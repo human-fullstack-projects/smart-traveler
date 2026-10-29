@@ -1,0 +1,17 @@
+smart_travel_db 가이드
+
+1. heidisql로 root-local 접속
+2. 아래 sql 문장 실행
+
+CREATE DATABASE smart_travel_db
+	CHARACTER SET UTF8MB4
+	COLLATE UTF8MB4_UNICODE_CI;
+
+CREATE USER 'sixon'@'localhost' IDENTIFIED BY '123456';
+CREATE USER 'sixon'@'%' IDENTIFIED BY '123456';
+
+GRANT ALL PRIVILEGES ON smart_travel_db.* TO sixon@localhost;	
+GRANT ALL PRIVILEGES ON smart_travel_db.* TO sixon@"%";		
+
+FLUSH PRIVILEGES; 
+
