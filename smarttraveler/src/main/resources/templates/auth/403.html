@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>접근 권한 없음 · smart travel</title>
+  <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+<header class="top"><div class="top-inner"><div><a class="brand" th:href="@{/}">smart travel</a><p class="subtitle">서비스 운영 관리</p></div></div></header>
+<main class="shell auth-shell">
+  <div class="hero"><span class="eyebrow">접근 제한</span><h1>접근 권한이 없습니다</h1><p>관리자 계정만 이 화면을 이용할 수 있습니다.</p></div>
+  <section class="auth-card"><a th:href="@{/}">메인으로 돌아가기</a></section>
+</main>
+</body>
+</html>

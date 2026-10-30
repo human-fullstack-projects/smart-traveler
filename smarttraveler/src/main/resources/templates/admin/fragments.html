@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<header class="top" th:fragment="header(active)">
+  <div class="top-inner">
+    <div><a class="brand" th:href="@{/admin}">관리자</a><p class="subtitle">smart travel · 서비스 운영 관리</p></div>
+    <nav aria-label="전체 메뉴">
+      <a th:href="@{/admin}" th:attr="aria-current=${active == 'home'} ? 'page' : null">관리자 홈</a>
+      <a th:href="@{/admin/orders}" th:attr="aria-current=${active == 'orders'} ? 'page' : null">주문 관리</a>
+      <a th:href="@{/admin/lodgings}" th:attr="aria-current=${active == 'lodgings'} ? 'page' : null">숙소 관리</a>
+      <a th:href="@{/admin/members}" th:attr="aria-current=${active == 'members'} ? 'page' : null">유저 관리</a>
+      <a th:href="@{/admin/ai-courses}" th:attr="aria-current=${active == 'ai'} ? 'page' : null">AI 코스 관리</a>
+      <a th:href="@{/admin/human-courses}" th:attr="aria-current=${active == 'human'} ? 'page' : null">휴먼 추천 코스 관리</a>
+    </nav>
+  </div>
+</header>
+<aside class="sidebar" th:fragment="sidebar(active)">
+  <h2>관리자</h2>
+  <div class="avatar" aria-hidden="true">관</div>
+  <p><strong th:text="${#authentication.name}">관리자</strong></p>
+  <p class="muted">서비스 운영 관리자</p>
+  <nav aria-label="관리자 메뉴">
+    <a th:href="@{/admin}" th:attr="aria-current=${active == 'home'} ? 'page' : null">관리자 홈</a>
+    <a th:href="@{/admin/orders}" th:attr="aria-current=${active == 'orders'} ? 'page' : null">주문 관리</a>
+    <a th:href="@{/admin/lodgings}" th:attr="aria-current=${active == 'lodgings'} ? 'page' : null">숙소 관리</a>
+    <a th:href="@{/admin/members}" th:attr="aria-current=${active == 'members'} ? 'page' : null">유저 관리</a>
+    <a th:href="@{/admin/ai-courses}" th:attr="aria-current=${active == 'ai'} ? 'page' : null">AI 코스 관리</a>
+    <a th:href="@{/admin/human-courses}" th:attr="aria-current=${active == 'human'} ? 'page' : null">휴먼 추천 코스 관리</a>
+  </nav>
+  <form th:action="@{/logout}" method="post" class="logout-form"><button type="submit" class="line">로그아웃</button></form>
+</aside>
+</body>
+</html>

@@ -1,10 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>관리자 로그인 · smart travel</title>
+  <link rel="stylesheet" th:href="@{/css/admin.css}">
 </head>
 <body>
-
+<header class="top"><div class="top-inner"><div><a class="brand" th:href="@{/}">smart travel</a><p class="subtitle">서비스 운영 관리</p></div></div></header>
+<main class="shell auth-shell">
+  <div class="hero"><span class="eyebrow">관리자</span><h1>로그인</h1><p>버튼을 누르면 관리자로 들어갑니다.</p></div>
+  <section class="auth-card">
+    <p class="badge ok" th:if="${param.logout}">로그아웃했습니다.</p>
+    <form th:action="@{/login/quick}" method="post">
+      <button type="submit" autofocus>관리자로 로그인</button>
+    </form>
+    <p class="note">임시 로그인입니다. 실제 로그인·회원가입 화면은 담당 팀원 것으로 합칠 때 바꿉니다.</p>
+  </section>
+</main>
 </body>
 </html>
