@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Home, { Intro, PanelHeader } from './pages/Home';
 import Login from './pages/Login';
+import { getCurrentMember, logout } from './api/auth';
 
 const navigation = [
   { label: '여행 시작', href: '#/' },
@@ -10,7 +11,7 @@ const navigation = [
   { label: '마이페이지' },
 ];
 
-function Header({ route, onUnavailable }) {
+function Header({ route, onUnavailable, member, onLogout, loggingOut }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const link = (item) => item.href ? (
     <a key={item.label} href={item.href} aria-current={route === item.href.slice(1) ? 'page' : undefined} onClick={() => setMenuOpen(false)}>{item.label}</a>
@@ -25,9 +26,9 @@ function Header({ route, onUnavailable }) {
         </button>
         <a className="brand" href="#/">smart <span>travel</span></a>
       </div>
-      <nav className="desktop-nav" aria-label="주 메뉴">{navigation.map(link)}<a className="account" href="#/login" aria-current={route === '/login' ? 'page' : undefined}>로그인</a></nav>
+      <nav className="desktop-nav" aria-label="주 메뉴">{navigation.map(link)}{member ? <span className="auth-account"><span className="auth-account__name">{member.nickname || member.loginId}님</span><button className="account" type="button" disabled={loggingOut} onClick={() => { setMenuOpen(false); onLogout(); }}>{loggingOut ? '로그아웃 중…' : '로그아웃'}</button></span> : <a className="account" href="#/login" aria-current={route === '/login' ? 'page' : undefined}>로그인</a>}</nav>
     </div>
-    {menuOpen && <nav id="mobile-menu" className="menu-panel" aria-label="전체 메뉴">{navigation.map(link)}<a className="nav-link" href="#/login" aria-current={route === '/login' ? 'page' : undefined} onClick={() => setMenuOpen(false)}>로그인</a></nav>}
+    {menuOpen && <nav id="mobile-menu" className="menu-panel" aria-label="전체 메뉴">{navigation.map(link)}{member ? <span className="auth-account"><span className="auth-account__name">{member.nickname || member.loginId}님</span><button className="account" type="button" disabled={loggingOut} onClick={() => { setMenuOpen(false); onLogout(); }}>{loggingOut ? '로그아웃 중…' : '로그아웃'}</button></span> : <a className="nav-link" href="#/login" aria-current={route === '/login' ? 'page' : undefined} onClick={() => setMenuOpen(false)}>로그인</a>}</nav>}
   </header>;
 }
 
@@ -61,10 +62,49 @@ function Conditions() {
 }
 
 export default function App() {
+  const [member, setMember] = useState(null);
+  const [loggingOut, setLoggingOut] = useState(false);
+  const authVersion = useRef(0);
+  const logoutInFlight = useRef(false);
+  useEffect(() => {
+    let cancelled = false;
+    const version = authVersion.current;
+    getCurrentMember().then((value) => {
+      if (!cancelled && version === authVersion.current) setMember(value);
+    }).catch(() => {
+      if (!cancelled && version === authVersion.current) setNotice('로그인 상태를 확인할 서버에 연결하지 못했어요. Spring Boot 실행 상태를 확인해주세요.');
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  function loggedIn(value) {
+    authVersion.current += 1;
+    setMember(value);
+    setNotice('');
+    window.location.hash = '/';
+  }
+
+  async function handleLogout() {
+    if (logoutInFlight.current) return;
+    logoutInFlight.current = true;
+    setLoggingOut(true);
+    authVersion.current += 1;
+    try {
+      await logout();
+      setMember(null);
+      setNotice('로그아웃했어요.');
+    } catch (error) {
+      setNotice(error.message);
+    } finally {
+      logoutInFlight.current = false;
+      setLoggingOut(false);
+    }
+  }
+
   const [route, setRoute] = useState(window.location.hash.slice(1) || '/');
   const [notice, setNotice] = useState('');
   useEffect(() => { const update = () => { setRoute(window.location.hash.slice(1) || '/'); setNotice(''); window.scrollTo(0, 0); }; window.addEventListener('hashchange', update); return () => window.removeEventListener('hashchange', update); }, []);
   const isConditions = route === '/conditions';
   const isLogin = route === '/login';
-  return <div className="app-shell"><Header route={route} onUnavailable={(label) => setNotice(`${label} 페이지는 연결 준비 중입니다.`)} />{notice && <div className="navigation-notice" role="status">{notice}<button onClick={() => setNotice('')} aria-label="알림 닫기">×</button></div>}<main className="main-content">{isLogin ? <Login /> : isConditions ? <Conditions /> : <Home />}</main><footer className="footer"><a href="#/">smart <strong>travel</strong></a><span>당신의 여행을 함께 그려요.</span></footer></div>;
+  return <div className="app-shell"><Header route={route} member={member} onLogout={handleLogout} loggingOut={loggingOut} onUnavailable={(label) => setNotice(`${label} 페이지는 연결 준비 중입니다.`)} />{notice && <div className="navigation-notice" role="status">{notice}<button onClick={() => setNotice('')} aria-label="알림 닫기">×</button></div>}<main className="main-content">{isLogin ? <Login onLogin={loggedIn} /> : isConditions ? <Conditions /> : <Home />}</main><footer className="footer"><a href="#/">smart <strong>travel</strong></a><span>당신의 여행을 함께 그려요.</span></footer></div>;
 }

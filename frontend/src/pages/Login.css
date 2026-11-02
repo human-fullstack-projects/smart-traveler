@@ -23,3 +23,9 @@
   .login-card { padding: 24px 18px; border-radius: 18px; }
   .login-intro h1 { font-size: 24px; }
 }
+
+.login-form button:disabled, .login-form input:disabled { opacity: .6; cursor: wait; }
+.auth-account { display: inline-flex; align-items: center; gap: 10px; min-width: 0; }
+.auth-account__name { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; color: #29483d; }
+.auth-account button:disabled { opacity: .6; cursor: wait; }
+.menu-panel .auth-account { flex-wrap: wrap; padding: 8px 12px; }

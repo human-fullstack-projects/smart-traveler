@@ -1,20 +1,25 @@
 import { useEffect, useRef, useState } from 'react';
 import './Login.css';
+import { login } from '../api/auth';
 
-export default function Login() {
+export default function Login({ onLogin }) {
   const [loginId, setLoginId] = useState('');
   const [password, setPassword] = useState('');
   const [visible, setVisible] = useState(false);
   const [errors, setErrors] = useState({});
   const [notice, setNotice] = useState('');
+  const [busy, setBusy] = useState(false);
+  const inFlight = useRef(false);
+  const mounted = useRef(true);
   const titleRef = useRef(null);
   const idRef = useRef(null);
   const passwordRef = useRef(null);
 
-  useEffect(() => { titleRef.current?.focus(); }, []);
+  useEffect(() => { mounted.current = true; titleRef.current?.focus(); return () => { mounted.current = false; }; }, []);
 
-  function submit(event) {
+  async function submit(event) {
     event.preventDefault();
+    if (inFlight.current) return;
     const nextErrors = {};
     if (!loginId.trim()) nextErrors.loginId = '아이디를 입력해주세요.';
     if (!password) nextErrors.password = '비밀번호를 입력해주세요.';
@@ -22,9 +27,22 @@ export default function Login() {
     setNotice('');
     if (nextErrors.loginId) { idRef.current?.focus(); return; }
     if (nextErrors.password) { passwordRef.current?.focus(); return; }
-    // Connect the real server API here after its request/response contract is defined.
-    // Never treat a local validation pass as successful authentication.
-    setNotice('입력 확인이 완료됐어요. 로그인 서버 연결 준비 중으로, 아직 로그인되지 않았어요.');
+    inFlight.current = true;
+    setBusy(true);
+    try {
+      const member = await login(loginId.trim(), password);
+      // Update application auth state even if the user navigated away while submitting.
+      onLogin(member);
+    } catch (error) {
+      if (mounted.current) setNotice(error.message);
+    } finally {
+      inFlight.current = false;
+      if (mounted.current) {
+        setPassword('');
+        setVisible(false);
+        setBusy(false);
+      }
+    }
   }
 
   function update(field, value) {
@@ -43,11 +61,11 @@ export default function Login() {
           <h1 id="login-title" ref={titleRef} tabIndex={-1}>다시 만나 반가워요.</h1>
           <p>로그인하고 나만의 여행을 이어가세요.</p>
         </div>
-        <form className="login-form" onSubmit={submit} noValidate>
+        <form className="login-form" onSubmit={submit} noValidate aria-busy={busy}>
           <div className="login-field">
             <label htmlFor="login-id">아이디</label>
             <input ref={idRef} id="login-id" name="username" type="text"
-              autoComplete="username" autoCapitalize="none" spellCheck={false} required
+              disabled={busy} autoComplete="username" autoCapitalize="none" spellCheck={false} required
               placeholder="아이디를 입력해주세요" value={loginId}
               onChange={(event) => update('loginId', event.target.value)}
               aria-invalid={Boolean(errors.loginId)} aria-describedby={errors.loginId ? 'login-id-error' : undefined} />
@@ -57,20 +75,20 @@ export default function Login() {
             <label htmlFor="login-password">비밀번호</label>
             <div className="login-password-row">
               <input ref={passwordRef} id="login-password" name="password"
-                type={visible ? 'text' : 'password'} autoComplete="current-password" required
+                disabled={busy} type={visible ? 'text' : 'password'} autoComplete="current-password" required
                 placeholder="비밀번호를 입력해주세요" value={password}
                 onChange={(event) => update('password', event.target.value)}
                 aria-invalid={Boolean(errors.password)} aria-describedby={errors.password ? 'login-password-error' : undefined} />
-              <button type="button" className="login-password-toggle"
+              <button type="button" className="login-password-toggle" disabled={busy}
                 aria-label="비밀번호 표시" aria-pressed={visible} aria-controls="login-password"
                 onClick={() => setVisible((value) => !value)}>{visible ? '숨기기' : '보기'}</button>
             </div>
             {errors.password && <p id="login-password-error" className="login-error" role="alert">{errors.password}</p>}
           </div>
-          <button className="primary login-submit" type="submit">로그인</button>
+          <button className="primary login-submit" type="submit" disabled={busy}>{busy ? '로그인 중…' : '로그인'}</button>
           {notice && <p className="login-notice" role="status">{notice}</p>}
         </form>
-        <p className="login-development-note">현재는 화면과 입력 확인 단계입니다. 실제 계정 인증은 아직 연결되지 않았어요.</p>
+        <p className="login-development-note">아이디와 비밀번호는 로그인 확인에만 사용됩니다.</p>
       </div>
     </section>
   );
