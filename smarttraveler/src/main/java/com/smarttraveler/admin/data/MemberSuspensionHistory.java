@@ -6,7 +6,7 @@ import lombok.Setter;
 import java.time.*;
 import java.math.BigDecimal;
 
-@Entity @Table(name = "member_suspension_history") @Getter @Setter
+@Entity(name = "AdminMemberSuspensionHistory") @Table(name = "member_suspension_history") @Getter @Setter
 public class MemberSuspensionHistory {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "suspension_id") private Long suspensionId;
     @Column(name = "member_id") private Long memberId;

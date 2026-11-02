@@ -6,7 +6,7 @@ import lombok.Setter;
 import java.time.*;
 import java.math.BigDecimal;
 
-@Entity @Table(name = "owner_review_history") @Getter @Setter
+@Entity(name = "AdminOwnerReviewHistory") @Table(name = "owner_review_history") @Getter @Setter
 public class OwnerReviewHistory {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "review_id") private Long reviewId;
     @Column(name = "owner_id") private Long ownerId;

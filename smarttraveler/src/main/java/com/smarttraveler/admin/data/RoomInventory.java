@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import java.time.*;
 
-@Entity @Table(name = "room_inventory") @Getter @Setter
+@Entity(name = "AdminRoomInventory") @Table(name = "room_inventory") @Getter @Setter
 public class RoomInventory {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "inventory_id") private Long inventoryId;
     @Column(name = "room_id") private Long roomId;
