@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react';
+import AiCoursePage from './ai-course/AiCoursePage.jsx';
+import SearchPage from './search/SearchPage.jsx';
+import MainPage from './main/MainPage.jsx';
 
 const navigation = [
   { label: '여행 시작', href: '#/' },
+  { label: '코스추천', href: '#/ai-course' },
   { label: '조건검색', href: '#/conditions' },
   { label: '숙소 찾기' },
   { label: '내 여행 일정' },
@@ -63,5 +67,11 @@ export default function App() {
   const [notice, setNotice] = useState('');
   useEffect(() => { const update = () => { setRoute(window.location.hash.slice(1) || '/'); setNotice(''); window.scrollTo(0, 0); }; window.addEventListener('hashchange', update); return () => window.removeEventListener('hashchange', update); }, []);
   const isConditions = route === '/conditions';
+  const isAiCourse = route === '/ai-course';
+  const isSearch = route === '/search';
+  const isMain = route === '/' || route === '/main';
+  if (isAiCourse) return <AiCoursePage />;
+  if (isSearch) return <SearchPage />;
+  if (isMain) return <MainPage />;
   return <div className="app-shell"><Header route={route} onUnavailable={(label) => setNotice(`${label} 페이지는 연결 준비 중입니다.`)} />{notice && <div className="navigation-notice" role="status">{notice}<button onClick={() => setNotice('')} aria-label="알림 닫기">×</button></div>}<main className="main-content">{isConditions ? <Conditions /> : <Home />}</main><footer className="footer"><a href="#/">smart <strong>travel</strong></a><span>당신의 여행을 함께 그려요.</span></footer></div>;
 }
