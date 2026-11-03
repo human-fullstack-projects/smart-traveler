@@ -1,4 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import Home, { Intro, PanelHeader } from './pages/Home';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import AdminApp, { AdminGuard } from './pages/admin/AdminApp';
+import { getCurrentMember, logout } from './api/auth';
 
 const navigation = [
   { label: '여행 시작', href: '#/' },
@@ -8,7 +13,7 @@ const navigation = [
   { label: '마이페이지' },
 ];
 
-function Header({ route, onUnavailable }) {
+function Header({ route, onUnavailable, member, onLogout, loggingOut }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const link = (item) => item.href ? (
     <a key={item.label} href={item.href} aria-current={route === item.href.slice(1) ? 'page' : undefined} onClick={() => setMenuOpen(false)}>{item.label}</a>
@@ -23,35 +28,35 @@ function Header({ route, onUnavailable }) {
         </button>
         <a className="brand" href="#/">smart <span>travel</span></a>
       </div>
-      <nav className="desktop-nav" aria-label="주 메뉴">{navigation.map(link)}<button className="account" onClick={() => onUnavailable('로그인')}>로그인</button></nav>
+      <nav className="desktop-nav" aria-label="주 메뉴">{navigation.map(link)}{member ? <span className="auth-account"><span className="auth-account__name">{member.nickname || member.loginId}님</span><button className="account" type="button" disabled={loggingOut} onClick={() => { setMenuOpen(false); onLogout(); }}>{loggingOut ? '로그아웃 중…' : '로그아웃'}</button></span> : <a className="account" href="#/login" aria-current={route === '/login' ? 'page' : undefined}>로그인</a>}</nav>
     </div>
-    {menuOpen && <nav id="mobile-menu" className="menu-panel" aria-label="전체 메뉴">{navigation.map(link)}<button className="nav-link" onClick={() => { setMenuOpen(false); onUnavailable('로그인'); }}>로그인</button></nav>}
+    {menuOpen && <nav id="mobile-menu" className="menu-panel" aria-label="전체 메뉴">{navigation.map(link)}{member ? <span className="auth-account"><span className="auth-account__name">{member.nickname || member.loginId}님</span><button className="account" type="button" disabled={loggingOut} onClick={() => { setMenuOpen(false); onLogout(); }}>{loggingOut ? '로그아웃 중…' : '로그아웃'}</button></span> : <a className="nav-link" href="#/login" aria-current={route === '/login' ? 'page' : undefined} onClick={() => setMenuOpen(false)}>로그인</a>}</nav>}
   </header>;
 }
 
-function Intro({ conditions = false }) {
-  return <section className="intro">
-    <div className="kicker"><span />{conditions ? 'PLAN YOUR TRIP' : 'AI TRAVEL PLANNER'}</div>
-    {conditions ? <><h1>원하는 조건으로<br /><em>여행을 그려요.</em></h1><p>여행지와 일정을 직접 선택해 주세요.<br />선택한 조건에 맞는 여행을 찾아드릴게요.</p></> : <><h1>당신의 이야기가<br /><em>여행이 되는 곳.</em></h1><p>가고 싶은 곳부터 떠오르는 장면까지,<br />편하게 들려주세요. 함께 여행을 그려볼게요.</p></>}
-    <div className="intro-divider" />
-    <div className="intro-caption"><strong>{conditions ? '어떤 여행을 생각하고 있나요?' : '어디로 떠나볼까요?'}</strong><span>{conditions ? '조건은 다음 단계에서도 변경할 수 있어요.' : '지역, 일정, 동행을 알려주면 더 좋아요.'}</span></div>
-  </section>;
-}
+// function Intro({ conditions = false }) {
+//   return <section className="intro">
+//     <div className="kicker"><span />{conditions ? 'PLAN YOUR TRIP' : 'AI TRAVEL PLANNER'}</div>
+//     {conditions ? <><h1>원하는 조건으로<br /><em>여행을 그려요.</em></h1><p>여행지와 일정을 직접 선택해 주세요.<br />선택한 조건에 맞는 여행을 찾아드릴게요.</p></> : <><h1>당신의 이야기가<br /><em>여행이 되는 곳.</em></h1><p>가고 싶은 곳부터 떠오르는 장면까지,<br />편하게 들려주세요. 함께 여행을 그려볼게요.</p></>}
+//     <div className="intro-divider" />
+//     <div className="intro-caption"><strong>{conditions ? '어떤 여행을 생각하고 있나요?' : '어디로 떠나볼까요?'}</strong><span>{conditions ? '조건은 다음 단계에서도 변경할 수 있어요.' : '지역, 일정, 동행을 알려주면 더 좋아요.'}</span></div>
+//   </section>;
+// }
 
-function PanelHeader({ conditions = false }) {
-  return <div className="panel-header"><div className="assistant-mark" aria-hidden="true">✳</div><div className="panel-title"><strong>{conditions ? '조건검색' : '여행 플래너'}</strong><span>{conditions ? '내게 맞는 여행을 찾아보세요' : '당신만의 여행을 함께 만들어요'}</span></div><span className="status-dot">{conditions ? '여행 계획' : '대화 준비'}</span></div>;
-}
+// function PanelHeader({ conditions = false }) {
+//   return <div className="panel-header"><div className="assistant-mark" aria-hidden="true">✳</div><div className="panel-title"><strong>{conditions ? '조건검색' : '여행 플래너'}</strong><span>{conditions ? '내게 맞는 여행을 찾아보세요' : '당신만의 여행을 함께 만들어요'}</span></div><span className="status-dot">{conditions ? '여행 계획' : '대화 준비'}</span></div>;
+// }
 
-function Home() {
-  const [message, setMessage] = useState('');
-  const [notice, setNotice] = useState('');
-  function submit(event) {
-    event.preventDefault();
-    if (!message.trim()) { setNotice('여행 이야기를 입력해 주세요.'); return; }
-    setNotice('입력한 여행 이야기는 유지됩니다. 대화 추천 기능은 연결 준비 중입니다.');
-  }
-  return <div className="start-layout"><Intro /><section className="conversation" aria-labelledby="greeting-title"><PanelHeader /><div className="greeting"><span className="greeting-label">SMART TRAVEL</span><h2 id="greeting-title">안녕하세요!<br />어떤 여행을 계획하고 있나요?</h2><p>정해진 게 없어도 괜찮아요.<br />생각나는 것부터 이야기해 주세요.</p></div><form className="composer" onSubmit={submit}><label className="visually-hidden" htmlFor="travel-story">여행 이야기</label><textarea id="travel-story" value={message} onChange={(e) => { setMessage(e.target.value); setNotice(''); }} placeholder="예: 친구와 부산으로 1박 2일 여행을 가고 싶어요." /><div className="composer-bottom"><span>원하는 분위기나 장소도 함께 적어보세요</span><button type="submit" className="primary">대화 시작하기 <span aria-hidden="true">↗</span></button></div>{notice && <p role="status" className="form-notice">{notice}</p>}</form></section></div>;
-}
+// function Home() {
+//   const [message, setMessage] = useState('');
+//   const [notice, setNotice] = useState('');
+//   function submit(event) {
+//     event.preventDefault();
+//     if (!message.trim()) { setNotice('여행 이야기를 입력해 주세요.'); return; }
+//     setNotice('입력한 여행 이야기는 유지됩니다. 대화 추천 기능은 연결 준비 중입니다.');
+//   }
+//   return <div className="start-layout"><Intro /><section className="conversation" aria-labelledby="greeting-title"><PanelHeader /><div className="greeting"><span className="greeting-label">SMART TRAVEL</span><h2 id="greeting-title">안녕하세요!<br />어떤 여행을 계획하고 있나요?</h2><p>정해진 게 없어도 괜찮아요.<br />생각나는 것부터 이야기해 주세요.</p></div><form className="composer" onSubmit={submit}><label className="visually-hidden" htmlFor="travel-story">여행 이야기</label><textarea id="travel-story" value={message} onChange={(e) => { setMessage(e.target.value); setNotice(''); }} placeholder="예: 친구와 부산으로 1박 2일 여행을 가고 싶어요." /><div className="composer-bottom"><span>원하는 분위기나 장소도 함께 적어보세요</span><button type="submit" className="primary">대화 시작하기 <span aria-hidden="true">↗</span></button></div>{notice && <p role="status" className="form-notice">{notice}</p>}</form></section></div>;
+// }
 
 function Conditions() {
   const [notice, setNotice] = useState('');
@@ -59,9 +64,58 @@ function Conditions() {
 }
 
 export default function App() {
+  const [member, setMember] = useState(null);
+  const [authChecked, setAuthChecked] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+  const authVersion = useRef(0);
+  const logoutInFlight = useRef(false);
+  useEffect(() => {
+    let cancelled = false;
+    const version = authVersion.current;
+    getCurrentMember().then((value) => {
+      if (!cancelled && version === authVersion.current) { setMember(value); setAuthChecked(true); }
+    }).catch(() => {
+      if (!cancelled) setAuthChecked(true);
+      if (!cancelled && version === authVersion.current) setNotice('로그인 상태를 확인할 서버에 연결하지 못했어요. Spring Boot 실행 상태를 확인해주세요.');
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  function loggedIn(value) {
+    authVersion.current += 1;
+    setMember(value);
+    setNotice('');
+    setAuthChecked(true);
+    window.location.hash = value?.roleCode === 'ADMIN' ? '/admin' : '/';
+  }
+
+  async function handleLogout() {
+    if (logoutInFlight.current) return;
+    logoutInFlight.current = true;
+    setLoggingOut(true);
+    authVersion.current += 1;
+    try {
+      await logout();
+      setMember(null);
+      setNotice('로그아웃했어요.');
+      if (window.location.hash.startsWith('#/admin')) window.location.hash = '/';
+    } catch (error) {
+      setNotice(error.message);
+    } finally {
+      logoutInFlight.current = false;
+      setLoggingOut(false);
+    }
+  }
+
   const [route, setRoute] = useState(window.location.hash.slice(1) || '/');
   const [notice, setNotice] = useState('');
   useEffect(() => { const update = () => { setRoute(window.location.hash.slice(1) || '/'); setNotice(''); window.scrollTo(0, 0); }; window.addEventListener('hashchange', update); return () => window.removeEventListener('hashchange', update); }, []);
   const isConditions = route === '/conditions';
-  return <div className="app-shell"><Header route={route} onUnavailable={(label) => setNotice(`${label} 페이지는 연결 준비 중입니다.`)} />{notice && <div className="navigation-notice" role="status">{notice}<button onClick={() => setNotice('')} aria-label="알림 닫기">×</button></div>}<main className="main-content">{isConditions ? <Conditions /> : <Home />}</main><footer className="footer"><a href="#/">smart <strong>travel</strong></a><span>당신의 여행을 함께 그려요.</span></footer></div>;
+  const isLogin = route === '/login';
+  const isSignup = route === '/signup';
+  if (route === '/admin' || route.startsWith('/admin/')) {
+    if (member?.roleCode === 'ADMIN') return <AdminApp route={route} member={member} onLogout={handleLogout} />;
+    return <AdminGuard member={member} checking={!authChecked} />;
+  }
+  return <div className="app-shell"><Header route={route} member={member} onLogout={handleLogout} loggingOut={loggingOut} onUnavailable={(label) => setNotice(`${label} 페이지는 연결 준비 중입니다.`)} />{notice && <div className="navigation-notice" role="status">{notice}<button onClick={() => setNotice('')} aria-label="알림 닫기">×</button></div>}<main className="main-content">{isLogin ? <Login onLogin={loggedIn} /> : isSignup ? <Signup /> : isConditions ? <Conditions /> : <Home />}</main><footer className="footer"><a href="#/">smart <strong>travel</strong></a><span>당신의 여행을 함께 그려요.</span></footer></div>;
 }

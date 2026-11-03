@@ -1,0 +1,33 @@
+/* Home-only additions. Keep the team's current theme. */
+.home-planner { min-width: 0; }
+.home-story-summary {
+  padding: 16px; border-radius: 12px;
+  background: #f0f8f4; color: #29483d;
+}
+.home-story-summary strong { font-size: 12px; color: #426d61; }
+.home-story-summary p {
+  margin: 8px 0 0; font-size: 14px; line-height: 1.7;
+  white-space: pre-wrap; overflow-wrap: anywhere;
+  max-height: 180px; overflow-y: auto;
+}
+.home-methods { display: grid; gap: 12px; margin-top: 20px; }
+.home-method {
+  display: flex; flex-direction: column; gap: 9px;
+  width: 100%; min-width: 0; padding: 18px; text-align: left;
+  border: 1px solid #cedfd6; border-radius: 12px;
+  background: #fff; color: #213b32; text-decoration: none;
+}
+.home-method:hover { border-color: #0c806b; background: #f5fbf8; }
+.home-method__title { display: flex; justify-content: space-between; gap: 12px; font-size: 16px; font-weight: 700; }
+.home-method__description { font-size: 13px; line-height: 1.6; color: #536e61; }
+.home-method__status { align-self: flex-start; font-size: 11px; background: #e5f5ed; color: #28614d; padding: 4px 8px; border-radius: 5px; }
+.home-method-note { margin: 14px 0 0; color: #536e61; font-size: 12px; line-height: 1.7; }
+.home-back { display: inline-block; min-height: 44px; margin-top: 12px; padding: 10px 0; border: 0; background: transparent; color: #176f59; font-size: 13px; text-align: left; }
+.home-chat-pending { margin-top: 20px; }
+.home-chat-pending > p { color: #536e61; font-size: 14px; line-height: 1.8; }
+.home-condition-link { display: block; text-align: center; white-space: normal; }
+.home-planner textarea:focus-visible { outline: 3px solid #80c7b4; outline-offset: 3px; }
+@media (max-width: 400px) {
+  .home-method { padding: 15px; }
+  .home-method__title { font-size: 15px; }
+}

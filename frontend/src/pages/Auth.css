@@ -1,0 +1,33 @@
+/* 로그인·회원가입 화면 (공유 CSS st-common.css 변수만 사용) */
+.auth-page { display: flex; justify-content: center; padding: 40px 24px 64px; background: var(--st-bg); min-height: calc(100vh - 140px); }
+.auth-wrap { width: min(100%, 520px); }
+.auth-wrap.wide { width: min(100%, 720px); }
+.auth-back { display: inline-flex; align-items: center; min-height: 40px; margin-bottom: 8px; color: var(--st-teal); font-weight: 700; font-size: 14px; }
+.auth-head { margin-bottom: 20px; }
+.auth-kicker { margin: 0 0 6px; color: var(--st-teal); font-weight: 700; font-size: 13px; letter-spacing: .12em; }
+.auth-head .st-h2 { font-size: clamp(30px, 3.4vw, 40px); }
+.auth-head p { margin: 8px 0 0; color: var(--st-muted); font-size: 15px; }
+.auth-form { display: grid; gap: 18px; }
+.auth-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.auth-password { display: flex; gap: 8px; align-items: flex-end; }
+.auth-password .st-field { flex: 1; }
+.auth-password .st-btn { min-height: 48px; padding: 8px 14px; font-size: 14px; }
+.auth-submit { width: 100%; }
+.auth-notice { margin: 0; padding: 12px 14px; border-radius: var(--st-radius-s); background: rgba(163, 206, 202, .35); color: var(--st-ink); font-size: 14px; }
+.auth-notice.error { background: rgba(168, 59, 75, .1); color: var(--st-danger); }
+.auth-foot { margin: 20px 0 0; padding-top: 16px; border-top: 1px solid var(--st-line); color: var(--st-muted); font-size: 14px; text-align: center; }
+.auth-foot a { color: var(--st-teal); font-weight: 700; }
+.auth-roles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.auth-role { display: grid; gap: 4px; padding: 14px 16px; border: 2px solid var(--st-line); border-radius: var(--st-radius-s); background: var(--st-surface); color: var(--st-ink); text-align: left; cursor: pointer; font-family: var(--st-font-body); }
+.auth-role strong { font-size: 16px; }
+.auth-role span { color: var(--st-muted); font-size: 13px; }
+.auth-role[aria-pressed="true"] { border-color: var(--st-teal); background: rgba(163, 206, 202, .35); }
+.auth-section-title { margin: 6px 0 -4px; color: var(--st-teal); font-weight: 700; font-size: 14px; }
+.auth-terms { display: grid; gap: 8px; padding: 14px 16px; border: 1px solid var(--st-line); border-radius: var(--st-radius-s); background: var(--st-surface); }
+.auth-terms label { display: flex; gap: 10px; align-items: center; font-size: 15px; cursor: pointer; }
+.auth-terms .all { padding-bottom: 8px; border-bottom: 1px solid var(--st-line); font-weight: 700; }
+.auth-terms input { width: 18px; height: 18px; accent-color: var(--st-teal); }
+.auth-req { color: var(--st-danger); font-size: 12px; font-weight: 700; }
+.auth-done { text-align: center; }
+.auth-done .st-btn { margin-top: 18px; }
+@media (max-width: 600px) { .auth-row, .auth-roles { grid-template-columns: 1fr; } }

@@ -29,6 +29,10 @@ public class SignupController {
     @org.springframework.web.bind.annotation.ResponseStatus(HttpStatus.CREATED)
     public SignupResult signup(@RequestBody SignupRequest request) { return signup.create(request); }
 
+    /** Current terms for the sign-up screen (AUTH-03). */
+    @org.springframework.web.bind.annotation.GetMapping("/terms")
+    public List<Map<String,Object>> terms() { return signup.activeTerms(); }
+
     public record SignupRequest(String role, String loginId, String password, String nickname, String email,
         String businessNumber, String businessName, String representativeName,
         String businessAddress, String businessPhone, List<TermConsent> consents) {}
@@ -46,6 +50,20 @@ class SignupService {
     private final JdbcTemplate jdbc;
     SignupService(MemberRepository members, SignupOwnerRepository owners, PasswordEncoder passwords, JdbcTemplate jdbc) {
         this.members = members; this.owners = owners; this.passwords = passwords; this.jdbc = jdbc;
+    }
+
+    public List<Map<String,Object>> activeTerms() {
+        return jdbc.queryForList("""
+            SELECT t.terms_id AS termsId, t.terms_type AS type, t.terms_version AS version,
+                   (t.is_required <> 0) AS required, t.content AS content
+            FROM terms t
+            WHERE t.effective_date <= CURRENT_DATE()
+              AND NOT EXISTS (SELECT 1 FROM terms newer WHERE newer.terms_type=t.terms_type
+                AND newer.effective_date<=CURRENT_DATE() AND
+                (newer.effective_date>t.effective_date OR
+                 (newer.effective_date=t.effective_date AND newer.terms_id>t.terms_id)))
+            ORDER BY t.terms_id
+            """);
     }
 
     @Transactional
