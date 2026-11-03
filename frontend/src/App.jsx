@@ -4,9 +4,13 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import AdminApp, { AdminGuard } from './pages/admin/AdminApp';
 import { getCurrentMember, logout } from './api/auth';
+import AiCoursePage from './ai-course/AiCoursePage.jsx';
+import SearchPage from './search/SearchPage.jsx';
+import MainPage from './main/MainPage.jsx';
 
 const navigation = [
   { label: '여행 시작', href: '#/' },
+  { label: '코스추천', href: '#/ai-course' },
   { label: '조건검색', href: '#/conditions' },
   { label: '숙소 찾기' },
   { label: '내 여행 일정' },
@@ -113,9 +117,15 @@ export default function App() {
   const isConditions = route === '/conditions';
   const isLogin = route === '/login';
   const isSignup = route === '/signup';
+  const isAiCourse = route === '/ai-course';
+  const isSearch = route === '/search';
+  const isMain = route === '/main';
   if (route === '/admin' || route.startsWith('/admin/')) {
     if (member?.roleCode === 'ADMIN') return <AdminApp route={route} member={member} onLogout={handleLogout} />;
     return <AdminGuard member={member} checking={!authChecked} />;
   }
+  if (isAiCourse) return <AiCoursePage />;
+  if (isSearch) return <SearchPage />;
+  if (isMain) return <MainPage />;
   return <div className="app-shell"><Header route={route} member={member} onLogout={handleLogout} loggingOut={loggingOut} onUnavailable={(label) => setNotice(`${label} 페이지는 연결 준비 중입니다.`)} />{notice && <div className="navigation-notice" role="status">{notice}<button onClick={() => setNotice('')} aria-label="알림 닫기">×</button></div>}<main className="main-content">{isLogin ? <Login onLogin={loggedIn} /> : isSignup ? <Signup /> : isConditions ? <Conditions /> : <Home />}</main><footer className="footer"><a href="#/">smart <strong>travel</strong></a><span>당신의 여행을 함께 그려요.</span></footer></div>;
 }
