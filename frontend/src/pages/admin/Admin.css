@@ -37,7 +37,7 @@
 .adm-pill.bad { background: rgba(168, 59, 75, .15); color: var(--st-danger); }
 .adm-pill.off { background: var(--st-line); color: var(--st-muted); }
 .adm-detail { padding: 16px 18px; }
-.adm-dl { display: grid; grid-template-columns: 120px 1fr; gap: 8px 12px; margin: 0; font-size: 14px; }
+.adm-dl { display: grid; grid-template-columns: 76px minmax(0,1fr) 76px minmax(0,1fr); gap: 6px 10px; margin: 0; font-size: 14px; }
 .adm-dl dt { color: var(--st-muted); font-weight: 700; }
 .adm-dl dd { margin: 0; color: var(--st-ink); overflow-wrap: anywhere; }
 .adm-sub { margin: 18px 0 8px; color: var(--st-teal); font-weight: 700; font-size: 14px; }
@@ -50,3 +50,36 @@
 .adm-guard { display: grid; place-items: center; min-height: 100vh; background: var(--st-bg); }
 @media (max-width: 1100px) { .adm-split { grid-template-columns: 1fr; } }
 @media (max-width: 800px) { .adm { grid-template-columns: 1fr; } .adm-side { position: static; height: auto; } .adm-stats { grid-template-columns: 1fr 1fr; } .adm-main { padding: 20px; } }
+/* 페이지 나누기 */
+.adm-pager { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 10px 14px; border-top: 1px solid var(--st-line); }
+.adm-pages { display: flex; gap: 4px; }
+.adm-pages button { min-width: 34px; height: 34px; padding: 0 8px; border: 1px solid var(--st-line); border-radius: 8px; background: var(--st-surface); color: var(--st-ink); font-family: var(--st-font-body); font-weight: 700; font-size: 14px; cursor: pointer; }
+.adm-pages button:hover:not(:disabled) { border-color: var(--st-teal); color: var(--st-teal); }
+.adm-pages button[aria-current="page"] { border-color: var(--st-aqua); background: var(--st-aqua); color: var(--st-ink); }
+.adm-pages button:disabled { opacity: .4; cursor: default; }
+.adm-size select { height: 34px; padding: 0 8px; border: 1px solid var(--st-line); border-radius: 8px; background: var(--st-surface); color: var(--st-ink); font-family: var(--st-font-body); font-size: 13px; }
+
+/* 세로 스크롤 줄이기: 탭 · 작은 목록 · 한 줄 2항목 */
+.adm-main { padding-top: 20px; padding-bottom: 24px; }
+.adm-head { margin-bottom: 12px; }
+.adm-head h1 { font-size: 30px; }
+.adm-toolbar { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.adm-toolbar .adm-filters { margin-bottom: 0; }
+.adm-tabs { display: inline-flex; gap: 4px; padding: 4px; border-radius: 12px; background: var(--st-surface); border: 1px solid var(--st-line); }
+.adm-tabs button { display: inline-flex; align-items: center; gap: 8px; min-height: 38px; padding: 6px 16px; border: 0; border-radius: 9px; background: transparent; color: var(--st-muted); font-family: var(--st-font-body); font-weight: 700; font-size: 14px; cursor: pointer; }
+.adm-tabs button[aria-selected="true"] { background: var(--st-aqua); color: var(--st-ink); }
+.adm-tab-count { min-width: 22px; padding: 1px 7px; border-radius: 999px; background: rgba(47,111,109,.15); color: var(--st-teal); font-size: 12px; }
+.adm-sub { display: flex; align-items: center; gap: 8px; margin: 12px 0 6px; }
+.adm-mini-pager { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; color: var(--st-muted); font-size: 12px; }
+.adm-mini-pager button { width: 26px; height: 26px; border: 1px solid var(--st-line); border-radius: 6px; background: var(--st-surface); cursor: pointer; }
+.adm-mini-pager button:disabled { opacity: .4; cursor: default; }
+.adm-clamp { margin: 0; font-size: 14px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.adm-link { border: 0; background: none; color: var(--st-teal); font-weight: 700; cursor: pointer; padding: 0; }
+.adm-actions { margin-top: 12px; padding-top: 10px; }
+.adm-inline-input { margin-top: 0 !important; min-height: 34px !important; padding: 4px 10px !important; font-size: 14px !important; }
+.adm-inline-btn { min-height: 34px; padding: 4px 14px; font-size: 14px; }
+.adm-stats-row { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; margin-bottom: 14px; }
+.adm-stats-row .adm-stat { padding: 12px 16px; }
+.adm-stats-row .adm-stat strong { font-size: 28px; }
+.adm-table td { padding: 8px 14px; }
+@media (max-width: 1100px) { .adm-stats-row { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
