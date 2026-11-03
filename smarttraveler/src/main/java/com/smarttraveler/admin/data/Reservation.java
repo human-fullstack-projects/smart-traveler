@@ -6,7 +6,7 @@ import lombok.Setter;
 import java.time.*;
 import java.math.BigDecimal;
 
-@Entity @Table(name = "reservation") @Getter @Setter
+@Entity @Table(name = "room_reservation") @Getter @Setter
 public class Reservation {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "reservation_id") private Long reservationId;
     @Column(name = "reservation_no", length = 64) private String reservationNo;
@@ -16,6 +16,7 @@ public class Reservation {
     @Column(name = "checkin_date") private LocalDate checkinDate;
     @Column(name = "checkout_date") private LocalDate checkoutDate;
     @Column(name = "guest_count") private Integer guestCount;
+    @Column(name = "room_quantity") private Integer roomQuantity;
     @Column(name = "booker_name", length = 50) private String bookerName;
     @Column(name = "booker_phone", length = 30) private String bookerPhone;
     @Column(name = "request_memo", length = 500) private String requestMemo;

@@ -21,7 +21,6 @@ public class Course {
     @Column(name = "assumptions", columnDefinition = "json") private String assumptions;
     @Column(name = "title") private String title;
     @Column(name = "summary") private String summary;
-    @Column(name = "parent_course_id") private Long parentCourseId;
     @Column(name = "revision_request") private String revisionRequest;
     @Column(name = "origin_template_id") private Long originTemplateId;
     @Column(name = "share_consent") private Boolean shareConsent;

@@ -1,3 +1,4 @@
+-- LEGACY M51 sample data. Do not run after M55: it targets retired admin/code tables.
 -- M51 fake local demo data. Run manually after the application has created admin_* tables.
 -- Idempotent IDs are reserved in the 510000 range; INSERT IGNORE leaves existing rows untouched.
 -- Demo password for every fake account: Admin123! (BCrypt hash below).

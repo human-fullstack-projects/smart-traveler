@@ -27,7 +27,8 @@
     <a th:href="@{/admin/ai-courses}" th:attr="aria-current=${active == 'ai'} ? 'page' : null">AI 코스 관리</a>
     <a th:href="@{/admin/human-courses}" th:attr="aria-current=${active == 'human'} ? 'page' : null">휴먼 추천 코스 관리</a>
   </nav>
-  <form th:action="@{/logout}" method="post" class="logout-form"><button type="submit" class="line">로그아웃</button></form>
+  <form th:action="@{/api/auth/logout}" method="post" class="logout-form"><button type="submit" class="line">로그아웃</button></form>
+  <script>document.querySelector('.logout-form').addEventListener('submit',async event=>{event.preventDefault();await fetch('/api/auth/logout',{method:'POST',body:new FormData(event.target)});location.assign('/login?logout');});</script>
 </aside>
 </body>
 </html>

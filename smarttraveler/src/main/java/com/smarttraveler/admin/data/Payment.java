@@ -6,7 +6,7 @@ import lombok.Setter;
 import java.time.*;
 import java.math.BigDecimal;
 
-@Entity @Table(name = "payment") @Getter @Setter
+@Entity @Table(name = "room_payment") @Getter @Setter
 public class Payment {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "payment_id") private Long paymentId;
     @Column(name = "reservation_id") private Long reservationId;

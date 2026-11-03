@@ -128,7 +128,7 @@ public class TourSyncService {
         }
     }
 
-    /** EXT-01 관광지별 연관 관광지 → place_related. */
+    /** EXT-01 관광지별 연관 관광지 → 팀 related_attraction_rank. */
     StepResult syncRelated(long regionId, String baseYm, String areaCd, String regionCode) {
         LocalDateTime started = LocalDateTime.now();
         int total = 0, ok = 0;
@@ -139,17 +139,24 @@ public class TourSyncService {
                 total = page.totalCount();
                 for (JsonNode it : page.items()) {
                     String source = text(it, "tAtsNm");
-                    String category = String.join(" > ", nonEmpty(text(it, "rlteCtgryLclsNm"), text(it, "rlteCtgryMclsNm"), text(it, "rlteCtgrySclsNm")));
                     jdbc.update("""
-                            INSERT INTO place_related(region_id, base_ym, source_code, source_name, related_code, related_name,
-                              related_area_name, related_signgu_name, related_category, related_rank, source_place_id, synced_at)
-                            VALUES (?,?,?,?,?,?,?,?,?,?,?,NOW())
-                            ON DUPLICATE KEY UPDATE source_name=VALUES(source_name), related_name=VALUES(related_name),
-                              related_area_name=VALUES(related_area_name), related_signgu_name=VALUES(related_signgu_name),
-                              related_category=VALUES(related_category), related_rank=VALUES(related_rank),
-                              source_place_id=VALUES(source_place_id), synced_at=NOW()""",
-                            regionId, baseYm, text(it, "tAtsCd"), source, text(it, "rlteTatsCd"), text(it, "rlteTatsNm"),
-                            text(it, "rlteRegnNm"), text(it, "rlteSignguNm"), category, intOf(it, "rlteRank"), byName.get(norm(source)));
+                            INSERT INTO related_attraction_rank(base_ym, attraction_code, attraction_name,
+                              area_code, sigungu_code, related_code, related_name, related_region_code,
+                              related_region_name, related_sigungu_code, related_sigungu_name,
+                              category_large, category_medium, category_small, related_rank,
+                              fetched_at, base_place_id, related_place_id, source_record_hash)
+                            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,SHA2(CONCAT_WS('|',?,?,?),256))
+                            ON DUPLICATE KEY UPDATE attraction_name=VALUES(attraction_name), related_name=VALUES(related_name),
+                              related_region_name=VALUES(related_region_name), related_sigungu_name=VALUES(related_sigungu_name),
+                              category_large=VALUES(category_large), category_medium=VALUES(category_medium),
+                              category_small=VALUES(category_small), related_rank=VALUES(related_rank),
+                              base_place_id=VALUES(base_place_id), related_place_id=VALUES(related_place_id), fetched_at=NOW()""",
+                            baseYm, text(it, "tAtsCd"), source, areaCd, text(it, "signguCd"),
+                            text(it, "rlteTatsCd"), text(it, "rlteTatsNm"), text(it, "rlteRegnCd"),
+                            text(it, "rlteRegnNm"), text(it, "rlteSignguCd"), text(it, "rlteSignguNm"),
+                            text(it, "rlteCtgryLclsNm"), text(it, "rlteCtgryMclsNm"), text(it, "rlteCtgrySclsNm"),
+                            intOf(it, "rlteRank"), LocalDateTime.now(), byName.get(norm(source)),
+                            byName.get(norm(text(it, "rlteTatsNm"))), baseYm, text(it, "tAtsCd"), text(it, "rlteTatsCd"));
                     ok++;
                 }
                 if (pageNo * 1000 >= total || page.items().isEmpty()) break;
@@ -187,7 +194,7 @@ public class TourSyncService {
                        (SELECT COUNT(*) FROM place p JOIN region r ON r.region_id=p.region_id WHERE r.region_code=? AND p.latitude IS NOT NULL) AS withCoords,
                        (SELECT COUNT(*) FROM place_image i JOIN place p ON p.place_id=i.place_id JOIN region r ON r.region_id=p.region_id WHERE r.region_code=? AND i.sort_order=0) AS withImage,
                        (SELECT COUNT(*) FROM place_hub_rank h JOIN region r ON r.region_id=h.region_id WHERE r.region_code=?) AS hubRanks,
-                       (SELECT COUNT(*) FROM place_related x JOIN region r ON r.region_id=x.region_id WHERE r.region_code=?) AS related
+                       (SELECT COUNT(*) FROM related_attraction_rank x JOIN place p ON p.place_id=x.base_place_id JOIN region r ON r.region_id=p.region_id WHERE r.region_code=?) AS related
                 """, regionCode, regionCode, regionCode, regionCode, regionCode);
     }
 
@@ -202,8 +209,8 @@ public class TourSyncService {
                 ORDER BY h.hub_rank LIMIT ?""", regionCode, limit);
         for (Map<String, Object> row : rows) {
             row.put("related", jdbc.queryForList("""
-                    SELECT related_name, related_signgu_name, related_rank FROM place_related
-                    WHERE base_ym=? AND (source_code=? OR source_name=? OR source_place_id=?) ORDER BY related_rank LIMIT 3""",
+                    SELECT related_name, related_sigungu_name AS related_signgu_name, related_rank FROM related_attraction_rank
+                    WHERE base_ym=? AND (attraction_code=? OR attraction_name=? OR base_place_id=?) ORDER BY related_rank LIMIT 3""",
                     row.get("base_ym"), row.get("hub_code"), row.get("hub_name"), row.get("place_id")));
         }
         return rows;

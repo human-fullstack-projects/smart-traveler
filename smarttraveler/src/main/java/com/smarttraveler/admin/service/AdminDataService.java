@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service @RequiredArgsConstructor
 public class AdminDataService {
-    private final MemberRepository members;
+    private final AdminMemberRepository members;
     private final OwnerProfileRepository owners;
     private final OwnerReviewHistoryRepository reviews;
     private final MemberSuspensionHistoryRepository suspensions;
@@ -21,7 +21,6 @@ public class AdminDataService {
     private final PaymentRepository payments;
     private final CourseRepository courses;
     private final CourseTemplateRepository templates;
-    private final TravelPlanVersionRepository versions;
     private final HumanCourseRepository humanCourses;
     private final HumanReportRepository humanReports;
     private final HumanActionHistoryRepository humanActions;
@@ -50,9 +49,8 @@ public class AdminDataService {
     public List<Course> courses() { return courses.findAll(); }
     public Course course(Long id) { return courses.findById(id).orElseThrow(() -> missing("코스")); }
     public List<CourseTemplate> templates() { return templates.findAll(); }
-    public TravelPlanVersion version(Long id) { return versions.findById(id).orElseThrow(() -> missing("코스 버전")); }
-    public List<HumanCourse> humanCourses() { return humanCourses.findAll(); }
-    public HumanCourse humanCourse(Long id) { return humanCourses.findById(id).orElseThrow(() -> missing("휴먼 코스")); }
+    public List<HumanCourse> humanCourses() { return humanCourses.findAll().stream().map(this::enrichHumanCourse).toList(); }
+    public HumanCourse humanCourse(Long id) { return enrichHumanCourse(humanCourses.findById(id).orElseThrow(() -> missing("휴먼 코스"))); }
     public List<HumanReport> humanReports() { return humanReports.findAll(); }
     public List<HumanActionHistory> humanHistory(Long courseId) { return humanActions.findByCourseIdOrderByCreatedAtDesc(courseId); }
     public List<RecommendationCriteria> criteria() { return criteria.findAll(); }
@@ -178,17 +176,32 @@ public class AdminDataService {
             if (done.isEmpty()) throw new IllegalStateException("결제 최종 승인과 금액이 확인되지 않았습니다.");
             int nights = (int) java.time.temporal.ChronoUnit.DAYS.between(order.getCheckinDate(), order.getCheckoutDate());
             if (nights < 1) throw new IllegalStateException("체크인·아웃 날짜가 올바르지 않습니다.");
-            Integer holds = jdbc.queryForObject(
-                "SELECT COUNT(*) FROM room_inventory WHERE room_id=? AND stay_date>=? AND stay_date<? AND reservation_id=? AND status='HELD' AND (hold_expires_at IS NULL OR hold_expires_at>NOW())",
-                Integer.class, order.getRoomId(), order.getCheckinDate(), order.getCheckoutDate(), id);
+            int quantity = order.getRoomQuantity() == null ? 1 : order.getRoomQuantity();
+            Integer holds = jdbc.queryForObject("""
+                SELECT COUNT(*) FROM reservation_inventory a JOIN room_inventory i ON i.inventory_id=a.inventory_id
+                WHERE a.reservation_id=? AND a.room_id=? AND i.stay_date>=? AND i.stay_date<?
+                  AND a.allocation_status='HELD' AND a.quantity=?
+                  AND (a.hold_expires_at IS NULL OR a.hold_expires_at>NOW())
+                  AND i.held_quantity>=a.quantity
+                """, Integer.class, id, order.getRoomId(), order.getCheckinDate(), order.getCheckoutDate(), quantity);
             if (holds == null || holds != nights) throw new IllegalStateException("유효한 객실 임시 점유를 확인할 수 없습니다.");
-            jdbc.update("UPDATE room_inventory SET status='BOOKED', hold_expires_at=NULL WHERE room_id=? AND stay_date>=? AND stay_date<? AND reservation_id=?",
-                order.getRoomId(), order.getCheckinDate(), order.getCheckoutDate(), id);
+            jdbc.update("""
+                UPDATE room_inventory i JOIN reservation_inventory a ON a.inventory_id=i.inventory_id
+                SET i.held_quantity=i.held_quantity-a.quantity,
+                    i.reserved_quantity=i.reserved_quantity+a.quantity
+                WHERE a.reservation_id=? AND a.allocation_status='HELD'
+                """, id);
+            jdbc.update("UPDATE reservation_inventory SET allocation_status='RESERVED', hold_expires_at=NULL, updated_at=NOW() WHERE reservation_id=? AND allocation_status='HELD'", id);
         } else if ("CANCELLED".equals(status)) {
             if (!"PENDING_PAYMENT".equals(current)) throw new IllegalStateException("결제 대기 예약만 이 화면에서 취소할 수 있습니다.");
             if (paymentsForReservation(id).stream().anyMatch(p -> "DONE".equals(p.getStatus())))
                 throw new IllegalStateException("승인된 결제가 있어 단순 미결제 취소로 처리할 수 없습니다.");
-            jdbc.update("UPDATE room_inventory SET status='AVAILABLE', reservation_id=NULL, hold_expires_at=NULL WHERE reservation_id=? AND status='HELD'", id);
+            jdbc.update("""
+                UPDATE room_inventory i JOIN reservation_inventory a ON a.inventory_id=i.inventory_id
+                SET i.held_quantity=i.held_quantity-a.quantity
+                WHERE a.reservation_id=? AND a.allocation_status='HELD' AND i.held_quantity>=a.quantity
+                """, id);
+            jdbc.update("UPDATE reservation_inventory SET allocation_status='CANCELLED', hold_expires_at=NULL, updated_at=NOW() WHERE reservation_id=? AND allocation_status='HELD'", id);
             order.setCancelledAt(LocalDateTime.now());
         } else if ("COMPLETED".equals(status)) {
             if (!"CONFIRMED".equals(current)) throw new IllegalStateException("확정 예약만 숙박 완료할 수 있습니다.");
@@ -219,7 +232,9 @@ public class AdminDataService {
         if (!Set.of("VISIBLE", "BLINDED", "DELETED").contains(status)) throw new IllegalArgumentException("지원하지 않는 코스 상태입니다.");
         HumanCourse course = humanCourse(id);
         course.setStatus(status);
-        if ("DELETED".equals(status)) course.setFeatured(false);
+        if ("DELETED".equals(status)) setHumanFeatured(id, false, login);
+        course.setUpdatedAt(LocalDateTime.now());
+        if ("DELETED".equals(status)) course.setDeletedAt(LocalDateTime.now());
         humanCourses.save(course);
         recordHumanAction(id, null, login, status, reason);
     }
@@ -228,8 +243,10 @@ public class AdminDataService {
     public void setHumanFeatured(Long id, boolean featured, String login) {
         HumanCourse course = humanCourse(id);
         if (featured && !"VISIBLE".equals(course.getStatus())) throw new IllegalStateException("노출 중인 코스만 메인에 지정할 수 있습니다.");
-        course.setFeatured(featured);
-        humanCourses.save(course);
+        jdbc.update("""
+            INSERT INTO admin_human_featured(post_id,featured,updated_at) VALUES (?,?,NOW())
+            ON DUPLICATE KEY UPDATE featured=VALUES(featured),updated_at=NOW()
+            """, id, featured);
         recordHumanAction(id, null, login, featured ? "FEATURE" : "UNFEATURE", null);
     }
 
@@ -239,6 +256,8 @@ public class AdminDataService {
         HumanReport report = humanReports.findById(id).orElseThrow(() -> missing("신고"));
         report.setStatus(status);
         report.setResolvedAt(LocalDateTime.now());
+        report.setProcessedBy(reviewer(login).getMemberId());
+        report.setResolution(reason);
         humanReports.save(report);
         recordHumanAction(report.getCourseId(), id, login, status, reason);
     }
@@ -269,6 +288,13 @@ public class AdminDataService {
         h.setNote(reason);
         h.setCreatedAt(LocalDateTime.now());
         humanActions.save(h);
+    }
+
+    private HumanCourse enrichHumanCourse(HumanCourse post) {
+        post.setFeatured(Boolean.TRUE.equals(jdbc.queryForObject(
+            "SELECT COALESCE(MAX(featured),0) FROM admin_human_featured WHERE post_id=?", Boolean.class, post.getId())));
+        if (post.getCourseId() != null) courses.findById(post.getCourseId()).ifPresent(c -> post.setDestination(c.getDestination()));
+        return post;
     }
 
     private Member reviewer(String login) {

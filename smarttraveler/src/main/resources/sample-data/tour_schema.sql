@@ -1,6 +1,6 @@
 -- 관광지 연동 표 (smart-travel-db 전용 · 지우는 줄 없음 · 여러 번 실행해도 됨)
 -- region / place / place_image / data_sync_log = 팀 통합 ERD new_01(10-29) 칸 그대로.
--- place_hub_rank / place_related = ERD에 없는 순위·연관 정보 → 별도 표 (팀 ERD 합칠 때 결정).
+-- place_hub_rank는 관리자 확장 표. 연관 관광지는 팀 related_attraction_rank를 사용.
 
 CREATE TABLE IF NOT EXISTS region (
   region_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -97,26 +97,6 @@ CREATE TABLE IF NOT EXISTS place_hub_rank (
   UNIQUE KEY uq_hub (region_id, base_ym, hub_code),
   CONSTRAINT fk_hub_region FOREIGN KEY (region_id) REFERENCES region(region_id),
   CONSTRAINT fk_hub_place FOREIGN KEY (place_id) REFERENCES place(place_id)
-);
-
--- EXT-01 관광지별 연관 관광지: 기준 관광지 → 연관 관광지 순위
-CREATE TABLE IF NOT EXISTS place_related (
-  related_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  region_id BIGINT NOT NULL,
-  base_ym CHAR(6) NOT NULL,
-  source_code VARCHAR(100) NOT NULL,
-  source_name VARCHAR(200) NOT NULL,
-  related_code VARCHAR(100) NOT NULL,
-  related_name VARCHAR(200) NOT NULL,
-  related_area_name VARCHAR(100) NULL,
-  related_signgu_name VARCHAR(100) NULL,
-  related_category VARCHAR(100) NULL,
-  related_rank INT NOT NULL,
-  source_place_id BIGINT NULL,
-  synced_at DATETIME NOT NULL,
-  UNIQUE KEY uq_related (base_ym, source_code, related_code),
-  CONSTRAINT fk_related_region FOREIGN KEY (region_id) REFERENCES region(region_id),
-  CONSTRAINT fk_related_place FOREIGN KEY (source_place_id) REFERENCES place(place_id)
 );
 
 -- 지원 지역 (처음엔 경주시만)

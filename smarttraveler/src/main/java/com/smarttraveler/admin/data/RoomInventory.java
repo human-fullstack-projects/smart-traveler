@@ -13,9 +13,9 @@ public class RoomInventory {
     private Integer price;
     @Column(name = "price_type", length = 20) private String priceType;
     @Column(name = "is_on_sale") private Boolean isOnSale;
-    @Column(name = "status", length = 20) private String status;
-    @Column(name = "reservation_id") private Long reservationId;
-    @Column(name = "hold_expires_at") private LocalDateTime holdExpiresAt;
+    @Column(name = "total_quantity") private Integer totalQuantity;
+    @Column(name = "held_quantity") private Integer heldQuantity;
+    @Column(name = "reserved_quantity") private Integer reservedQuantity;
     @Column(name = "updated_at") private LocalDateTime updatedAt;
 }
 

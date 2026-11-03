@@ -1,3 +1,4 @@
+-- LEGACY M51 reset. Do not run after M55: it targets retired admin/inventory columns.
 -- 관리자 화면 시연용 상태 되돌리기 (가짜 데이터 510000번대만 · smart-travel-db 전용).
 -- admin_sample.sql 다음에 실행. 몇 번을 실행해도 같은 상태가 된다. 지우는 줄 없음.
 -- 결과: 업주 가입 승인대기 1 · 숙소 승인대기 1 · 결제대기 주문 1 · 신고 대기 1.

@@ -8,7 +8,7 @@
 <section><h2>게시 코스 목록</h2>
 <form class="filters" method="get" th:action="@{/admin/human-courses}">
 <label>상태<select name="status"><option value="">전체</option><option value="VISIBLE" th:selected="${status == 'VISIBLE'}">게시 중</option><option value="BLINDED" th:selected="${status == 'BLINDED'}">블라인드</option><option value="DELETED" th:selected="${status == 'DELETED'}">삭제</option></select></label>
-<label>신고<select name="reportStatus"><option value="">전체</option><option value="OPEN" th:selected="${reportStatus == 'OPEN'}">미처리 신고</option><option value="RESOLVED" th:selected="${reportStatus == 'RESOLVED'}">처리된 신고</option><option value="DISMISSED" th:selected="${reportStatus == 'DISMISSED'}">기각된 신고</option><option value="NONE" th:selected="${reportStatus == 'NONE'}">신고 없음</option></select></label>
+<label>신고<select name="reportStatus"><option value="">전체</option><option value="PENDING" th:selected="${reportStatus == 'PENDING'}">미처리 신고</option><option value="RESOLVED" th:selected="${reportStatus == 'RESOLVED'}">처리된 신고</option><option value="DISMISSED" th:selected="${reportStatus == 'DISMISSED'}">기각된 신고</option><option value="NONE" th:selected="${reportStatus == 'NONE'}">신고 없음</option></select></label>
 <label>작성 시작일<input type="date" name="from" th:value="${from}"></label><label>작성 종료일<input type="date" name="to" th:value="${to}"></label>
 <label>지역 · 제목<input name="query" th:value="${query}" placeholder="검색어 입력"></label><button class="line">검색</button>
 </form>
@@ -22,7 +22,7 @@
 <dt>내용</dt><dd th:text="${selectedHumanCourse.summary}"></dd><dt>상태</dt><dd th:text="${@fmt.label(selectedHumanCourse.status)}"></dd></dl>
 <h3>신고 목록</h3><div class="table-wrap"><table><thead><tr><th>신고일</th><th>신고자</th><th>사유</th><th>처리 상태</th><th>처리</th></tr></thead><tbody>
 <tr th:each="report : ${reports}"><td th:text="${@fmt.dt(report.createdAt)}"></td><td th:text="${report.reporterId}"></td><td th:text="${report.reason}"></td><td th:text="${@fmt.label(report.status)}"></td><td>
-<form method="post" th:if="${report.status == 'OPEN'}" th:action="@{/admin/human-reports/{id}/resolve(id=${report.id})}">
+<form method="post" th:if="${report.status == 'PENDING'}" th:action="@{/admin/human-reports/{id}/resolve(id=${report.id})}">
 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"><label>처리 사유<input name="reason" required placeholder="처리 사유"></label><button name="status" value="RESOLVED">처리</button><button name="status" value="DISMISSED" class="line">기각</button></form></td></tr>
 <tr th:if="${#lists.isEmpty(reports)}"><td colspan="5">신고가 없습니다.</td></tr></tbody></table></div>
 <form method="post" th:action="@{/admin/human-courses/{id}/status(id=${selectedHumanCourse.id})}">

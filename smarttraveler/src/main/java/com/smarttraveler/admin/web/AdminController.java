@@ -32,7 +32,7 @@ public class AdminController {
             "orderCount", data.reservations().size(),
             "pendingLodgingCount", data.lodgings().stream().filter(x -> "PENDING".equals(x.getStatus())).count(),
             "suspendedMemberCount", data.members().stream().filter(x -> "SUSPENDED".equals(x.getStatus())).count(),
-            "openReportCount", data.humanReports().stream().filter(x -> "OPEN".equals(x.getStatus())).count()));
+            "openReportCount", data.humanReports().stream().filter(x -> "PENDING".equals(x.getStatus())).count()));
         return "admin/dashboard";
     }
 
@@ -261,8 +261,7 @@ public class AdminController {
         if (selected != null) {
             model.addAttribute("selectedAiMember", selected.getMemberNo() == null ? null
                 : data.members().stream().filter(m -> selected.getMemberNo().equals(m.getMemberId())).findFirst().orElse(null));
-            model.addAttribute("selectedAiParent", selected.getParentCourseId() == null ? null
-                : data.courses().stream().filter(c -> selected.getParentCourseId().equals(c.getId())).findFirst().orElse(null));
+            model.addAttribute("selectedAiParent", null);
             model.addAttribute("selectedAiReservations", data.reservations().stream()
                 .filter(r -> selected.getId().equals(r.getCourseId())).toList());
         }
