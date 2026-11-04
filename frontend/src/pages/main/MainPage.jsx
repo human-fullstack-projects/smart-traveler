@@ -48,15 +48,16 @@ function CalendarIcon() {
   );
 }
 
-export default function MainPage() {
+export default function MainPage({ onStart, busy }) {
   const [message, setMessage] = useState('');
   const [notice, setNotice] = useState('');
   const [helpOpen, setHelpOpen] = useState(false);
 
-  function submit(event) {
+  async function submit(event) {
     event.preventDefault();
     if (!message.trim()) { setNotice('여행 이야기를 입력해 주세요.'); return; }
-    setNotice('입력한 여행 이야기는 유지됩니다. 대화 추천 기능은 연결 준비 중입니다.');
+    try { await onStart?.(message.trim()); }
+    catch { setNotice('대화를 시작하지 못했습니다. 서버와 OpenAI API 키를 확인해 주세요.'); }
   }
 
   return (
@@ -85,7 +86,7 @@ export default function MainPage() {
             />
             <div className="mp-composer-bottom">
               <span>원하는 분위기나 장소도 함께 적어보세요</span>
-              <button type="submit" className="mp-primary">대화 시작하기 <span aria-hidden="true">↗</span></button>
+              <button type="submit" className="mp-primary" disabled={busy}>{busy ? '대화를 시작하는 중…' : <>대화 시작하기 <span aria-hidden="true">↗</span></>}</button>
             </div>
             {notice && <p role="status" className="mp-notice">{notice}</p>}
           </form>
