@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import './Auth.css';
-import { login } from '../api/auth';
+import { login } from '../../api/auth';
 
 // 로그인 (AUTH) — 처리 로직은 sein/v1 그대로, 화면만 공유 CSS(st-*)로.
-export default function Login({ onLogin }) {
+export default function LoginPage({ onLogin }) {
   const [loginId, setLoginId] = useState('');
   const [password, setPassword] = useState('');
   const [visible, setVisible] = useState(false);

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import './Home.css';
+import './HomePage.css';
 
 export function Intro({ conditions = false }) {
   return <section className="intro">
@@ -14,7 +14,7 @@ export function PanelHeader({ conditions = false }) {
   return <div className="panel-header"><div className="assistant-mark" aria-hidden="true">✳</div><div className="panel-title"><strong>{conditions ? '조건검색' : '여행 플래너'}</strong><span>{conditions ? '내게 맞는 여행을 찾아보세요' : '당신만의 여행을 함께 만들어요'}</span></div><span className="status-dot">{conditions ? '여행 계획' : '대화 준비'}</span></div>;
 }
 
-export default function Home() {
+export default function HomePage() {
   const [message, setMessage] = useState('');
   const [notice, setNotice] = useState('');
   const [step, setStep] = useState('compose');

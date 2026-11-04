@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import './Auth.css';
-import { getTerms, signup } from '../api/auth';
+import { getTerms, signup } from '../../api/auth';
 
 // 회원가입 (AUTH-01 여행자 · AUTH-02 숙박업주 · AUTH-03 약관 동의)
 const TERM_NAMES = { SERVICE: '서비스 이용약관', PRIVACY: '개인정보 수집·이용', LOCATION: '위치정보 이용', MARKETING: '마케팅 정보 수신' };
@@ -29,7 +29,7 @@ function Field({ name, label, form, errors, onChange, type = 'text', placeholder
   </label>;
 }
 
-export default function Signup() {
+export default function SignupPage() {
   const [role, setRole] = useState('USER');
   const [form, setForm] = useState(EMPTY);
   const [errors, setErrors] = useState({});
