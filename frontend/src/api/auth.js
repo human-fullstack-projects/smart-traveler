@@ -41,3 +41,27 @@ export async function login(loginId, password) {
 }
 
 export async function logout() { await postWithCsrf('/api/auth/logout', new URLSearchParams()); }
+
+// 회원가입 정보를 JSON 형식으로 전송
+async function postJsonWithCsrf(path, data) {
+  const csrf = await request('/api/auth/csrf');
+
+  return request(path, {
+    method: 'POST',
+    headers: {
+      [csrf.headerName]: csrf.token,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+}
+
+// 회원가입 화면에 표시할 약관 조회
+export async function getTerms() {
+  return request('/api/auth/terms');
+}
+
+// 회원가입 요청
+export async function signup(data) {
+  return postJsonWithCsrf('/api/auth/signup', data);
+}

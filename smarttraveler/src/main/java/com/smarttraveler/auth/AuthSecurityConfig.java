@@ -29,6 +29,8 @@ public class AuthSecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/auth/csrf").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                 .requestMatchers("/", "/error", "/css/**", "/js/**", "/favicon.ico").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/auth/terms").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/auth/signup").permitAll()
                 .anyRequest().authenticated());
         http.requestCache(cache -> cache.disable());
         http.exceptionHandling(errors -> errors
