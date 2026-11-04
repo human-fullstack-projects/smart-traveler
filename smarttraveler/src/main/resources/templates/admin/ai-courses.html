@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AI 코스 관리 · Smart Traveler</title><link rel="stylesheet" th:href="@{/css/admin.css}"></head>
+<body><header th:replace="~{admin/fragments :: header('ai')}"></header>
+<main class="shell"><div class="hero"><span class="eyebrow">관리자 / AI 코스 관리</span><h1>AI 코스 관리</h1><p>생성 코스와 오류, 추천 기준을 확인합니다.</p></div>
+<p class="notice" th:if="${message}" th:text="${message}"></p><p class="notice" th:if="${error}" th:text="${error}"></p>
+<div class="layout"><aside th:replace="~{admin/fragments :: sidebar('ai')}"></aside><div class="content">
+<section><h2>생성 코스 목록</h2><form class="filters" method="get" th:action="@{/admin/ai-courses}">
+<label>상태<select name="status"><option value="">전체</option><option value="failed" th:selected="${status == 'failed'}">생성 실패</option><option value="done" th:selected="${status == 'done'}">생성 완료</option><option value="running" th:selected="${status == 'running'}">생성 중</option></select></label>
+<label>지역 · 제목<input name="query" th:value="${query}" placeholder="검색어 입력"></label><button class="line">검색</button></form>
+<div class="table-wrap"><table><thead><tr><th>코스 제목</th><th>지역</th><th>생성 방식</th><th>상태</th><th>생성일</th><th>상세</th></tr></thead><tbody>
+<tr th:each="course : ${aiCourses}"><td th:text="${course.title}"></td><td th:text="${course.destination}"></td><td th:text="${@fmt.method(course.generationMethodId)}"></td>
+<td><span class="badge" th:classappend="${course.status == 'failed' ? 'bad' : 'ok'}" th:text="${@fmt.label(course.status)}"></span></td><td th:text="${@fmt.dt(course.createdAt)}"></td>
+<td><a th:href="@{/admin/ai-courses#detail(id=${course.id})}">보기</a></td></tr>
+<tr th:if="${#lists.isEmpty(aiCourses)}"><td colspan="6">생성된 코스가 없습니다.</td></tr></tbody></table></div></section>
+<section id="detail"><h2>코스 상세</h2><div th:if="${selectedAiCourse == null}" class="box">목록에서 코스를 선택하세요.</div>
+<div th:if="${selectedAiCourse != null}"><dl>
+<dt>코스 번호</dt><dd th:text="${selectedAiCourse.id}"></dd>
+<dt>제목</dt><dd th:text="${selectedAiCourse.title}"></dd>
+<dt>요약</dt><dd th:text="${selectedAiCourse.summary ?: '-'}"></dd>
+<dt>지역</dt><dd th:text="${selectedAiCourse.destination}"></dd>
+<dt>여행 기간</dt><dd th:text="${@fmt.dt(selectedAiCourse.startDate) + ' ~ ' + @fmt.dt(selectedAiCourse.endDate)}"></dd>
+<dt>인원</dt><dd th:text="${'성인 ' + (selectedAiCourse.adults ?: 0) + '명 · 아동 ' + (selectedAiCourse.children ?: 0) + '명'}"></dd>
+<dt>회원</dt><dd th:text="${selectedAiMember != null ? selectedAiMember.nickname + ' (' + selectedAiMember.loginId + ')' : '-'}"></dd>
+<dt>상태</dt><dd><span class="badge" th:classappend="${selectedAiCourse.status == 'done' ? 'ok' : (selectedAiCourse.status == 'failed' ? 'bad' : 'wait')}" th:text="${@fmt.label(selectedAiCourse.status)}"></span></dd>
+<dt>생성 방식</dt><dd th:text="${@fmt.method(selectedAiCourse.generationMethodId)}"></dd>
+<dt>원본 코스</dt><dd><a th:if="${selectedAiParent != null}" th:href="@{/admin/ai-courses#detail(id=${selectedAiParent.id})}" th:text="${selectedAiParent.title}"></a><span th:if="${selectedAiParent == null}">-</span></dd>
+<dt>수정 요청</dt><dd th:text="${selectedAiCourse.revisionRequest ?: '-'}"></dd>
+<dt>AI 모델 · 프롬프트</dt><dd th:text="${(selectedAiCourse.model ?: '-') + ' · ' + (selectedAiCourse.promptVersion ?: '-')}"></dd>
+<dt>생성일 · 수정일</dt><dd th:text="${@fmt.dt(selectedAiCourse.createdAt) + ' · ' + @fmt.dt(selectedAiCourse.updatedAt)}"></dd>
+<dt>오류</dt><dd th:text="${selectedAiCourse.errorMessage ?: '-'}"></dd>
+</dl>
+<h3>연결된 숙소 예약</h3>
+<div class="table-wrap"><table><thead><tr><th>주문번호</th><th>예약자</th><th>기간</th><th>상태</th><th>상세</th></tr></thead><tbody>
+<tr th:if="${#lists.isEmpty(selectedAiReservations)}"><td colspan="5">이 코스로 들어온 예약이 없습니다.</td></tr>
+<tr th:each="r : ${selectedAiReservations}"><td th:text="${r.reservationNo}"></td><td th:text="${r.bookerName}"></td><td th:text="${r.checkinDate + ' ~ ' + r.checkoutDate}"></td><td th:text="${@fmt.label(r.status)}"></td><td><a th:href="@{/admin/orders#detail(id=${r.reservationId})}">보기</a></td></tr>
+</tbody></table></div>
+<p class="note">일자별 방문 장소(일정표)는 AI 코스 담당 표(course_day·activity)가 팀 ERD에서 정해지면 이어 붙입니다.</p></div></section>
+<section><h2>관광지 데이터</h2><p>코스 후보로 쓰는 한국관광공사 중심 관광지·연관 관광지·관광정보를 불러오고 수집 결과를 확인합니다.</p><div class="actions"><a th:href="@{/admin/tour-data}">관광지 데이터 수집 화면으로</a></div></section>
+<section><h2>생성 오류 현황</h2><div class="table-wrap"><table><thead><tr><th>코스</th><th>지역</th><th>오류 내용</th><th>발생일</th></tr></thead><tbody>
+<tr th:each="course : ${aiErrors}"><td th:text="${course.title}"></td><td th:text="${course.destination}"></td><td th:text="${course.errorMessage}"></td><td th:text="${@fmt.dt(course.createdAt)}"></td></tr>
+<tr th:if="${#lists.isEmpty(aiErrors)}"><td colspan="4">현재 확인된 생성 오류가 없습니다.</td></tr></tbody></table></div></section>
+<section><h2>추천 기준</h2><p class="note">새 기준은 이후 생성되는 코스에 적용합니다.</p>
+<div class="table-wrap"><table><thead><tr><th>기준</th><th>설정값</th><th>변경일</th><th>수정</th></tr></thead><tbody>
+<tr th:each="criterion : ${criteria}"><td th:text="${criterion.name}"></td><td th:text="${criterion.value}"></td><td th:text="${@fmt.dt(criterion.updatedAt)}"></td><td>
+<form method="post" th:action="@{/admin/ai-courses/criteria}"><input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"><input type="hidden" name="id" th:value="${criterion.id}"><label><span class="sr-only">설정값</span><input name="value" required th:value="${criterion.value}"></label><button>저장</button></form></td></tr>
+<tr th:if="${#lists.isEmpty(criteria)}"><td colspan="3">등록된 기준이 없습니다.</td></tr></tbody></table></div>
+</section>
+</div></div><footer class="bottom">Smart Traveler · 관리자</footer></main></body></html>
+
