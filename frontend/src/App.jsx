@@ -1,33 +1,31 @@
 import { useEffect, useState } from 'react';
+import Header from './common_components/Header';
+import Footer from './common_components/Footer';
+import MyPageMenu from './mypage/components/MyPageMenu';
+import MyPage from './mypage/pages/MyPage';
+import Reservations from './mypage/pages/Reservations';
+import MyCourses from './mypage/pages/MyCourses';
+import MyPosts from './mypage/pages/MyPosts';
+import useMyPageStore from './mypage/hooks/useMyPageStore';
+import HumanCourseList from './human_course/pages/HumanCourseList';
+import HumanCourseDetail from './human_course/pages/HumanCourseDetail';
+import HumanCourseCreate from './human_course/pages/HumanCourseCreate';
+import HumanCourseEdit from './human_course/pages/HumanCourseEdit';
+import HumanCourseModeration from './human_course/pages/HumanCourseModeration';
+import useHumanCourses from './human_course/hooks/useHumanCourses';
 
-const navigation = [
-  { label: '여행 시작', href: '#/' },
-  { label: '조건검색', href: '#/conditions' },
-  { label: '숙소 찾기' },
-  { label: '내 여행 일정' },
-  { label: '마이페이지' },
-];
+const myPageRoutes = {
+  '/mypage': MyPage,
+  '/reservations': Reservations,
+  '/my-courses': MyCourses,
+  '/my-posts': MyPosts,
+};
 
-function Header({ route, onUnavailable }) {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const link = (item) => item.href ? (
-    <a key={item.label} href={item.href} aria-current={route === item.href.slice(1) ? 'page' : undefined} onClick={() => setMenuOpen(false)}>{item.label}</a>
-  ) : (
-    <button key={item.label} type="button" className="nav-link" onClick={() => { setMenuOpen(false); onUnavailable(item.label); }}>{item.label}</button>
-  );
-  return <header className="site-header">
-    <div className="header-inner">
-      <div className="brand-wrap">
-        <button className="menu-toggle" type="button" aria-label={menuOpen ? '메뉴 닫기' : '메뉴 열기'} aria-expanded={menuOpen} aria-controls="mobile-menu" onClick={() => setMenuOpen(!menuOpen)}>
-          <span></span><span></span><span></span>
-        </button>
-        <a className="brand" href="#/">smart <span>travel</span></a>
-      </div>
-      <nav className="desktop-nav" aria-label="주 메뉴">{navigation.map(link)}<button className="account" onClick={() => onUnavailable('로그인')}>로그인</button></nav>
-    </div>
-    {menuOpen && <nav id="mobile-menu" className="menu-panel" aria-label="전체 메뉴">{navigation.map(link)}<button className="nav-link" onClick={() => { setMenuOpen(false); onUnavailable('로그인'); }}>로그인</button></nav>}
-  </header>;
-}
+const humanCourseRoutes = {
+  '/human-courses': HumanCourseList,
+  '/human-courses/create': HumanCourseCreate,
+  '/human-courses/moderation': HumanCourseModeration,
+};
 
 function Intro({ conditions = false }) {
   return <section className="intro">
@@ -59,9 +57,27 @@ function Conditions() {
 }
 
 export default function App() {
+  const myPageStore = useMyPageStore();
+  const humanCourses = useHumanCourses();
   const [route, setRoute] = useState(window.location.hash.slice(1) || '/');
   const [notice, setNotice] = useState('');
   useEffect(() => { const update = () => { setRoute(window.location.hash.slice(1) || '/'); setNotice(''); window.scrollTo(0, 0); }; window.addEventListener('hashchange', update); return () => window.removeEventListener('hashchange', update); }, []);
   const isConditions = route === '/conditions';
-  return <div className="app-shell"><Header route={route} onUnavailable={(label) => setNotice(`${label} 페이지는 연결 준비 중입니다.`)} />{notice && <div className="navigation-notice" role="status">{notice}<button onClick={() => setNotice('')} aria-label="알림 닫기">×</button></div>}<main className="main-content">{isConditions ? <Conditions /> : <Home />}</main><footer className="footer"><a href="#/">smart <strong>travel</strong></a><span>당신의 여행을 함께 그려요.</span></footer></div>;
+  const MyPageScreen = myPageRoutes[route];
+  const humanCoursePath = route.replace(/\/$/, '');
+  const isHumanCourse = humanCoursePath === '/human-courses' || humanCoursePath.startsWith('/human-courses/');
+  const courseMatch = humanCoursePath.match(/^\/human-courses\/([^/]+)(\/edit)?$/);
+  const HumanCourseScreen = humanCourseRoutes[humanCoursePath] || (courseMatch ? (courseMatch[2] ? HumanCourseEdit : HumanCourseDetail) : null);
+  return <div className="app-shell">
+    <Header route={route} onUnavailable={(label) => setNotice(`${label} 페이지는 연결 준비 중입니다.`)} />
+    {notice && <div className="navigation-notice" role="status">{notice}<button onClick={() => setNotice('')} aria-label="알림 닫기">×</button></div>}
+    <main className="main-content">{MyPageScreen ? <>
+      <div className="mypage"><MyPageMenu currentPage={route.slice(1)} /><p className="note">샘플 데이터로 동작합니다. 실제 예약·환불·AI 추천·공개 게시는 처리되지 않습니다.</p>{myPageStore.storageError && <p className="warning" role="alert">{myPageStore.storageError}</p>}</div>
+      <MyPageScreen key={route} {...myPageStore} />
+    </> : isHumanCourse ? <>
+      {humanCourses.storageNotice && <div className="human-courses"><p className="note" role="alert">{humanCourses.storageNotice}</p></div>}
+      {HumanCourseScreen ? <HumanCourseScreen key={humanCoursePath} {...humanCourses} courseId={courseMatch?.[1]} /> : <div className="human-courses"><section className="panel"><h1>페이지를 찾을 수 없습니다.</h1><a className="button" href="#/human-courses">코스 목록으로</a></section></div>}
+    </> : isConditions ? <Conditions /> : <Home />}</main>
+    <Footer />
+  </div>;
 }
