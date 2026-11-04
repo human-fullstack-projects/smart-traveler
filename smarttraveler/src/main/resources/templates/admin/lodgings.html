@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>숙소 관리 · Smart Traveler</title><link rel="stylesheet" th:href="@{/css/admin.css}"></head>
+<body><header th:replace="~{admin/fragments :: header('lodgings')}"></header>
+<main class="shell"><div class="hero"><span class="eyebrow">관리자 / 숙소 관리</span><h1>숙소 관리</h1><p>숙소 등록을 심사하고 운영 상태를 관리합니다.</p></div>
+<p class="notice" th:if="${message}" th:text="${message}"></p><p class="notice" th:if="${error}" th:text="${error}"></p>
+<div class="layout"><aside th:replace="~{admin/fragments :: sidebar('lodgings')}"></aside><div class="content">
+<section><h2>숙소 목록</h2>
+<form class="filters" method="get" th:action="@{/admin/lodgings}">
+<label>업주<select name="ownerId"><option value="">전체</option><option th:each="owner : ${owners}" th:value="${owner.ownerId}" th:text="${owner.businessName}" th:selected="${ownerId != null and ownerId == owner.ownerId}"></option></select></label>
+<label>지역<input name="region" th:value="${region}" placeholder="주소의 지역명"></label>
+<label>운영 상태<select name="status"><option value="">전체</option><option value="PENDING" th:selected="${status == 'PENDING'}">승인대기</option><option value="ACTIVE" th:selected="${status == 'ACTIVE'}">운영 중</option><option value="REJECTED" th:selected="${status == 'REJECTED'}">반려</option><option value="SUSPENDED" th:selected="${status == 'SUSPENDED'}">운영 중지</option></select></label>
+<label>숙소명 · 주소<input name="query" th:value="${query}" placeholder="검색어 입력"></label><button class="line">검색</button>
+</form>
+<div class="table-wrap"><table><thead><tr><th>숙소명</th><th>업주</th><th>지역 · 주소</th><th>운영 상태</th><th>등록일</th><th>상세</th></tr></thead><tbody>
+<tr th:each="lodging : ${lodgings}"><td th:text="${lodging.name}"></td><td th:text="${@fmt.owner(lodging.ownerId)}"></td><td th:text="${lodging.address}"></td>
+<td><span class="badge" th:classappend="${lodging.status == 'ACTIVE' ? 'ok' : (lodging.status == 'REJECTED' ? 'bad' : 'wait')}" th:text="${@fmt.label(lodging.status)}"></span></td>
+<td th:text="${@fmt.dt(lodging.createdAt)}"></td><td><a th:href="@{/admin/lodgings#detail(id=${lodging.lodgingId})}">보기</a></td></tr>
+<tr th:if="${#lists.isEmpty(lodgings)}"><td colspan="6">조건에 맞는 숙소가 없습니다.</td></tr>
+</tbody></table></div></section>
+<section id="detail"><h2>숙소 상세</h2><div th:if="${selectedLodging == null}" class="box">목록에서 숙소를 선택하세요.</div>
+<div th:if="${selectedLodging != null}"><dl><dt>숙소명</dt><dd th:text="${selectedLodging.name}"></dd><dt>주소</dt><dd th:text="${selectedLodging.address}"></dd>
+<dt>업주</dt><dd th:text="${@fmt.owner(selectedLodging.ownerId)}"></dd><dt>소개</dt><dd th:text="${selectedLodging.description}"></dd>
+<dt>상태</dt><dd th:text="${@fmt.label(selectedLodging.status)}"></dd><dt>승인 시각</dt><dd th:text="${selectedLodging.approvedAt ?: '—'}"></dd>
+<dt>반려 사유</dt><dd th:text="${selectedLodging.rejectReason ?: '—'}"></dd></dl>
+<h3>등록 객실</h3><div class="table-wrap"><table><thead><tr><th>객실</th><th>기준 인원</th><th>최대 인원</th><th>운영</th></tr></thead><tbody>
+<tr th:each="room : ${rooms}"><td th:text="${room.name}"></td><td th:text="${room.baseCapacity}"></td><td th:text="${room.maxCapacity}"></td><td th:text="${room.isActive ? '운영' : '중지'}"></td></tr>
+<tr th:if="${#lists.isEmpty(rooms)}"><td colspan="4">등록된 객실이 없습니다.</td></tr></tbody></table></div>
+<h3>예약 현황</h3><div class="table-wrap"><table><thead><tr><th>주문번호</th><th>일정</th><th>상태</th></tr></thead><tbody>
+<tr th:each="reservation : ${lodgingReservations}"><td><a th:href="@{/admin/orders#detail(id=${reservation.reservationId})}" th:text="${reservation.reservationNo}"></a></td><td th:text="${reservation.checkinDate + ' ~ ' + reservation.checkoutDate}"></td><td th:text="${@fmt.label(reservation.status)}"></td></tr>
+<tr th:if="${#lists.isEmpty(lodgingReservations)}"><td colspan="3">예약이 없습니다.</td></tr></tbody></table></div>
+<h3>승인 · 운영 상태</h3>
+<form method="post" th:action="@{/admin/lodgings/{id}/status(id=${selectedLodging.lodgingId})}">
+<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+<label>처리 사유 <textarea name="reason" placeholder="반려 시 사유를 반드시 입력하세요"></textarea></label>
+<div class="actions"><button name="status" value="ACTIVE" th:if="${selectedLodging.status == 'PENDING' or selectedLodging.status == 'SUSPENDED'}">운영 승인 · 재개</button>
+<button name="status" value="REJECTED" th:if="${selectedLodging.status == 'PENDING'}">반려</button>
+<button name="status" value="SUSPENDED" th:if="${selectedLodging.status == 'ACTIVE'}">운영 중지</button></div></form>
+<h3>정보 수정</h3><form method="post" th:action="@{/admin/lodgings/{id}/edit(id=${selectedLodging.lodgingId})}">
+<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+<label>숙소명<input name="name" required th:value="${selectedLodging.name}"></label><label>소개<textarea name="description" th:text="${selectedLodging.description}"></textarea></label>
+<button>정보 저장</button></form>
+<p class="note">진행 중인 예약이 있는 숙소는 삭제보다 운영 중지로 처리합니다.</p>
+</div></section>
+</div></div><footer class="bottom">Smart Traveler · 관리자</footer></main></body></html>
+

@@ -1,10 +1,32 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>관리자 로그인 · smart travel</title>
+  <link rel="stylesheet" th:href="@{/css/admin.css}">
 </head>
 <body>
-
+<header class="top"><div class="top-inner"><div><a class="brand" th:href="@{/}">smart travel</a><p class="subtitle">서비스 운영 관리</p></div></div></header>
+<main class="shell auth-shell">
+  <div class="hero"><span class="eyebrow">관리자</span><h1>로그인</h1><p>관리자 계정으로 로그인하세요.</p></div>
+  <section class="auth-card">
+    <p class="badge ok" th:if="${param.logout}">로그아웃했습니다.</p>
+    <p id="login-error" class="badge" hidden>아이디 또는 비밀번호를 확인해주세요.</p>
+    <form id="login-form" th:action="@{/api/auth/login}" method="post">
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+      <label>아이디 <input name="loginId" required autofocus></label>
+      <label>비밀번호 <input name="password" type="password" required></label>
+      <button type="submit">로그인</button>
+    </form>
+  </section>
+</main>
+<script>
+document.getElementById('login-form').addEventListener('submit', async event => {
+  event.preventDefault();
+  const response = await fetch('/api/auth/login', {method:'POST', body:new FormData(event.target)});
+  if (response.ok) location.assign('/admin');
+  else document.getElementById('login-error').hidden = false;
+});
+</script>
 </body>
 </html>

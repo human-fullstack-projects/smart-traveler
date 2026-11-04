@@ -3,14 +3,32 @@ import { chatApi } from './chatApi.js';
 import TravelConditions from './TravelConditions.jsx';
 import TourSearch from './TourSearch.jsx';
 import { createEmptyConditions } from './travelConditions.js';
+import Home, { Intro, PanelHeader } from './pages/Home';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import AdminApp, { AdminGuard } from './pages/admin/AdminApp';
+import { getCurrentMember, logout } from './api/auth';
+import AiCoursePage from './ai-course/AiCoursePage.jsx';
+import SearchPage from './search/SearchPage.jsx';
+import MainPage from './main/MainPage.jsx';
+import StaySearchPage from './stays/search/StaySearchPage.jsx';
+import StayBookingPage from './stays/booking/StayBookingPage.jsx';
+import OwnerPage from './owner/OwnerPage.jsx';
 
-const navigation = [
-  { label: '여행 시작', href: '#/' },
-  { label: '조건검색', href: '#/conditions' },
-  { label: '숙소 찾기' },
-  { label: '내 여행 일정' },
-  { label: '마이페이지' },
-];
+import Header from './common_components/Header';
+import Footer from './common_components/Footer';
+import MyPageMenu from './mypage/components/MyPageMenu';
+import MyPage from './mypage/pages/MyPage';
+import Reservations from './mypage/pages/Reservations';
+import MyCourses from './mypage/pages/MyCourses';
+import MyPosts from './mypage/pages/MyPosts';
+import useMyPageStore from './mypage/hooks/useMyPageStore';
+import HumanCourseList from './human_course/pages/HumanCourseList';
+import HumanCourseDetail from './human_course/pages/HumanCourseDetail';
+import HumanCourseCreate from './human_course/pages/HumanCourseCreate';
+import HumanCourseEdit from './human_course/pages/HumanCourseEdit';
+import HumanCourseModeration from './human_course/pages/HumanCourseModeration';
+import useHumanCourses from './human_course/hooks/useHumanCourses';
 
 // 한글 조합을 확정하는 Enter는 전송하지 않고, Shift+Enter는 줄바꿈에 사용한다.
 function submitOnEnter(event) {
@@ -41,18 +59,20 @@ function Header({ route, onUnavailable }) {
   </header>;
 }
 
-function Intro({ conditions = false }) {
-  return <section className="intro">
-    <div className="kicker"><span />{conditions ? 'PLAN YOUR TRIP' : 'AI TRAVEL PLANNER'}</div>
-    {conditions ? <><h1>원하는 조건으로<br /><em>여행을 그려요.</em></h1><p>여행지와 일정을 직접 선택해 주세요.<br />선택한 조건에 맞는 여행을 찾아드릴게요.</p></> : <><h1>당신의 이야기가<br /><em>여행이 되는 곳.</em></h1><p>가고 싶은 곳부터 떠오르는 장면까지,<br />편하게 들려주세요. 함께 여행을 그려볼게요.</p></>}
-    <div className="intro-divider" />
-    <div className="intro-caption"><strong>{conditions ? '어떤 여행을 생각하고 있나요?' : '어디로 떠나볼까요?'}</strong><span>{conditions ? '조건은 다음 단계에서도 변경할 수 있어요.' : '지역, 일정, 동행을 알려주면 더 좋아요.'}</span></div>
-  </section>;
-}
+const humanCourseRoutes = {
+  '/human-courses': HumanCourseList,
+  '/human-courses/create': HumanCourseCreate,
+  '/human-courses/moderation': HumanCourseModeration,
+};
 
-function PanelHeader({ conditions = false }) {
-  return <div className="panel-header"><div className="assistant-mark" aria-hidden="true">✳</div><div className="panel-title"><strong>{conditions ? '조건검색' : '여행 플래너'}</strong><span>{conditions ? '내게 맞는 여행을 찾아보세요' : '당신만의 여행을 함께 만들어요'}</span></div><span className="status-dot">{conditions ? '여행 계획' : '대화 준비'}</span></div>;
-}
+// function Intro({ conditions = false }) {
+//   return <section className="intro">
+//     <div className="kicker"><span />{conditions ? 'PLAN YOUR TRIP' : 'AI TRAVEL PLANNER'}</div>
+//     {conditions ? <><h1>원하는 조건으로<br /><em>여행을 그려요.</em></h1><p>여행지와 일정을 직접 선택해 주세요.<br />선택한 조건에 맞는 여행을 찾아드릴게요.</p></> : <><h1>당신의 이야기가<br /><em>여행이 되는 곳.</em></h1><p>가고 싶은 곳부터 떠오르는 장면까지,<br />편하게 들려주세요. 함께 여행을 그려볼게요.</p></>}
+//     <div className="intro-divider" />
+//     <div className="intro-caption"><strong>{conditions ? '어떤 여행을 생각하고 있나요?' : '어디로 떠나볼까요?'}</strong><span>{conditions ? '조건은 다음 단계에서도 변경할 수 있어요.' : '지역, 일정, 동행을 알려주면 더 좋아요.'}</span></div>
+//   </section>;
+// }
 
 function Home({ onStart, busy }) {
   const [message, setMessage] = useState('');
@@ -144,6 +164,51 @@ function Conditions() {
 }
 
 export default function App() {
+  const myPageStore = useMyPageStore();
+  const humanCourses = useHumanCourses();
+  const [member, setMember] = useState(null);
+  const [authChecked, setAuthChecked] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+  const authVersion = useRef(0);
+  const logoutInFlight = useRef(false);
+  useEffect(() => {
+    let cancelled = false;
+    const version = authVersion.current;
+    getCurrentMember().then((value) => {
+      if (!cancelled && version === authVersion.current) { setMember(value); setAuthChecked(true); }
+    }).catch(() => {
+      if (!cancelled) setAuthChecked(true);
+      if (!cancelled && version === authVersion.current) setNotice('로그인 상태를 확인할 서버에 연결하지 못했어요. Spring Boot 실행 상태를 확인해주세요.');
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  function loggedIn(value) {
+    authVersion.current += 1;
+    setMember(value);
+    setNotice('');
+    setAuthChecked(true);
+    window.location.hash = value?.roleCode === 'ADMIN' ? '/admin' : '/';
+  }
+
+  async function handleLogout() {
+    if (logoutInFlight.current) return;
+    logoutInFlight.current = true;
+    setLoggingOut(true);
+    authVersion.current += 1;
+    try {
+      await logout();
+      setMember(null);
+      setNotice('로그아웃했어요.');
+      if (window.location.hash.startsWith('#/admin')) window.location.hash = '/';
+    } catch (error) {
+      setNotice(error.message);
+    } finally {
+      logoutInFlight.current = false;
+      setLoggingOut(false);
+    }
+  }
+
   const [route, setRoute] = useState(window.location.hash.slice(1) || '/');
   const [notice, setNotice] = useState('');
   const [messages, setMessages] = useState([]);
@@ -223,4 +288,37 @@ export default function App() {
 
   const isConditions = route === '/conditions';
   return <div className="app-shell"><Header route={route} onUnavailable={(label) => setNotice(`${label} 페이지는 연결 준비 중입니다.`)} />{notice && <div className="navigation-notice" role="status">{notice}<button onClick={() => setNotice('')} aria-label="알림 닫기">×</button></div>}<main className="main-content">{isConditions ? <Conditions /> : route === '/chat' ? loading ? <p role="status">대화를 불러오는 중입니다.</p> : !sessionId ? <p role="status">대화를 불러올 수 없습니다. <a href="#/">여행 시작으로 돌아가기</a></p> : <ChatPage messages={messages} onSend={sendMessage} conditions={conditions} conditionsConfirmed={conditionsConfirmed} onConditionsChange={(next) => queueConditions(next, false)} onConfirmConditions={() => queueConditions(currentConditions.current.conditions, true)} busy={busy} saveStatus={saveStatus} onRetry={() => queueConditions(currentConditions.current.conditions, currentConditions.current.confirmed)} /> : <Home onStart={startChat} busy={busy || loading} />}</main><footer className="footer"><a href="#/">smart <strong>travel</strong></a><span>당신의 여행을 함께 그려요.</span></footer></div>;
+  useEffect(() => { const update = () => { setRoute(window.location.hash.slice(1) || '/'); setNotice(''); window.scrollTo(0, 0); }; window.addEventListener('hashchange', update); return () => window.removeEventListener('hashchange', update); }, []);
+  const routePath = route.split('?')[0];
+  const MyPageScreen = myPageRoutes[routePath];
+  const humanCoursePath = routePath.replace(/\/$/, '');
+  const isHumanCourse = humanCoursePath === '/human-courses' || humanCoursePath.startsWith('/human-courses/');
+  const courseMatch = humanCoursePath.match(/^\/human-courses\/([^/]+)(\/edit)?$/);
+  const HumanCourseScreen = humanCourseRoutes[humanCoursePath] || (courseMatch ? (courseMatch[2] ? HumanCourseEdit : HumanCourseDetail) : null);
+  const isConditions = routePath === '/conditions';
+  const isLogin = routePath === '/login';
+  const isSignup = routePath === '/signup';
+  const isAiCourse = routePath === '/ai-course';
+  const isSearch = routePath === '/search';
+  const isMain = routePath === '/main';
+  const isStaySearch = routePath === '/stays';
+  const isStayBooking = routePath === '/stays/booking';
+  const isOwner = routePath === '/owner';
+  if (routePath === '/admin' || routePath.startsWith('/admin/')) {
+    if (member?.roleCode === 'ADMIN') return <AdminApp route={routePath} member={member} onLogout={handleLogout} />;
+    return <AdminGuard member={member} checking={!authChecked} />;
+  }
+  if (isAiCourse) return <AiCoursePage />;
+  if (isSearch) return <SearchPage />;
+  if (isMain) return <MainPage />;
+  if (isStaySearch) return <StaySearchPage />;
+  if (isStayBooking) return <StayBookingPage />;
+  if (isOwner) return <OwnerPage />;
+  return <div className="app-shell"><Header route={routePath} member={member} onLogout={handleLogout} loggingOut={loggingOut} onUnavailable={(label) => setNotice(`${label} 페이지는 연결 준비 중입니다.`)} />{notice && <div className="navigation-notice" role="status">{notice}<button onClick={() => setNotice('')} aria-label="알림 닫기">×</button></div>}<main className="main-content">{MyPageScreen ? <>
+      <div className="mypage"><MyPageMenu currentPage={routePath.slice(1)} /><p className="note">샘플 데이터로 동작합니다. 실제 예약·환불·AI 추천·공개 게시는 처리되지 않습니다.</p>{myPageStore.storageError && <p className="warning" role="alert">{myPageStore.storageError}</p>}</div>
+      <MyPageScreen key={routePath} {...myPageStore} />
+    </> : isHumanCourse ? <>
+      {humanCourses.storageNotice && <div className="human-courses"><p className="note" role="alert">{humanCourses.storageNotice}</p></div>}
+      {HumanCourseScreen ? <HumanCourseScreen key={humanCoursePath} {...humanCourses} courseId={courseMatch?.[1]} /> : <div className="human-courses"><section className="panel"><h1>페이지를 찾을 수 없습니다.</h1><a className="button" href="#/human-courses">코스 목록으로</a></section></div>}
+    </> : isLogin ? <Login onLogin={loggedIn} /> : isSignup ? <Signup /> : isConditions ? <Conditions /> : <Home />}</main><Footer /></div>;
 }

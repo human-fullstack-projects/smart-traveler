@@ -1,0 +1,64 @@
+.ai-course-page{min-height:100vh;display:flex;flex-direction:column;background:#fcfefd}
+
+.ac-header{background:rgba(255,255,255,.92)}
+.ac-header-inner{min-height:84px;padding:0 3.4%;display:flex;justify-content:space-between;align-items:center;gap:28px}
+.ac-brand-wrap{display:flex;align-items:center;gap:26px}
+.ac-menu-toggle{display:flex;flex-direction:column;justify-content:center;gap:5px;width:26px;height:36px;padding:0;border:0;background:none}
+.ac-menu-toggle span{display:block;width:18px;height:2px;background:#263c44;border-radius:2px}
+.ac-brand{font-size:28px;font-weight:800;letter-spacing:-1.4px;white-space:nowrap}
+.ac-brand span{color:#09836d}
+.ac-login{border:1px solid #dbe3e8;border-radius:9px;background:#fff;padding:10px 21px;color:#263a43;font-size:14px}
+.ac-login:hover{border-color:#b9d6cb}
+
+.ac-main{width:100%;max-width:900px;flex:1;margin:0 auto;padding:54px 24px 70px;text-align:center}
+
+.ac-step{display:flex;align-items:center;justify-content:center;gap:12px;color:#9aa7a2;font-size:13px;font-weight:700;margin-bottom:22px}
+.ac-step-line{width:70px;height:1px;background:#d8e2dd}
+.ac-step-num{color:#9aa7a2}
+.ac-step-label{color:#6b7c76}
+
+.ac-title{margin:0 0 18px;font-size:clamp(32px,4.2vw,44px);font-weight:800;letter-spacing:-1.6px;line-height:1.3;color:#101722}
+.ac-title span{color:#0c806b}
+.ac-subtitle{margin:0 0 40px;color:#687a7b;font-size:17px;line-height:1.7}
+
+.ac-question{margin:0 0 26px;font-size:19px;font-weight:700;color:#101722}
+
+.ac-card{max-width:740px;margin:0 auto;padding:40px 40px 34px;background:#fff;border:1px solid #e0eae5;border-radius:24px;box-shadow:0 24px 70px rgba(30,75,57,.08)}
+
+.ac-icon{position:relative;display:inline-flex;margin-bottom:22px}
+.ac-icon-bubble{position:absolute;right:-16px;bottom:-10px}
+
+.ac-card h3{margin:0 0 10px;font-size:24px;font-weight:800;letter-spacing:-.6px;color:#101722}
+.ac-card-desc{margin:0 0 26px;color:#7c8d88;font-size:15px}
+
+.ac-form{display:flex;flex-direction:column;gap:18px}
+
+.ac-input-row{display:flex;align-items:center;gap:12px;padding:16px 20px;border:1px solid #dbe6df;border-radius:14px;background:#fff}
+.ac-input-row:focus-within{border-color:#91c8b7}
+.ac-input-row input{flex:1;border:0;outline:none;background:transparent;font-size:15px;color:#253b3c}
+.ac-input-row input::placeholder{color:#9bada7}
+.ac-send{display:grid;place-items:center;width:34px;height:34px;border:0;background:none;padding:0;flex-shrink:0}
+
+.ac-cta{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;border:1px solid #0c806b;background:#0c806b;color:#fff;padding:16px;border-radius:12px;font-size:15px;font-weight:700}
+.ac-cta:hover{background:#076d5b}
+
+.ac-notice{margin:0;color:#426d61;font-size:13px;line-height:1.6}
+
+.ac-tip{display:flex;align-items:center;justify-content:center;gap:11px;margin:30px auto 0;max-width:740px;padding:16px 20px;background:#edf8f3;color:#146856;border-radius:12px;font-size:14px;font-weight:600}
+
+.ac-footer{min-height:90px;border-top:1px solid #edf2ef;display:flex;justify-content:center;align-items:center;color:#889c95;font-size:13px}
+.ac-footer nav{display:flex;align-items:center}
+.ac-footer-item{display:flex;align-items:center}
+.ac-footer a{color:#5c6f68;font-weight:600}
+.ac-footer a:hover{color:#09836d}
+.ac-footer-sep{margin:0 14px;color:#d3ddd8}
+
+.ac-visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+@media(max-width:700px){
+  .ac-header-inner{min-height:72px;padding:0 20px}
+  .ac-main{padding:38px 20px 54px}
+  .ac-title{letter-spacing:-1px}
+  .ac-card{padding:30px 22px 26px;border-radius:20px}
+  .ac-footer{flex-wrap:wrap;min-height:auto;padding:22px 16px;text-align:center}
+}
