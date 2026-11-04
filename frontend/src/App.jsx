@@ -7,12 +7,15 @@ import { getCurrentMember, logout } from './api/auth';
 import AiCoursePage from './ai-course/AiCoursePage.jsx';
 import SearchPage from './search/SearchPage.jsx';
 import MainPage from './main/MainPage.jsx';
+import StaySearchPage from './stays/search/StaySearchPage.jsx';
+import StayBookingPage from './stays/booking/StayBookingPage.jsx';
+import OwnerPage from './owner/OwnerPage.jsx';
 
 const navigation = [
   { label: '여행 시작', href: '#/' },
   { label: '코스추천', href: '#/ai-course' },
   { label: '조건검색', href: '#/conditions' },
-  { label: '숙소 찾기' },
+  { label: '숙소 찾기', href: '#/stays' },
   { label: '내 여행 일정' },
   { label: '마이페이지' },
 ];
@@ -114,18 +117,25 @@ export default function App() {
   const [route, setRoute] = useState(window.location.hash.slice(1) || '/');
   const [notice, setNotice] = useState('');
   useEffect(() => { const update = () => { setRoute(window.location.hash.slice(1) || '/'); setNotice(''); window.scrollTo(0, 0); }; window.addEventListener('hashchange', update); return () => window.removeEventListener('hashchange', update); }, []);
-  const isConditions = route === '/conditions';
-  const isLogin = route === '/login';
-  const isSignup = route === '/signup';
-  const isAiCourse = route === '/ai-course';
-  const isSearch = route === '/search';
-  const isMain = route === '/main';
-  if (route === '/admin' || route.startsWith('/admin/')) {
-    if (member?.roleCode === 'ADMIN') return <AdminApp route={route} member={member} onLogout={handleLogout} />;
+  const routePath = route.split('?')[0];
+  const isConditions = routePath === '/conditions';
+  const isLogin = routePath === '/login';
+  const isSignup = routePath === '/signup';
+  const isAiCourse = routePath === '/ai-course';
+  const isSearch = routePath === '/search';
+  const isMain = routePath === '/main';
+  const isStaySearch = routePath === '/stays';
+  const isStayBooking = routePath === '/stays/booking';
+  const isOwner = routePath === '/owner';
+  if (routePath === '/admin' || routePath.startsWith('/admin/')) {
+    if (member?.roleCode === 'ADMIN') return <AdminApp route={routePath} member={member} onLogout={handleLogout} />;
     return <AdminGuard member={member} checking={!authChecked} />;
   }
   if (isAiCourse) return <AiCoursePage />;
   if (isSearch) return <SearchPage />;
   if (isMain) return <MainPage />;
-  return <div className="app-shell"><Header route={route} member={member} onLogout={handleLogout} loggingOut={loggingOut} onUnavailable={(label) => setNotice(`${label} 페이지는 연결 준비 중입니다.`)} />{notice && <div className="navigation-notice" role="status">{notice}<button onClick={() => setNotice('')} aria-label="알림 닫기">×</button></div>}<main className="main-content">{isLogin ? <Login onLogin={loggedIn} /> : isSignup ? <Signup /> : isConditions ? <Conditions /> : <Home />}</main><footer className="footer"><a href="#/">smart <strong>travel</strong></a><span>당신의 여행을 함께 그려요.</span></footer></div>;
+  if (isStaySearch) return <StaySearchPage />;
+  if (isStayBooking) return <StayBookingPage />;
+  if (isOwner) return <OwnerPage />;
+  return <div className="app-shell"><Header route={routePath} member={member} onLogout={handleLogout} loggingOut={loggingOut} onUnavailable={(label) => setNotice(`${label} 페이지는 연결 준비 중입니다.`)} />{notice && <div className="navigation-notice" role="status">{notice}<button onClick={() => setNotice('')} aria-label="알림 닫기">×</button></div>}<main className="main-content">{isLogin ? <Login onLogin={loggedIn} /> : isSignup ? <Signup /> : isConditions ? <Conditions /> : <Home />}</main><footer className="footer"><a href="#/">smart <strong>travel</strong></a><span>당신의 여행을 함께 그려요.</span></footer></div>;
 }
