@@ -1,10 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
+﻿<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>관리자 홈 · Smart Traveler</title><link rel="stylesheet" th:href="@{/css/admin.css}"></head>
 <body>
+<header th:replace="~{admin/fragments :: header('home')}"></header>
+<main class="shell">
+  <div class="hero"><span class="eyebrow">관리자 / 홈</span><h1>오늘의 운영 현황</h1><p>예약과 숙소, 회원, 코스의 처리 대상을 확인합니다.</p></div>
+  <p class="notice" th:if="${message}" th:text="${message}"></p><p class="notice" th:if="${error}" th:text="${error}"></p>
+  <div class="layout"><aside th:replace="~{admin/fragments :: sidebar('home')}"></aside><div class="content">
+    <div class="dashboard">
+      <section><div class="photo">주문 관리</div><div class="inner"><h2>주문 관리 <span class="tag" th:text="${stats.orderCount + '건'}"></span></h2><p>결제 대기와 환불 상태를 확인합니다.</p><a th:href="@{/admin/orders}">주문 목록 보기 →</a></div></section>
+      <section><div class="photo">숙소 관리</div><div class="inner"><h2>숙소 관리 <span class="tag" th:text="${stats.pendingLodgingCount + '건 대기'}"></span></h2><p>등록 승인과 운영 상태를 처리합니다.</p><a th:href="@{/admin/lodgings}">숙소 목록 보기 →</a></div></section>
+      <section><div class="photo">유저 관리</div><div class="inner"><h2>유저 관리 <span class="tag" th:text="${stats.suspendedMemberCount + '명 정지'}"></span></h2><p>업주 심사와 회원 상태를 확인합니다.</p><a th:href="@{/admin/members}">회원 목록 보기 →</a></div></section>
+      <section><div class="photo">AI 코스 관리</div><div class="inner"><h2>AI 코스 관리</h2><p>생성 결과와 오류를 살펴봅니다.</p><a th:href="@{/admin/ai-courses}">AI 코스 보기 →</a></div></section>
+      <section class="full"><div class="inner"><h2>휴먼 추천 코스 관리 <span class="tag" th:text="${stats.openReportCount + '건 신고 대기'}"></span></h2><p>게시 코스, 신고, 추천 노출을 확인합니다.</p><a th:href="@{/admin/human-courses}">휴먼 추천 코스 보기 →</a></div></section>
+    </div>
+  </div></div><footer class="bottom">Smart Traveler · 관리자</footer>
+</main></body></html>
 
-</body>
-</html>
