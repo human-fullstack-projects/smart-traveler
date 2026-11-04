@@ -4,7 +4,7 @@ import './MainLayout.css';
 const sidebarMenu = [
   { key: 'schedule', label: '내 여행 일정', icon: CalendarIcon, subLinks: ['예약 내역', '저장한 일정'] },
   { key: 'stay', label: '숙소 찾기', icon: LodgeIcon, subLinks: ['숙소 검색', '찜한 숙소'] },
-  { key: 'human-course', label: '휴먼 추천 코스', icon: MapPinIcon, subLinks: ['코스 둘러보기', '내가 올린 코스'] },
+  { key: 'human-course', label: '휴먼 추천 코스', icon: MapPinIcon, subLinks: [{ label: '코스 둘러보기', href: '#/human-courses' }, '내가 올린 코스'] },
   { key: 'mypage', label: '마이페이지', icon: UserIcon, subLinks: ['프로필', '설정'] },
 ];
 
@@ -122,8 +122,10 @@ export default function MainLayout({ children, member, loggingOut, onLogout, onN
                   </button>
                   {activeMenu === key && (
                     <div className="mp-sidebar-submenu">
-                      {subLinks.map((sub) => (
+                      {subLinks.map((sub) => typeof sub === 'string' ? (
                         <button key={sub} type="button" onClick={() => setGlobalNotice(`${sub} 페이지는 연결 준비 중입니다.`)}>{sub}</button>
+                      ) : (
+                        <a key={sub.label} href={sub.href} onClick={() => setActiveMenu(null)}>{sub.label}</a>
                       ))}
                     </div>
                   )}
