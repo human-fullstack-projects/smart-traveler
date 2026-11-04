@@ -88,6 +88,12 @@ export default function Login({ onLogin }) {
           <button className="primary login-submit" type="submit" disabled={busy}>{busy ? '로그인 중…' : '로그인'}</button>
           {notice && <p className="login-notice" role="status">{notice}</p>}
         </form>
+        <p className="login-development-note">
+  아직 계정이 없으신가요?{' '}
+  <a className="login-back" href="#/signup">
+    회원가입
+  </a>
+</p>
         <p className="login-development-note">아이디와 비밀번호는 로그인 확인에만 사용됩니다.</p>
       </div>
     </section>

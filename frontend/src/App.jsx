@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import Home, { Intro, PanelHeader } from './pages/Home';
 import Login from './pages/Login';
 import { getCurrentMember, logout } from './api/auth';
+import Signup from './pages/Signup';
 
 const navigation = [
   { label: '여행 시작', href: '#/' },
@@ -106,5 +107,19 @@ export default function App() {
   useEffect(() => { const update = () => { setRoute(window.location.hash.slice(1) || '/'); setNotice(''); window.scrollTo(0, 0); }; window.addEventListener('hashchange', update); return () => window.removeEventListener('hashchange', update); }, []);
   const isConditions = route === '/conditions';
   const isLogin = route === '/login';
-  return <div className="app-shell"><Header route={route} member={member} onLogout={handleLogout} loggingOut={loggingOut} onUnavailable={(label) => setNotice(`${label} 페이지는 연결 준비 중입니다.`)} />{notice && <div className="navigation-notice" role="status">{notice}<button onClick={() => setNotice('')} aria-label="알림 닫기">×</button></div>}<main className="main-content">{isLogin ? <Login onLogin={loggedIn} /> : isConditions ? <Conditions /> : <Home />}</main><footer className="footer"><a href="#/">smart <strong>travel</strong></a><span>당신의 여행을 함께 그려요.</span></footer></div>;
+  const isSignup = route === '/signup';
+  return <div className="app-shell"><Header route={route} member={member} onLogout={handleLogout} loggingOut={loggingOut} onUnavailable={(label) => setNotice(`${label} 페이지는 연결 준비 중입니다.`)} />{notice && <div className="navigation-notice" role="status">{notice}<button onClick={() => setNotice('')} aria-label="알림 닫기">×</button></div>}<main className="main-content">
+    {/* 기존 화면 선택
+{isLogin ? <Login onLogin={loggedIn} /> : isConditions ? <Conditions /> : <Home />}
+*/}
+
+{isSignup ? (
+  <Signup />
+) : isLogin ? (
+  <Login onLogin={loggedIn} />
+) : isConditions ? (
+  <Conditions />
+) : (
+  <Home />
+)}</main><footer className="footer"><a href="#/">smart <strong>travel</strong></a><span>당신의 여행을 함께 그려요.</span></footer></div>;
 }

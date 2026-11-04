@@ -29,3 +29,5 @@
 .auth-account__name { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; color: #29483d; }
 .auth-account button:disabled { opacity: .6; cursor: wait; }
 .menu-panel .auth-account { flex-wrap: wrap; padding: 8px 12px; }
+
+
