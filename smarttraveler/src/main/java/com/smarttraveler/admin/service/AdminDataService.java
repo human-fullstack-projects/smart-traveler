@@ -80,12 +80,13 @@ public class AdminDataService {
         return humanCourses.findAllWithCourse().stream()
             .map(post -> new HumanCourseView(post,
                 post.getCourse() == null ? null : post.getCourse().getDestination(),
-                featured.getOrDefault(post.getPostId(), false)))
+                featured.getOrDefault(post.getPostId(), false), post.getAuthor()))
             .toList();
     }
     @Transactional(readOnly = true)
     public HumanCourseView humanCourse(Long id) { return enrichHumanCourse(humanCourses.findById(id).orElseThrow(() -> missing("휴먼 코스"))); }
-    public List<HumanReportView> humanReports() { return humanReports.findAll().stream().map(HumanReportView::new).toList(); }
+    @Transactional(readOnly = true)
+    public List<HumanReportView> humanReports() { return humanReports.findAllWithReporter().stream().map(report -> new HumanReportView(report, report.getReporter())).toList(); }
     public List<HumanActionHistory> humanHistory(Long courseId) { return humanActions.findByCourseIdOrderByCreatedAtDesc(courseId); }
     public List<RecommendationCriteria> criteria() { return criteria.findAll(); }
     public List<RecommendationCriteriaHistory> criteriaHistory(Long id) { return criteriaHistory.findByCriteriaIdOrderByCreatedAtDesc(id); }
@@ -358,7 +359,7 @@ public class AdminDataService {
             "SELECT EXISTS(SELECT 1 FROM admin_human_exposure WHERE post_id=? AND scope='MAIN')", Boolean.class, post.getPostId()));
         String destination = post.getCourseId() == null ? null : courses.findById(post.getCourseId())
             .map(Course::getDestination).orElse(null);
-        return new HumanCourseView(post, destination, featured);
+        return new HumanCourseView(post, destination, featured, post.getAuthor());
     }
 
     private Member reviewer(String login) {

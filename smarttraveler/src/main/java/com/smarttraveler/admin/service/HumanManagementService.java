@@ -52,7 +52,8 @@ public class HumanManagementService {
                                       String query, Long postId) {
         return jdbc.query("""
             SELECT co.comment_id, co.post_id, p.title AS post_title, co.author_id,
-              m.nickname, m.login_id, co.content, c.destination AS region, co.created_at, co.deleted_at
+              COALESCE(NULLIF(TRIM(m.nickname), ''), NULLIF(TRIM(m.login_id), '')) AS nickname,
+              m.login_id, co.content, c.destination AS region, co.created_at, co.deleted_at
             FROM human_course_comment co JOIN human_course_post p ON p.post_id=co.post_id
             JOIN course c ON c.id=p.course_id JOIN members m ON m.member_id=co.author_id
             WHERE (? IS NULL OR c.destination LIKE CONCAT('%',?,'%'))

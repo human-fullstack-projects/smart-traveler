@@ -3,6 +3,7 @@ package com.smarttraveler.admin;
 import com.smarttraveler.admin.dto.AdminViews;
 import com.smarttraveler.domain.entity.HumanCoursePost;
 import com.smarttraveler.domain.entity.HumanCourseReport;
+import com.smarttraveler.domain.entity.Member;
 import com.smarttraveler.domain.entity.RoomReservation;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -22,17 +23,25 @@ class AdminTeamColumnAlignmentTest {
         var post = new HumanCoursePost();
         post.setPostId(5L);
         post.setAuthorId(7L);
-        var view = new AdminViews.HumanCourseView(post, "Gyeongju", true);
+        var author = new Member();
+        author.setNickname("여행 작가");
+        author.setLoginId("writer7");
+        var view = new AdminViews.HumanCourseView(post, "Gyeongju", true, author);
         assertEquals(5L, view.getId());
         assertEquals(7L, view.getMemberId());
+        assertEquals("여행 작가", view.getAuthorNickname());
         assertEquals("Gyeongju", view.getDestination());
         assertTrue(view.getFeatured());
+
+        author.setNickname("  ");
+        assertEquals("writer7", new AdminViews.HumanCourseView(post, "Gyeongju", false, author).getAuthorNickname());
 
         var report = new HumanCourseReport();
         report.setReportId(9L);
         report.setPostId(5L);
-        var reportView = new AdminViews.HumanReportView(report);
+        var reportView = new AdminViews.HumanReportView(report, author);
         assertEquals(9L, reportView.getId());
         assertEquals(5L, reportView.getCourseId());
+        assertEquals("writer7", reportView.getReporterNickname());
     }
 }

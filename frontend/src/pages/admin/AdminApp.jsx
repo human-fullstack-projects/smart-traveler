@@ -20,7 +20,13 @@ const LABEL = {
   PENDING: '승인대기', APPROVED: '승인', REJECTED: '반려', INACTIVE: '운영중지', CLOSED: '폐업',
   PENDING_PAYMENT: '결제대기', CONFIRMED: '예약확정', COMPLETED: '숙박완료', CANCELLED: '취소', CANCELED: '취소', REFUNDED: '환불', NO_SHOW: '노쇼', EXPIRED: '만료',
   REFUNDING: '환불 처리 중', REFUND_FAILED: '환불 실패',
-  PUBLISHED: '게시', BLINDED: '블라인드', HIDDEN: '숨김', RESOLVED: '처리완료', DISMISSED: '기각', OPEN: '신고 접수', RECEIVED: '신고 접수',
+  VISIBLE: '게시 중', PUBLISHED: '게시', BLINDED: '블라인드', HIDDEN: '숨김', RESOLVED: '처리완료', DISMISSED: '기각', OPEN: '신고 접수', RECEIVED: '신고 접수',
+  READY: '결제 준비', DONE: '결제 완료', ABORTED: '결제 실패', SKIPPED: '건너뜀',
+  queued: '대기', running: '생성 중', pending: '대기',
+  FRAUD: '부정 이용', POLICY: '운영 정책 위반', POLICY_VIOLATION: '운영 정책 위반', OTHER: '기타',
+  FEATURE: '메인 노출', UNFEATURE: '노출 해제',
+  KTO_TOURAPI: '관광공사 관광정보', KTO_HUB: '중심 관광지', KTO_RELATED: '연관 관광지',
+  ATTRACTION: '관광지 정보', HUB_RANK: '중심 순위', RELATED: '연관 순위',
   done: '완료', failed: '생성실패', generating: '생성중', preview: '미리보기', selected: '선택됨', confirmed: '확정',
   SUCCESS: '성공', FAILED: '실패', PARTIAL: '일부 성공',
   PENSION: '펜션', HOTEL: '호텔', MOTEL: '모텔', GUESTHOUSE: '게스트하우스', HANOK: '한옥', RESORT: '리조트', CAMPING: '캠핑',
@@ -147,7 +153,7 @@ function MiniList({ title, rows, columns, empty = '없음', size = 3 }) {
         <tbody>{list.slice((p - 1) * size, p * size).map((r, i) => <tr key={i}>{columns.map((c, j) => <td key={j}>{c[1](r)}</td>)}</tr>)}</tbody></table>}
   </>;
 }
-const histCols = [['일시', (h) => date(h.createdAt || h.created_at)], ['처리', (h) => show(h.action || h.toStatus || h.to_status)], ['사유', (h) => show(h.reason)]];
+const histCols = [['일시', (h) => date(h.createdAt || h.created_at)], ['처리', (h) => show(LABEL[h.action || h.toStatus || h.to_status] || h.action || h.toStatus || h.to_status)], ['사유', (h) => show(h.reason)]];
 
 /* ---------- 주문 (ADM-02~04) ---------- */
 function Orders() {
@@ -266,7 +272,7 @@ function Members({ onChanged }) {
         {op && <><p className="adm-sub">업주 정보</p>
           <DL items={[['상호', op.businessName], ['심사', <Pill v={op.reviewStatusCode} />], ['사업자번호', op.businessNumber], ['대표', op.representativeName], ['연락처', show(op.businessPhone)], ['숙소', `${(detail.data.ownerLodgings || []).length}곳`], ['주소', show(op.businessAddress)]]} /></>}
         {(detail.data.suspensions || []).length > 0 && <MiniList title="정지 이력" rows={detail.data.suspensions}
-          columns={[['시작', (s) => date(s.startedAt || s.createdAt)], ['해제 예정', (s) => s.suspendedUntil ? date(s.suspendedUntil) : '무기한'], ['실제 해제', (s) => date(s.releasedAt)], ['사유', (s) => show(s.reasonCode)], ['내용', (s) => show(s.reasonDetail || s.reason)]]} />}
+          columns={[['시작', (s) => date(s.startedAt || s.createdAt)], ['해제 예정', (s) => s.suspendedUntil ? date(s.suspendedUntil) : '무기한'], ['실제 해제', (s) => date(s.releasedAt)], ['사유', (s) => show(LABEL[s.reasonCode] || s.reasonCode)], ['내용', (s) => show(s.reasonDetail || s.reason)]]} />}
         <div className="adm-actions">
           <input className="st-input" placeholder="사유 (정지·반려 시 입력)" value={reason} onChange={(e) => setReason(e.target.value)} />
           {m.roleCode !== 'ADMIN' && m.status !== 'SUSPENDED' && <label className="st-field">해제 예정일시 (비우면 무기한)
@@ -316,14 +322,14 @@ function HumanCourses({ onChanged }) {
     {(tab === 'courses' || tab === 'reports') && <div className="adm-split">
       {tab === 'courses'
         ? <Table title="휴먼 추천 코스" rows={list.data} rowKey="id" selected={sel} onSelect={setSel} empty="아직 등록된 휴먼 추천 코스가 없어요."
-          columns={[['제목', (r) => r.title], ['지역', (r) => show(r.region)], ['작성자', (r) => show(r.memberId)], ['작성일', (r) => date(r.createdAt).slice(0, 10)], ['메인', (r) => (r.featured ? '노출' : '—')], ['상태', (r) => <Pill v={r.status} />]]} />
+          columns={[['제목', (r) => r.title], ['지역', (r) => show(r.region)], ['작성자', (r) => show(r.authorNickname || r.memberId)], ['작성일', (r) => date(r.createdAt).slice(0, 10)], ['메인', (r) => (r.featured ? '노출' : '—')], ['상태', (r) => <Pill v={r.status} />]]} />
         : <Table title="신고" rows={reports.data} rowKey="id" onSelect={(id) => { const r = reports.data.find((x) => x.id === id); if (r) setSel(r.courseId); }} empty="접수된 신고가 없어요."
-          columns={[['코스', (r) => show(r.courseId)], ['사유', (r) => show(r.reason)], ['신고일', (r) => date(r.createdAt).slice(0, 10)], ['상태', (r) => <Pill v={r.status} />]]} />}
+          columns={[['코스', (r) => show(r.courseId)], ['신고자', (r) => show(r.reporterNickname || r.reporterId)], ['사유', (r) => show(r.reason)], ['신고일', (r) => date(r.createdAt).slice(0, 10)], ['상태', (r) => <Pill v={r.status} />]]} />}
       <Detail title="코스 상세">{!c ? <Pick /> : <>
-        <DL items={[['제목', c.title], ['상태', <Pill v={c.status} />], ['작성자', show(c.memberId)], ['연결 코스', show(c.courseId)], ['지역', show(c.region)], ['작성일', date(c.createdAt)], ['메인 노출', featured ? '추천 중' : '아님']]} />
+        <DL items={[['제목', c.title], ['상태', <Pill v={c.status} />], ['작성자', show(c.authorNickname || c.memberId)], ['연결 코스', show(c.courseId)], ['지역', show(c.region)], ['작성일', date(c.createdAt)], ['메인 노출', featured ? '추천 중' : '아님']]} />
         <p className="adm-sub">내용</p><p className="adm-clamp">{show(c.content)}</p>
         <MiniList title="신고" rows={detail.data.reports} empty="신고 없음"
-          columns={[['사유', (r) => show(r.reason)], ['상태', (r) => <Pill v={r.status} />], ['', (r) => <button className="adm-link" onClick={() => run(() => adminPost(`/human-reports/${r.id}/resolve`, { status: 'RESOLVED', reason }), '신고를 처리했어요.')}>처리 완료</button>]]} />
+          columns={[['신고자', (r) => show(r.reporterNickname || r.reporterId)], ['사유', (r) => show(r.reason)], ['상태', (r) => <Pill v={r.status} />], ['', (r) => <button className="adm-link" onClick={() => run(() => adminPost(`/human-reports/${r.id}/resolve`, { status: 'RESOLVED', reason }), '신고를 처리했어요.')}>처리 완료</button>]]} />
         <MiniList title="처리 이력" rows={detail.data.history || detail.data.actions} empty="처리 이력 없음" columns={histCols} />
         <div className="adm-actions">
           <input className="st-input" placeholder="처리 사유" value={reason} onChange={(e) => setReason(e.target.value)} />
@@ -410,7 +416,7 @@ function TourData() {
       ? <Table title="중심 관광지 순위 (기초지자체 중심 관광지)" rows={d.hubs} rowKey="hub_rank"
         columns={[['순위', (r) => r.hub_rank], ['관광지', (r) => r.hub_name], ['분류', (r) => show(r.category_middle)], ['주소', (r) => show(r.address)], ['기준', (r) => show(r.base_ym)]]} />
       : <Table title="수집 기록" rows={d.logs} rowKey="sync_log_id"
-        columns={[['자료', (r) => show(r.data_type)], ['제공처', (r) => show(r.provider)], ['결과', (r) => <Pill v={r.status} />], ['건수', (r) => `${r.success_count ?? 0}/${r.total_count ?? 0}`], ['시각', (r) => date(r.finished_at || r.started_at)], ['메모', (r) => show(r.error_message)]]} />}
+        columns={[['자료', (r) => show(LABEL[r.data_type] || r.data_type)], ['제공처', (r) => show(LABEL[r.provider] || r.provider)], ['결과', (r) => <Pill v={r.status} />], ['건수', (r) => `${r.success_count ?? 0}/${r.total_count ?? 0}`], ['시각', (r) => date(r.finished_at || r.started_at)], ['메모', (r) => show(r.error_message)]]} />}
   </>;
 }
 
