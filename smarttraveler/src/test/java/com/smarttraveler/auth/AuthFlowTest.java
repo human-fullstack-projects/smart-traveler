@@ -8,6 +8,7 @@ import com.smarttraveler.auth.repository.SuspensionRepository;
 import com.smarttraveler.domain.entity.MemberSuspensionHistory;
 import tools.jackson.databind.ObjectMapper;
 import com.smarttraveler.auth.service.MemberDetailsService;
+import com.smarttraveler.auth.service.SuspensionReleaseService;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class AuthFlowTest {
     @Configuration
     @EnableWebMvc
-    @Import({AuthSecurityConfig.class, MemberDetailsService.class, AuthController.class})
+    @Import({AuthSecurityConfig.class, MemberDetailsService.class, SuspensionReleaseService.class, AuthController.class})
     static class TestConfig {
         @Bean MemberRepository memberRepository() { return mock(MemberRepository.class); }
         @Bean SuspensionRepository suspensionRepository() { return mock(SuspensionRepository.class); }

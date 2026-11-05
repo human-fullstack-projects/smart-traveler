@@ -7,26 +7,30 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class MemberDetailsService implements UserDetailsService {
     private final MemberRepository members;
+    private final SuspensionReleaseService releases;
 
-    public MemberDetailsService(MemberRepository members) { this.members = members; }
+    public MemberDetailsService(MemberRepository members, SuspensionReleaseService releases) {
+        this.members = members; this.releases = releases;
+    }
 
     @Override
-    @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String loginId) {
         var member = members.findByLoginId(loginId)
                 .orElseThrow(() -> new UsernameNotFoundException("Invalid credentials"));
-        if (member.getPassword() == null || member.getRoleCode() == null) {
+        if ("SUSPENDED".equals(member.getStatus())) releases.releaseIfExpired(member.getMemberId());
+        // The release runs in its own transaction; reload the account for the login decision.
+        var current = members.findById(member.getMemberId()).orElse(member);
+        if (current.getPassword() == null || current.getRoleCode() == null) {
             throw new UsernameNotFoundException("Invalid credentials");
         }
-        return User.withUsername(member.getLoginId())
-                .password(member.getPassword())
-                .authorities("ROLE_" + member.getRoleCode())
-                .disabled(!"ACTIVE".equals(member.getStatus()) || member.getDeletedAt() != null)
+        return User.withUsername(current.getLoginId())
+                .password(current.getPassword())
+                .authorities("ROLE_" + current.getRoleCode())
+                .disabled(!"ACTIVE".equals(current.getStatus()) || current.getDeletedAt() != null)
                 .build();
     }
 }
