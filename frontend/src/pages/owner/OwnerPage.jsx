@@ -32,7 +32,10 @@ function OwnerHeader({ propertyName, member, onLogout, loggingOut }) {
         <div className="owner-topbar__right">
           <span className="owner-property-name">{propertyName}</span>
           <a href="#/stays">사용자 숙소 화면</a>
-          <button type="button">지훈 업주님</button>
+          {/* 기존 샘플 이름 <button type="button">지훈 업주님</button> */}
+          {member && (
+            <span>{member.nickname || member.loginId}님</span>
+          )}
           <a href="#/main">고객</a>
           {member ? (
             <button type="button" disabled={loggingOut} onClick={onLogout}>{loggingOut ? '로그아웃 중…' : '로그아웃'}</button>

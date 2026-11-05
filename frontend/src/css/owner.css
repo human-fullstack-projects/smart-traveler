@@ -2,3 +2,27 @@
 @media(max-width:1050px){.owner-metrics{grid-template-columns:1fr 1fr}.owner-dashboard-grid{grid-template-columns:1fr}.owner-reservation-layout{grid-template-columns:1fr}.owner-reservation-detail{position:static}.owner-facility-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:760px){.owner-topbar__inner{padding:0 16px}.owner-property-name,.owner-topbar__right>a{display:none}.owner-shell{grid-template-columns:1fr}.owner-sidebar{position:sticky;top:68px;z-index:20;width:100%;height:auto;padding:8px 12px;border-right:0;border-bottom:1px solid var(--owner-line);overflow-x:auto}.owner-sidebar__status,.owner-sidebar__help{display:none}.owner-sidebar nav{display:flex;margin:0;min-width:max-content}.owner-sidebar nav button{padding:9px}.owner-main{padding:22px 16px}.owner-welcome{align-items:flex-start;flex-direction:column}.owner-welcome h1{font-size:23px}.owner-metrics{grid-template-columns:1fr 1fr}.owner-quick>div:last-child{grid-template-columns:1fr}.owner-toolbar{align-items:stretch;flex-direction:column}.owner-segment{overflow-x:auto}.owner-toolbar>label input{width:100%}.owner-view__title{align-items:flex-start;flex-direction:column}.owner-form-grid{grid-template-columns:1fr}.owner-wide,.owner-address{grid-column:auto}.owner-photo-grid{grid-template-columns:1fr 1fr}.owner-room-list article{grid-template-columns:65px 1fr auto}.owner-room-list article>button{display:none}.owner-room-grid{grid-template-columns:1fr}.owner-topbar__right{gap:5px}.owner-property-form .owner-panel{padding:17px}}
 @media(max-width:460px){.owner-metrics{grid-template-columns:1fr}.owner-topbar__right>button{font-size:9px}.owner-facility-grid{grid-template-columns:1fr 1fr}.owner-photo-grid{grid-template-columns:1fr}.owner-season-row{grid-template-columns:1fr 1fr}.owner-season-row>span{display:none}.owner-season-row button{grid-column:1/-1}}
+
+/* 업주센터에 Smart Travel 공통 색상 적용 */
+.owner-page {
+  --owner-bg: var(--st-bg);
+  --owner-ink: var(--st-ink);
+  --owner-muted: var(--st-muted);
+  --owner-line: var(--st-line);
+  --owner-green: var(--st-teal);
+  font-family: var(--st-font-body);
+}
+
+.owner-page .owner-topbar {
+  background: var(--st-bg);
+}
+
+.owner-page .owner-sidebar,
+.owner-page .owner-panel {
+  background: var(--st-surface);
+}
+
+.owner-page .owner-welcome h1 {
+  color: var(--st-title);
+  font-family: var(--st-font-title);
+}
