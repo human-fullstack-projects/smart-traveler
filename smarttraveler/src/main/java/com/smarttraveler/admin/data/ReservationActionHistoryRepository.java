@@ -1,8 +1,0 @@
-package com.smarttraveler.admin.data;
-
-import org.springframework.data.jpa.repository.JpaRepository;
-import java.util.List;
-
-public interface ReservationActionHistoryRepository extends JpaRepository<ReservationActionHistory, Long> {
-    List<ReservationActionHistory> findByReservationIdOrderByCreatedAtDesc(Long reservationId);
-}

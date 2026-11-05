@@ -1,6 +1,10 @@
 package com.smarttraveler.auth;
 
 import com.smarttraveler.domain.entity.Member;
+import com.smarttraveler.auth.config.AuthSecurityConfig;
+import com.smarttraveler.auth.controller.AuthController;
+import com.smarttraveler.auth.repository.MemberRepository;
+import com.smarttraveler.auth.service.MemberDetailsService;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;

@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import './MainLayout.css';
+import '../../css/MainLayout.css';
 
 const sidebarMenu = [
-  { key: 'schedule', label: '내 여행 일정', icon: CalendarIcon, subLinks: ['예약 내역', '저장한 일정'] },
-  { key: 'stay', label: '숙소 찾기', icon: LodgeIcon, subLinks: ['숙소 검색', '찜한 숙소'] },
-  { key: 'human-course', label: '휴먼 추천 코스', icon: MapPinIcon, subLinks: [{ label: '코스 둘러보기', href: '#/human-courses' }, '내가 올린 코스'] },
-  { key: 'mypage', label: '마이페이지', icon: UserIcon, subLinks: ['프로필', '설정'] },
+  { key: 'schedule', label: '내 여행 일정', icon: CalendarIcon, subLinks: [{ label: '예약 내역', href: '#/reservations' }, { label: '저장한 일정', href: '#/my-courses' }] },
+  { key: 'stay', label: '숙소 찾기', icon: LodgeIcon, href: '#/stays' },
+  { key: 'human-course', label: '휴먼 추천 코스', icon: MapPinIcon, href: '#/human-courses' },
+  { key: 'mypage', label: '마이페이지', icon: UserIcon, href: '#/mypage' },
 ];
 
 function PlusIcon() {
@@ -194,11 +194,17 @@ export default function MainLayout({ children, member, loggingOut, onLogout, onN
               <PlusIcon /> 새 여행 만들기
             </button>
             <nav className="mp-sidebar-nav" aria-label="사이드 메뉴">
-              {sidebarMenu.map(({ key, label, icon: Icon, subLinks }) => (
+              {sidebarMenu.map(({ key, label, icon: Icon, href, subLinks }) => (
                 <div key={key} className="mp-sidebar-item">
-                  <button type="button" className="mp-sidebar-link" aria-expanded={activeMenu === key} onClick={() => toggleMenu(key)}>
-                    <Icon /> {label}
-                  </button>
+                  {href ? (
+                    <a className="mp-sidebar-link" href={href} onClick={() => setActiveMenu(null)}>
+                      <Icon /> {label}
+                    </a>
+                  ) : (
+                    <button type="button" className="mp-sidebar-link" aria-expanded={activeMenu === key} onClick={() => toggleMenu(key)}>
+                      <Icon /> {label}
+                    </button>
+                  )}
                   {activeMenu === key && (
                     <div className="mp-sidebar-submenu">
                       {subLinks.map((sub) => typeof sub === 'string' ? (

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import './AiCoursePage.css';
+import '../../css/AiCoursePage.css';
 
 function ChatIcon() {
   return (

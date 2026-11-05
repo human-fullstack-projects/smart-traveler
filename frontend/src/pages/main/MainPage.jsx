@@ -1,5 +1,12 @@
+// 이전 메인 화면 import 보관
 // import { useState } from 'react';
 // import './MainPage.css';
+
+// 팀에서 변경한 공통 CSS 위치
+import '../../css/MainPage.css';
+// import { useState } from 'react';
+
+
 
 // function SparkleIcon() {
 //   return (
