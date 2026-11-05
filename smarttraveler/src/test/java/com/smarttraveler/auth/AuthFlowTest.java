@@ -4,6 +4,9 @@ import com.smarttraveler.domain.entity.Member;
 import com.smarttraveler.auth.config.AuthSecurityConfig;
 import com.smarttraveler.auth.controller.AuthController;
 import com.smarttraveler.auth.repository.MemberRepository;
+import com.smarttraveler.auth.repository.SuspensionRepository;
+import com.smarttraveler.domain.entity.MemberSuspensionHistory;
+import tools.jackson.databind.ObjectMapper;
 import com.smarttraveler.auth.service.MemberDetailsService;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -38,16 +41,19 @@ class AuthFlowTest {
     @Import({AuthSecurityConfig.class, MemberDetailsService.class, AuthController.class})
     static class TestConfig {
         @Bean MemberRepository memberRepository() { return mock(MemberRepository.class); }
+        @Bean SuspensionRepository suspensionRepository() { return mock(SuspensionRepository.class); }
+        @Bean ObjectMapper objectMapper() { return new ObjectMapper(); }
     }
     @Autowired WebApplicationContext context;
     @Autowired MemberRepository repository;
+    @Autowired SuspensionRepository suspensions;
     @Autowired PasswordEncoder encoder;
     MockMvc mvc;
     Member member;
 
     @BeforeEach
     void setup() {
-        reset(repository);
+        reset(repository, suspensions);
         member = new Member();
         member.setMemberId(7L);
         member.setLoginId("test-traveler");
@@ -103,9 +109,21 @@ class AuthFlowTest {
         assertEquals(first, second);
     }
     @Test void suspendedMemberCannotLogin() throws Exception {
-        member.setStatus("BANNED");
+        member.setStatus("SUSPENDED");
+        var suspension = new MemberSuspensionHistory();
+        suspension.setReasonDetail("이용 규칙 위반");
+        suspension.setSuspendedUntil(LocalDateTime.of(2026, 11, 20, 18, 0));
+        when(suspensions.findByMemberIdOrderByCreatedAtDesc(7L)).thenReturn(java.util.List.of(suspension));
         mvc.perform(post("/api/auth/login").with(csrf()).param("loginId", "test-traveler")
-                .param("password", "Test-password-123!")).andExpect(status().isUnauthorized());
+                .param("password", "Test-password-123!")).andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("이용 규칙 위반")))
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("2026-11-20 18:00")));
+    }
+    @Test void withdrawnMemberGetsOwnFailure() throws Exception {
+        member.setStatus("WITHDRAWN");
+        mvc.perform(post("/api/auth/login").with(csrf()).param("loginId", "test-traveler")
+                .param("password", "Test-password-123!")).andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("탈퇴한 계정은 로그인할 수 없습니다."));
     }
     @Test void deletedMemberCannotLogin() throws Exception {
         member.setDeletedAt(LocalDateTime.now());
