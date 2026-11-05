@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import './MainPage.css';
+import '../../css/MainPage.css';
 
 function SparkleIcon() {
   return (

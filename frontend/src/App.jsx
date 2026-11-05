@@ -15,22 +15,22 @@ import { chatApi } from './chatApi.js';
 import TravelConditions from './TravelConditions.jsx';
 import TourSearch from './TourSearch.jsx';
 import { createEmptyConditions } from './travelConditions.js';
-import StaySearchPage from './stays/search/StaySearchPage.jsx';
-import StayBookingPage from './stays/booking/StayBookingPage.jsx';
-import OwnerPage from './owner/OwnerPage.jsx';
+import StaySearchPage from './pages/stays/search/StaySearchPage.jsx';
+import StayBookingPage from './pages/stays/booking/StayBookingPage.jsx';
+import OwnerPage from './pages/owner/OwnerPage.jsx';
 
-import MyPageMenu from './mypage/components/MyPageMenu';
-import MyPage from './mypage/pages/MyPage';
-import Reservations from './mypage/pages/Reservations';
-import MyCourses from './mypage/pages/MyCourses';
-import MyPosts from './mypage/pages/MyPosts';
-import useMyPageStore from './mypage/hooks/useMyPageStore';
-import HumanCourseList from './human_course/pages/HumanCourseList';
-import HumanCourseDetail from './human_course/pages/HumanCourseDetail';
-import HumanCourseCreate from './human_course/pages/HumanCourseCreate';
-import HumanCourseEdit from './human_course/pages/HumanCourseEdit';
-import HumanCourseModeration from './human_course/pages/HumanCourseModeration';
-import useHumanCourses from './human_course/hooks/useHumanCourses';
+import MyPageMenu from './pages/mypage/components/MyPageMenu';
+import MyPage from './pages/mypage/pages/MyPage';
+import Reservations from './pages/mypage/pages/Reservations';
+import MyCourses from './pages/mypage/pages/MyCourses';
+import MyPosts from './pages/mypage/pages/MyPosts';
+import useMyPageStore from './pages/mypage/hooks/useMyPageStore';
+import HumanCourseList from './pages/human_course/pages/HumanCourseList';
+import HumanCourseDetail from './pages/human_course/pages/HumanCourseDetail';
+import HumanCourseCreate from './pages/human_course/pages/HumanCourseCreate';
+import HumanCourseEdit from './pages/human_course/pages/HumanCourseEdit';
+import HumanCourseModeration from './pages/human_course/pages/HumanCourseModeration';
+import useHumanCourses from './pages/human_course/hooks/useHumanCourses';
 
 // 한글 조합을 확정하는 Enter는 전송하지 않고, Shift+Enter는 줄바꿈에 사용한다.
 function submitOnEnter(event) {
@@ -144,7 +144,6 @@ const sidebarPageRoutes = {
   '/search': SearchPage,
   '/stays': StaySearchPage,
   '/stays/booking': StayBookingPage,
-  '/owner': OwnerPage,
 };
 
 export default function App() {
@@ -255,6 +254,10 @@ export default function App() {
     return <AdminGuard member={member} checking={!authChecked} />;
   }
 
+  if (route === '/owner') {
+    return <OwnerPage member={member} onLogout={handleLogout} loggingOut={loggingOut} />;
+  }
+
   const TopNavScreen = topNavPageRoutes[route];
   if (TopNavScreen) {
     return <div className="app-shell">
@@ -275,7 +278,7 @@ export default function App() {
   let content;
   if (MyPageScreen) {
     content = <>
-      <div className="mypage"><MyPageMenu currentPage={routePath.slice(1)} /><p className="note">샘플 데이터로 동작합니다. 실제 예약·환불·AI 추천·공개 게시는 처리되지 않습니다.</p>{myPageStore.storageError && <p className="warning" role="alert">{myPageStore.storageError}</p>}</div>
+      <div className="mypage">{routePath === '/mypage' && <MyPageMenu currentPage={routePath.slice(1)} />}<p className="note">샘플 데이터로 동작합니다. 실제 예약·환불·AI 추천·공개 게시는 처리되지 않습니다.</p>{myPageStore.storageError && <p className="warning" role="alert">{myPageStore.storageError}</p>}</div>
       <MyPageScreen key={routePath} {...myPageStore} />
     </>;
   } else if (isHumanCourse) {
