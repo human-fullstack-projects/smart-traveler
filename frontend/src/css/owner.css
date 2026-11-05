@@ -26,3 +26,580 @@
   color: var(--st-title);
   font-family: var(--st-font-title);
 }
+
+/* 업주센터 대시보드 */
+.owner-overview {
+  display: grid;
+  gap: 20px;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.owner-overview-heading,
+.owner-overview-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.owner-overview-heading h1 {
+  margin: 0;
+  color: var(--st-teal);
+  font-family: var(--st-font-title);
+  font-size: clamp(26px, 3vw, 36px);
+  line-height: 1.2;
+}
+
+.owner-overview-heading p,
+.owner-overview-status p {
+  margin: 8px 0 0;
+  color: var(--st-muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.owner-overview-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.owner-overview-card {
+  padding: 20px;
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius-m);
+  background: var(--st-surface);
+}
+
+.owner-overview-card h2 {
+  margin: 0;
+  color: var(--st-ink);
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.owner-overview-number {
+  margin: 10px 0 0;
+  color: var(--st-teal);
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.owner-overview-number span {
+  margin-left: 5px;
+  font-size: 14px;
+}
+
+.owner-overview-action {
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid var(--st-aqua);
+  border-radius: var(--st-radius-s);
+  background: var(--st-aqua);
+  color: var(--st-ink);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.owner-overview-action--line {
+  border-color: var(--st-line);
+  background: var(--st-surface);
+  color: var(--st-teal);
+}
+
+.owner-overview-action:hover {
+  background: var(--st-aqua-hover);
+  color: var(--st-ink);
+}
+
+/* 사이드바에는 실제 이동 메뉴만 표시 */
+.owner-page .owner-sidebar__status,
+.owner-page .owner-sidebar__help {
+  display: none;
+}
+
+.owner-page .owner-sidebar nav {
+  margin-top: 0;
+}
+
+.owner-page .owner-sidebar nav button {
+  min-height: 44px;
+  color: var(--st-ink);
+  font-size: 14px;
+}
+
+.owner-page .owner-sidebar nav button.is-active {
+  background: var(--st-aqua);
+  color: var(--st-ink);
+}
+
+@media (max-width: 760px) {
+  .owner-overview {
+    gap: 16px;
+  }
+
+  .owner-overview-heading,
+  .owner-overview-status {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .owner-overview-metrics {
+    gap: 8px;
+  }
+
+  .owner-overview-card {
+    padding: 12px;
+  }
+
+  .owner-overview-card h2 {
+    font-size: 14px;
+  }
+
+  .owner-overview-number {
+    font-size: 26px;
+  }
+}
+/* 업주센터 네 탭의 공통 틀 */
+.owner-page .owner-topbar__inner {
+  min-height: 64px;
+  height: auto;
+  padding: 8px 24px;
+}
+
+.owner-page .owner-brand {
+  color: var(--st-title);
+  font-family: var(--st-font-title);
+  font-size: 28px;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+}
+
+.owner-page .owner-topbar__right {
+  gap: 12px;
+  color: var(--st-muted);
+  font-size: 14px;
+}
+
+.owner-page .owner-topbar__right > a[href="#/login"],
+.owner-page .owner-topbar__right > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 8px 16px;
+  border: 1px solid var(--st-aqua);
+  border-radius: var(--st-radius-s);
+  background: var(--st-aqua);
+  color: var(--st-ink);
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.owner-page .owner-main {
+  padding: 28px clamp(16px, 3vw, 40px) 36px;
+}
+
+.owner-page .owner-main > :is(.owner-view, .owner-overview) {
+  width: 100%;
+  max-width: 1100px;
+  margin-inline: auto;
+}
+
+.owner-page :is(.owner-view__title, .owner-overview-heading) h1 {
+  margin: 0;
+  color: var(--st-teal);
+  font-family: var(--st-font-title);
+  font-size: clamp(26px, 3vw, 36px);
+  line-height: 1.2;
+}
+
+.owner-page .owner-view__title > div > span {
+  display: none; /* 한글 제목 위의 반복 영문 라벨 숨김 */
+}
+
+.owner-page :is(.owner-view__title, .owner-overview-heading) p {
+  margin: 8px 0 0;
+  color: var(--st-muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.owner-page .owner-demo-caption {
+  max-width: 1100px;
+  color: var(--st-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+@media (max-width: 760px) {
+  .owner-page .owner-topbar__inner {
+    padding-inline: 16px;
+    gap: 12px;
+  }
+
+  .owner-page .owner-brand {
+    font-size: 21px;
+  }
+
+  .owner-page .owner-topbar__right > span {
+    display: none;
+  }
+
+  .owner-page .owner-main {
+    padding: 20px 16px 28px;
+  }
+}
+
+/* 업주센터 예약 현황 */
+.owner-reservations .owner-booking-filters {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 16px;
+  padding: 16px;
+}
+
+.owner-booking-search {
+  display: grid;
+  gap: 6px;
+  color: var(--st-ink);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.owner-booking-search input {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius-s);
+  background: var(--st-surface);
+  color: var(--st-ink);
+  font-size: 16px;
+  font-weight: 400;
+}
+
+.owner-booking-statuses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.owner-booking-statuses button {
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius-s);
+  background: var(--st-surface);
+  color: var(--st-ink);
+  font-size: 14px;
+}
+
+.owner-booking-statuses button[aria-pressed="true"] {
+  border-color: var(--st-aqua);
+  background: var(--st-aqua);
+  font-weight: 700;
+}
+
+.owner-reservations .owner-reservation-layout {
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 300px);
+  gap: 16px;
+}
+
+.owner-reservations .owner-table-wrap {
+  min-width: 0;
+}
+
+.owner-reservations .owner-table-wrap table {
+  min-width: 480px;
+  font-size: 14px;
+}
+
+.owner-reservations .owner-table-wrap td small,
+.owner-reservations .owner-booking-id {
+  margin: 4px 0 0;
+  color: var(--st-muted);
+  font-size: 12px;
+}
+
+.owner-booking-select {
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: var(--st-teal);
+  text-align: left;
+  font-weight: 700;
+}
+
+.owner-reservations .owner-badge {
+  font-size: 12px;
+}
+
+.owner-reservations .owner-reservation-detail dl {
+  margin-bottom: 0;
+}
+
+.owner-reservations .owner-reservation-detail dl div {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.owner-reservations .owner-reservation-detail dt {
+  color: var(--st-muted);
+}
+
+.owner-booking-empty {
+  margin: 0;
+  padding: 24px 16px;
+  color: var(--st-muted);
+  font-size: 14px;
+}
+
+@media (max-width: 1050px) {
+  .owner-reservations .owner-reservation-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .owner-reservations .owner-reservation-detail {
+    position: static;
+  }
+}
+/* 업주센터 숙소 정보 폼 */
+.owner-property-form {
+  gap: 20px;
+}
+
+.owner-property-form .owner-panel {
+  min-width: 0;
+  padding: clamp(16px, 2.5vw, 24px);
+}
+
+.owner-property-form .owner-panel__head {
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.owner-property-form .owner-panel__head > div > span {
+  display: none;
+}
+
+.owner-property-form .owner-panel__head h2 {
+  margin: 0;
+  color: var(--st-ink);
+  font-size: 20px;
+}
+
+.owner-property-form .owner-panel__head > span {
+  color: var(--st-muted);
+  font-size: 13px;
+}
+
+.owner-property-form .owner-form-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.owner-property-form .owner-form-grid > label,
+.owner-property-form .owner-form-grid legend {
+  min-width: 0;
+  color: var(--st-ink);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.owner-property-form .owner-form-grid :is(input:not([type="checkbox"]), select, textarea) {
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 12px;
+  border-color: var(--st-line);
+  border-radius: var(--st-radius-s);
+  background: var(--st-surface);
+  color: var(--st-ink);
+  font-size: 16px;
+  font-weight: 400;
+}
+
+.owner-property-form .owner-form-grid textarea {
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.owner-property-form .owner-address > div > button {
+  flex-shrink: 0;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.owner-property-form .owner-facility-grid label {
+  min-height: 44px;
+  color: var(--st-ink);
+  font-size: 14px;
+}
+
+.owner-property-form .owner-location-preview :is(strong, p, button),
+.owner-property-form .owner-photo-grid :is(span, small) {
+  font-size: 14px;
+}
+
+.owner-property-form .owner-form-actions {
+  gap: 10px;
+}
+
+.owner-property-form .owner-form-actions button {
+  min-height: 44px;
+  font-size: 14px;
+}
+
+.owner-property-form .owner-form-actions .owner-primary {
+  border: 1px solid var(--st-aqua);
+  background: var(--st-aqua);
+  color: var(--st-ink);
+}
+
+@media (max-width: 760px) {
+  .owner-property-form {
+    gap: 14px;
+  }
+
+  .owner-property-form .owner-form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .owner-property-form .owner-form-actions > button {
+    flex: 1;
+  }
+}
+/* 업주센터 객실·요금 */
+.owner-rooms-view > .owner-panel + .owner-panel {
+  margin-top: 16px;
+}
+
+.owner-rooms-view .owner-panel {
+  min-width: 0;
+}
+
+.owner-rooms-view .owner-panel__head {
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+
+.owner-rooms-view .owner-panel__head > div > span {
+  display: none;
+}
+
+.owner-rooms-view .owner-panel__head h2 {
+  margin: 0;
+  color: var(--st-ink);
+  font-size: 20px;
+}
+
+.owner-rooms-view .owner-panel__head > span,
+.owner-rooms-view .owner-room-list article p,
+.owner-rooms-view .owner-room-list article > div:nth-child(2) > span,
+.owner-rooms-view .owner-rate-note,
+.owner-rooms-view .owner-room-grid section > p,
+.owner-rooms-view .owner-stop-list small {
+  color: var(--st-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.owner-rooms-view .owner-room-list article h3 {
+  font-size: 16px;
+}
+
+.owner-rooms-view .owner-badge {
+  font-size: 12px;
+}
+
+.owner-rooms-view .owner-rate-row {
+  grid-template-columns: minmax(112px, 1.2fr) repeat(4, minmax(0, 1fr));
+  min-width: 0;
+}
+
+.owner-rooms-view .owner-rate-row.is-head {
+  background: var(--st-bg);
+  color: var(--st-ink);
+  font-size: 13px;
+}
+
+.owner-rooms-view .owner-rate-row > strong,
+.owner-rooms-view .owner-stop-list strong,
+.owner-rooms-view .owner-season-row label,
+.owner-rooms-view .owner-stop-date {
+  color: var(--st-ink);
+  font-size: 14px;
+}
+
+.owner-rooms-view :is(.owner-rate-row input, .owner-season-row input, .owner-stop-date input) {
+  min-width: 0;
+  min-height: 44px;
+  color: var(--st-ink);
+  font-size: 16px;
+}
+
+.owner-rooms-view .owner-rate-row label i {
+  font-size: 12px;
+}
+
+.owner-rooms-view :is(.owner-view__title, .owner-panel__head, .owner-season-row) > button {
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid var(--st-aqua);
+  border-radius: var(--st-radius-s);
+  background: var(--st-aqua);
+  color: var(--st-ink);
+  font-size: 14px;
+}
+
+@media (max-width: 1100px) {
+  .owner-rooms-view .owner-rate-row.is-head {
+    display: none;
+  }
+
+  .owner-rooms-view .owner-rate-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding: 14px 0;
+  }
+
+  .owner-rooms-view .owner-rate-row > strong {
+    grid-column: 1 / -1;
+    padding: 0;
+  }
+
+  .owner-rooms-view .owner-rate-row > label {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+    padding: 0;
+  }
+
+  .owner-rooms-view .owner-rate-label {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+    white-space: normal;
+    color: var(--st-muted);
+    font-size: 13px;
+  }
+
+  .owner-rooms-view .owner-rate-row label i {
+    top: auto;
+    right: 8px;
+    bottom: 13px;
+    transform: none;
+  }
+
+  .owner-rooms-view .owner-room-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

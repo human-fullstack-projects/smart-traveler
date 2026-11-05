@@ -28,15 +28,16 @@ function OwnerHeader({ propertyName, member, onLogout, loggingOut }) {
   return (
     <header className="owner-topbar">
       <div className="owner-topbar__inner">
-        <a className="owner-brand" href="#/">smart <span>travel</span><small>partner</small></a>
+        {/* 기존 로고 <a className="owner-brand" href="#/">smart <span>travel</span><small>partner</small></a> */}
+        <a className="owner-brand" href="#/">SMART TRAVEL</a>
         <div className="owner-topbar__right">
           <span className="owner-property-name">{propertyName}</span>
-          <a href="#/stays">사용자 숙소 화면</a>
+          {/* <a href="#/stays">사용자 숙소 화면</a> */}
           {/* 기존 샘플 이름 <button type="button">지훈 업주님</button> */}
           {member && (
             <span>{member.nickname || member.loginId}님</span>
           )}
-          <a href="#/main">고객</a>
+          {/* <a href="#/main">고객</a> */}
           {member ? (
             <button type="button" disabled={loggingOut} onClick={onLogout}>{loggingOut ? '로그아웃 중…' : '로그아웃'}</button>
           ) : (
@@ -53,32 +54,201 @@ function StatusBadge({ children }) {
   return <span className={`owner-badge owner-badge--${tone}`}>{children}</span>;
 }
 
-function Dashboard({ onNavigate }) {
+// function Dashboard({ onNavigate }) {
+//   return (
+//     <div className="owner-dashboard">
+//       <section className="owner-welcome"><div><span>2026년 11월 4일 수요일</span><h1>오늘의 업장 현황을 확인하세요.</h1><p>예약과 객실 판매 상태는 서버 연결 전 샘플 데이터로 표시됩니다.</p></div><button type="button" onClick={() => onNavigate('reservations')}>오늘 예약 보기</button></section>
+//       <section className="owner-metrics" aria-label="오늘의 현황">
+//         <article><span className="owner-metric-icon is-green">IN</span><div><small>오늘 체크인</small><strong>2</strong><p>오후 3시부터</p></div></article>
+//         <article><span className="owner-metric-icon is-blue">OUT</span><div><small>오늘 체크아웃</small><strong>1</strong><p>오전 11시까지</p></div></article>
+//         <article><span className="owner-metric-icon is-amber">NEW</span><div><small>신규 예약</small><strong>6</strong><p>지난 24시간</p></div></article>
+//         <article><span className="owner-metric-icon is-purple">ROOM</span><div><small>오늘 판매 가능</small><strong>4</strong><p>전체 6실 중</p></div></article>
+//       </section>
+//       <div className="owner-dashboard-grid">
+//         <section className="owner-panel owner-today"><div className="owner-panel__head"><div><span>TODAY</span><h2>오늘 도착·출발</h2></div><button type="button" onClick={() => onNavigate('reservations')}>전체 보기</button></div>{initialReservations.slice(0, 3).map((item) => <article key={item.id}><div className="owner-date-box"><strong>{item.checkIn.slice(8)}</strong><span>11월</span></div><div><strong>{item.guest}</strong><span>{item.room} · {item.people}</span><small>{item.id}</small></div><StatusBadge>{item.status}</StatusBadge></article>)}</section>
+//         <section className="owner-panel owner-property-status"><div className="owner-panel__head"><div><span>PROPERTY STATUS</span><h2>숙소 운영 상태</h2></div></div><div className="owner-approval-card"><span className="owner-approval-card__icon">✓</span><div><strong>숙소 승인 완료</strong><p>사용자 검색과 예약에 정상 노출 중입니다.</p></div><StatusBadge>운영 중</StatusBadge></div><dl><div><dt>업주 가입 심사</dt><dd>승인 완료</dd></div><div><dt>숙소 심사</dt><dd>승인 완료 · 2026.10.31</dd></div><div><dt>등록 객실</dt><dd>2개 유형 · 총 6실</dd></div><div><dt>판매 중지</dt><dd>없음</dd></div></dl><button type="button" className="owner-line-button" onClick={() => onNavigate('property')}>숙소 정보 관리</button></section>
+//       </div>
+//       <section className="owner-panel owner-quick"><div className="owner-panel__head"><div><span>QUICK ACTION</span><h2>빠른 관리</h2></div></div><div><button type="button" onClick={() => onNavigate('property')}><b>＋</b><strong>숙소 정보 수정</strong><span>사진·편의시설·운영 정보</span></button><button type="button" onClick={() => onNavigate('rooms')}><b>₩</b><strong>객실 요금 변경</strong><span>시즌·주중·주말 요금</span></button><button type="button" onClick={() => onNavigate('rooms')}><b>×</b><strong>판매 중지 설정</strong><span>날짜별 객실 판매 제어</span></button></div></section>
+//     </div>
+//   );
+// }
+
+  function Dashboard({ onNavigate }) {
+  const metrics = [
+    { label: '오늘 체크인', value: 2 },
+    { label: '오늘 체크아웃', value: 1 },
+    { label: '신규 예약', value: 6 },
+  ];
+
   return (
-    <div className="owner-dashboard">
-      <section className="owner-welcome"><div><span>2026년 11월 4일 수요일</span><h1>오늘의 업장 현황을 확인하세요.</h1><p>예약과 객실 판매 상태는 서버 연결 전 샘플 데이터로 표시됩니다.</p></div><button type="button" onClick={() => onNavigate('reservations')}>오늘 예약 보기</button></section>
-      <section className="owner-metrics" aria-label="오늘의 현황">
-        <article><span className="owner-metric-icon is-green">IN</span><div><small>오늘 체크인</small><strong>2</strong><p>오후 3시부터</p></div></article>
-        <article><span className="owner-metric-icon is-blue">OUT</span><div><small>오늘 체크아웃</small><strong>1</strong><p>오전 11시까지</p></div></article>
-        <article><span className="owner-metric-icon is-amber">NEW</span><div><small>신규 예약</small><strong>6</strong><p>지난 24시간</p></div></article>
-        <article><span className="owner-metric-icon is-purple">ROOM</span><div><small>오늘 판매 가능</small><strong>4</strong><p>전체 6실 중</p></div></article>
+    <div className="owner-overview">
+      <header className="owner-overview-heading">
+        <div>
+          <h1>업장 현황</h1>
+          <p>2026년 11월 4일 기준 예시 데이터</p>
+        </div>
+        <button
+          type="button"
+          className="owner-overview-action"
+          onClick={() => onNavigate('reservations')}
+        >
+          예약 현황 보기 →
+        </button>
+      </header>
+
+      <section className="owner-overview-metrics" aria-label="예약 요약">
+        {metrics.map(({ label, value }) => (
+          <article key={label} className="owner-overview-card">
+            <h2>{label}</h2>
+            <p className="owner-overview-number">
+              {value}<span>건</span>
+            </p>
+          </article>
+        ))}
       </section>
-      <div className="owner-dashboard-grid">
-        <section className="owner-panel owner-today"><div className="owner-panel__head"><div><span>TODAY</span><h2>오늘 도착·출발</h2></div><button type="button" onClick={() => onNavigate('reservations')}>전체 보기</button></div>{initialReservations.slice(0, 3).map((item) => <article key={item.id}><div className="owner-date-box"><strong>{item.checkIn.slice(8)}</strong><span>11월</span></div><div><strong>{item.guest}</strong><span>{item.room} · {item.people}</span><small>{item.id}</small></div><StatusBadge>{item.status}</StatusBadge></article>)}</section>
-        <section className="owner-panel owner-property-status"><div className="owner-panel__head"><div><span>PROPERTY STATUS</span><h2>숙소 운영 상태</h2></div></div><div className="owner-approval-card"><span className="owner-approval-card__icon">✓</span><div><strong>숙소 승인 완료</strong><p>사용자 검색과 예약에 정상 노출 중입니다.</p></div><StatusBadge>운영 중</StatusBadge></div><dl><div><dt>업주 가입 심사</dt><dd>승인 완료</dd></div><div><dt>숙소 심사</dt><dd>승인 완료 · 2026.10.31</dd></div><div><dt>등록 객실</dt><dd>2개 유형 · 총 6실</dd></div><div><dt>판매 중지</dt><dd>없음</dd></div></dl><button type="button" className="owner-line-button" onClick={() => onNavigate('property')}>숙소 정보 관리</button></section>
-      </div>
-      <section className="owner-panel owner-quick"><div className="owner-panel__head"><div><span>QUICK ACTION</span><h2>빠른 관리</h2></div></div><div><button type="button" onClick={() => onNavigate('property')}><b>＋</b><strong>숙소 정보 수정</strong><span>사진·편의시설·운영 정보</span></button><button type="button" onClick={() => onNavigate('rooms')}><b>₩</b><strong>객실 요금 변경</strong><span>시즌·주중·주말 요금</span></button><button type="button" onClick={() => onNavigate('rooms')}><b>×</b><strong>판매 중지 설정</strong><span>날짜별 객실 판매 제어</span></button></div></section>
+
+      <section className="owner-overview-card owner-overview-status">
+        <div>
+          <h2>숙소 운영 상태</h2>
+          <p>숙소 승인 완료 · 운영 중</p>
+          <p>등록 객실 2개 유형 · 총 6실</p>
+        </div>
+        <button
+          type="button"
+          className="owner-overview-action owner-overview-action--line"
+          onClick={() => onNavigate('property')}
+        >
+          숙소 정보 관리 →
+        </button>
+      </section>
     </div>
   );
 }
 
+// function Reservations() {
+//   const [status, setStatus] = useState('전체');
+//   const [query, setQuery] = useState('');
+//   const [selected, setSelected] = useState(initialReservations[0]);
+//   const visible = initialReservations.filter((item) => (status === '전체' || item.status === status) && `${item.guest}${item.id}${item.room}`.toLowerCase().includes(query.toLowerCase()));
+//   return (
+//     <div className="owner-view"><div className="owner-view__title"><div><span>RESERVATIONS</span><h1>예약 현황</h1><p>본인 업장의 날짜별·객실별 예약만 조회합니다.</p></div><button type="button">예약 목록 내려받기</button></div><section className="owner-toolbar"><div className="owner-segment">{['전체', '체크인 예정', '체크인', '체크아웃', '예약확정'].map((value) => <button type="button" key={value} className={status === value ? 'is-active' : ''} onClick={() => setStatus(value)}>{value}</button>)}</div><label><span className="owner-sr-only">예약 검색</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="예약번호, 예약자, 객실 검색" /></label></section><div className="owner-reservation-layout"><section className="owner-panel owner-table-wrap"><table><thead><tr><th>예약번호</th><th>예약자</th><th>객실</th><th>숙박 일정</th><th>결제 금액</th><th>상태</th></tr></thead><tbody>{visible.map((item) => <tr key={item.id} className={selected.id === item.id ? 'is-selected' : ''} onClick={() => setSelected(item)}><td><strong>{item.id}</strong></td><td>{item.guest}<small>{item.people}</small></td><td>{item.room}</td><td>{item.checkIn}<small>~ {item.checkOut}</small></td><td>{formatWon(item.amount)}</td><td><StatusBadge>{item.status}</StatusBadge></td></tr>)}</tbody></table>{!visible.length && <p className="owner-table-empty">조건에 맞는 예약이 없습니다.</p>}</section><aside className="owner-panel owner-reservation-detail"><div className="owner-panel__head"><div><span>BOOKING DETAIL</span><h2>{selected.id}</h2></div><StatusBadge>{selected.status}</StatusBadge></div><dl><div><dt>예약자</dt><dd>{selected.guest}</dd></div><div><dt>투숙 인원</dt><dd>{selected.people}</dd></div><div><dt>객실</dt><dd>{selected.room}</dd></div><div><dt>체크인</dt><dd>{selected.checkIn} · 15:00</dd></div><div><dt>체크아웃</dt><dd>{selected.checkOut} · 11:00</dd></div><div><dt>결제 금액</dt><dd>{formatWon(selected.amount)}</dd></div></dl><p>예약 상태와 PG 결제 상태는 별도로 관리하며, 화면 조작만으로 결제 성공 상태를 만들지 않습니다.</p><button type="button" className="owner-line-button">예약 상세 열기</button></aside></div></div>
+//   );
+// }
+
 function Reservations() {
   const [status, setStatus] = useState('전체');
   const [query, setQuery] = useState('');
-  const [selected, setSelected] = useState(initialReservations[0]);
-  const visible = initialReservations.filter((item) => (status === '전체' || item.status === status) && `${item.guest}${item.id}${item.room}`.toLowerCase().includes(query.toLowerCase()));
+  const [selectedId, setSelectedId] = useState(null);
+
+  const statuses = ['전체', '체크인 예정', '체크인', '체크아웃', '예약확정'];
+  const keyword = query.trim().toLowerCase();
+  const visible = initialReservations.filter((item) => {
+    const matchesStatus = status === '전체' || item.status === status;
+    const matchesQuery = `${item.id} ${item.guest} ${item.room}`
+      .toLowerCase()
+      .includes(keyword);
+    return matchesStatus && matchesQuery;
+  });
+  const selected = visible.find((item) => item.id === selectedId) ?? visible[0];
+
   return (
-    <div className="owner-view"><div className="owner-view__title"><div><span>RESERVATIONS</span><h1>예약 현황</h1><p>본인 업장의 날짜별·객실별 예약만 조회합니다.</p></div><button type="button">예약 목록 내려받기</button></div><section className="owner-toolbar"><div className="owner-segment">{['전체', '체크인 예정', '체크인', '체크아웃', '예약확정'].map((value) => <button type="button" key={value} className={status === value ? 'is-active' : ''} onClick={() => setStatus(value)}>{value}</button>)}</div><label><span className="owner-sr-only">예약 검색</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="예약번호, 예약자, 객실 검색" /></label></section><div className="owner-reservation-layout"><section className="owner-panel owner-table-wrap"><table><thead><tr><th>예약번호</th><th>예약자</th><th>객실</th><th>숙박 일정</th><th>결제 금액</th><th>상태</th></tr></thead><tbody>{visible.map((item) => <tr key={item.id} className={selected.id === item.id ? 'is-selected' : ''} onClick={() => setSelected(item)}><td><strong>{item.id}</strong></td><td>{item.guest}<small>{item.people}</small></td><td>{item.room}</td><td>{item.checkIn}<small>~ {item.checkOut}</small></td><td>{formatWon(item.amount)}</td><td><StatusBadge>{item.status}</StatusBadge></td></tr>)}</tbody></table>{!visible.length && <p className="owner-table-empty">조건에 맞는 예약이 없습니다.</p>}</section><aside className="owner-panel owner-reservation-detail"><div className="owner-panel__head"><div><span>BOOKING DETAIL</span><h2>{selected.id}</h2></div><StatusBadge>{selected.status}</StatusBadge></div><dl><div><dt>예약자</dt><dd>{selected.guest}</dd></div><div><dt>투숙 인원</dt><dd>{selected.people}</dd></div><div><dt>객실</dt><dd>{selected.room}</dd></div><div><dt>체크인</dt><dd>{selected.checkIn} · 15:00</dd></div><div><dt>체크아웃</dt><dd>{selected.checkOut} · 11:00</dd></div><div><dt>결제 금액</dt><dd>{formatWon(selected.amount)}</dd></div></dl><p>예약 상태와 PG 결제 상태는 별도로 관리하며, 화면 조작만으로 결제 성공 상태를 만들지 않습니다.</p><button type="button" className="owner-line-button">예약 상세 열기</button></aside></div></div>
+    <div className="owner-view owner-reservations">
+      <div className="owner-view__title">
+        <div>
+          <h1>예약 현황</h1>
+          <p>예약을 선택하면 투숙 정보와 결제 금액을 확인할 수 있어요.</p>
+        </div>
+      </div>
+
+      <section className="owner-panel owner-booking-filters" aria-label="예약 검색과 필터">
+        <label className="owner-booking-search">
+          <span>예약 검색</span>
+          <input
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="예약번호, 예약자, 객실명"
+          />
+        </label>
+        <div className="owner-booking-statuses" role="group" aria-label="예약 상태">
+          {statuses.map((value) => (
+            <button
+              key={value}
+              type="button"
+              aria-pressed={status === value}
+              onClick={() => setStatus(value)}
+            >
+              {value}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <div className="owner-reservation-layout">
+        <section className="owner-panel owner-table-wrap" aria-label="예약 목록">
+          {visible.length ? (
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">예약자</th>
+                  <th scope="col">객실</th>
+                  <th scope="col">숙박 일정</th>
+                  <th scope="col">상태</th>
+                </tr>
+              </thead>
+              <tbody>
+                {visible.map((item) => (
+                  <tr
+                    key={item.id}
+                    className={selected?.id === item.id ? 'is-selected' : ''}
+                    onClick={() => setSelectedId(item.id)}
+                  >
+                    <td>
+                      <button
+                        type="button"
+                        className="owner-booking-select"
+                        aria-pressed={selected?.id === item.id}
+                        onClick={() => setSelectedId(item.id)}
+                      >
+                        {item.guest}
+                        <small>{item.id}</small>
+                      </button>
+                    </td>
+                    <td>{item.room}</td>
+                    <td>{item.checkIn}<small>~ {item.checkOut}</small></td>
+                    <td><StatusBadge>{item.status}</StatusBadge></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p className="owner-booking-empty" role="status">
+              조건에 맞는 예약이 없어요.
+            </p>
+          )}
+        </section>
+
+        {selected && (
+          <aside className="owner-panel owner-reservation-detail" aria-label="예약 상세">
+            <div className="owner-panel__head">
+              <div>
+                <h2>예약 상세</h2>
+                <p className="owner-booking-id">{selected.id}</p>
+              </div>
+              <StatusBadge>{selected.status}</StatusBadge>
+            </div>
+            <dl>
+              <div><dt>예약자</dt><dd>{selected.guest}</dd></div>
+              <div><dt>투숙 인원</dt><dd>{selected.people}</dd></div>
+              <div><dt>객실</dt><dd>{selected.room}</dd></div>
+              <div><dt>체크인</dt><dd>{selected.checkIn} · 15:00</dd></div>
+              <div><dt>체크아웃</dt><dd>{selected.checkOut} · 11:00</dd></div>
+              <div><dt>결제 금액</dt><dd>{formatWon(selected.amount)}</dd></div>
+            </dl>
+          </aside>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -93,9 +263,18 @@ function PropertyForm({ property, setProperty, setToast }) {
 function Rooms({ rooms, setRooms, setToast }) {
   const [stopDate, setStopDate] = useState('2026-11-12');
   const [selectedRoom, setSelectedRoom] = useState(rooms[0].id);
+  const rateLabels = {
+  offWeekday: '비수기 주중',
+  offWeekend: '비수기 주말',
+  peakWeekday: '성수기 주중',
+  peakWeekend: '성수기 주말',
+  };
   function updateRoom(id, key, value) { setRooms((current) => current.map((room) => room.id === id ? { ...room, [key]: value } : room)); }
   return (
-    <div className="owner-view"><div className="owner-view__title"><div><span>ROOM &amp; RATE</span><h1>객실 · 요금 관리</h1><p>객실 기본 정보, 시즌 요금, 날짜별 재고와 판매 중지를 관리합니다.</p></div><button type="button" onClick={() => setToast('새 객실 등록 폼이 열렸습니다. 샘플에서는 기존 목록에만 표시됩니다.')}>＋ 객실 추가</button></div><section className="owner-panel owner-room-list"><div className="owner-panel__head"><div><span>ROOM TYPES</span><h2>등록 객실</h2></div><span>예약이 있는 객실은 삭제 대신 판매 중지</span></div>{rooms.map((room) => <article key={room.id} className={selectedRoom === room.id ? 'is-selected' : ''} onClick={() => setSelectedRoom(room.id)}><div className="owner-room-thumb"><span>ROOM {room.id}</span></div><div><h3>{room.name}</h3><p>기준 {room.basis}명 · 최대 {room.max}명 · 판매 수량 {room.stock}실</p><span>비수기 주중 {formatWon(room.offWeekday)}부터</span></div><StatusBadge>{room.stopped ? '판매 중지' : '판매 중'}</StatusBadge><button type="button">수정</button></article>)}</section><section className="owner-panel"><div className="owner-panel__head"><div><span>SEASON RATE</span><h2>기본 요금표</h2></div><button type="button" onClick={() => setToast('요금표를 저장했습니다. 이미 생성된 주문의 확정 요금은 변경되지 않습니다.')}>요금 저장</button></div><div className="owner-rate-table"><div className="owner-rate-row is-head"><span>객실</span><span>비수기 주중</span><span>비수기 주말</span><span>성수기 주중</span><span>성수기 주말</span></div>{rooms.map((room) => <div className="owner-rate-row" key={room.id}><strong>{room.name}</strong>{['offWeekday','offWeekend','peakWeekday','peakWeekend'].map((key) => <label key={key}><span className="owner-sr-only">{room.name} {key}</span><input type="number" step="1000" value={room[key]} onChange={(event) => updateRoom(room.id, key, Number(event.target.value))} /><i>원</i></label>)}</div>)}</div><p className="owner-rate-note">공휴일은 주말 요금을 적용합니다. 날짜별 직접 설정 요금은 자동 재계산으로 덮어쓰지 않습니다.</p></section><div className="owner-room-grid"><section className="owner-panel"><div className="owner-panel__head"><div><span>PEAK SEASON</span><h2>성수기 기간</h2></div></div><div className="owner-season-row"><label>시작일<input type="date" defaultValue="2026-12-20" /></label><span>~</span><label>종료일<input type="date" defaultValue="2027-01-03" /></label><button type="button">적용</button></div><p>성수기 기간 변경은 신규 판매 요금에만 반영합니다.</p></section><section className="owner-panel"><div className="owner-panel__head"><div><span>STOP SALE</span><h2>날짜별 판매 중지</h2></div></div><label className="owner-stop-date">날짜<input type="date" value={stopDate} onChange={(event) => setStopDate(event.target.value)} /></label><div className="owner-stop-list">{rooms.map((room) => <label key={room.id}><span><strong>{room.name}</strong><small>{stopDate} 판매 상태</small></span><input type="checkbox" checked={room.stopped} onChange={(event) => updateRoom(room.id, 'stopped', event.target.checked)} /><i /></label>)}</div><p>예약이 확정된 날짜는 판매 중지할 수 없도록 서버에서 다시 검증합니다.</p></section></div></div>
+    <div className="owner-view owner-rooms-view"><div className="owner-view__title"><div><span>ROOM &amp; RATE</span><h1>객실 · 요금 관리</h1><p>객실 기본 정보, 시즌 요금, 날짜별 재고와 판매 중지를 관리합니다.</p></div><button type="button" onClick={() => setToast('새 객실 등록 폼이 열렸습니다. 샘플에서는 기존 목록에만 표시됩니다.')}>＋ 객실 추가</button></div><section className="owner-panel owner-room-list"><div className="owner-panel__head"><div><span>ROOM TYPES</span><h2>등록 객실</h2></div><span>예약이 있는 객실은 삭제 대신 판매 중지</span></div>{rooms.map((room) => <article key={room.id} className={selectedRoom === room.id ? 'is-selected' : ''} onClick={() => setSelectedRoom(room.id)}><div className="owner-room-thumb"><span>ROOM {room.id}</span></div><div><h3>{room.name}</h3><p>기준 {room.basis}명 · 최대 {room.max}명 · 판매 수량 {room.stock}실</p><span>비수기 주중 {formatWon(room.offWeekday)}부터</span></div><StatusBadge>{room.stopped ? '판매 중지' : '판매 중'}</StatusBadge><button type="button">수정</button></article>)}</section><section className="owner-panel"><div className="owner-panel__head"><div><span>SEASON RATE</span><h2>기본 요금표</h2></div><button type="button" onClick={() => setToast('요금표를 저장했습니다. 이미 생성된 주문의 확정 요금은 변경되지 않습니다.')}>요금 저장</button></div><div className="owner-rate-table"><div className="owner-rate-row is-head"><span>객실</span><span>비수기 주중</span><span>비수기 주말</span><span>성수기 주중</span><span>성수기 주말</span></div>{rooms.map((room) => <div className="owner-rate-row" key={room.id}><strong>{room.name}</strong>{['offWeekday','offWeekend','peakWeekday','peakWeekend'].map((key) => <label key={key}><span className="owner-sr-only owner-rate-label">
+  <span className="owner-sr-only">{room.name} </span>
+  {rateLabels[key]}
+</span><input type="number" step="1000" value={room[key]} onChange={(event) => updateRoom(room.id, key, Number(event.target.value))} /><i>원</i></label>)}</div>)}</div><p className="owner-rate-note">공휴일은 주말 요금을 적용합니다. 날짜별 직접 설정 요금은 자동 재계산으로 덮어쓰지 않습니다.</p></section><div className="owner-room-grid"><section className="owner-panel"><div className="owner-panel__head"><div><span>PEAK SEASON</span><h2>성수기 기간</h2></div></div><div className="owner-season-row"><label>시작일<input type="date" defaultValue="2026-12-20" /></label><span>~</span><label>종료일<input type="date" defaultValue="2027-01-03" /></label><button type="button">적용</button></div><p>성수기 기간 변경은 신규 판매 요금에만 반영합니다.</p></section><section className="owner-panel"><div className="owner-panel__head"><div><span>STOP SALE</span><h2>날짜별 판매 중지</h2></div></div><label className="owner-stop-date">날짜<input type="date" value={stopDate} onChange={(event) => setStopDate(event.target.value)} /></label><div className="owner-stop-list">{rooms.map((room) => <label key={room.id}><span><strong>{room.name}</strong><small>{stopDate} 판매 상태</small></span><input type="checkbox" checked={room.stopped} onChange={(event) => updateRoom(room.id, 'stopped', event.target.checked)} /><i /></label>)}</div><p>예약이 확정된 날짜는 판매 중지할 수 없도록 서버에서 다시 검증합니다.</p></section></div></div>
   );
 }
 
