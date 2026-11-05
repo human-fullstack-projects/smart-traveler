@@ -1,8 +1,27 @@
 package com.smarttraveler.admin.service;
 
-import com.smarttraveler.admin.data.*;
+import com.smarttraveler.admin.repository.*;
+import com.smarttraveler.domain.entity.HumanActionHistory;
+import com.smarttraveler.domain.entity.RecommendationCriteria;
+import com.smarttraveler.domain.entity.RecommendationCriteriaHistory;
+import com.smarttraveler.domain.entity.ReservationActionHistory;
+import com.smarttraveler.admin.dto.AdminViews.HumanCourseView;
+import com.smarttraveler.admin.dto.AdminViews.HumanReportView;
+import com.smarttraveler.domain.entity.Member;
+import com.smarttraveler.domain.entity.OwnerProfile;
+import com.smarttraveler.domain.entity.OwnerReviewHistory;
+import com.smarttraveler.domain.entity.MemberSuspensionHistory;
+import com.smarttraveler.domain.entity.Lodging;
+import com.smarttraveler.domain.entity.Room;
+import com.smarttraveler.domain.entity.RoomReservation;
+import com.smarttraveler.domain.entity.RoomPayment;
+import com.smarttraveler.domain.entity.Course;
+import com.smarttraveler.domain.entity.CourseTemplate;
+import com.smarttraveler.domain.entity.HumanCoursePost;
+import com.smarttraveler.domain.entity.HumanCourseReport;
 import java.time.*;
 import java.util.*;
+import jakarta.persistence.EntityManager;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +46,7 @@ public class AdminDataService {
     private final RecommendationCriteriaRepository criteria;
     private final RecommendationCriteriaHistoryRepository criteriaHistory;
     private final JdbcTemplate jdbc;
+    private final EntityManager entityManager;
 
     public List<Member> members() { return members.findAll(); }
     public Member member(Long id) { return members.findById(id).orElseThrow(() -> missing("회원")); }
@@ -38,20 +58,32 @@ public class AdminDataService {
     public List<Lodging> lodgings() { return lodgings.findAll(); }
     public Lodging lodging(Long id) { return lodgings.findById(id).orElseThrow(() -> missing("숙소")); }
     public List<Room> roomsForLodging(Long id) { return rooms.findByLodgingId(id); }
-    public List<Reservation> reservationsForLodging(Long id) {
+    public List<RoomReservation> reservationsForLodging(Long id) {
         List<Long> roomIds = roomsForLodging(id).stream().map(Room::getRoomId).toList();
         return roomIds.isEmpty() ? List.of() : reservations.findByRoomIdIn(roomIds);
     }
-    public List<Reservation> reservations() { return reservations.findAll(); }
-    public Reservation reservation(Long id) { return reservations.findById(id).orElseThrow(() -> missing("예약")); }
-    public List<Payment> paymentsForReservation(Long id) { return payments.findByReservationIdOrderByCreatedAtDesc(id); }
+    public List<RoomReservation> reservations() { return reservations.findAll(); }
+    public RoomReservation reservation(Long id) { return reservations.findById(id).orElseThrow(() -> missing("예약")); }
+    public List<RoomPayment> paymentsForReservation(Long id) { return payments.findByReservationIdOrderByCreatedAtDesc(id); }
     public List<ReservationActionHistory> reservationHistory(Long id) { return reservationActions.findByReservationIdOrderByCreatedAtDesc(id); }
     public List<Course> courses() { return courses.findAll(); }
     public Course course(Long id) { return courses.findById(id).orElseThrow(() -> missing("코스")); }
     public List<CourseTemplate> templates() { return templates.findAll(); }
-    public List<HumanCourse> humanCourses() { return humanCourses.findAll().stream().map(this::enrichHumanCourse).toList(); }
-    public HumanCourse humanCourse(Long id) { return enrichHumanCourse(humanCourses.findById(id).orElseThrow(() -> missing("휴먼 코스"))); }
-    public List<HumanReport> humanReports() { return humanReports.findAll(); }
+    @Transactional(readOnly = true)
+    public List<HumanCourseView> humanCourses() {
+        Map<Long, Boolean> featured = new HashMap<>();
+        jdbc.queryForList("SELECT post_id, featured FROM admin_human_featured")
+            .forEach(row -> featured.put(((Number) row.get("post_id")).longValue(),
+                Boolean.TRUE.equals(row.get("featured")) || row.get("featured") instanceof Number n && n.intValue() != 0));
+        return humanCourses.findAllWithCourse().stream()
+            .map(post -> new HumanCourseView(post,
+                post.getCourse() == null ? null : post.getCourse().getDestination(),
+                featured.getOrDefault(post.getPostId(), false)))
+            .toList();
+    }
+    @Transactional(readOnly = true)
+    public HumanCourseView humanCourse(Long id) { return enrichHumanCourse(humanCourses.findById(id).orElseThrow(() -> missing("휴먼 코스"))); }
+    public List<HumanReportView> humanReports() { return humanReports.findAll().stream().map(HumanReportView::new).toList(); }
     public List<HumanActionHistory> humanHistory(Long courseId) { return humanActions.findByCourseIdOrderByCreatedAtDesc(courseId); }
     public List<RecommendationCriteria> criteria() { return criteria.findAll(); }
     public List<RecommendationCriteriaHistory> criteriaHistory(Long id) { return criteriaHistory.findByCriteriaIdOrderByCreatedAtDesc(id); }
@@ -165,11 +197,11 @@ public class AdminDataService {
 
     @Transactional
     public void setReservationStatus(Long id, String status, String reason, String adminLogin) {
-        Reservation order = reservation(id);
+        RoomReservation order = reservation(id);
         String current = order.getStatus();
         if ("CONFIRMED".equals(status)) {
             if (!"PENDING_PAYMENT".equals(current)) throw new IllegalStateException("결제 대기 예약만 확정할 수 있습니다.");
-            List<Payment> done = paymentsForReservation(id).stream()
+            List<RoomPayment> done = paymentsForReservation(id).stream()
                 .filter(p -> "DONE".equals(p.getStatus()))
                 .filter(p -> Objects.equals(p.getAmount(), order.getTotalPrice()))
                 .toList();
@@ -213,10 +245,18 @@ public class AdminDataService {
         } else if ("REFUND_FAILED".equals(status)) {
             if (!"REFUNDING".equals(current)) throw new IllegalStateException("환불 처리 중인 예약만 실패로 표시할 수 있습니다.");
         } else throw new IllegalArgumentException("지원하지 않는 예약 상태입니다.");
+        // The guarded SQL update below owns this row; do not flush the stale JPA copy afterward.
+        entityManager.detach(order);
         order.setStatus(status);
         if ("CANCELLED".equals(status)) order.setCancelReason(reason);
         order.setUpdatedAt(LocalDateTime.now());
-        reservations.saveAndFlush(order);
+        int updated = jdbc.update("""
+            UPDATE room_reservation SET status=?, cancel_reason=?, cancelled_at=?,
+                updated_at=?, version=version+1
+            WHERE reservation_id=? AND version=? AND status=?
+            """, order.getStatus(), order.getCancelReason(), order.getCancelledAt(),
+            order.getUpdatedAt(), id, order.getVersion(), current);
+        if (updated != 1) throw new IllegalStateException("다른 처리로 예약 상태가 변경되었습니다. 새로고침 후 다시 확인하세요.");
         ReservationActionHistory history = new ReservationActionHistory();
         history.setReservationId(id);
         history.setAdminId(reviewer(adminLogin).getMemberId());
@@ -230,7 +270,7 @@ public class AdminDataService {
     @Transactional
     public void setHumanCourseStatus(Long id, String status, String login, String reason) {
         if (!Set.of("VISIBLE", "BLINDED", "DELETED").contains(status)) throw new IllegalArgumentException("지원하지 않는 코스 상태입니다.");
-        HumanCourse course = humanCourse(id);
+        HumanCoursePost course = humanCourses.findById(id).orElseThrow(() -> missing("휴먼 코스"));
         course.setStatus(status);
         if ("DELETED".equals(status)) setHumanFeatured(id, false, login);
         course.setUpdatedAt(LocalDateTime.now());
@@ -241,7 +281,7 @@ public class AdminDataService {
 
     @Transactional
     public void setHumanFeatured(Long id, boolean featured, String login) {
-        HumanCourse course = humanCourse(id);
+        HumanCoursePost course = humanCourses.findById(id).orElseThrow(() -> missing("휴먼 코스"));
         if (featured && !"VISIBLE".equals(course.getStatus())) throw new IllegalStateException("노출 중인 코스만 메인에 지정할 수 있습니다.");
         jdbc.update("""
             INSERT INTO admin_human_featured(post_id,featured,updated_at) VALUES (?,?,NOW())
@@ -253,13 +293,13 @@ public class AdminDataService {
     @Transactional
     public void resolveHumanReport(Long id, String status, String login, String reason) {
         if (!Set.of("RESOLVED", "DISMISSED").contains(status)) throw new IllegalArgumentException("신고 처리 상태가 올바르지 않습니다.");
-        HumanReport report = humanReports.findById(id).orElseThrow(() -> missing("신고"));
+        HumanCourseReport report = humanReports.findById(id).orElseThrow(() -> missing("신고"));
         report.setStatus(status);
-        report.setResolvedAt(LocalDateTime.now());
+        report.setProcessedAt(LocalDateTime.now());
         report.setProcessedBy(reviewer(login).getMemberId());
         report.setResolution(reason);
         humanReports.save(report);
-        recordHumanAction(report.getCourseId(), id, login, status, reason);
+        recordHumanAction(report.getPostId(), id, login, status, reason);
     }
 
     @Transactional
@@ -290,11 +330,12 @@ public class AdminDataService {
         humanActions.save(h);
     }
 
-    private HumanCourse enrichHumanCourse(HumanCourse post) {
-        post.setFeatured(Boolean.TRUE.equals(jdbc.queryForObject(
-            "SELECT COALESCE(MAX(featured),0) FROM admin_human_featured WHERE post_id=?", Boolean.class, post.getId())));
-        if (post.getCourseId() != null) courses.findById(post.getCourseId()).ifPresent(c -> post.setDestination(c.getDestination()));
-        return post;
+    private HumanCourseView enrichHumanCourse(HumanCoursePost post) {
+        boolean featured = Boolean.TRUE.equals(jdbc.queryForObject(
+            "SELECT COALESCE(MAX(featured),0) FROM admin_human_featured WHERE post_id=?", Boolean.class, post.getPostId()));
+        String destination = post.getCourseId() == null ? null : courses.findById(post.getCourseId())
+            .map(Course::getDestination).orElse(null);
+        return new HumanCourseView(post, destination, featured);
     }
 
     private Member reviewer(String login) {
