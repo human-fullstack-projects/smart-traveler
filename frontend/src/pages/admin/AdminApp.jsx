@@ -348,7 +348,7 @@ function HumanCourses({ onChanged }) {
       <div className="adm-filters"><label className="st-field">선정 월<input className="st-input" type="month" value={month} onChange={(e) => setMonth(e.target.value)} /></label></div>
       <div className="adm-split">
         <Table title="월간 좋아요 순위" rows={popular.data} rowKey="postId" columns={[['제목', (r) => r.title], ['지역', (r) => r.region], ['좋아요', (r) => r.likeCount], ['', (r) => <button className="adm-link" onClick={() => run(() => adminPost('/human-monthly-picks', { month, postId: r.postId, selected: !r.selected }), r.selected ? '선정을 해제했어요.' : '월간 인기 코스로 선정했어요.')}>{r.selected ? '선정 해제' : '선정'}</button>]]} />
-        <Table title="선정된 코스" rows={picks.data} rowKey="postId" columns={[['제목', (r) => r.title], ['지역', (r) => r.region], ['좋아요', (r) => r.likeCount]]} />
+        <Table title="선정된 코스 · 좋아요 순" rows={picks.data} rowKey="postId" columns={[['제목', (r) => r.title], ['지역', (r) => r.region], ['좋아요', (r) => r.likeCount]]} />
       </div>
     </>}
   </>;

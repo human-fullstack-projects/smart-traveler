@@ -152,7 +152,7 @@ public class HumanManagementService {
             FROM admin_human_monthly_pick pk JOIN human_course_post p ON p.post_id=pk.post_id
             JOIN course c ON c.id=p.course_id JOIN members m ON m.member_id=p.author_id
             WHERE pk.pick_month=? AND p.status='VISIBLE' AND p.deleted_at IS NULL
-            ORDER BY pk.pick_rank,pk.id
+            ORDER BY like_count DESC,p.created_at DESC,p.post_id DESC
             """, (r,n) -> card(r), ym.atDay(1).atStartOfDay(),ym.plusMonths(1).atDay(1).atStartOfDay(),month);
     }
 
