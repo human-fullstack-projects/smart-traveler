@@ -65,16 +65,34 @@ export default function MainPage({ onStart, busy }) {
       <div className="mp-layout">
         <section className="mp-conversation" aria-labelledby="mp-greeting-title">
           <div className="mp-panel-header">
+            <div className="mp-layout st-home"></div>
             <div className="mp-assistant-mark"><SparkleIcon /></div>
             <div className="mp-panel-title"><strong>여행 플래너</strong><span>당신만의 여행을 함께 만들어요</span></div>
             <span className="mp-status-dot">대화 준비</span>
           </div>
 
-          <div className="mp-greeting">
-            <span className="mp-greeting-label">SMART TRAVEL</span>
-            <h2 id="mp-greeting-title">안녕하세요!<br />어떤 여행을 계획하고 있나요?</h2>
-            <p>정해진 게 없어도 괜찮아요.<br />생각나는 것부터 이야기해 주세요.</p>
-          </div>
+          {/* 기존 인사말 보관
+<div className="mp-greeting">
+  <span className="mp-greeting-label">SMART TRAVEL</span>
+  <h2 id="mp-greeting-title">
+    안녕하세요!<br />어떤 여행을 계획하고 있나요?
+  </h2>
+  <p>정해진 게 없어도 괜찮아요.<br />생각나는 것부터 이야기해 주세요.</p>
+</div>
+*/}
+
+<div className="mp-greeting">
+  <p className="st-home-eyebrow">계획은 짧게. 여행은 길게.</p>
+
+  <h1 id="mp-greeting-title" className="st-home-title">
+    다음 여행,<br />
+    여기서 시작해요.
+  </h1>
+
+  <p className="st-home-description">
+    좋아하는 것을 말해 주세요. 코스는 저희가 짤게요.
+  </p>
+</div>
 
           <form className="mp-composer" onSubmit={submit}>
             <label className="mp-visually-hidden" htmlFor="mp-story">여행 이야기</label>

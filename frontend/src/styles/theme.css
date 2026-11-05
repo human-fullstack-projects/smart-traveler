@@ -1,0 +1,321 @@
+/* Smart Travel 공통 테마
+   색상과 글꼴 값은 tokens.css에서 가져옵니다. */
+
+/* 페이지 기본 글꼴과 배경 */
+:root {
+  font-family: var(--st-font-body);
+  color: var(--st-ink);
+  background: var(--st-bg);
+}
+
+body {
+  background: var(--st-bg);
+  color: var(--st-ink);
+  font-family: var(--st-font-body);
+}
+
+/* 일반 화면과 사이드바 화면의 바깥 배경 */
+.app-shell,
+.main-page {
+  background: var(--st-bg);
+  color: var(--st-ink);
+}
+
+/* 입력 요소도 페이지와 같은 글꼴 사용 */
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+/* ── 상단 메뉴 ── */
+.mp-topbar {
+  background: var(--st-bg);
+  border-bottom-color: var(--st-line);
+}
+
+.mp-brand,
+.mp-brand span {
+  color: var(--st-title);
+  font-family: var(--st-font-title);
+  font-weight: 900;
+}
+
+.mp-menu-toggle span {
+  background: var(--st-ink);
+}
+
+.mp-topbar .auth-account__name {
+  color: var(--st-muted);
+}
+
+/* 로그인·로그아웃 및 새 여행 버튼 */
+.mp-account,
+.mp-new-trip {
+  background: var(--st-aqua);
+  color: var(--st-ink);
+  border: 1px solid var(--st-aqua);
+  border-radius: var(--st-radius-s);
+  font-weight: 700;
+}
+
+.mp-account:not(:disabled):hover,
+.mp-new-trip:not(:disabled):hover {
+  background: var(--st-aqua-hover);
+  border-color: var(--st-aqua-hover);
+}
+
+.mp-account:disabled,
+.mp-new-trip:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── 왼쪽 사이드바 ── */
+.mp-sidebar {
+  background: var(--st-surface);
+  border-right-color: var(--st-line);
+}
+
+.mp-sidebar-link {
+  color: var(--st-ink);
+  border-radius: var(--st-radius-s);
+}
+
+.mp-sidebar-link:hover,
+.mp-sidebar-link[aria-expanded="true"] {
+  background: var(--st-aqua);
+  color: var(--st-ink);
+}
+
+.mp-sidebar-submenu button,
+.mp-sidebar-submenu a {
+  color: var(--st-muted);
+}
+
+.mp-sidebar-submenu button:hover,
+.mp-sidebar-submenu a:hover {
+  background: var(--st-bg);
+  color: var(--st-teal);
+}
+
+.mp-sidebar-bottom {
+  border-top-color: var(--st-line);
+}
+
+/* ── 안내 메시지 ── */
+.mp-global-notice {
+  background: var(--st-surface);
+  color: var(--st-ink);
+  border-color: var(--st-line);
+  border-radius: var(--st-radius-s);
+}
+
+/* ── 하단 메뉴 ── */
+.mp-footer {
+  border-top-color: var(--st-line);
+  color: var(--st-muted);
+}
+
+.mp-footer a,
+.mp-footer-fine {
+  color: var(--st-muted);
+}
+
+.mp-footer a:hover {
+  color: var(--st-teal);
+}
+
+.mp-footer-sep {
+  color: var(--st-line);
+}
+
+.mp-footer nav {
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 0;
+}
+
+/* 키보드로 이동할 때 현재 위치 표시 */
+.mp-topbar :focus-visible,
+.mp-sidebar :focus-visible,
+.mp-footer :focus-visible {
+  outline: 3px solid var(--st-teal);
+  outline-offset: 3px;
+}
+
+/* 작은 화면에서 회원 이름과 버튼이 겹치지 않도록 조정 */
+@media (max-width: 700px) {
+  .mp-topbar {
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+
+  .mp-topbar .auth-account__name {
+    max-width: 90px;
+  }
+}
+
+/* ── 홈: 큰 제목과 가로형 대화 입력창 ── */
+.st-home {
+  width: 100%;
+}
+
+/* 기존 바깥 흰 카드를 배경과 자연스럽게 연결 */
+.st-home .mp-conversation {
+  width: 100%;
+  max-width: 960px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* 첫 화면에서는 작은 플래너 헤더 대신 큰 제목 사용 */
+.st-home .mp-panel-header {
+  display: none;
+}
+
+.st-home .mp-greeting {
+  padding: 12px 0 36px;
+  text-align: center;
+}
+
+.st-home .mp-greeting .st-home-eyebrow {
+  margin: 0 0 14px;
+  color: var(--st-ink);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.st-home .st-home-title {
+  margin: 0;
+  color: var(--st-title);
+  font-family: var(--st-font-title);
+  font-size: clamp(44px, 5.5vw, 80px);
+  font-weight: 900;
+  line-height: 1.12;
+  letter-spacing: -0.04em;
+  word-break: keep-all;
+}
+
+.st-home .mp-greeting .st-home-description {
+  margin: 22px 0 0;
+  color: var(--st-ink);
+  font-size: clamp(16px, 1.6vw, 21px);
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+/* 넓고 밝은 입력 카드 */
+.st-home .mp-composer {
+  padding: 24px;
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius-m);
+  background: var(--st-surface);
+  box-shadow: var(--st-shadow);
+}
+
+.st-home .mp-composer:focus-within {
+  border-color: var(--st-teal);
+  outline: 2px solid var(--st-teal);
+  outline-offset: 3px;
+}
+
+.st-home .mp-composer textarea {
+  min-height: 90px;
+  color: var(--st-ink);
+  font-size: 18px;
+  line-height: 1.7;
+}
+
+.st-home .mp-composer textarea::placeholder {
+  color: var(--st-muted);
+}
+
+.st-home .mp-composer-bottom {
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.st-home .mp-composer-bottom > span {
+  color: var(--st-muted);
+  font-size: 13px;
+}
+
+/* 대화 시작 버튼 */
+.st-home .mp-primary {
+  margin-left: auto;
+  min-height: 48px;
+  padding: 12px 28px;
+  border-color: var(--st-aqua);
+  border-radius: var(--st-radius-s);
+  background: var(--st-aqua);
+  color: var(--st-ink);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.st-home .mp-primary:not(:disabled):hover {
+  background: var(--st-aqua-hover);
+  border-color: var(--st-aqua-hover);
+}
+
+.st-home .mp-primary:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+/* 입력창 아래 선택 버튼 */
+.st-home .mp-chip {
+  min-height: 44px;
+  border-color: var(--st-aqua);
+  background: transparent;
+  color: var(--st-teal);
+}
+
+.st-home .mp-chip:hover {
+  background: var(--st-aqua);
+  color: var(--st-ink);
+}
+
+.st-home .mp-notice {
+  color: var(--st-danger);
+}
+
+.st-home .mp-help-toggle,
+.st-home .mp-help-body {
+  color: var(--st-muted);
+}
+
+.st-home :is(button, a):focus-visible {
+  outline: 3px solid var(--st-teal);
+  outline-offset: 3px;
+}
+
+/* 모바일 */
+@media (max-width: 700px) {
+  .st-home .mp-greeting {
+    padding: 8px 0 28px;
+  }
+
+  .st-home .st-home-title {
+    font-size: clamp(36px, 8vw, 52px);
+  }
+
+  .st-home .mp-composer {
+    padding: 18px;
+  }
+
+  .st-home .mp-composer textarea {
+    font-size: 16px;
+  }
+
+  .st-home .mp-primary {
+    padding: 12px 18px;
+  }
+}
