@@ -11,6 +11,8 @@
 | POST | `/api/auth/login` | form `loginId`, `password` | 200 `{ "authenticated":true }` |
 | GET | `/api/auth/me` | 세션 | 회원 공개 필드, 미인증 401 |
 | POST | `/api/auth/logout` | CSRF 헤더 | 204 |
+| GET | `/api/auth/owner-review` | 로그인한 업주 세션 | 200 `{ "status":"REJECTED", "businessNumber":"...", "businessName":"...", "representativeName":"...", "businessAddress":"...", "businessPhone":"...", "history":[{"status":"REJECTED","comment":"...","reviewedAt":"...","createdAt":"..."}] }` |
+| POST | `/api/auth/owner-review/reapply` | CSRF + JSON `{"businessNumber":"...","businessName":"...","representativeName":"...","businessAddress":"...","businessPhone":"..."}` | 200 위와 같은 형식, `status:"PENDING"`; 반려 상태가 아니면 400 |
 
 회원가입 예시:
 
@@ -36,6 +38,7 @@
 | GET | `/api/admin/lodgings/{id}` | 숙소, 객실, 예약 |
 | POST | `/api/admin/lodgings/{id}/status` | `{"status":"ACTIVE","reason":null}` |
 | POST | `/api/admin/lodgings/{id}/edit` | `{"name":"...","address":"...","description":"..."}` |
+| POST | `/api/admin/lodgings/{id}/delete` | CSRF + JSON `{"reason":"..."}`; 200 `{"status":"DELETED","message":"숙소를 삭제했어요."}` 또는 진행 중 예약이 있으면 `{"status":"SUSPENDED","message":"진행 중인 예약이 있어 삭제 대신 운영을 중지했어요."}` |
 | GET | `/api/admin/members` | `role,status,query,from,to`; 비밀번호 제외 |
 | GET | `/api/admin/members/{id}` | 회원, 업주 정보·심사·숙소·정지 이력 |
 | POST | `/api/admin/members/{id}/status` | `{"status":"SUSPENDED","reasonCode":"OTHER","reason":"..."}`; `ACTIVE`, `WITHDRAWN` 지원 |

@@ -1,6 +1,7 @@
 package com.smarttraveler.admin.service;
 
 import com.smarttraveler.admin.repository.*;
+import com.smarttraveler.domain.entity.AdminLodgingActionHistory;
 import com.smarttraveler.domain.entity.HumanActionHistory;
 import com.smarttraveler.domain.entity.RecommendationCriteria;
 import com.smarttraveler.domain.entity.RecommendationCriteriaHistory;
@@ -34,6 +35,7 @@ public class AdminDataService {
     private final OwnerReviewHistoryRepository reviews;
     private final MemberSuspensionHistoryRepository suspensions;
     private final LodgingRepository lodgings;
+    private final AdminLodgingActionHistoryRepository lodgingActions;
     private final RoomRepository rooms;
     private final ReservationRepository reservations;
     private final ReservationActionHistoryRepository reservationActions;
@@ -193,6 +195,20 @@ public class AdminDataService {
         lodging.setDescription(description);
         lodging.setUpdatedAt(LocalDateTime.now());
         lodgings.save(lodging);
+    }
+
+    @Transactional
+    public String deleteLodging(Long id, String reason, String actorLogin) {
+        Lodging lodging = lodging(id);
+        if ("DELETED".equals(lodging.getStatus())) throw new IllegalStateException("이미 삭제된 숙소입니다.");
+        boolean ongoing = reservationsForLodging(id).stream().anyMatch(order ->
+            Set.of("PENDING_PAYMENT", "CONFIRMED", "REFUNDING", "REFUND_FAILED").contains(order.getStatus()));
+        String action = ongoing ? "SUSPENDED" : "DELETED";
+        lodging.setStatus(action);
+        lodging.setUpdatedAt(LocalDateTime.now());
+        lodgings.save(lodging);
+        lodgingActions.save(new AdminLodgingActionHistory(id, actorLogin, action, reason));
+        return action;
     }
 
     @Transactional

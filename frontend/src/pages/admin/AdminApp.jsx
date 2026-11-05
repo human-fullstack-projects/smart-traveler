@@ -28,6 +28,7 @@ const tone = (s) => (['SUSPENDED', 'REJECTED', 'CANCELLED', 'CANCELED', 'BLINDED
   : ['PENDING', 'PENDING_PAYMENT', 'OPEN', 'RECEIVED', 'generating'].includes(s) ? 'warn'
   : ['INACTIVE', 'HIDDEN', 'CLOSED', 'EXPIRED'].includes(s) ? 'off' : '');
 const Pill = ({ v }) => (v == null || v === '' ? '—' : <span className={`adm-pill ${tone(v)}`}>{LABEL[v] || v}</span>);
+const LodgingPill = ({ v }) => (v == null || v === '' ? '—' : <span className={`adm-pill ${tone(v)}`}>{v === 'SUSPENDED' ? '운영중지' : LABEL[v] || v}</span>);
 const date = (v) => (v ? String(v).replace('T', ' ').replace(/\.\d+Z?$/, '').replace(/Z$/, '').slice(0, 16) : '—');
 const won = (v) => (v == null ? '—' : `${Number(v).toLocaleString('ko-KR')}원`);
 const show = (v) => (v == null || v === '' ? '—' : String(v));
@@ -94,7 +95,7 @@ function useAction(after) {
   const [msg, setMsg] = useState(null);
   const run = async (fn, okText) => {
     setMsg(null);
-    try { await fn(); setMsg({ ok: true, text: okText }); after?.(); }
+    try { const result = await fn(); setMsg({ ok: true, text: typeof okText === 'function' ? okText(result) : okText }); after?.(); }
     catch (e) { setMsg({ ok: false, text: e.message }); }
   };
   return [msg, run];
@@ -104,7 +105,7 @@ const Msg = ({ msg }) => (msg ? <p className={`adm-msg${msg.ok ? '' : ' error'}`
 function Filters({ fields, value, onChange }) {
   return <div className="adm-filters">{fields.map(([name, label, options]) => <label key={name} className="st-field">{label}
     {options ? <select className="st-input" value={value[name] || ''} onChange={(e) => onChange({ ...value, [name]: e.target.value })}>
-      <option value="">전체</option>{options.map((o) => <option key={o} value={o}>{LABEL[o] || o}</option>)}</select>
+      <option value="">전체</option>{options.map((o) => <option key={o} value={o}>{label === '운영 상태' && o === 'SUSPENDED' ? '운영중지' : LABEL[o] || o}</option>)}</select>
       : <input className="st-input" value={value[name] || ''} placeholder="검색어" onChange={(e) => onChange({ ...value, [name]: e.target.value })} />}
   </label>)}</div>;
 }
@@ -189,21 +190,26 @@ function Lodgings() {
   const [msg, run] = useAction(() => { reload(); reloadDetail(); });
   const l = detail.data?.lodging;
   const act = (status) => run(() => adminPost(`/lodgings/${sel}/status`, { status, reason: reason || null }), `숙소 상태를 「${LABEL[status]}」(으)로 바꿨어요.`);
+  const remove = () => {
+    if (!window.confirm('이 숙소를 삭제할까요? 진행 중인 예약이 있으면 운영 중지로 처리해요.')) return;
+    run(() => adminPost(`/lodgings/${sel}/delete`, { reason: reason || null }), (result) => result.message);
+  };
   return <>
-    <Filters fields={[['status', '운영 상태', ['PENDING', 'ACTIVE', 'REJECTED', 'INACTIVE']], ['query', '숙소 이름']]} value={f} onChange={setF} />
+    <Filters fields={[['status', '운영 상태', ['PENDING', 'ACTIVE', 'REJECTED', 'SUSPENDED', 'DELETED']], ['query', '숙소 이름']]} value={f} onChange={setF} />
     <Msg msg={msg || (list.error && { text: list.error })} />
     <div className="adm-split">
       <Table title="숙소 목록" rows={list.data} rowKey="lodgingId" selected={sel} onSelect={setSel}
-        columns={[['숙소', (r) => r.name], ['유형', (r) => LABEL[r.lodgingType] || show(r.lodgingType)], ['주소', (r) => show(r.address)], ['상태', (r) => <Pill v={r.status} />]]} />
+        columns={[['숙소', (r) => r.name], ['유형', (r) => LABEL[r.lodgingType] || show(r.lodgingType)], ['주소', (r) => show(r.address)], ['상태', (r) => <LodgingPill v={r.status} />]]} />
       <Detail title="숙소 상세">{!l ? <Pick /> : <>
-        <DL items={[['숙소', l.name], ['상태', <Pill v={l.status} />], ['유형', LABEL[l.lodgingType] || show(l.lodgingType)], ['연락처', show(l.phone)], ['주소', show(l.address)],
+        <DL items={[['숙소', l.name], ['상태', <LodgingPill v={l.status} />], ['유형', LABEL[l.lodgingType] || show(l.lodgingType)], ['연락처', show(l.phone)], ['주소', show(l.address)],
           ['체크인/아웃', `${show(l.checkinTime).slice(0, 5)} / ${show(l.checkoutTime).slice(0, 5)}`], ['업주', show(l.ownerId)], ['등록', date(l.createdAt)], ['반려 사유', show(l.rejectReason)], ['예약', `${(detail.data.reservations || []).length}건`]]} />
         <MiniList title="객실" rows={detail.data.rooms} empty="객실 없음" columns={[['객실', (r) => r.name], ['인원', (r) => `${r.baseCapacity}~${r.maxCapacity}명`], ['주중', (r) => won(r.priceOffWeekday)], ['주말', (r) => won(r.priceOffWeekend)]]} />
         <div className="adm-actions">
           <input className="st-input" placeholder="반려·운영중지 사유" value={reason} onChange={(e) => setReason(e.target.value)} />
           <button className="st-btn" onClick={() => act('ACTIVE')}>승인 · 운영</button>
           <button className="st-btn st-btn-line" onClick={() => act('REJECTED')}>반려</button>
-          <button className="st-btn st-btn-line" onClick={() => act('INACTIVE')}>운영 중지</button>
+          <button className="st-btn st-btn-line" onClick={() => act('SUSPENDED')}>운영 중지</button>
+          {l.status !== 'DELETED' && <button className="st-btn st-btn-line" onClick={remove}>숙소 삭제</button>}
         </div>
       </>}</Detail>
     </div>

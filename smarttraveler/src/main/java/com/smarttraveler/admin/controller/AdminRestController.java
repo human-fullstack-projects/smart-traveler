@@ -31,7 +31,7 @@ public class AdminRestController {
     @GetMapping({"", "/dashboard"})
     public Map<String,Object> dashboard() {
         return Map.of("members", data.members().size(), "orders", data.reservations().size(),
-            "lodgings", data.lodgings().size(), "humanCourses", data.humanCourses().size(),
+            "lodgings", data.lodgings().stream().filter(x -> !"DELETED".equals(x.getStatus())).count(), "humanCourses", data.humanCourses().size(),
             "pendingOwners", data.owners().stream().filter(x -> "PENDING".equals(x.getReviewStatusCode())).count(),
             "openReports", data.humanReports().stream().filter(x -> "PENDING".equals(x.getStatus())).count());
     }
@@ -74,7 +74,7 @@ public class AdminRestController {
     public List<Map<String,Object>> lodgings(@RequestParam(required=false) String status,
         @RequestParam(required=false) Long ownerId, @RequestParam(required=false) String region,
         @RequestParam(required=false) String query) {
-        return data.lodgings().stream().filter(x -> status==null || status.equals(x.getStatus()))
+        return data.lodgings().stream().filter(x -> status != null ? status.equals(x.getStatus()) : !"DELETED".equals(x.getStatus()))
             .filter(x -> ownerId==null || ownerId.equals(x.getOwnerId()))
             .filter(x -> region==null || contains(x.getAddress(),region))
             .filter(x -> query==null || contains(x.getName(),query) || contains(x.getAddress(),query))
@@ -92,6 +92,12 @@ public class AdminRestController {
     @PostMapping("/lodgings/{id}/edit")
     public Map<String,Object> lodgingEdit(@PathVariable Long id,@RequestBody LodgingEdit body) {
         data.updateLodging(id,body.name(),body.address(),body.description()); return lodging(id);
+    }
+    @PostMapping("/lodgings/{id}/delete")
+    public Map<String,Object> lodgingDelete(@PathVariable Long id, @RequestBody DeleteRequest body, Principal principal) {
+        String status = data.deleteLodging(id, body.reason(), principal.getName());
+        return Map.of("status", status, "message", "SUSPENDED".equals(status)
+            ? "진행 중인 예약이 있어 삭제 대신 운영을 중지했어요." : "숙소를 삭제했어요.");
     }
 
     @GetMapping("/members")
@@ -199,6 +205,7 @@ public class AdminRestController {
     public record StatusChange(String status,String reason) {}
     public record MemberStatus(String status,String reasonCode,String reason) {}
     public record LodgingEdit(String name,String address,String description) {}
+    public record DeleteRequest(String reason) {}
     public record OwnerDecision(String decision,String comment) {}
     public record FeatureChange(boolean featured) {}
     public record CriteriaChange(String value) {}
