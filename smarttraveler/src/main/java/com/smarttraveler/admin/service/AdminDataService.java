@@ -111,15 +111,24 @@ public class AdminDataService {
 
     @Transactional
     public void suspendMember(Long id, String reasonCode, String detail, String reviewerLogin) {
+        suspendMember(id, reasonCode, detail, null, reviewerLogin);
+    }
+
+    @Transactional
+    public void suspendMember(Long id, String reasonCode, String detail, LocalDateTime suspendedUntil, String reviewerLogin) {
         Member member = member(id);
         if ("ADMIN".equals(member.getRoleCode())) throw new IllegalArgumentException("관리자 계정은 정지할 수 없습니다.");
         if (blank(reasonCode)) throw new IllegalArgumentException("정지 사유 코드는 필수입니다.");
         if ("WITHDRAWN".equals(member.getStatus())) throw new IllegalStateException("탈퇴 회원은 정지할 수 없습니다.");
+        if ("SUSPENDED".equals(member.getStatus())) throw new IllegalStateException("이미 정지된 회원입니다.");
+        if (suspendedUntil != null && !suspendedUntil.isAfter(LocalDateTime.now()))
+            throw new IllegalArgumentException("해제 예정일시는 현재보다 늦어야 합니다.");
         MemberSuspensionHistory h = new MemberSuspensionHistory();
         h.setMemberId(id);
         h.setReasonCode(reasonCode);
         h.setReasonDetail(detail);
         h.setStartedAt(LocalDateTime.now());
+        h.setSuspendedUntil(suspendedUntil);
         h.setProcessedBy(reviewer(reviewerLogin).getMemberId());
         h.setCreatedAt(LocalDateTime.now());
         suspensions.save(h);
@@ -218,7 +227,7 @@ public class AdminDataService {
         if ("CONFIRMED".equals(status)) {
             if (!"PENDING_PAYMENT".equals(current)) throw new IllegalStateException("결제 대기 예약만 확정할 수 있습니다.");
             List<RoomPayment> done = paymentsForReservation(id).stream()
-                .filter(p -> "DONE".equals(p.getStatus()))
+                .filter(p -> "DONE".equals(p.getStatus()) && p.getApprovedAt() != null)
                 .filter(p -> Objects.equals(p.getAmount(), order.getTotalPrice()))
                 .toList();
             if (done.isEmpty()) throw new IllegalStateException("결제 최종 승인과 금액이 확인되지 않았습니다.");
@@ -229,7 +238,7 @@ public class AdminDataService {
                 SELECT COUNT(*) FROM reservation_inventory a JOIN room_inventory i ON i.inventory_id=a.inventory_id
                 WHERE a.reservation_id=? AND a.room_id=? AND i.stay_date>=? AND i.stay_date<?
                   AND a.allocation_status='HELD' AND a.quantity=?
-                  AND (a.hold_expires_at IS NULL OR a.hold_expires_at>NOW())
+                  AND a.hold_expires_at>NOW()
                   AND i.held_quantity>=a.quantity
                 """, Integer.class, id, order.getRoomId(), order.getCheckinDate(), order.getCheckoutDate(), quantity);
             if (holds == null || holds != nights) throw new IllegalStateException("유효한 객실 임시 점유를 확인할 수 없습니다.");

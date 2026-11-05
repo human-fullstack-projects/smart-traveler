@@ -61,3 +61,10 @@
 조회는 200, 권한 부족은 403, 잘못된 처리 상태는 400입니다. 예약 확정은 결제 최종 상태·금액과 `reservation_inventory`의 유효 점유를 확인한 뒤 재고 수량을 옮깁니다. 기존 Thymeleaf `/admin/**`도 같은 서비스 메서드를 사용합니다.
 
 관리자 전용 표는 `admin_reservation_action_history`, `admin_human_action_history`, `admin_recommendation_criteria`, `admin_recommendation_criteria_history`, `admin_human_featured`, `place_hub_rank`입니다. 팀 ERD 표에는 새 칸을 추가하지 않습니다.
+
+## M62 주문·회원 정지 정책
+
+- `GET /api/admin/orders`는 `type=reserve`(결제대기) 또는 `type=confirmed`(확정·완료·환불 중·환불 실패), `status`, `lodgingId`, `from`, `to`, `query`를 받습니다. 기간은 주문 생성일 기준이며 시작일과 종료일을 포함합니다. 검색은 주문번호·예약자 이름·회원번호·회원 로그인 아이디·닉네임을 확인합니다.
+- `POST /api/admin/orders/{id}/status`에서 `CONFIRMED`는 결제 `DONE`, 승인 시각, 예약 금액 일치 및 `reservation_inventory`의 `HELD` 점유가 만료되지 않고 모든 숙박일에 남아 있을 때만 허용합니다. 조건 미달은 한국어 `message`를 담아 400으로 답합니다. PG 승인 호출은 이 API에서 하지 않습니다.
+- `POST /api/admin/members/{id}/status`에서 정지 요청은 `{"status":"SUSPENDED","reasonCode":"OTHER","reason":"...","suspendedUntil":"2026-11-10T12:00:00"}`입니다. `suspendedUntil`을 생략하거나 `null`로 보내면 무기한 정지입니다. 과거 시각은 400입니다.
+- 로그인 시 정지 기한이 지났으면 `members.status=ACTIVE`로 바꾸고 정지 이력의 `released_at`을 실제 시각으로 기록한 후 로그인을 허용합니다. 같은 처리는 앱 시작 10분 후부터 10분 간격의 정기 작업에서도 수행합니다. `processed_by`는 관리자 회원번호를 참조하는 필수 칸이라 정지 당시 처리자 번호를 유지합니다.

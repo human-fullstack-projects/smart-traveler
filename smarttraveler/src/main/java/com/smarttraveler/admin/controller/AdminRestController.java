@@ -43,6 +43,8 @@ public class AdminRestController {
         @RequestParam(required=false) LocalDate from, @RequestParam(required=false) LocalDate to) {
         var roomLodging = new java.util.HashMap<Long,Long>();
         if (lodgingId != null) data.roomsForLodging(lodgingId).forEach(r -> roomLodging.put(r.getRoomId(), lodgingId));
+        var members = new java.util.HashMap<Long,Member>();
+        if (query != null && !query.isBlank()) data.members().forEach(m -> members.put(m.getMemberId(), m));
         return data.reservations().stream()
             .filter(x -> status == null || status.equals(x.getStatus()))
             .filter(x -> type == null || ("reserve".equals(type) && "PENDING_PAYMENT".equals(x.getStatus()))
@@ -50,7 +52,9 @@ public class AdminRestController {
             .filter(x -> lodgingId == null || roomLodging.containsKey(x.getRoomId()))
             .filter(x -> from == null || x.getCreatedAt() != null && !x.getCreatedAt().toLocalDate().isBefore(from))
             .filter(x -> to == null || x.getCreatedAt() != null && !x.getCreatedAt().toLocalDate().isAfter(to))
-            .filter(x -> query == null || contains(x.getReservationNo(), query) || contains(x.getBookerName(), query))
+            .filter(x -> query == null || query.isBlank() || contains(x.getReservationNo(), query)
+                || contains(x.getBookerName(), query) || contains(String.valueOf(x.getMemberId()), query)
+                || memberMatches(members.get(x.getMemberId()), query))
             .map(AdminViews::of).toList();
     }
     @GetMapping("/orders/{id}")
@@ -109,12 +113,12 @@ public class AdminRestController {
             .filter(x -> from==null || x.getCreatedAt()!=null && !x.getCreatedAt().toLocalDate().isBefore(from))
             .filter(x -> to==null || x.getCreatedAt()!=null && !x.getCreatedAt().toLocalDate().isAfter(to))
             .filter(x -> query==null || contains(x.getLoginId(),query) || contains(x.getNickname(),query)
-                || contains(x.getEmail(),query)).map(MemberView::new).toList();
+                || contains(x.getEmail(),query)).map(this::memberView).toList();
     }
     @GetMapping("/members/{id}")
     public Map<String,Object> member(@PathVariable Long id) {
         var result=new java.util.LinkedHashMap<String,Object>();
-        result.put("member",new MemberView(data.member(id)));
+        result.put("member",memberView(data.member(id)));
         var owner=data.ownerByMember(id);
         result.put("ownerProfile",owner == null ? null : AdminViews.of(owner));
         result.put("suspensions",AdminViews.list(data.suspensions(id)));
@@ -126,7 +130,7 @@ public class AdminRestController {
     @PostMapping("/members/{id}/status")
     public Map<String,Object> memberStatus(@PathVariable Long id,@RequestBody MemberStatus body,Principal principal) {
         switch (body.status()) {
-            case "SUSPENDED" -> data.suspendMember(id,body.reasonCode(),body.reason(),principal.getName());
+            case "SUSPENDED" -> data.suspendMember(id,body.reasonCode(),body.reason(),body.suspendedUntil(),principal.getName());
             case "ACTIVE" -> data.releaseMember(id);
             case "WITHDRAWN" -> data.withdrawMember(id,body.reason(),principal.getName());
             default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"지원하지 않는 회원 상태입니다.");
@@ -202,8 +206,16 @@ public class AdminRestController {
     public TourSyncService.SyncResult tourSync(@RequestBody TourRun body) { return tour.sync(body.region()); }
 
     private static boolean contains(String text,String q) { return text!=null && text.toLowerCase().contains(q.toLowerCase()); }
+    private static boolean memberMatches(Member member, String q) {
+        return member != null && (contains(member.getLoginId(), q) || contains(member.getNickname(), q));
+    }
+    private MemberView memberView(Member member) {
+        var active = "SUSPENDED".equals(member.getStatus()) ? data.suspensions(member.getMemberId()).stream()
+            .filter(h -> h.getReleasedAt() == null).findFirst().orElse(null) : null;
+        return new MemberView(member, active == null ? null : active.getSuspendedUntil());
+    }
     public record StatusChange(String status,String reason) {}
-    public record MemberStatus(String status,String reasonCode,String reason) {}
+    public record MemberStatus(String status,String reasonCode,String reason,java.time.LocalDateTime suspendedUntil) {}
     public record LodgingEdit(String name,String address,String description) {}
     public record DeleteRequest(String reason) {}
     public record OwnerDecision(String decision,String comment) {}
@@ -211,8 +223,9 @@ public class AdminRestController {
     public record CriteriaChange(String value) {}
     public record TourRun(String region) {}
     public record MemberView(Long memberId,String loginId,String nickname,String email,String roleCode,
-        String status,java.time.LocalDateTime createdAt,java.time.LocalDateTime deletedAt) {
-        MemberView(Member m) { this(m.getMemberId(),m.getLoginId(),m.getNickname(),m.getEmail(),
-            m.getRoleCode(),m.getStatus(),m.getCreatedAt(),m.getDeletedAt()); }
+        String status,java.time.LocalDateTime createdAt,java.time.LocalDateTime deletedAt,
+        java.time.LocalDateTime suspendedUntil) {
+        MemberView(Member m, java.time.LocalDateTime until) { this(m.getMemberId(),m.getLoginId(),m.getNickname(),m.getEmail(),
+            m.getRoleCode(),m.getStatus(),m.getCreatedAt(),m.getDeletedAt(),until); }
     }
 }

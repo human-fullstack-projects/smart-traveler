@@ -21,6 +21,8 @@
 .adm-filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; margin-bottom: 14px; }
 .adm-filters .st-field { min-width: 160px; font-size: 13px; }
 .adm-filters .st-input { min-height: 40px; margin-top: 4px; padding: 6px 10px; font-size: 14px; }
+.adm-order-filters .st-field { min-width: 128px; flex: 1 1 128px; }
+.adm-order-filters .st-field:last-child { flex-basis: 180px; }
 .adm-split { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(320px, 1fr); gap: 18px; align-items: start; }
 .adm-card { border: 1px solid var(--st-line); border-radius: var(--st-radius-m); background: var(--st-surface); box-shadow: var(--st-shadow); overflow: hidden; }
 .adm-card-title { margin: 0; padding: 14px 18px; border-bottom: 1px solid var(--st-line); color: var(--st-ink); font-weight: 700; font-size: 16px; }
