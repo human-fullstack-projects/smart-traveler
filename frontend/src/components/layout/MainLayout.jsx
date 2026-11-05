@@ -66,7 +66,11 @@ function HelpIcon() {
 const footerLinks = ['내 여행 일정', '조건검색', '숙소 찾기', '내 휴먼 추천 코스', '마이페이지'];
 
 export default function MainLayout({ children, member, loggingOut, onLogout, onNewTrip, notice, onDismissNotice }) {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  // 기존: 사이드바를 처음부터 표시
+  // const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  // 변경: 메뉴 버튼을 눌렀을 때 표시
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState(null);
   const [globalNotice, setGlobalNotice] = useState('');
 
@@ -84,7 +88,7 @@ export default function MainLayout({ children, member, loggingOut, onLogout, onN
 
   return (
     <div className="main-page">
-      <header className="mp-topbar">
+      {/* <header className="mp-topbar">
         <div className="mp-topbar-left">
           <button type="button" className="mp-menu-toggle" aria-label={sidebarOpen ? '메뉴 닫기' : '메뉴 열기'} aria-expanded={sidebarOpen} onClick={() => setSidebarOpen(!sidebarOpen)}>
             <span /><span /><span />
@@ -99,7 +103,70 @@ export default function MainLayout({ children, member, loggingOut, onLogout, onN
         ) : (
           <a className="mp-account" href="#/login">로그인</a>
         )}
-      </header>
+      </header> */}
+      <header className="mp-topbar">
+  <div className="mp-topbar-left">
+    <button
+      type="button"
+      className="mp-menu-toggle"
+      aria-label={sidebarOpen ? '메뉴 닫기' : '메뉴 열기'}
+      aria-expanded={sidebarOpen}
+      onClick={() => setSidebarOpen(!sidebarOpen)}
+    >
+      <span />
+      <span />
+      <span />
+    </button>
+
+    <a className="mp-brand st-brand" href="#/main">
+      <svg
+        width="42"
+        height="30"
+        viewBox="0 0 42 30"
+        fill="none"
+        aria-hidden="true"
+      >
+        <path
+          d="M3 25L14 14L22 20L34 7"
+          stroke="currentColor"
+          strokeWidth="5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <circle cx="39" cy="3" r="3" fill="currentColor" />
+      </svg>
+      SMART TRAVEL
+    </a>
+  </div>
+
+  <div className="st-header-actions">
+     {/* <nav className="st-top-links" aria-label="주요 메뉴">
+      <a href="#/human-courses">둘러보기</a>
+      <a href="#/stays">숙소</a>
+      <a href="#/mypage">내 여행</a> 
+    </nav> */}
+
+    {member ? (
+      <span className="auth-account">
+        {/* <span className="auth-account__name">
+          {member.nickname || member.loginId}님
+        </span> */}
+        <button
+          type="button"
+          className="mp-account"
+          disabled={loggingOut}
+          onClick={onLogout}
+        >
+          {loggingOut ? '로그아웃 중…' : '로그아웃'}
+        </button>
+      </span>
+    ) : (
+      <a className="mp-account" href="#/login">
+        로그인
+      </a>
+    )}
+  </div>
+</header>
 
       {banner && (
         <div className="mp-global-notice" role="status">
@@ -109,7 +176,19 @@ export default function MainLayout({ children, member, loggingOut, onLogout, onN
       )}
 
       <div className="mp-body">
-        <aside className={`mp-sidebar${sidebarOpen ? '' : ' mp-sidebar-closed'}`} aria-hidden={!sidebarOpen}>
+                {sidebarOpen && (
+          <button
+            type="button"
+            className="mp-sidebar-backdrop"
+            aria-label="메뉴 닫기"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+        <aside
+          className={`mp-sidebar${sidebarOpen ? '' : ' mp-sidebar-closed'}`}
+          aria-hidden={!sidebarOpen}
+          inert={!sidebarOpen}
+        >
           <div className="mp-sidebar-inner">
             <button type="button" className="mp-new-trip" onClick={handleNewTrip}>
               <PlusIcon /> 새 여행 만들기

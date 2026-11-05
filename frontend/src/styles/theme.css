@@ -319,3 +319,176 @@ textarea {
     padding: 12px 18px;
   }
 }
+
+/* ── 시안 기준 상단 가로 메뉴 ── */
+.mp-topbar {
+  min-height: 76px;
+  padding: 12px max(24px, calc((100% - 1240px) / 2));
+  gap: 24px;
+}
+
+.st-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 28px;
+  letter-spacing: -0.03em;
+}
+
+.st-brand svg {
+  flex-shrink: 0;
+}
+
+.st-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.st-top-links {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  color: var(--st-ink);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.st-top-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+.st-top-links a:hover {
+  color: var(--st-teal);
+}
+
+.mp-topbar .mp-account {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 24px;
+}
+
+@media (max-width: 1000px) {
+  .st-header-actions {
+    gap: 18px;
+  }
+
+  .st-top-links {
+    gap: 18px;
+  }
+
+  .mp-topbar .auth-account__name {
+    display: none;
+  }
+}
+
+@media (max-width: 700px) {
+  .mp-topbar {
+    min-height: 64px;
+    padding: 10px 16px;
+    gap: 8px;
+    flex-wrap: nowrap;
+  }
+
+  .mp-topbar-left {
+    gap: 10px;
+  }
+
+  .st-brand {
+    gap: 6px;
+    font-size: 20px;
+    letter-spacing: -0.04em;
+  }
+
+  .st-brand svg {
+    width: 28px;
+    height: 24px;
+  }
+
+  .st-top-links {
+    display: none;
+  }
+
+  .st-header-actions {
+    gap: 0;
+  }
+
+  .mp-topbar .mp-account {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  /* 모바일 상단 메뉴 높이에 맞춰 사이드바 위치 조정 */
+  .mp-sidebar {
+    top: 64px;
+  }
+}
+/* 상단 메뉴를 화면 왼쪽 기준으로 정렬 */
+.mp-topbar {
+  padding-left: 16px;
+  padding-right: 24px;
+}
+
+.mp-topbar-left {
+  gap: 12px;
+}
+
+/* 햄버거 버튼: 누르기 편한 영역 확보 */
+.mp-menu-toggle {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+/* 그림 로고 숨기기 — SMART TRAVEL 글자는 유지 */
+.st-brand > svg {
+  display: none;
+}
+
+@media (max-width: 700px) {
+  .mp-topbar {
+    padding-left: 8px;
+    padding-right: 12px;
+  }
+
+  .mp-topbar-left {
+    gap: 6px;
+  }
+}
+/* PC에서는 메뉴 뒤 배경을 표시하지 않음 */
+.mp-sidebar-backdrop {
+  display: none;
+}
+
+@media (max-width: 700px) {
+  /* 상단 메뉴 아래부터 화면 전체를 덮음 */
+  .mp-sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 64px 0 0;
+    z-index: 30;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: rgba(44, 44, 76, 0.18);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    cursor: pointer;
+  }
+
+  /* 사이드바는 블러 배경보다 앞에 표시 */
+  .mp-sidebar {
+    z-index: 40;
+  }
+
+  /* 메뉴를 연 동안 뒤 페이지 스크롤 방지 */
+  body:has(.mp-sidebar:not(.mp-sidebar-closed)) {
+    overflow: hidden;
+  }
+}
