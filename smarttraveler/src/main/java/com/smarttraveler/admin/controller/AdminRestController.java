@@ -147,12 +147,18 @@ public class AdminRestController {
 
     @GetMapping("/human-courses")
     public List<HumanCourseView> humanCourses(@RequestParam(required=false) String status,
-        @RequestParam(required=false) String reportStatus,@RequestParam(required=false) String query) {
+        @RequestParam(required=false) String reportStatus,@RequestParam(required=false) String query,
+        @RequestParam(required=false) Boolean reported, @RequestParam(required=false) String region,
+        @RequestParam(required=false) LocalDate from, @RequestParam(required=false) LocalDate to) {
         var reports=data.humanReports();
         return data.humanCourses().stream().filter(x -> status==null || status.equals(x.getStatus()))
+            .filter(x -> reported==null || reported == reports.stream().anyMatch(r -> Objects.equals(r.getCourseId(), x.getId())))
             .filter(x -> reportStatus==null || ("NONE".equals(reportStatus)
                 ? reports.stream().noneMatch(r -> Objects.equals(r.getCourseId(),x.getId()))
                 : reports.stream().anyMatch(r -> Objects.equals(r.getCourseId(),x.getId()) && reportStatus.equals(r.getStatus()))))
+            .filter(x -> region==null || contains(x.getRegion(),region))
+            .filter(x -> from==null || x.getCreatedAt()!=null && !x.getCreatedAt().toLocalDate().isBefore(from))
+            .filter(x -> to==null || x.getCreatedAt()!=null && !x.getCreatedAt().toLocalDate().isAfter(to))
             .filter(x -> query==null || contains(x.getTitle(),query) || contains(x.getDestination(),query)).toList();
     }
     @GetMapping("/human-courses/{id}")

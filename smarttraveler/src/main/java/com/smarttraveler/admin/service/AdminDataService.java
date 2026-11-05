@@ -45,6 +45,7 @@ public class AdminDataService {
     private final HumanCourseRepository humanCourses;
     private final HumanReportRepository humanReports;
     private final HumanActionHistoryRepository humanActions;
+    private final HumanManagementService humanManagement;
     private final RecommendationCriteriaRepository criteria;
     private final RecommendationCriteriaHistoryRepository criteriaHistory;
     private final JdbcTemplate jdbc;
@@ -74,9 +75,8 @@ public class AdminDataService {
     @Transactional(readOnly = true)
     public List<HumanCourseView> humanCourses() {
         Map<Long, Boolean> featured = new HashMap<>();
-        jdbc.queryForList("SELECT post_id, featured FROM admin_human_featured")
-            .forEach(row -> featured.put(((Number) row.get("post_id")).longValue(),
-                Boolean.TRUE.equals(row.get("featured")) || row.get("featured") instanceof Number n && n.intValue() != 0));
+        jdbc.queryForList("SELECT post_id FROM admin_human_exposure WHERE scope='MAIN'")
+            .forEach(row -> featured.put(((Number) row.get("post_id")).longValue(), true));
         return humanCourses.findAllWithCourse().stream()
             .map(post -> new HumanCourseView(post,
                 post.getCourse() == null ? null : post.getCourse().getDestination(),
@@ -297,7 +297,10 @@ public class AdminDataService {
         if (!Set.of("VISIBLE", "BLINDED", "DELETED").contains(status)) throw new IllegalArgumentException("지원하지 않는 코스 상태입니다.");
         HumanCoursePost course = humanCourses.findById(id).orElseThrow(() -> missing("휴먼 코스"));
         course.setStatus(status);
-        if ("DELETED".equals(status)) setHumanFeatured(id, false, login);
+        if (!"VISIBLE".equals(status)) {
+            humanManagement.clearSelections(id);
+            jdbc.update("UPDATE admin_human_featured SET featured=FALSE WHERE post_id=?", id);
+        }
         course.setUpdatedAt(LocalDateTime.now());
         if ("DELETED".equals(status)) course.setDeletedAt(LocalDateTime.now());
         humanCourses.save(course);
@@ -307,12 +310,7 @@ public class AdminDataService {
     @Transactional
     public void setHumanFeatured(Long id, boolean featured, String login) {
         HumanCoursePost course = humanCourses.findById(id).orElseThrow(() -> missing("휴먼 코스"));
-        if (featured && !"VISIBLE".equals(course.getStatus())) throw new IllegalStateException("노출 중인 코스만 메인에 지정할 수 있습니다.");
-        jdbc.update("""
-            INSERT INTO admin_human_featured(post_id,featured,updated_at) VALUES (?,?,NOW())
-            ON DUPLICATE KEY UPDATE featured=VALUES(featured),updated_at=NOW()
-            """, id, featured);
-        recordHumanAction(id, null, login, featured ? "FEATURE" : "UNFEATURE", null);
+        humanManagement.setExposure(id, "MAIN", null, featured, login);
     }
 
     @Transactional
@@ -357,7 +355,7 @@ public class AdminDataService {
 
     private HumanCourseView enrichHumanCourse(HumanCoursePost post) {
         boolean featured = Boolean.TRUE.equals(jdbc.queryForObject(
-            "SELECT COALESCE(MAX(featured),0) FROM admin_human_featured WHERE post_id=?", Boolean.class, post.getPostId()));
+            "SELECT EXISTS(SELECT 1 FROM admin_human_exposure WHERE post_id=? AND scope='MAIN')", Boolean.class, post.getPostId()));
         String destination = post.getCourseId() == null ? null : courses.findById(post.getCourseId())
             .map(Course::getDestination).orElse(null);
         return new HumanCourseView(post, destination, featured);

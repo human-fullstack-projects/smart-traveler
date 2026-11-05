@@ -38,7 +38,7 @@ public final class AdminViews {
     @Getter
     public static final class HumanCourseView {
         private final Long id, memberId, courseId, reservationId;
-        private final String title, content, courseSnapshot, status, destination, summary;
+        private final String title, content, courseSnapshot, status, destination, region, summary;
         private final Boolean featured;
         private final LocalDateTime createdAt, updatedAt, deletedAt;
         public HumanCourseView(HumanCoursePost post, String destination, Boolean featured) {
@@ -46,7 +46,7 @@ public final class AdminViews {
             this.courseId = post.getCourseId(); this.reservationId = post.getReservationId();
             this.title = post.getTitle(); this.content = post.getContent();
             this.courseSnapshot = post.getCourseSnapshot(); this.status = post.getStatus();
-            this.destination = destination; this.featured = featured; this.summary = post.getContent();
+            this.destination = destination; this.region = destination; this.featured = featured; this.summary = post.getContent();
             this.createdAt = post.getCreatedAt(); this.updatedAt = post.getUpdatedAt(); this.deletedAt = post.getDeletedAt();
         }
     }

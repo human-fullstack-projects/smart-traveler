@@ -34,6 +34,7 @@ class AdminDeletionTest {
     @Mock HumanCourseRepository humanCourses;
     @Mock HumanReportRepository humanReports;
     @Mock HumanActionHistoryRepository humanActions;
+    @Mock com.smarttraveler.admin.service.HumanManagementService humanManagement;
     @Mock RecommendationCriteriaRepository criteria;
     @Mock RecommendationCriteriaHistoryRepository criteriaHistory;
     @Mock org.springframework.jdbc.core.JdbcTemplate jdbc;
