@@ -1,0 +1,553 @@
+/* 홈 화면 전용 스타일 */
+.home-landing {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  gap: 20px;
+  color: var(--st-ink);
+}
+
+.landing-hero {
+  text-align: center;
+}
+
+.landing-eyebrow {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.landing-hero h1 {
+  margin: 0;
+  color: var(--st-title);
+  font-family: var(--st-font-title);
+  font-size: clamp(38px, 5vw, 72px);
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+}
+
+.landing-description {
+  margin: 14px 0 0;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+/* 대화 입력창 */
+.landing-composer {
+  width: min(100%, 1000px);
+  margin: 0 auto;
+  padding: 20px;
+  border: 1px solid var(--st-line);
+  border-radius: 18px;
+  background: var(--st-surface);
+  box-shadow: var(--st-shadow);
+}
+
+.landing-composer:focus-within {
+  border-color: var(--st-teal);
+}
+
+.landing-composer textarea {
+  display: block;
+  width: 100%;
+  height: 64px;
+  min-height: 0;
+  padding: 0;
+  resize: none;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--st-ink);
+  font: inherit;
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+.landing-composer textarea::placeholder {
+  color: var(--st-muted);
+}
+
+.landing-composer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.landing-condition-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--st-teal);
+  font-size: 14px;
+}
+
+.landing-start {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  min-height: 44px;
+  padding: 10px 26px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--st-aqua);
+  color: var(--st-ink);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.landing-start:not(:disabled):hover {
+  background: var(--st-aqua-hover);
+}
+
+.landing-error {
+  margin: 8px 0 0;
+  color: var(--st-danger);
+  font-size: 13px;
+}
+
+/* 빠른 입력 */
+.landing-shortcuts {
+  text-align: center;
+}
+
+.landing-shortcuts > p {
+  margin: 0 0 10px;
+  color: var(--st-muted);
+  font-size: 12px;
+}
+
+.landing-quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.landing-quick-actions button {
+  min-height: 44px;
+  padding: 10px 24px;
+  border: 1px solid var(--st-aqua);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--st-teal);
+  font-weight: 700;
+}
+
+.landing-quick-actions button:hover,
+.landing-quick-actions .is-featured {
+  background: var(--st-aqua);
+  color: var(--st-ink);
+}
+
+.home-landing button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+/* 추천 코스 */
+.landing-recommendations {
+  min-height: 0;
+}
+
+.landing-section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.landing-section-heading h2 {
+  margin: 0;
+  color: var(--st-title);
+  font-family: var(--st-font-title);
+  font-size: clamp(24px, 2.6vw, 36px);
+  line-height: 1.2;
+}
+
+.landing-section-heading > a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.landing-course-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.landing-course {
+  display: grid;
+  grid-template-rows: 140px auto;
+  min-width: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--st-line);
+  border-radius: 14px;
+  background: var(--st-surface);
+  color: var(--st-ink);
+  text-align: left;
+}
+
+.landing-course:hover {
+  border-color: var(--st-teal);
+}
+
+.landing-course-image {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.landing-course-image.autumn {
+  background: linear-gradient(135deg, #e9c28c, #a46e50);
+}
+
+.landing-course-image.winter {
+  background: linear-gradient(135deg, #c8e4ed, #548caa);
+}
+
+.landing-course-image.hanok {
+  background: linear-gradient(135deg, #e2d4bd, #8a786b);
+}
+
+.landing-region {
+  color: #fff;
+  font-size: 24px;
+  font-weight: 700;
+  text-shadow: 0 1px 4px #0008;
+}
+
+.landing-course-image img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.landing-example {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--st-surface);
+  color: var(--st-teal);
+  font-size: 11px;
+}
+
+.landing-course-body {
+  min-width: 0;
+  padding: 12px;
+}
+
+.landing-course-tag {
+  color: var(--st-teal);
+  font-size: 11px;
+}
+
+.landing-course-body h3 {
+  margin: 5px 0;
+  font-size: 16px;
+}
+
+.landing-course-body p {
+  margin: 0;
+  color: var(--st-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* 더미 코스 상세 팝업 */
+.landing-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: #1c253b66;
+}
+
+.landing-modal {
+  width: min(100%, 480px);
+  max-height: 85svh;
+  overflow-y: auto;
+  padding: 24px;
+  border-radius: 18px;
+  background: var(--st-surface);
+  box-shadow: var(--st-shadow);
+}
+
+.landing-modal-close {
+  display: block;
+  min-height: 44px;
+  margin-left: auto;
+  border: 0;
+  background: transparent;
+  color: var(--st-teal);
+}
+
+.landing-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.home-landing :is(button, a):focus-visible {
+  outline: 3px solid var(--st-teal);
+  outline-offset: 3px;
+}
+
+/* PC: 홈 화면을 화면 높이에 맞춰 구성 */
+@media (min-width: 1024px) and (min-height: 640px) {
+  .main-page:has(.home-landing) {
+    height: 100svh;
+    min-height: 0;
+  }
+
+  .main-page:has(.home-landing) .mp-topbar {
+    min-height: 64px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+
+  .main-page:has(.home-landing) .mp-main {
+    display: flex;
+    min-height: 0;
+    padding: 12px 32px;
+  }
+
+  .main-page:has(.home-landing) .mp-footer {
+    min-height: 32px;
+    padding: 4px 0;
+  }
+
+  .main-page:has(.home-landing) .mp-footer-fine {
+    display: none;
+  }
+
+  .home-landing {
+    flex: 1;
+    min-height: 0;
+    grid-template-rows: auto auto auto minmax(140px, 1fr);
+    gap: 10px;
+  }
+
+  .landing-eyebrow {
+    margin-bottom: 6px;
+    font-size: 12px;
+  }
+
+  .landing-hero h1 {
+    font-size: clamp(32px, 5vh, 56px);
+  }
+
+  .landing-description {
+    margin-top: 8px;
+    font-size: 14px;
+  }
+
+  .landing-composer {
+    padding: 12px 18px;
+  }
+
+  .landing-composer textarea {
+    height: 42px;
+    font-size: 16px;
+  }
+
+  .landing-composer-bottom {
+    margin-top: 4px;
+  }
+
+  .landing-shortcuts > p {
+    margin-bottom: 6px;
+  }
+
+  .landing-recommendations {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .landing-section-heading {
+    margin-bottom: 6px;
+  }
+
+  .landing-section-heading h2 {
+    font-size: 26px;
+  }
+
+  .landing-course-grid {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .landing-course {
+    min-height: 0;
+    grid-template-rows: minmax(36px, 1fr) auto;
+  }
+
+  .landing-course-body {
+    padding: 8px 10px;
+  }
+
+  .landing-course-body h3 {
+    margin: 3px 0;
+    font-size: 14px;
+  }
+}
+
+/* 모바일: 세로 스크롤과 카드 1열 */
+@media (max-width: 700px) {
+  .home-landing {
+    gap: 24px;
+  }
+
+  .landing-hero h1 {
+    font-size: clamp(34px, 8vw, 48px);
+  }
+
+  .landing-description {
+    font-size: 14px;
+  }
+
+  .landing-composer {
+    padding: 16px;
+  }
+
+  .landing-composer textarea {
+    height: 86px;
+    font-size: 16px;
+  }
+
+  .landing-quick-actions {
+    gap: 8px;
+  }
+
+  .landing-quick-actions button {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+
+  .landing-course-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-course {
+    grid-template-rows: 150px auto;
+  }
+}
+/* 카드가 남은 세로 공간 전체로 늘어나지 않도록 조정 */
+.landing-course-grid {
+  flex: none;
+  align-items: start;
+}
+
+.landing-course {
+  align-self: start;
+  grid-template-rows: 110px auto;
+}
+
+/* PC: 작은 화면 높이에서는 사진도 조금 더 작게 */
+@media (min-width: 1024px) and (min-height: 640px) {
+  .landing-course-grid {
+    flex: none;
+  }
+
+  .landing-course {
+    grid-template-rows: clamp(65px, 12vh, 120px) auto;
+  }
+
+  .landing-course-body {
+    padding: 10px 12px;
+  }
+}
+
+/* 모바일: 사진을 왼쪽에 둔 작은 가로 카드 */
+@media (max-width: 700px) {
+  .landing-course-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .landing-course {
+    grid-template-columns: 100px minmax(0, 1fr);
+    grid-template-rows: auto;
+    min-height: 112px;
+  }
+
+  .landing-course-image {
+    min-height: 112px;
+  }
+
+  .landing-region {
+    font-size: 20px;
+  }
+
+  .landing-course-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 12px;
+  }
+
+  .landing-course-body h3 {
+    margin: 5px 0;
+    font-size: 15px;
+    line-height: 1.4;
+  }
+
+  .landing-course-body p {
+    font-size: 12px;
+    overflow-wrap: anywhere;
+  }
+}
+/* PC: 추천 코스를 화면 하단 쪽에 배치 */
+@media (min-width: 1024px) and (min-height: 640px) {
+  .home-landing .landing-recommendations {
+    align-self: end;
+    width: 100%;
+  }
+}
+
+/* 높이가 충분한 PC 화면: 제목과 여백을 여유 있게 */
+@media (min-width: 1024px) and (min-height: 800px) {
+  .home-landing {
+    padding-top: clamp(20px, 4vh, 48px);
+    box-sizing: border-box;
+    gap: 16px;
+  }
+
+  .home-landing .landing-hero h1 {
+    font-size: clamp(44px, 6vh, 64px);
+  }
+
+  .home-landing .landing-eyebrow {
+    margin-bottom: 10px;
+    font-size: 14px;
+  }
+
+  .home-landing .landing-description {
+    margin-top: 14px;
+    font-size: 16px;
+  }
+
+  .home-landing .landing-section-heading {
+    margin-bottom: 12px;
+  }
+}

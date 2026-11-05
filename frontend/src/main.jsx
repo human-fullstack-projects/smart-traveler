@@ -5,6 +5,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import './styles/tokens.css';
 import './styles/global.css';
 import './chat.css';
+import './styles/theme.css';
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode><AuthProvider><App /></AuthProvider></React.StrictMode>,
