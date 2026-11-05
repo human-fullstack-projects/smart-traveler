@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import './SearchPage.css';
+import '../../css/SearchPage.css';
 
 function SlidersIcon() {
   return (

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import './Admin.css';
+import '../../css/Admin.css';
 import { adminGet, adminPost } from '../../api/admin';
 
 // 관리자 페이지 (ADM-01~19) — 서버 /api/admin (M55) 을 부르는 React 화면

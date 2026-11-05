@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import './HomePage.css';
+import '../../css/HomePage.css';
 
 export function Intro({ conditions = false }) {
   return <section className="intro">

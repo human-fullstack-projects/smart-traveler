@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import './Auth.css';
+import '../../css/Auth.css';
 import { login } from '../../api/auth';
 import OwnerReviewPage from './OwnerReviewPage';
 

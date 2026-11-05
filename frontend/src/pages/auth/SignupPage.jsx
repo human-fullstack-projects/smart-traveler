@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import './Auth.css';
+import '../../css/Auth.css';
 import { getTerms, signup } from '../../api/auth';
 
 // 회원가입 (AUTH-01 여행자 · AUTH-02 숙박업주 · AUTH-03 약관 동의)
