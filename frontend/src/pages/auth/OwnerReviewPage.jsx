@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getOwnerReview, reapplyOwner } from '../../api/auth';
-import './Auth.css';
+import '../../css/Auth.css';
 
 const label = { PENDING: '승인 대기', APPROVED: '승인', REJECTED: '반려' };
 
