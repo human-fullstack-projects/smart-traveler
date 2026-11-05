@@ -1,6 +1,7 @@
 package com.smarttraveler.admin.service;
 
 import com.smarttraveler.admin.repository.*;
+import com.smarttraveler.domain.entity.AdminLodgingActionHistory;
 import com.smarttraveler.domain.entity.HumanActionHistory;
 import com.smarttraveler.domain.entity.RecommendationCriteria;
 import com.smarttraveler.domain.entity.RecommendationCriteriaHistory;
@@ -34,6 +35,7 @@ public class AdminDataService {
     private final OwnerReviewHistoryRepository reviews;
     private final MemberSuspensionHistoryRepository suspensions;
     private final LodgingRepository lodgings;
+    private final AdminLodgingActionHistoryRepository lodgingActions;
     private final RoomRepository rooms;
     private final ReservationRepository reservations;
     private final ReservationActionHistoryRepository reservationActions;
@@ -43,6 +45,7 @@ public class AdminDataService {
     private final HumanCourseRepository humanCourses;
     private final HumanReportRepository humanReports;
     private final HumanActionHistoryRepository humanActions;
+    private final HumanManagementService humanManagement;
     private final RecommendationCriteriaRepository criteria;
     private final RecommendationCriteriaHistoryRepository criteriaHistory;
     private final JdbcTemplate jdbc;
@@ -72,9 +75,8 @@ public class AdminDataService {
     @Transactional(readOnly = true)
     public List<HumanCourseView> humanCourses() {
         Map<Long, Boolean> featured = new HashMap<>();
-        jdbc.queryForList("SELECT post_id, featured FROM admin_human_featured")
-            .forEach(row -> featured.put(((Number) row.get("post_id")).longValue(),
-                Boolean.TRUE.equals(row.get("featured")) || row.get("featured") instanceof Number n && n.intValue() != 0));
+        jdbc.queryForList("SELECT post_id FROM admin_human_exposure WHERE scope='MAIN'")
+            .forEach(row -> featured.put(((Number) row.get("post_id")).longValue(), true));
         return humanCourses.findAllWithCourse().stream()
             .map(post -> new HumanCourseView(post,
                 post.getCourse() == null ? null : post.getCourse().getDestination(),
@@ -109,15 +111,24 @@ public class AdminDataService {
 
     @Transactional
     public void suspendMember(Long id, String reasonCode, String detail, String reviewerLogin) {
+        suspendMember(id, reasonCode, detail, null, reviewerLogin);
+    }
+
+    @Transactional
+    public void suspendMember(Long id, String reasonCode, String detail, LocalDateTime suspendedUntil, String reviewerLogin) {
         Member member = member(id);
         if ("ADMIN".equals(member.getRoleCode())) throw new IllegalArgumentException("관리자 계정은 정지할 수 없습니다.");
         if (blank(reasonCode)) throw new IllegalArgumentException("정지 사유 코드는 필수입니다.");
         if ("WITHDRAWN".equals(member.getStatus())) throw new IllegalStateException("탈퇴 회원은 정지할 수 없습니다.");
+        if ("SUSPENDED".equals(member.getStatus())) throw new IllegalStateException("이미 정지된 회원입니다.");
+        if (suspendedUntil != null && !suspendedUntil.isAfter(LocalDateTime.now()))
+            throw new IllegalArgumentException("해제 예정일시는 현재보다 늦어야 합니다.");
         MemberSuspensionHistory h = new MemberSuspensionHistory();
         h.setMemberId(id);
         h.setReasonCode(reasonCode);
         h.setReasonDetail(detail);
         h.setStartedAt(LocalDateTime.now());
+        h.setSuspendedUntil(suspendedUntil);
         h.setProcessedBy(reviewer(reviewerLogin).getMemberId());
         h.setCreatedAt(LocalDateTime.now());
         suspensions.save(h);
@@ -196,13 +207,27 @@ public class AdminDataService {
     }
 
     @Transactional
+    public String deleteLodging(Long id, String reason, String actorLogin) {
+        Lodging lodging = lodging(id);
+        if ("DELETED".equals(lodging.getStatus())) throw new IllegalStateException("이미 삭제된 숙소입니다.");
+        boolean ongoing = reservationsForLodging(id).stream().anyMatch(order ->
+            Set.of("PENDING_PAYMENT", "CONFIRMED", "REFUNDING", "REFUND_FAILED").contains(order.getStatus()));
+        String action = ongoing ? "SUSPENDED" : "DELETED";
+        lodging.setStatus(action);
+        lodging.setUpdatedAt(LocalDateTime.now());
+        lodgings.save(lodging);
+        lodgingActions.save(new AdminLodgingActionHistory(id, actorLogin, action, reason));
+        return action;
+    }
+
+    @Transactional
     public void setReservationStatus(Long id, String status, String reason, String adminLogin) {
         RoomReservation order = reservation(id);
         String current = order.getStatus();
         if ("CONFIRMED".equals(status)) {
             if (!"PENDING_PAYMENT".equals(current)) throw new IllegalStateException("결제 대기 예약만 확정할 수 있습니다.");
             List<RoomPayment> done = paymentsForReservation(id).stream()
-                .filter(p -> "DONE".equals(p.getStatus()))
+                .filter(p -> "DONE".equals(p.getStatus()) && p.getApprovedAt() != null)
                 .filter(p -> Objects.equals(p.getAmount(), order.getTotalPrice()))
                 .toList();
             if (done.isEmpty()) throw new IllegalStateException("결제 최종 승인과 금액이 확인되지 않았습니다.");
@@ -213,7 +238,7 @@ public class AdminDataService {
                 SELECT COUNT(*) FROM reservation_inventory a JOIN room_inventory i ON i.inventory_id=a.inventory_id
                 WHERE a.reservation_id=? AND a.room_id=? AND i.stay_date>=? AND i.stay_date<?
                   AND a.allocation_status='HELD' AND a.quantity=?
-                  AND (a.hold_expires_at IS NULL OR a.hold_expires_at>NOW())
+                  AND a.hold_expires_at>NOW()
                   AND i.held_quantity>=a.quantity
                 """, Integer.class, id, order.getRoomId(), order.getCheckinDate(), order.getCheckoutDate(), quantity);
             if (holds == null || holds != nights) throw new IllegalStateException("유효한 객실 임시 점유를 확인할 수 없습니다.");
@@ -272,7 +297,10 @@ public class AdminDataService {
         if (!Set.of("VISIBLE", "BLINDED", "DELETED").contains(status)) throw new IllegalArgumentException("지원하지 않는 코스 상태입니다.");
         HumanCoursePost course = humanCourses.findById(id).orElseThrow(() -> missing("휴먼 코스"));
         course.setStatus(status);
-        if ("DELETED".equals(status)) setHumanFeatured(id, false, login);
+        if (!"VISIBLE".equals(status)) {
+            humanManagement.clearSelections(id);
+            jdbc.update("UPDATE admin_human_featured SET featured=FALSE WHERE post_id=?", id);
+        }
         course.setUpdatedAt(LocalDateTime.now());
         if ("DELETED".equals(status)) course.setDeletedAt(LocalDateTime.now());
         humanCourses.save(course);
@@ -282,12 +310,7 @@ public class AdminDataService {
     @Transactional
     public void setHumanFeatured(Long id, boolean featured, String login) {
         HumanCoursePost course = humanCourses.findById(id).orElseThrow(() -> missing("휴먼 코스"));
-        if (featured && !"VISIBLE".equals(course.getStatus())) throw new IllegalStateException("노출 중인 코스만 메인에 지정할 수 있습니다.");
-        jdbc.update("""
-            INSERT INTO admin_human_featured(post_id,featured,updated_at) VALUES (?,?,NOW())
-            ON DUPLICATE KEY UPDATE featured=VALUES(featured),updated_at=NOW()
-            """, id, featured);
-        recordHumanAction(id, null, login, featured ? "FEATURE" : "UNFEATURE", null);
+        humanManagement.setExposure(id, "MAIN", null, featured, login);
     }
 
     @Transactional
@@ -332,7 +355,7 @@ public class AdminDataService {
 
     private HumanCourseView enrichHumanCourse(HumanCoursePost post) {
         boolean featured = Boolean.TRUE.equals(jdbc.queryForObject(
-            "SELECT COALESCE(MAX(featured),0) FROM admin_human_featured WHERE post_id=?", Boolean.class, post.getPostId()));
+            "SELECT EXISTS(SELECT 1 FROM admin_human_exposure WHERE post_id=? AND scope='MAIN')", Boolean.class, post.getPostId()));
         String destination = post.getCourseId() == null ? null : courses.findById(post.getCourseId())
             .map(Course::getDestination).orElse(null);
         return new HumanCourseView(post, destination, featured);

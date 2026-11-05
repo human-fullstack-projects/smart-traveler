@@ -1,6 +1,11 @@
 package com.smarttraveler.auth.config;
 
 import com.smarttraveler.auth.service.MemberDetailsService;
+import com.smarttraveler.auth.repository.MemberRepository;
+import com.smarttraveler.auth.repository.SuspensionRepository;
+import tools.jackson.databind.ObjectMapper;
+import java.time.format.DateTimeFormatter;
+import java.util.Map;
 
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -30,7 +35,8 @@ public class AuthSecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http, MemberDetailsService users,
-                                           PasswordEncoder encoder) throws Exception {
+                                           PasswordEncoder encoder, MemberRepository members,
+                                           SuspensionRepository suspensions, ObjectMapper mapper) throws Exception {
         var provider = new DaoAuthenticationProvider(users);
         provider.setPasswordEncoder(encoder);
         http.authenticationProvider(provider);
@@ -40,6 +46,7 @@ public class AuthSecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/auth/signup").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/auth/terms").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/human-courses/exposed", "/api/human-courses/monthly-picks").permitAll()
                 .requestMatchers("/admin", "/admin/**", "/api/admin", "/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/", "/login", "/403", "/error", "/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
                 .anyRequest().authenticated());
@@ -58,8 +65,27 @@ public class AuthSecurityConfig {
                     request.getSession().setMaxInactiveInterval(30 * 60);
                     json(response, 200, "{\"authenticated\":true}");
                 })
-                .failureHandler((request, response, exception) ->
-                        json(response, 401, "{\"message\":\"아이디 또는 비밀번호를 확인해주세요. 이용이 제한된 계정도 로그인할 수 없습니다.\"}")));
+                .failureHandler((request, response, exception) -> {
+                    String message = "아이디 또는 비밀번호를 확인해주세요.";
+                    var member = members.findByLoginId(request.getParameter("loginId"));
+                    if (member.isPresent() && request.getParameter("password") != null && member.get().getPassword() != null
+                            && encoder.matches(request.getParameter("password"), member.get().getPassword())) {
+                        var account = member.get();
+                        if ("SUSPENDED".equals(account.getStatus())) {
+                            var active = suspensions.findByMemberIdOrderByCreatedAtDesc(account.getMemberId()).stream()
+                                    .filter(h -> h.getReleasedAt() == null).findFirst();
+                            String reason = active.map(h -> h.getReasonDetail() == null || h.getReasonDetail().isBlank()
+                                    ? h.getReasonCode() : h.getReasonDetail()).orElse("사유 미등록");
+                            String until = active.filter(h -> h.getSuspendedUntil() != null)
+                                    .map(h -> h.getSuspendedUntil().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                                    .orElse("해제일 미정");
+                            message = "계정이 정지되었습니다. 사유: " + reason + " · 해제 예정: " + until;
+                        } else if ("WITHDRAWN".equals(account.getStatus()) || account.getDeletedAt() != null) {
+                            message = "탈퇴한 계정은 로그인할 수 없습니다.";
+                        }
+                    }
+                    json(response, 401, mapper.writeValueAsString(Map.of("message", message)));
+                }));
         http.addFilterBefore(new AdminAccessLogFilter(), UsernamePasswordAuthenticationFilter.class);
         http.logout(logout -> logout
                 .logoutUrl("/api/auth/logout")

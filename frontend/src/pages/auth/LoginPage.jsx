@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import '../../css/Auth.css';
 import { login } from '../../api/auth';
+import OwnerReviewPage from './OwnerReviewPage';
 
 // 로그인 (AUTH) — 처리 로직은 sein/v1 그대로, 화면만 공유 CSS(st-*)로.
 export default function LoginPage({ onLogin }) {
@@ -10,6 +11,7 @@ export default function LoginPage({ onLogin }) {
   const [errors, setErrors] = useState({});
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
+  const [reviewMember, setReviewMember] = useState(null);
   const inFlight = useRef(false);
   const mounted = useRef(true);
   const titleRef = useRef(null);
@@ -32,9 +34,10 @@ export default function LoginPage({ onLogin }) {
     setBusy(true);
     try {
       const member = await login(loginId.trim(), password);
-      onLogin(member);
+      if (member.roleCode === 'OWNER') setReviewMember(member);
+      else onLogin(member);
     } catch (error) {
-      if (mounted.current) setNotice(error.status === 401 ? '아이디 또는 비밀번호를 확인해주세요.' : error.message);
+      if (mounted.current) setNotice(error.message);
     } finally {
       inFlight.current = false;
       if (mounted.current) { setPassword(''); setVisible(false); setBusy(false); }
@@ -47,6 +50,7 @@ export default function LoginPage({ onLogin }) {
     setNotice('');
   }
 
+  if (reviewMember) return <OwnerReviewPage onContinue={() => onLogin(reviewMember)} />;
   return (
     <div className="st-page auth-page">
       <section className="auth-wrap" aria-labelledby="login-title">
