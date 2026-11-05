@@ -22,7 +22,7 @@ class EntityMappingTest {
         scanner.addIncludeFilter(new AnnotationTypeFilter(Entity.class));
         Set<BeanDefinition> entities =
                 scanner.findCandidateComponents("com.smarttraveler.domain.entity");
-        assertEquals(68, entities.size());
+        assertEquals(71, entities.size());
         for (BeanDefinition definition : entities) {
             Class<?> entityClass = Class.forName(definition.getBeanClassName());
             boolean hasId = Arrays.stream(entityClass.getDeclaredFields())

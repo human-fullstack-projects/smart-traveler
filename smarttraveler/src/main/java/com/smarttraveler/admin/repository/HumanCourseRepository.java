@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import com.smarttraveler.domain.entity.HumanCoursePost;
 
 public interface HumanCourseRepository extends JpaRepository<HumanCoursePost, Long> {
-    @Query("select p from HumanCoursePost p left join fetch p.course")
+    @Query("select p from HumanCoursePost p left join fetch p.course left join fetch p.author")
     java.util.List<HumanCoursePost> findAllWithCourse();
 }
 

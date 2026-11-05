@@ -55,4 +55,7 @@ export async function getTerms() { return request('/api/auth/terms'); }
 
 export async function signup(data) { return postJsonWithCsrf('/api/auth/signup', data); }
 
+export async function getOwnerReview() { return request('/api/auth/owner-review'); }
+export async function reapplyOwner(data) { return postJsonWithCsrf('/api/auth/owner-review/reapply', data); }
+
 export { request, postJsonWithCsrf };

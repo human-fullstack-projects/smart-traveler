@@ -19,7 +19,14 @@ const LABEL = {
   USER: '여행자', OWNER: '업주', ADMIN: '관리자',
   PENDING: '승인대기', APPROVED: '승인', REJECTED: '반려', INACTIVE: '운영중지', CLOSED: '폐업',
   PENDING_PAYMENT: '결제대기', CONFIRMED: '예약확정', COMPLETED: '숙박완료', CANCELLED: '취소', CANCELED: '취소', REFUNDED: '환불', NO_SHOW: '노쇼', EXPIRED: '만료',
-  PUBLISHED: '게시', BLINDED: '블라인드', HIDDEN: '숨김', RESOLVED: '처리완료', DISMISSED: '기각', OPEN: '신고 접수', RECEIVED: '신고 접수',
+  REFUNDING: '환불 처리 중', REFUND_FAILED: '환불 실패',
+  VISIBLE: '게시 중', PUBLISHED: '게시', BLINDED: '블라인드', HIDDEN: '숨김', RESOLVED: '처리완료', DISMISSED: '기각', OPEN: '신고 접수', RECEIVED: '신고 접수',
+  READY: '결제 준비', DONE: '결제 완료', ABORTED: '결제 실패', SKIPPED: '건너뜀',
+  queued: '대기', running: '생성 중', pending: '대기',
+  FRAUD: '부정 이용', POLICY: '운영 정책 위반', POLICY_VIOLATION: '운영 정책 위반', OTHER: '기타',
+  FEATURE: '메인 노출', UNFEATURE: '노출 해제',
+  KTO_TOURAPI: '관광공사 관광정보', KTO_HUB: '중심 관광지', KTO_RELATED: '연관 관광지',
+  ATTRACTION: '관광지 정보', HUB_RANK: '중심 순위', RELATED: '연관 순위',
   done: '완료', failed: '생성실패', generating: '생성중', preview: '미리보기', selected: '선택됨', confirmed: '확정',
   SUCCESS: '성공', FAILED: '실패', PARTIAL: '일부 성공',
   PENSION: '펜션', HOTEL: '호텔', MOTEL: '모텔', GUESTHOUSE: '게스트하우스', HANOK: '한옥', RESORT: '리조트', CAMPING: '캠핑',
@@ -28,6 +35,7 @@ const tone = (s) => (['SUSPENDED', 'REJECTED', 'CANCELLED', 'CANCELED', 'BLINDED
   : ['PENDING', 'PENDING_PAYMENT', 'OPEN', 'RECEIVED', 'generating'].includes(s) ? 'warn'
   : ['INACTIVE', 'HIDDEN', 'CLOSED', 'EXPIRED'].includes(s) ? 'off' : '');
 const Pill = ({ v }) => (v == null || v === '' ? '—' : <span className={`adm-pill ${tone(v)}`}>{LABEL[v] || v}</span>);
+const LodgingPill = ({ v }) => (v == null || v === '' ? '—' : <span className={`adm-pill ${tone(v)}`}>{v === 'SUSPENDED' ? '운영중지' : LABEL[v] || v}</span>);
 const date = (v) => (v ? String(v).replace('T', ' ').replace(/\.\d+Z?$/, '').replace(/Z$/, '').slice(0, 16) : '—');
 const won = (v) => (v == null ? '—' : `${Number(v).toLocaleString('ko-KR')}원`);
 const show = (v) => (v == null || v === '' ? '—' : String(v));
@@ -94,7 +102,7 @@ function useAction(after) {
   const [msg, setMsg] = useState(null);
   const run = async (fn, okText) => {
     setMsg(null);
-    try { await fn(); setMsg({ ok: true, text: okText }); after?.(); }
+    try { const result = await fn(); setMsg({ ok: true, text: typeof okText === 'function' ? okText(result) : okText }); after?.(); }
     catch (e) { setMsg({ ok: false, text: e.message }); }
   };
   return [msg, run];
@@ -104,8 +112,8 @@ const Msg = ({ msg }) => (msg ? <p className={`adm-msg${msg.ok ? '' : ' error'}`
 function Filters({ fields, value, onChange }) {
   return <div className="adm-filters">{fields.map(([name, label, options]) => <label key={name} className="st-field">{label}
     {options ? <select className="st-input" value={value[name] || ''} onChange={(e) => onChange({ ...value, [name]: e.target.value })}>
-      <option value="">전체</option>{options.map((o) => <option key={o} value={o}>{LABEL[o] || o}</option>)}</select>
-      : <input className="st-input" value={value[name] || ''} placeholder="검색어" onChange={(e) => onChange({ ...value, [name]: e.target.value })} />}
+      <option value="">전체</option>{options.map((o) => <option key={o} value={o}>{label === '운영 상태' && o === 'SUSPENDED' ? '운영중지' : o === 'true' ? '신고 있음' : o === 'false' ? '신고 없음' : o === 'NONE' ? '신고 없음' : LABEL[o] || o}</option>)}</select>
+      : <input className="st-input" type={name === 'from' || name === 'to' ? 'date' : name === 'postId' ? 'number' : 'text'} value={value[name] || ''} placeholder="검색어" onChange={(e) => onChange({ ...value, [name]: e.target.value })} />}
   </label>)}</div>;
 }
 
@@ -145,12 +153,14 @@ function MiniList({ title, rows, columns, empty = '없음', size = 3 }) {
         <tbody>{list.slice((p - 1) * size, p * size).map((r, i) => <tr key={i}>{columns.map((c, j) => <td key={j}>{c[1](r)}</td>)}</tr>)}</tbody></table>}
   </>;
 }
-const histCols = [['일시', (h) => date(h.createdAt || h.created_at)], ['처리', (h) => show(h.action || h.toStatus || h.to_status)], ['사유', (h) => show(h.reason)]];
+const histCols = [['일시', (h) => date(h.createdAt || h.created_at)], ['처리', (h) => show(LABEL[h.action || h.toStatus || h.to_status] || h.action || h.toStatus || h.to_status)], ['사유', (h) => show(h.reason)]];
 
 /* ---------- 주문 (ADM-02~04) ---------- */
 function Orders() {
   const [f, setF] = useState({});
   const [list, reload] = useLoad(() => adminGet('/orders', f), [JSON.stringify(f)]);
+  const [lodgings] = useLoad(() => Promise.all([adminGet('/lodgings'), adminGet('/lodgings', { status: 'DELETED' })])
+    .then((groups) => groups.flat()), []);
   const [sel, setSel] = useState(null);
   const [detail, reloadDetail] = useLoad(() => (sel ? adminGet(`/orders/${sel}`) : Promise.resolve(null)), [sel]);
   const [reason, setReason] = useState('');
@@ -158,7 +168,19 @@ function Orders() {
   const o = detail.data?.order;
   const act = (status) => run(() => adminPost(`/orders/${sel}/status`, { status, reason }), `주문 상태를 「${LABEL[status]}」(으)로 바꿨어요.`);
   return <>
-    <Filters fields={[['status', '주문 상태', ['PENDING_PAYMENT', 'CONFIRMED', 'COMPLETED', 'CANCELLED']], ['type', '주문 유형', ['RESERVATION', 'CONFIRMED']], ['query', '주문번호·회원']]} value={f} onChange={setF} />
+    <div className="adm-filters adm-order-filters">
+      <label className="st-field">주문 유형<select className="st-input" value={f.type || ''} onChange={(e) => setF({ ...f, type: e.target.value })}>
+        <option value="">전체</option><option value="reserve">예약주문</option><option value="confirmed">확정주문</option>
+      </select></label>
+      <label className="st-field">주문 상태<select className="st-input" value={f.status || ''} onChange={(e) => setF({ ...f, status: e.target.value })}>
+        <option value="">전체</option>{['PENDING_PAYMENT', 'CONFIRMED', 'COMPLETED', 'REFUNDING', 'REFUND_FAILED', 'CANCELLED', 'EXPIRED'].map((s) =>
+          <option key={s} value={s}>{LABEL[s] || s}</option>)}</select></label>
+      <label className="st-field">숙소<select className="st-input" value={f.lodgingId || ''} onChange={(e) => setF({ ...f, lodgingId: e.target.value })}>
+        <option value="">전체</option>{(lodgings.data || []).map((l) => <option key={l.lodgingId} value={l.lodgingId}>{l.name}</option>)}</select></label>
+      <label className="st-field">시작일<input className="st-input" type="date" value={f.from || ''} max={f.to || undefined} onChange={(e) => setF({ ...f, from: e.target.value })} /></label>
+      <label className="st-field">종료일<input className="st-input" type="date" value={f.to || ''} min={f.from || undefined} onChange={(e) => setF({ ...f, to: e.target.value })} /></label>
+      <label className="st-field">주문번호·회원<input className="st-input" value={f.query || ''} placeholder="주문번호·회원" onChange={(e) => setF({ ...f, query: e.target.value })} /></label>
+    </div>
     <Msg msg={msg || (list.error && { text: list.error })} />
     <div className="adm-split">
       <Table title="주문 목록" rows={list.data} rowKey="reservationId" selected={sel} onSelect={setSel} empty="아직 주문(객실 예약)이 없어요."
@@ -189,21 +211,26 @@ function Lodgings() {
   const [msg, run] = useAction(() => { reload(); reloadDetail(); });
   const l = detail.data?.lodging;
   const act = (status) => run(() => adminPost(`/lodgings/${sel}/status`, { status, reason: reason || null }), `숙소 상태를 「${LABEL[status]}」(으)로 바꿨어요.`);
+  const remove = () => {
+    if (!window.confirm('이 숙소를 삭제할까요? 진행 중인 예약이 있으면 운영 중지로 처리해요.')) return;
+    run(() => adminPost(`/lodgings/${sel}/delete`, { reason: reason || null }), (result) => result.message);
+  };
   return <>
-    <Filters fields={[['status', '운영 상태', ['PENDING', 'ACTIVE', 'REJECTED', 'INACTIVE']], ['query', '숙소 이름']]} value={f} onChange={setF} />
+    <Filters fields={[['status', '운영 상태', ['PENDING', 'ACTIVE', 'REJECTED', 'SUSPENDED', 'DELETED']], ['query', '숙소 이름']]} value={f} onChange={setF} />
     <Msg msg={msg || (list.error && { text: list.error })} />
     <div className="adm-split">
       <Table title="숙소 목록" rows={list.data} rowKey="lodgingId" selected={sel} onSelect={setSel}
-        columns={[['숙소', (r) => r.name], ['유형', (r) => LABEL[r.lodgingType] || show(r.lodgingType)], ['주소', (r) => show(r.address)], ['상태', (r) => <Pill v={r.status} />]]} />
+        columns={[['숙소', (r) => r.name], ['유형', (r) => LABEL[r.lodgingType] || show(r.lodgingType)], ['주소', (r) => show(r.address)], ['상태', (r) => <LodgingPill v={r.status} />]]} />
       <Detail title="숙소 상세">{!l ? <Pick /> : <>
-        <DL items={[['숙소', l.name], ['상태', <Pill v={l.status} />], ['유형', LABEL[l.lodgingType] || show(l.lodgingType)], ['연락처', show(l.phone)], ['주소', show(l.address)],
+        <DL items={[['숙소', l.name], ['상태', <LodgingPill v={l.status} />], ['유형', LABEL[l.lodgingType] || show(l.lodgingType)], ['연락처', show(l.phone)], ['주소', show(l.address)],
           ['체크인/아웃', `${show(l.checkinTime).slice(0, 5)} / ${show(l.checkoutTime).slice(0, 5)}`], ['업주', show(l.ownerId)], ['등록', date(l.createdAt)], ['반려 사유', show(l.rejectReason)], ['예약', `${(detail.data.reservations || []).length}건`]]} />
         <MiniList title="객실" rows={detail.data.rooms} empty="객실 없음" columns={[['객실', (r) => r.name], ['인원', (r) => `${r.baseCapacity}~${r.maxCapacity}명`], ['주중', (r) => won(r.priceOffWeekday)], ['주말', (r) => won(r.priceOffWeekend)]]} />
         <div className="adm-actions">
           <input className="st-input" placeholder="반려·운영중지 사유" value={reason} onChange={(e) => setReason(e.target.value)} />
           <button className="st-btn" onClick={() => act('ACTIVE')}>승인 · 운영</button>
           <button className="st-btn st-btn-line" onClick={() => act('REJECTED')}>반려</button>
-          <button className="st-btn st-btn-line" onClick={() => act('INACTIVE')}>운영 중지</button>
+          <button className="st-btn st-btn-line" onClick={() => act('SUSPENDED')}>운영 중지</button>
+          {l.status !== 'DELETED' && <button className="st-btn st-btn-line" onClick={remove}>숙소 삭제</button>}
         </div>
       </>}</Detail>
     </div>
@@ -219,10 +246,15 @@ function Members({ onChanged }) {
   const [sel, setSel] = useState(null);
   const [detail, reloadDetail] = useLoad(() => (sel ? adminGet(`/members/${sel}`) : Promise.resolve(null)), [sel]);
   const [reason, setReason] = useState('');
+  const [suspendedUntil, setSuspendedUntil] = useState('');
+  useEffect(() => { setSuspendedUntil(''); }, [sel]);
   const [msg, run] = useAction(() => { reload(); reloadPending(); reloadDetail(); onChanged?.(); });
   const m = detail.data?.member; const op = detail.data?.ownerProfile;
   const review = (decision) => run(() => adminPost(`/owners/${op.ownerId}/review`, { decision, comment: reason || null }), decision === 'APPROVED' ? '업주 가입을 승인했어요.' : '업주 가입을 반려했어요.');
-  const status = (s) => run(() => adminPost(`/members/${sel}/status`, { status: s, reasonCode: 'OTHER', reason: reason || null }), `회원 상태를 「${LABEL[s]}」(으)로 바꿨어요.`);
+  const status = (s) => run(() => adminPost(`/members/${sel}/status`, {
+    status: s, reasonCode: 'OTHER', reason: reason || null,
+    suspendedUntil: s === 'SUSPENDED' && suspendedUntil ? suspendedUntil : null,
+  }), `회원 상태를 「${LABEL[s]}」(으)로 바꿨어요.`);
   return <>
     <div className="adm-toolbar">
       <Tabs value={tab} onChange={setTab} items={[['all', '전체 회원', list.data?.length], ['pending', '승인 대기 업주', pending.data?.length]]} />
@@ -232,17 +264,20 @@ function Members({ onChanged }) {
     <div className="adm-split">
       {tab === 'all'
         ? <Table title="회원 목록" rows={list.data} rowKey="memberId" selected={sel} onSelect={setSel}
-          columns={[['아이디', (r) => r.loginId], ['닉네임', (r) => show(r.nickname)], ['유형', (r) => <Pill v={r.roleCode} />], ['가입일', (r) => date(r.createdAt).slice(0, 10)], ['상태', (r) => <Pill v={r.status} />]]} />
+          columns={[['아이디', (r) => r.loginId], ['닉네임', (r) => show(r.nickname)], ['유형', (r) => <Pill v={r.roleCode} />], ['가입일', (r) => date(r.createdAt).slice(0, 10)], ['상태', (r) => <Pill v={r.status} />], ['해제 예정', (r) => r.status === 'SUSPENDED' ? (r.suspendedUntil ? date(r.suspendedUntil) : '무기한') : '—']]} />
         : <Table title="승인 대기 업주" rows={pending.data} rowKey="memberId" selected={sel} onSelect={setSel} empty="승인을 기다리는 업주가 없어요."
           columns={[['상호', (r) => r.businessName], ['대표', (r) => r.representativeName], ['사업자번호', (r) => r.businessNumber], ['신청일', (r) => date(r.createdAt).slice(0, 10)], ['심사', (r) => <Pill v={r.reviewStatusCode} />]]} />}
       <Detail title="회원 상세">{!m ? <Pick /> : <>
-        <DL items={[['아이디', m.loginId], ['닉네임', show(m.nickname)], ['유형', <Pill v={m.roleCode} />], ['상태', <Pill v={m.status} />], ['이메일', show(m.email)], ['가입일', date(m.createdAt)]]} />
+        <DL items={[['아이디', m.loginId], ['닉네임', show(m.nickname)], ['유형', <Pill v={m.roleCode} />], ['상태', <Pill v={m.status} />], ['이메일', show(m.email)], ['가입일', date(m.createdAt)], ['해제 예정', m.status === 'SUSPENDED' ? (m.suspendedUntil ? date(m.suspendedUntil) : '무기한') : '—']]} />
         {op && <><p className="adm-sub">업주 정보</p>
           <DL items={[['상호', op.businessName], ['심사', <Pill v={op.reviewStatusCode} />], ['사업자번호', op.businessNumber], ['대표', op.representativeName], ['연락처', show(op.businessPhone)], ['숙소', `${(detail.data.ownerLodgings || []).length}곳`], ['주소', show(op.businessAddress)]]} /></>}
         {(detail.data.suspensions || []).length > 0 && <MiniList title="정지 이력" rows={detail.data.suspensions}
-          columns={[['시작', (s) => date(s.startedAt || s.createdAt)], ['사유', (s) => show(s.reasonCode)], ['내용', (s) => show(s.reasonDetail || s.reason)]]} />}
+          columns={[['시작', (s) => date(s.startedAt || s.createdAt)], ['해제 예정', (s) => s.suspendedUntil ? date(s.suspendedUntil) : '무기한'], ['실제 해제', (s) => date(s.releasedAt)], ['사유', (s) => show(LABEL[s.reasonCode] || s.reasonCode)], ['내용', (s) => show(s.reasonDetail || s.reason)]]} />}
         <div className="adm-actions">
           <input className="st-input" placeholder="사유 (정지·반려 시 입력)" value={reason} onChange={(e) => setReason(e.target.value)} />
+          {m.roleCode !== 'ADMIN' && m.status !== 'SUSPENDED' && <label className="st-field">해제 예정일시 (비우면 무기한)
+            <input className="st-input" type="datetime-local" value={suspendedUntil} onChange={(e) => setSuspendedUntil(e.target.value)} />
+          </label>}
           {op && op.reviewStatusCode === 'PENDING' && <><button className="st-btn" onClick={() => review('APPROVED')}>업주 승인</button>
             <button className="st-btn st-btn-line" onClick={() => review('REJECTED')}>업주 반려</button></>}
           {m.roleCode !== 'ADMIN' && (m.status === 'SUSPENDED'
@@ -258,40 +293,70 @@ function Members({ onChanged }) {
 function HumanCourses({ onChanged }) {
   const [tab, setTab] = useState('courses');
   const [f, setF] = useState({});
+  const [commentFilters, setCommentFilters] = useState({});
+  const [scope, setScope] = useState('MAIN');
+  const [exposureRegion, setExposureRegion] = useState('');
+  const [exposurePostId, setExposurePostId] = useState('');
+  const [month, setMonth] = useState(new Date().toISOString().slice(0, 7));
   const [list, reload] = useLoad(() => adminGet('/human-courses', f), [JSON.stringify(f)]);
+  const [allPosts, reloadAllPosts] = useLoad(() => adminGet('/human-courses'), []);
   const [reports, reloadReports] = useLoad(() => adminGet('/human-reports'), []);
+  const [comments, reloadComments] = useLoad(() => adminGet('/human-comments', commentFilters), [JSON.stringify(commentFilters)]);
+  const [exposures, reloadExposures] = useLoad(() => adminGet('/human-exposures', { scope, region: scope === 'REGION' ? exposureRegion : '' }), [scope, exposureRegion]);
+  const [popular, reloadPopular] = useLoad(() => adminGet('/human-popularity', { month }), [month]);
+  const [picks, reloadPicks] = useLoad(() => adminGet('/human-monthly-picks', { month }), [month]);
   const [sel, setSel] = useState(null);
   const [detail, reloadDetail] = useLoad(() => (sel ? adminGet(`/human-courses/${sel}`) : Promise.resolve(null)), [sel]);
   const [reason, setReason] = useState('');
-  const [msg, run] = useAction(() => { reload(); reloadReports(); reloadDetail(); onChanged?.(); });
-  const c = detail.data?.course || detail.data?.post;
-  const featured = detail.data?.featured;
+  const [msg, run] = useAction(() => { reload(); reloadAllPosts(); reloadReports(); reloadComments(); reloadDetail(); reloadExposures(); reloadPopular(); reloadPicks(); onChanged?.(); });
+  const c = detail.data?.post;
+  const featured = c?.featured;
+  const visiblePosts = (allPosts.data || []).filter((p) => p.status === 'VISIBLE' && !p.deletedAt);
   return <>
     <div className="adm-toolbar">
-      <Tabs value={tab} onChange={setTab} items={[['courses', '휴먼 추천 코스', list.data?.length], ['reports', '신고', reports.data?.length]]} />
-      {tab === 'courses' && <Filters fields={[['status', '게시 상태', ['PUBLISHED', 'BLINDED', 'DELETED']], ['query', '제목']]} value={f} onChange={setF} />}
+      <Tabs value={tab} onChange={setTab} items={[['courses', '휴먼 추천 코스', list.data?.length], ['comments', '댓글', comments.data?.length], ['reports', '신고', reports.data?.length], ['exposure', '노출 관리', exposures.data?.length], ['monthly', '월간 인기', picks.data?.length]]} />
+      {tab === 'courses' && <Filters fields={[['status', '게시 상태', ['VISIBLE', 'BLINDED', 'DELETED']], ['reported', '신고 여부', ['true', 'false']], ['reportStatus', '신고 처리', ['PENDING', 'RESOLVED', 'DISMISSED', 'NONE']], ['region', '지역'], ['from', '작성 시작일'], ['to', '작성 종료일'], ['query', '제목']]} value={f} onChange={setF} />}
+      {tab === 'comments' && <Filters fields={[['region', '지역'], ['from', '작성 시작일'], ['to', '작성 종료일'], ['query', '내용·작성자'], ['postId', '코스 번호']]} value={commentFilters} onChange={setCommentFilters} />}
     </div>
-    <Msg msg={msg || (list.error && { text: list.error })} />
-    <div className="adm-split">
+    <Msg msg={msg || ([list, comments, exposures, popular, picks].find((s) => s.error)?.error && { text: [list, comments, exposures, popular, picks].find((s) => s.error).error })} />
+    {(tab === 'courses' || tab === 'reports') && <div className="adm-split">
       {tab === 'courses'
         ? <Table title="휴먼 추천 코스" rows={list.data} rowKey="id" selected={sel} onSelect={setSel} empty="아직 등록된 휴먼 추천 코스가 없어요."
-          columns={[['제목', (r) => r.title], ['작성자', (r) => show(r.memberId)], ['작성일', (r) => date(r.createdAt).slice(0, 10)], ['노출', (r) => (r.featured ? '추천' : '—')], ['상태', (r) => <Pill v={r.status} />]]} />
+          columns={[['제목', (r) => r.title], ['지역', (r) => show(r.region)], ['작성자', (r) => show(r.authorNickname || r.memberId)], ['작성일', (r) => date(r.createdAt).slice(0, 10)], ['메인', (r) => (r.featured ? '노출' : '—')], ['상태', (r) => <Pill v={r.status} />]]} />
         : <Table title="신고" rows={reports.data} rowKey="id" onSelect={(id) => { const r = reports.data.find((x) => x.id === id); if (r) setSel(r.courseId); }} empty="접수된 신고가 없어요."
-          columns={[['코스', (r) => show(r.courseId)], ['사유', (r) => show(r.reason)], ['신고일', (r) => date(r.createdAt).slice(0, 10)], ['상태', (r) => <Pill v={r.status} />]]} />}
+          columns={[['코스', (r) => show(r.courseId)], ['신고자', (r) => show(r.reporterNickname || r.reporterId)], ['사유', (r) => show(r.reason)], ['신고일', (r) => date(r.createdAt).slice(0, 10)], ['상태', (r) => <Pill v={r.status} />]]} />}
       <Detail title="코스 상세">{!c ? <Pick /> : <>
-        <DL items={[['제목', c.title], ['상태', <Pill v={c.status} />], ['작성자', show(c.memberId)], ['연결 코스', show(c.courseId)], ['작성일', date(c.createdAt)], ['메인 노출', featured ? '추천 중' : '아님']]} />
+        <DL items={[['제목', c.title], ['상태', <Pill v={c.status} />], ['작성자', show(c.authorNickname || c.memberId)], ['연결 코스', show(c.courseId)], ['지역', show(c.region)], ['작성일', date(c.createdAt)], ['메인 노출', featured ? '추천 중' : '아님']]} />
         <p className="adm-sub">내용</p><p className="adm-clamp">{show(c.content)}</p>
         <MiniList title="신고" rows={detail.data.reports} empty="신고 없음"
-          columns={[['사유', (r) => show(r.reason)], ['상태', (r) => <Pill v={r.status} />], ['', (r) => <button className="adm-link" onClick={() => run(() => adminPost(`/human-reports/${r.id}/resolve`, { status: 'RESOLVED', reason }), '신고를 처리했어요.')}>처리 완료</button>]]} />
+          columns={[['신고자', (r) => show(r.reporterNickname || r.reporterId)], ['사유', (r) => show(r.reason)], ['상태', (r) => <Pill v={r.status} />], ['', (r) => <button className="adm-link" onClick={() => run(() => adminPost(`/human-reports/${r.id}/resolve`, { status: 'RESOLVED', reason }), '신고를 처리했어요.')}>처리 완료</button>]]} />
         <MiniList title="처리 이력" rows={detail.data.history || detail.data.actions} empty="처리 이력 없음" columns={histCols} />
         <div className="adm-actions">
           <input className="st-input" placeholder="처리 사유" value={reason} onChange={(e) => setReason(e.target.value)} />
-          {c.status === 'BLINDED' ? <button className="st-btn" onClick={() => run(() => adminPost(`/human-courses/${sel}/status`, { status: 'PUBLISHED', reason }), '블라인드를 해제했어요.')}>블라인드 해제</button>
+          {c.status === 'BLINDED' ? <button className="st-btn" onClick={() => run(() => adminPost(`/human-courses/${sel}/status`, { status: 'VISIBLE', reason }), '블라인드를 해제했어요.')}>블라인드 해제</button>
             : <button className="st-btn st-btn-line" onClick={() => run(() => adminPost(`/human-courses/${sel}/status`, { status: 'BLINDED', reason }), '블라인드 처리했어요.')}>블라인드</button>}
-          <button className="st-btn st-btn-line" onClick={() => run(() => adminPost(`/human-courses/${sel}/feature`, { featured: !featured }), featured ? '추천 노출을 해제했어요.' : '메인 추천으로 노출해요.')}>{featured ? '추천 해제' : '메인 추천 지정'}</button>
+          <button className="st-btn st-btn-line" onClick={() => run(() => adminPost('/human-exposures', { postId: sel, scope: 'MAIN', selected: !featured }), featured ? '메인 노출을 해제했어요.' : '메인에 노출했어요.')}>{featured ? '메인 노출 해제' : '메인 노출 지정'}</button>
         </div>
       </>}</Detail>
-    </div>
+    </div>}
+    {tab === 'comments' && <Table title="댓글 목록" rows={comments.data} rowKey="commentId" empty="조건에 맞는 댓글이 없어요."
+      columns={[['코스', (r) => r.postTitle], ['작성자', (r) => show(r.authorNickname || r.authorId)], ['지역', (r) => show(r.region)], ['내용', (r) => r.content], ['작성일', (r) => date(r.createdAt)], ['삭제', (r) => r.deleted ? '삭제됨' : '—']]} />}
+    {tab === 'exposure' && <>
+      <div className="adm-filters">
+        <label className="st-field">노출 위치<select className="st-input" value={scope} onChange={(e) => setScope(e.target.value)}><option value="MAIN">메인</option><option value="REGION">지역</option></select></label>
+        {scope === 'REGION' && <label className="st-field">지역<input className="st-input" value={exposureRegion} onChange={(e) => setExposureRegion(e.target.value)} placeholder="예: 경주" /></label>}
+        <label className="st-field">코스<select className="st-input" value={exposurePostId} onChange={(e) => setExposurePostId(e.target.value)}><option value="">선택</option>{visiblePosts.map((p) => <option key={p.id} value={p.id}>{p.title} (#{p.id})</option>)}</select></label>
+        <button className="st-btn" disabled={!exposurePostId || (scope === 'REGION' && !exposureRegion.trim())} onClick={() => run(() => adminPost('/human-exposures', { postId: Number(exposurePostId), scope, region: scope === 'REGION' ? exposureRegion.trim() : null, selected: true }), '노출을 지정했어요.')}>노출 지정</button>
+      </div>
+      <Table title={`${scope === 'MAIN' ? '메인' : exposureRegion || '전체 지역'} 노출 코스`} rows={exposures.data} rowKey="slotKey" columns={[['제목', (r) => r.title], ['지역', (r) => r.region || '전체'], ['작성자', (r) => show(r.authorNickname)], ['좋아요', (r) => r.likeCount], ['', (r) => <button className="adm-link" onClick={() => run(() => adminPost('/human-exposures', { postId: r.postId, scope: r.scope, region: r.region || null, selected: false }), '노출을 해제했어요.')}>해제</button>]]} />
+    </>}
+    {tab === 'monthly' && <>
+      <div className="adm-filters"><label className="st-field">선정 월<input className="st-input" type="month" value={month} onChange={(e) => setMonth(e.target.value)} /></label></div>
+      <div className="adm-split">
+        <Table title="월간 좋아요 순위" rows={popular.data} rowKey="postId" columns={[['제목', (r) => r.title], ['지역', (r) => r.region], ['좋아요', (r) => r.likeCount], ['', (r) => <button className="adm-link" onClick={() => run(() => adminPost('/human-monthly-picks', { month, postId: r.postId, selected: !r.selected }), r.selected ? '선정을 해제했어요.' : '월간 인기 코스로 선정했어요.')}>{r.selected ? '선정 해제' : '선정'}</button>]]} />
+        <Table title="선정된 코스 · 좋아요 순" rows={picks.data} rowKey="postId" columns={[['제목', (r) => r.title], ['지역', (r) => r.region], ['좋아요', (r) => r.likeCount]]} />
+      </div>
+    </>}
   </>;
 }
 
@@ -351,7 +416,7 @@ function TourData() {
       ? <Table title="중심 관광지 순위 (기초지자체 중심 관광지)" rows={d.hubs} rowKey="hub_rank"
         columns={[['순위', (r) => r.hub_rank], ['관광지', (r) => r.hub_name], ['분류', (r) => show(r.category_middle)], ['주소', (r) => show(r.address)], ['기준', (r) => show(r.base_ym)]]} />
       : <Table title="수집 기록" rows={d.logs} rowKey="sync_log_id"
-        columns={[['자료', (r) => show(r.data_type)], ['제공처', (r) => show(r.provider)], ['결과', (r) => <Pill v={r.status} />], ['건수', (r) => `${r.success_count ?? 0}/${r.total_count ?? 0}`], ['시각', (r) => date(r.finished_at || r.started_at)], ['메모', (r) => show(r.error_message)]]} />}
+        columns={[['자료', (r) => show(LABEL[r.data_type] || r.data_type)], ['제공처', (r) => show(LABEL[r.provider] || r.provider)], ['결과', (r) => <Pill v={r.status} />], ['건수', (r) => `${r.success_count ?? 0}/${r.total_count ?? 0}`], ['시각', (r) => date(r.finished_at || r.started_at)], ['메모', (r) => show(r.error_message)]]} />}
   </>;
 }
 

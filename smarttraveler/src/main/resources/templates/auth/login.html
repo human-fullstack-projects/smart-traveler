@@ -25,7 +25,12 @@ document.getElementById('login-form').addEventListener('submit', async event => 
   event.preventDefault();
   const response = await fetch('/api/auth/login', {method:'POST', body:new FormData(event.target)});
   if (response.ok) location.assign('/admin');
-  else document.getElementById('login-error').hidden = false;
+  else {
+    const error = document.getElementById('login-error');
+    const body = await response.json().catch(() => ({}));
+    error.textContent = body.message || '아이디 또는 비밀번호를 확인해주세요.';
+    error.hidden = false;
+  }
 });
 </script>
 </body>
