@@ -2,6 +2,7 @@ package com.smarttraveler.admin.dto;
 
 import com.smarttraveler.domain.entity.HumanCoursePost;
 import com.smarttraveler.domain.entity.HumanCourseReport;
+import com.smarttraveler.domain.entity.Member;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -35,18 +36,25 @@ public final class AdminViews {
         return entities.stream().map(AdminViews::of).toList();
     }
 
+    private static String displayName(Member member) {
+        if (member == null) return null;
+        if (member.getNickname() != null && !member.getNickname().isBlank()) return member.getNickname();
+        return member.getLoginId() != null && !member.getLoginId().isBlank() ? member.getLoginId() : null;
+    }
+
     @Getter
     public static final class HumanCourseView {
         private final Long id, memberId, courseId, reservationId;
-        private final String title, content, courseSnapshot, status, destination, region, summary;
+        private final String title, content, courseSnapshot, status, destination, region, summary, authorNickname;
         private final Boolean featured;
         private final LocalDateTime createdAt, updatedAt, deletedAt;
-        public HumanCourseView(HumanCoursePost post, String destination, Boolean featured) {
+        public HumanCourseView(HumanCoursePost post, String destination, Boolean featured, Member author) {
             this.id = post.getPostId(); this.memberId = post.getAuthorId();
             this.courseId = post.getCourseId(); this.reservationId = post.getReservationId();
             this.title = post.getTitle(); this.content = post.getContent();
             this.courseSnapshot = post.getCourseSnapshot(); this.status = post.getStatus();
             this.destination = destination; this.region = destination; this.featured = featured; this.summary = post.getContent();
+            this.authorNickname = displayName(author);
             this.createdAt = post.getCreatedAt(); this.updatedAt = post.getUpdatedAt(); this.deletedAt = post.getDeletedAt();
         }
     }
@@ -54,12 +62,12 @@ public final class AdminViews {
     @Getter
     public static final class HumanReportView {
         private final Long id, courseId, reporterId, processedBy;
-        private final String reason, status, resolution;
+        private final String reason, status, resolution, reporterNickname;
         private final LocalDateTime createdAt, resolvedAt;
-        public HumanReportView(HumanCourseReport report) {
+        public HumanReportView(HumanCourseReport report, Member reporter) {
             this.id = report.getReportId(); this.courseId = report.getPostId();
             this.reporterId = report.getReporterId(); this.processedBy = report.getProcessedBy();
-            this.reason = report.getReason(); this.status = report.getStatus();
+            this.reason = report.getReason(); this.status = report.getStatus(); this.reporterNickname = displayName(reporter);
             this.resolution = report.getResolution(); this.createdAt = report.getCreatedAt();
             this.resolvedAt = report.getProcessedAt();
         }

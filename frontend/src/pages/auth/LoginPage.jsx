@@ -2,9 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import '../../css/Auth.css';
 import { login } from '../../api/auth';
 import OwnerReviewPage from './OwnerReviewPage';
+import { useAuth } from '../../contexts/AuthContext';
 
 // 로그인 (AUTH) — 처리 로직은 sein/v1 그대로, 화면만 공유 CSS(st-*)로.
 export default function LoginPage({ onLogin }) {
+  const { member: currentMember, login: updateAuth } = useAuth();
   const [loginId, setLoginId] = useState('');
   const [password, setPassword] = useState('');
   const [visible, setVisible] = useState(false);
@@ -34,7 +36,7 @@ export default function LoginPage({ onLogin }) {
     setBusy(true);
     try {
       const member = await login(loginId.trim(), password);
-      if (member.roleCode === 'OWNER') setReviewMember(member);
+      if (member.roleCode === 'OWNER') { updateAuth(member); setReviewMember(member); }
       else onLogin(member);
     } catch (error) {
       if (mounted.current) setNotice(error.message);
@@ -50,7 +52,7 @@ export default function LoginPage({ onLogin }) {
     setNotice('');
   }
 
-  if (reviewMember) return <OwnerReviewPage onContinue={() => onLogin(reviewMember)} />;
+  if (reviewMember && currentMember?.roleCode === 'OWNER') return <OwnerReviewPage onContinue={() => onLogin(reviewMember)} />;
   return (
     <div className="st-page auth-page">
       <section className="auth-wrap" aria-labelledby="login-title">

@@ -44,10 +44,10 @@
 | POST | `/api/admin/members/{id}/status` | `{"status":"SUSPENDED","reasonCode":"OTHER","reason":"..."}`; `ACTIVE`, `WITHDRAWN` 지원 |
 | GET | `/api/admin/owners/pending` | 승인 대기 업주 |
 | POST | `/api/admin/owners/{id}/review` | `{"decision":"APPROVED","comment":"..."}` |
-| GET | `/api/admin/human-courses` | `status,reportStatus,query,reported,region,from,to`; 지역은 연결 코스의 목적지 포함 검색, 날짜 양끝 포함. 응답에 `region` 추가 |
-| GET | `/api/admin/human-courses/{id}` | 글, 신고, 처리 이력, 추천 노출 여부 |
-| GET | `/api/admin/human-comments` | `region,from,to,query,postId`; 글 제목·작성자·작성일·삭제 여부 포함 |
-| GET | `/api/admin/human-reports` | 전체 신고 |
+| GET | `/api/admin/human-courses` | `status,reportStatus,query,reported,region,from,to`; 지역은 연결 코스의 목적지 포함 검색, 날짜 양끝 포함. 응답에 `region`, `authorNickname`(닉네임 → 로그인 ID → 없으면 null) 포함 |
+| GET | `/api/admin/human-courses/{id}` | 글(`authorNickname` 포함), 신고(`reporterNickname` 포함), 처리 이력, 추천 노출 여부 |
+| GET | `/api/admin/human-comments` | `region,from,to,query,postId`; 글 제목·작성자(`authorNickname`: 닉네임 → 로그인 ID → 없으면 null)·작성일·삭제 여부 포함 |
+| GET | `/api/admin/human-reports` | 전체 신고. `reporterNickname`은 닉네임 → 로그인 ID → 없으면 null |
 | POST | `/api/admin/human-courses/{id}/status` | `{"status":"BLINDED","reason":"..."}` |
 | POST | `/api/admin/human-courses/{id}/feature` | `{"featured":true}` |
 | GET | `/api/admin/human-exposures` | `scope=MAIN` 또는 `scope=REGION&region=경주`; REGION에서 region 생략 시 모든 지역. 응답: `slotKey,postId,scope,region,title,likeCount,authorNickname` |
