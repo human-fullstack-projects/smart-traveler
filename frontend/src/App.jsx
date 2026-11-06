@@ -11,6 +11,7 @@ import SiteFooter from './components/layout/SiteFooter';
 import MainLayout from './components/layout/MainLayout';
 import { useAuth } from './contexts/AuthContext';
 
+
 import { chatApi } from './chatApi.js';
 import TravelConditions from './TravelConditions.jsx';
 import TourSearch from './TourSearch.jsx';
@@ -18,6 +19,7 @@ import { createEmptyConditions } from './travelConditions.js';
 import StaySearchPage from './pages/stays/search/StaySearchPage.jsx';
 import StayBookingPage from './pages/stays/booking/StayBookingPage.jsx';
 import OwnerPage from './pages/owner/OwnerPage.jsx';
+import OwnerAccess from './pages/owner/OwnerAccess.jsx';
 
 import MyPageMenu from './pages/mypage/components/MyPageMenu';
 import MyPage from './pages/mypage/pages/MyPage';
@@ -255,8 +257,13 @@ export default function App() {
   }
 
   if (route === '/owner') {
-    return <OwnerPage member={member} onLogout={handleLogout} loggingOut={loggingOut} />;
-  }
+  // return <OwnerPage member={member} onLogout={handleLogout} loggingOut={loggingOut} />;
+  return (
+    <OwnerAccess>
+      <OwnerPage member={member} onLogout={handleLogout} loggingOut={loggingOut} />
+    </OwnerAccess>
+  );
+}
 
   const TopNavScreen = topNavPageRoutes[route];
   if (TopNavScreen) {

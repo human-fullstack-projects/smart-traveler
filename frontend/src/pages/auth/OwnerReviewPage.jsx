@@ -25,7 +25,7 @@ export default function OwnerReviewPage({ onContinue }) {
     finally { setBusy(false); }
   }
 
-  return <div className="st-page auth-page"><section className="auth-wrap wide st-panel" aria-labelledby="review-title">
+  return <div className="st-page auth-page owner-auth-page"><section className="auth-wrap wide st-panel" aria-labelledby="review-title">
     <p className="auth-kicker">OWNER REVIEW</p>
     <h1 id="review-title" className="st-h2">업주 신청 상태</h1>
     {review && <>
