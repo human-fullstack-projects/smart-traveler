@@ -89,7 +89,7 @@ public class AdminDataService {
     public List<HumanReportView> humanReports() { return humanReports.findAllWithReporter().stream().map(report -> new HumanReportView(report, report.getReporter())).toList(); }
     public List<HumanActionHistory> humanHistory(Long courseId) { return humanActions.findByCourseIdOrderByCreatedAtDesc(courseId); }
     public List<RecommendationCriteria> criteria() { return criteria.findAll(); }
-    public List<RecommendationCriteriaHistory> criteriaHistory(Long id) { return criteriaHistory.findByCriteriaIdOrderByCreatedAtDesc(id); }
+    public List<RecommendationCriteriaHistory> criteriaHistory(Long id) { return criteriaHistory.findByCriteriaIdOrderByCreatedAtDescIdDesc(id); }
 
     @Transactional
     public void reviewOwner(Long id, String status, String comment, String reviewerLogin) {

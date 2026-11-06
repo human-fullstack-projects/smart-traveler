@@ -367,10 +367,13 @@ function AiCourses() {
   const [list] = useLoad(() => adminGet('/ai-courses', f), [JSON.stringify(f)]);
   const [errors] = useLoad(() => adminGet('/ai-courses/errors'), []);
   const [criteria, reloadCriteria] = useLoad(() => adminGet('/ai-courses/criteria'), []);
+  const [criteriaSel, setCriteriaSel] = useState(null);
+  const [criteriaHistory, reloadCriteriaHistory] = useLoad(
+    () => criteriaSel ? adminGet(`/ai-courses/criteria/${criteriaSel}/history`) : Promise.resolve([]), [criteriaSel]);
   const [sel, setSel] = useState(null);
   const [detail] = useLoad(() => (sel ? adminGet(`/ai-courses/${sel}`) : Promise.resolve(null)), [sel]);
   const [edit, setEdit] = useState({});
-  const [msg, run] = useAction(reloadCriteria);
+  const [msg, run] = useAction(() => { reloadCriteria(); reloadCriteriaHistory(); });
   const c = detail.data?.course || detail.data;
   return <>
     <div className="adm-toolbar">
@@ -379,10 +382,20 @@ function AiCourses() {
     </div>
     <Msg msg={msg || (list.error && { text: list.error })} />
     {tab === 'criteria'
-      ? <Table title="AI 추천 기준 (코스 생성에 쓰는 기준)" rows={criteria.data} rowKey="id"
+      ? <>
+        <p className="st-note">기준을 바꿔도 이미 만든 코스·연결된 숙소는 바뀌지 않아요.</p>
+        <div className="adm-split">
+        <Table title="AI 추천 기준 (코스 생성에 쓰는 기준)" rows={criteria.data} rowKey="id" selected={criteriaSel} onSelect={setCriteriaSel}
         columns={[['기준', (r) => r.name], ['값', (r) => <input className="st-input adm-inline-input" value={edit[r.id] ?? r.value ?? ''} onClick={(e) => e.stopPropagation()} onChange={(e) => setEdit({ ...edit, [r.id]: e.target.value })} />],
           ['수정일', (r) => date(r.updatedAt)],
-          ['', (r) => <button className="st-btn adm-inline-btn" onClick={(e) => { e.stopPropagation(); run(() => adminPost(`/ai-courses/criteria/${r.id}`, { value: edit[r.id] ?? r.value }), `「${r.name}」 기준을 저장했어요.`); }}>저장</button>]]} />
+          ['', (r) => <><button className="st-btn adm-inline-btn" onClick={(e) => { e.stopPropagation(); setCriteriaSel(r.id); run(() => adminPost(`/ai-courses/criteria/${r.id}`, { value: edit[r.id] ?? r.value }), `「${r.name}」 기준을 저장했어요.`); }}>저장</button>{' '}
+            <button className="adm-link" onClick={(e) => { e.stopPropagation(); setCriteriaSel(r.id); }}>이력</button></>]]} />
+        {criteriaSel == null ? <Detail title="변경 이력"><Pick /></Detail>
+          : <Table title={`변경 이력 · ${criteria.data?.find((r) => r.id === criteriaSel)?.name || ''}`} rows={criteriaHistory.data} rowKey="id" empty="변경 이력이 없어요." pageSize={5}
+            columns={[["이전 값", (r) => show(r.oldValue)], ["새 값", (r) => show(r.newValue)], ["관리자", (r) => show(r.adminNickname || r.adminLoginId)], ["변경일", (r) => date(r.createdAt)]]} />}
+        </div>
+        {criteriaHistory.error && <Msg msg={{ ok: false, text: criteriaHistory.error }} />}
+      </>
       : <div className="adm-split">
         {tab === 'courses'
           ? <Table title="AI 추천 코스" rows={list.data} rowKey="id" selected={sel} onSelect={setSel}

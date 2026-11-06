@@ -202,6 +202,14 @@ public class AdminRestController {
         data.updateCriterion(id,body.value());
         return data.criteria().stream().filter(x -> Objects.equals(x.getId(),id)).findFirst().orElseThrow();
     }
+    @GetMapping("/ai-courses/criteria/{id}/history")
+    public List<CriteriaHistoryView> criteriaHistory(@PathVariable Long id) {
+        return data.criteriaHistory(id).stream().map(h -> {
+            Member admin = data.member(h.getAdminId());
+            return new CriteriaHistoryView(h.getId(), h.getOldValue(), h.getNewValue(),
+                admin.getLoginId(), admin.getNickname(), h.getCreatedAt());
+        }).toList();
+    }
 
     @GetMapping("/tour-data")
     public Map<String,Object> tourData(@RequestParam(defaultValue="47130") String region) {
@@ -227,6 +235,8 @@ public class AdminRestController {
     public record OwnerDecision(String decision,String comment) {}
     public record FeatureChange(boolean featured) {}
     public record CriteriaChange(String value) {}
+    public record CriteriaHistoryView(Long id, String oldValue, String newValue,
+        String adminLoginId, String adminNickname, java.time.LocalDateTime createdAt) {}
     public record TourRun(String region) {}
     public record MemberView(Long memberId,String loginId,String nickname,String email,String roleCode,
         String status,java.time.LocalDateTime createdAt,java.time.LocalDateTime deletedAt,
