@@ -67,6 +67,7 @@ export default function SignupPage() {
       <p className="auth-kicker">WELCOME</p>
       <h1 className="st-h2">가입이 완료됐어요</h1>
       <p className="st-note">{done.role === 'OWNER' ? '숙박업주 가입은 관리자 승인 후 숙소를 등록할 수 있어요. 승인 결과는 로그인 후 확인해주세요.' : '이제 로그인하고 여행을 시작해보세요.'}</p>
+      <p className="st-note">이 사이트에서 보관한 임시 코스는 다음 로그인 시 연결됩니다. 연결이 끝날 때까지 새로고침하거나 페이지를 닫지 마세요.</p>
       <a className="st-btn st-btn-lg" href="#/login">로그인하러 가기</a>
     </div></section></div>;
   }

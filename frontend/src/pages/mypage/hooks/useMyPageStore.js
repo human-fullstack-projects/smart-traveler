@@ -1,14 +1,22 @@
-import { useEffect, useReducer, useState } from 'react';
-import { initialState, loadState, reduceState, STORAGE_KEY } from '../data/store';
+import { useEffect, useRef, useSyncExternalStore } from 'react';
+import { createMyPageSession, emptyData } from '../data/store';
+import { myPageApi } from '../api/myPageApi';
 
-export default function useMyPageStore() {
-  const [state, dispatch] = useReducer(reduceState, undefined, () => {
-    try { return loadState(window.localStorage); } catch { return initialState(); }
-  });
-  const [storageError, setStorageError] = useState('');
+export default function useMyPageStore({ member, authChecked, authCheckFailed, authRevision }) {
+  const session = useRef(null);
+  if (!session.current) session.current = createMyPageSession(myPageApi);
+  const store = session.current;
+  const state = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot);
+  useEffect(() => { store.setIdentity(member, authChecked, authCheckFailed); }, [store, member?.memberId, authChecked, authCheckFailed, authRevision]);
   useEffect(() => {
-    try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); setStorageError(''); }
-    catch { setStorageError('브라우저에 저장하지 못했습니다. 현재 변경은 새로고침하면 사라질 수 있습니다.'); }
-  }, [state]);
-  return { ...state, dispatch, storageError };
+    const leave = () => store.clear();
+    const returnToSite = event => { if (event.persisted) store.setIdentity(member, authChecked, authCheckFailed); };
+    window.addEventListener('pagehide', leave);
+    window.addEventListener('pageshow', returnToSite);
+    return () => { window.removeEventListener('pagehide', leave); window.removeEventListener('pageshow', returnToSite); };
+  }, [store, member, authChecked, authCheckFailed]);
+  const identity = !authChecked ? 'checking' : authCheckFailed ? 'unavailable' : member?.memberId || 'guest';
+  // effect가 실행되기 전의 렌더에서도 이전 회원 자료를 가린다.
+  const visible = state.identity === identity ? state : { identity, status: 'checking', error: '', ...emptyData(), pendingCount: 0 };
+  return { ...visible, member, isGuest: identity === 'guest', addCourse: store.addCourse, retry: store.refresh };
 }
