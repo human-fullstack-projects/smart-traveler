@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import '../../css/owner.css';
+import { request } from '../../api/auth.js';
 
 const tabs = [
   { id: 'dashboard', label: '대시보드' },
@@ -73,7 +74,32 @@ function StatusBadge({ children }) {
 //   );
 // }
 
-  function Dashboard({ onNavigate }) {
+const lodgingStatusLabels = {
+  PENDING: '승인 대기',
+  ACTIVE: '운영 중',
+  APPROVED: '승인',
+  REJECTED: '반려',
+  INACTIVE: '운영 중지',
+  CLOSED: '폐업',
+};
+
+function OwnerLodgingStatus({ lodgings, error }) {
+  if (error) return <p role="alert">{error}</p>;
+  if (lodgings === null) return <p role="status">숙소 정보를 불러오는 중이에요.</p>;
+  if (lodgings.length === 0) return <p>등록된 숙소가 없어요.</p>;
+
+  return (
+    <ul>
+      {lodgings.map(({ lodgingId, name, status }) => (
+        <li key={lodgingId}>
+          {name} · {lodgingStatusLabels[status] ?? status}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function Dashboard({ onNavigate, lodgings, lodgingError }) {
   const metrics = [
     { label: '오늘 체크인', value: 2 },
     { label: '오늘 체크아웃', value: 1 },
@@ -110,8 +136,12 @@ function StatusBadge({ children }) {
       <section className="owner-overview-card owner-overview-status">
         <div>
           <h2>숙소 운영 상태</h2>
-          <p>숙소 승인 완료 · 운영 중</p>
-          <p>등록 객실 2개 유형 · 총 6실</p>
+              {/*
+              <p>숙소 승인 완료 · 운영 중</p>
+              <p>등록 객실 2개 유형 · 총 6실</p>
+              */}
+          {/* <OwnerLodgingStatus /> */}
+          <OwnerLodgingStatus lodgings={lodgings} error={lodgingError} />
         </div>
         <button
           type="button"
@@ -283,15 +313,41 @@ export default function OwnerPage({ member, onLogout, loggingOut }) {
   const [toast, setToast] = useState('');
   const [rooms, setRooms] = useState(initialRooms);
   const [property, setProperty] = useState({ name: '해운대 웨이브 호텔', type: '호텔', zip: '48099', address: '부산 해운대구 달맞이길 42', addressDetail: '스마트트래블 빌딩', phone: '051-000-1200', website: 'https://wave-hotel.example.com', description: '해운대 바다와 달맞이길을 함께 즐길 수 있는 도심형 호텔입니다.', checkIn: '15:00', checkOut: '11:00', parking: '투숙객은 객실당 1대 무료로 주차할 수 있습니다.', facilities: ['주차', '조식', '와이파이', '짐 보관'], cancellation: '체크인 5일 전까지 무료 취소, 이후 날짜별 환불 비율을 적용합니다.' });
+  const [lodgings, setLodgings] = useState(null);
+  const [lodgingError, setLodgingError] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+
+    request('/api/owner/lodgings')
+      .then((data) => {
+        if (!cancelled) setLodgings(data);
+      })
+      .catch(() => {
+        if (!cancelled) setLodgingError('숙소 정보를 불러오지 못했어요. 새로고침 후 다시 시도해 주세요.');
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const view = useMemo(() => {
     if (activeTab === 'reservations') return <Reservations />;
     if (activeTab === 'property') return <PropertyForm property={property} setProperty={setProperty} setToast={setToast} />;
     if (activeTab === 'rooms') return <Rooms rooms={rooms} setRooms={setRooms} setToast={setToast} />;
-    return <Dashboard onNavigate={setActiveTab} />;
-  }, [activeTab, property, rooms]);
+    // return <Dashboard onNavigate={setActiveTab} />;
+    return <Dashboard onNavigate={setActiveTab} lodgings={lodgings} lodgingError={lodgingError} />;
+  }, [activeTab, property, rooms, lodgings, lodgingError]);
   return (
     <div className="owner-page">
-      <OwnerHeader propertyName={property.name} member={member} onLogout={onLogout} loggingOut={loggingOut} />
+      {/* <OwnerHeader propertyName={property.name} member={member} onLogout={onLogout} loggingOut={loggingOut} /> */}
+      <OwnerHeader
+        propertyName={lodgings?.length === 1 ? lodgings[0].name : '업주센터'}
+        member={member}
+        onLogout={onLogout}
+        loggingOut={loggingOut}
+      />
       <div className="owner-shell">
         <aside className="owner-sidebar"><div className="owner-sidebar__status"><span>PARTNER STATUS</span><strong>업주 승인 완료</strong><small>본인 업장만 조회·수정 가능</small></div><nav aria-label="업주센터 메뉴">{tabs.map((tab) => <button type="button" key={tab.id} className={activeTab === tab.id ? 'is-active' : ''} onClick={() => { setActiveTab(tab.id); setToast(''); }}><i aria-hidden="true">{tab.id === 'dashboard' ? '▦' : tab.id === 'reservations' ? '▤' : tab.id === 'property' ? '⌂' : '₩'}</i>{tab.label}</button>)}</nav><div className="owner-sidebar__help"><strong>도움이 필요하신가요?</strong><span>파트너 운영 가이드를 확인하세요.</span><button type="button">운영 가이드</button></div></aside>
         <main className="owner-main">{toast && <div className="owner-toast" role="status">{toast}<button type="button" aria-label="알림 닫기" onClick={() => setToast('')}>×</button></div>}{view}<p className="owner-demo-caption">업주센터 프론트엔드 샘플 · 권한, 소유자 검증, 예약·재고·요금 저장은 백엔드 연결 전입니다.</p></main>
