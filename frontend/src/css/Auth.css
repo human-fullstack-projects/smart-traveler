@@ -31,4 +31,7 @@
 .auth-done { text-align: center; }
 .auth-done .st-btn { margin-top: 18px; }
 .auth-review-history { display: grid; gap: 8px; padding-left: 20px; color: var(--st-ink); }
+.auth-page.owner-auth-page {
+  align-items: flex-start;
+}
 @media (max-width: 600px) { .auth-row, .auth-roles { grid-template-columns: 1fr; } }
