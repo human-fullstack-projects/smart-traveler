@@ -48,6 +48,7 @@ try {
   assert.ok(result.id);
   const created = structuredClone(state.courses.find((c) => c.id === result.id));
   assert.equal(created.courseVersion, 3);
+  assert.equal(created.travelDates, '2026-10-12 ~ 2026-10-14');
   assert.ok(run({ type: 'create', reservationId: 'R101', fields }).error, '예약별 중복 글 방지');
   assert.ok(run({ type: 'edit', id: 1, fields }).error);
   run({ type: 'edit', id: result.id, fields: { ...fields, title: '수정한 제목' } });
@@ -56,6 +57,7 @@ try {
   assert.equal(edited.reservationId, created.reservationId);
   assert.deepEqual(edited.plan, created.plan);
   assert.equal(edited.courseVersion, created.courseVersion);
+  assert.deepEqual(edited.photos, created.photos);
   run({ type: 'moderate', id: result.id });
   run({ type: 'edit', id: result.id, fields });
   assert.equal(state.courses.find((c) => c.id === result.id).visibility, 'BLINDED');
@@ -67,6 +69,9 @@ try {
     assert.ok(renderToStaticMarkup(React.createElement(Page, { ...state, ...props, execute() {} })).includes('<h1>'));
     console.log(`${name}: changed state render OK`);
   }
+  assert.ok(run({ type: 'delete', id: 1 }).error, '타인 글 삭제 방지');
+  assert.equal(run({ type: 'delete', id: result.id }).id, result.id);
+  assert.ok(!state.courses.some((c) => c.id === result.id));
   run({ type: 'reset' }); assert.deepEqual(state, freshState());
-  console.log('Filters, likes, comments, reports, create/edit, batch, moderation, reset: OK');
+  console.log('Filters, likes, comments, reports, create/edit/delete, batch, moderation, reset: OK');
 } finally { await server.close(); }

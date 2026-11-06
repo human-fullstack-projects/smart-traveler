@@ -8,6 +8,8 @@ const server = await createServer({ server: { middlewareMode: true, hmr: false }
 const previousWindow = globalThis.window;
 try {
   const { default: App } = await server.ssrLoadModule('/src/App.jsx');
+  const { AuthProvider } = await server.ssrLoadModule('/src/contexts/AuthContext.jsx');
+  const renderApp = () => renderToStaticMarkup(React.createElement(AuthProvider, null, React.createElement(App)));
   const cases = [
     ['/human-courses', '다른 여행자의 추천 코스', '#/human-courses/1'],
     ['/human-courses/1', '부산 바다와 맛집을 하루에', '#/human-courses'],
@@ -23,7 +25,7 @@ try {
   ];
   for (const [route, expected, link] of cases) {
     globalThis.window = { location: { hash: `#${route}` }, localStorage: { getItem() { return null; } } };
-    const html = renderToStaticMarkup(React.createElement(App));
+    const html = renderApp();
     assert.ok(html.includes(expected), `${route}: content`);
     assert.ok(html.includes(`href="${link}"`), `${route}: navigation`);
     assert.equal((html.match(/<header/g) || []).length, 1, '헤더 중복 없음');
@@ -35,7 +37,7 @@ try {
   const { STORAGE_KEY } = await server.ssrLoadModule('/src/pages/human_course/data/courseStorage.js');
   for (const route of ['/human-courses', '/human-courses/create', '/human-courses/moderation', '/human-courses/1', '/human-courses/1/edit']) {
     globalThis.window = { location: { hash: `#${route}` }, localStorage: { getItem: (key) => key === STORAGE_KEY ? JSON.stringify({ version: 1, state: { courses: [], reservations: [], nextId: 1 } }) : null } };
-    const html = renderToStaticMarkup(React.createElement(App));
+    const html = renderApp();
     assert.ok(html.includes('<h1>'), `${route}: 빈 데이터 렌더링`);
     assert.ok(!html.includes('NaN') && !html.includes('undefined'));
   }

@@ -71,6 +71,7 @@
 .human-courses .course-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; }
 .human-courses .course-card { border: 1px solid var(--line); border-radius: 6px; background: #fff; overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
 .human-courses .course-thumb { background: #eff1f2; border-bottom: 1px solid #e4e7e9; height: 110px; display: grid; place-items: center; color: #87929a; font-size: 12px; }
+.human-courses .course-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .human-courses .course-content { padding: 15px; display: flex; flex: 1; flex-direction: column; gap: 8px; }
 .human-courses .course-content h3 { margin: 0; font-size: 16px; }
 .human-courses .course-content p { margin: 0; }
@@ -86,6 +87,7 @@
 .human-courses .article-intro .summary { font-size: 15px; margin: 0; }
 .human-courses .photo-boxes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(128px, 100%), 1fr)); gap: 10px; list-style: none; margin: 0; padding: 0; }
 .human-courses .photo-boxes li { display: flex; align-items: center; justify-content: center; min-height: 108px; text-align: center; padding: 12px; font-size: 12px; background: #f1f3f4; border: 1px dashed #cbd4d9; border-radius: 5px; color: #63727b; overflow-wrap: anywhere; }
+.human-courses .photo-boxes img { display: block; width: 100%; max-height: 240px; object-fit: contain; border-radius: 4px; }
 .human-courses .writing-sample { white-space: pre-wrap; line-height: 1.75; padding: 15px; border: 1px solid #e4e9eb; background: #fcfdfd; border-radius: 5px; margin-bottom: 0; }
 .human-courses .plan-day { border: 1px solid #e2e7e9; padding: 13px 15px; border-radius: 5px; margin-bottom: 10px; }
 .human-courses .plan-day:last-child { margin-bottom: 0; }
@@ -116,6 +118,14 @@
 .human-courses details { margin: 16px 0; padding: 12px; border: 1px dashed #bac6ce; border-radius: 6px; }
 .human-courses summary { cursor: pointer; font-weight: 600; }
 .human-courses details[open] > summary { margin-bottom: 14px; }
+.human-courses .course-preview { background: #fcfdfd; }
+.human-courses .course-preview .writing-sample { margin-bottom: 14px; }
+.human-courses .form-error { color: #a73434; border: 1px solid #ebbbbb; background: #fff7f7; padding: 10px; border-radius: 5px; }
+.human-courses .delete-course { margin-top: 12px; }
+.human-courses .delete-course .note { margin-top: 10px; }
+.human-courses .storage-notice { max-width: 1120px; margin: 16px auto; padding: 0 22px; }
+.human-courses .course-map iframe { width: 100%; height: 320px; border: 1px solid var(--line); border-radius: 5px; }
+.human-courses .map-stops { display: flex; flex-wrap: wrap; gap: 7px 16px; margin: 12px 0 0; padding-left: 20px; }
 
 @media (max-width: 1050px) {
   .human-courses .layout, .human-courses .layout.wide-left { grid-template-columns: minmax(0, 1fr); }
