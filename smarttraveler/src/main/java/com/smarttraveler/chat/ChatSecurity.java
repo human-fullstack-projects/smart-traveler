@@ -23,4 +23,5 @@ public class ChatSecurity {
         return http.authorizeHttpRequests(auth -> auth.dispatcherTypeMatchers(DispatcherType.ERROR).permitAll().anyRequest().authenticated())
                 .formLogin(Customizer.withDefaults()).httpBasic(Customizer.withDefaults()).build();
     }
+
 }

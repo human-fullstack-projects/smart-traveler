@@ -8,6 +8,8 @@ export function AuthProvider({ children }) {
   const [authChecked, setAuthChecked] = useState(false);
   const [authCheckFailed, setAuthCheckFailed] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [authRevision, setAuthRevision] = useState(0);
+  const [checkRequest, setCheckRequest] = useState(0);
   const authVersion = useRef(0);
   const logoutInFlight = useRef(false);
 
@@ -19,20 +21,34 @@ export function AuthProvider({ children }) {
         if (cancelled || version !== authVersion.current) return;
         setMember(value);
         setAuthChecked(true);
+        setAuthCheckFailed(false);
       })
       .catch(() => {
-        if (cancelled) return;
+        if (cancelled || version !== authVersion.current) return;
         setAuthChecked(true);
-        if (version === authVersion.current) setAuthCheckFailed(true);
+        setAuthCheckFailed(true);
       });
     return () => { cancelled = true; };
-  }, []);
+  }, [checkRequest]);
+
+  function retryAuth() {
+    authVersion.current += 1;
+    setAuthChecked(false);
+    setAuthCheckFailed(false);
+    setCheckRequest(value => value + 1);
+  }
 
   function login(value) {
     authVersion.current += 1;
+    setAuthRevision(version => version + 1);
     setMember(value);
     setAuthChecked(true);
     setAuthCheckFailed(false);
+  }
+
+  function updateMemberProfile(expectedMemberId, changes) {
+    setMember(previous => previous?.memberId === expectedMemberId
+      ? { ...previous, nickname: changes.nickname } : previous);
   }
 
   async function logout() {
@@ -43,6 +59,7 @@ export function AuthProvider({ children }) {
     try {
       await logoutRequest();
       setMember(null);
+      setAuthRevision(version => version + 1);
     } finally {
       logoutInFlight.current = false;
       setLoggingOut(false);
@@ -50,7 +67,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ member, authChecked, authCheckFailed, loggingOut, login, logout }}>
+    <AuthContext.Provider value={{ member, authChecked, authCheckFailed, loggingOut, authRevision, retryAuth, updateMemberProfile, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

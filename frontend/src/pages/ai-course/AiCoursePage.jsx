@@ -34,16 +34,20 @@ function BulbIcon() {
   );
 }
 
-export default function AiCoursePage() {
+export default function AiCoursePage({ onStart, busy = false }) {
   const [message, setMessage] = useState('');
   const [notice, setNotice] = useState('');
 
-  function startConversation() {
+  async function startConversation() {
+    if (busy) return;
     if (!message.trim()) {
       setNotice('여행 이야기를 입력해 주세요.');
       return;
     }
-    setNotice('입력한 여행 이야기는 유지됩니다. 대화 추천 기능은 연결 준비 중입니다.');
+    if (!onStart) { setNotice('대화 연결을 준비 중입니다.'); return; }
+    setNotice('');
+    try { await onStart(message.trim()); }
+    catch { setNotice('대화를 시작하지 못했습니다. 서버 연결을 확인하고 다시 시도해 주세요.'); }
   }
 
   return (
@@ -65,15 +69,17 @@ export default function AiCoursePage() {
           <div className="ac-input-row">
             <input
               id="ac-message"
+              autoFocus
+              disabled={busy}
               type="text"
               value={message}
               onChange={(e) => { setMessage(e.target.value); setNotice(''); }}
               placeholder="친구와 부산 1박 2일 여행을 가고 싶어요"
             />
-            <button type="submit" className="ac-send" aria-label="전송"><SendIcon /></button>
+            <button type="submit" className="ac-send" aria-label="전송" disabled={busy}><SendIcon /></button>
           </div>
 
-          <button type="submit" className="ac-cta">대화 시작하기 <span aria-hidden="true">→</span></button>
+          <button type="submit" className="ac-cta" disabled={busy}>{busy ? '대화 연결 중…' : '대화 시작하기'} <span aria-hidden="true">→</span></button>
 
           {notice && <p role="status" className="ac-notice">{notice}</p>}
         </form>
