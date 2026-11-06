@@ -34,12 +34,14 @@ export default function SignupPage() {
   const [form, setForm] = useState(EMPTY);
   const [errors, setErrors] = useState({});
   const [terms, setTerms] = useState([]);
+  const [termsState, setTermsState] = useState('loading');
+  const [openTerm, setOpenTerm] = useState(null);
   const [agreed, setAgreed] = useState({});
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(null);
 
-  useEffect(() => { getTerms().then(setTerms).catch((e) => setNotice(e.message)); }, []);
+  useEffect(() => { getTerms().then((list) => { setTerms(list || []); setTermsState((list || []).length ? 'ok' : 'empty'); }).catch(() => setTermsState('error')); }, []);
 
   const onChange = (name, value) => { setForm((f) => ({ ...f, [name]: value })); setErrors((e) => ({ ...e, [name]: '' })); setNotice(''); };
   const allAgreed = terms.length > 0 && terms.every((t) => agreed[t.termsId]);
@@ -113,12 +115,18 @@ export default function SignupPage() {
             </>}
             <p className="auth-section-title">약관 동의</p>
             <div className="auth-terms">
-              {terms.length === 0 ? <span className="st-note">약관을 불러오는 중이에요.</span> : <>
+              {terms.length === 0 ? <span className="st-note">{termsState === 'loading' ? '약관을 불러오는 중이에요.' : termsState === 'error' ? '약관을 불러오지 못했어요. 서버가 켜져 있는지 확인한 뒤 새로고침해 주세요.' : '등록된 약관이 없어요. 관리자에게 문의해 주세요.'}</span> : <>
                 <label className="all"><input type="checkbox" checked={allAgreed} onChange={toggleAll} />전체 동의</label>
-                {terms.map((t) => <label key={t.termsId}>
-                  <input type="checkbox" checked={Boolean(agreed[t.termsId])} onChange={() => setAgreed((a) => ({ ...a, [t.termsId]: !a[t.termsId] }))} />
-                  {TERM_NAMES[t.type] || t.type} {t.required ? <span className="auth-req">필수</span> : <span className="st-note">선택</span>}
-                </label>)}
+                {terms.map((t) => <div key={t.termsId} className="auth-term">
+                  <div className="auth-term-row">
+                    <label>
+                      <input type="checkbox" checked={Boolean(agreed[t.termsId])} onChange={() => setAgreed((a) => ({ ...a, [t.termsId]: !a[t.termsId] }))} />
+                      {TERM_NAMES[t.type] || t.type} {t.required ? <span className="auth-req">필수</span> : <span className="st-note">선택</span>}
+                    </label>
+                    <button type="button" className="auth-term-view" aria-expanded={openTerm === t.termsId} onClick={() => setOpenTerm(openTerm === t.termsId ? null : t.termsId)}>{openTerm === t.termsId ? '접기' : '보기'}</button>
+                  </div>
+                  {openTerm === t.termsId && <div className="auth-term-body">{t.content || '약관 내용이 없어요.'}<span className="st-note">버전 {t.version}</span></div>}
+                </div>)}
               </>}
             </div>
             <button className="st-btn st-btn-lg auth-submit" type="submit" disabled={busy}>{busy ? '가입 중…' : '가입하기'}</button>

@@ -83,9 +83,19 @@ INSERT IGNORE INTO course(id,member_no,destination,start_date,end_date,adults,ch
 (510001,510002,'경주',CURDATE()+INTERVAL 5 DAY,CURDATE()+INTERVAL 6 DAY,2,0,'[]','{}','[]','[]',FALSE,1,'done',TRUE,'경주 AI 코스','유적 산책',NULL,'demo-model',NOW(),NOW()),
 (510002,510003,'부산',CURDATE()+INTERVAL 8 DAY,CURDATE()+INTERVAL 9 DAY,2,0,'[]','{}','[]','[]',FALSE,1,'failed',TRUE,'부산 AI 코스','바다 여행','TourAPI 응답 실패','demo-model',NOW(),NOW()),
 (510003,510005,'전주',CURDATE()+INTERVAL 12 DAY,CURDATE()+INTERVAL 13 DAY,2,0,'[]','{}','[]','[]',FALSE,3,'running',TRUE,'전주 AI 수정 코스','한옥 여행',NULL,'demo-model',NOW(),NOW());
-INSERT IGNORE INTO admin_recommendation_criteria(id,name,setting_value,updated_at) VALUES
-(510001,'관광지 데이터 범위','공공데이터 등록 장소',NOW()),
-(510002,'도보 최대 이동 시간(분)','30',NOW()),
-(510003,'차량 최대 이동 시간(분)','60',NOW()),
-(510004,'추천 제외 장소','',NOW());
+INSERT INTO admin_recommendation_criteria(name,setting_value,updated_at)
+SELECT '관광지 데이터 범위','경주시(47130)',NOW()
+WHERE NOT EXISTS (SELECT 1 FROM admin_recommendation_criteria WHERE name='관광지 데이터 범위');
+INSERT INTO admin_recommendation_criteria(name,setting_value,updated_at)
+SELECT '추천 제외 장소','없음',NOW()
+WHERE NOT EXISTS (SELECT 1 FROM admin_recommendation_criteria WHERE name='추천 제외 장소');
+INSERT INTO admin_recommendation_criteria(name,setting_value,updated_at)
+SELECT '답변 범위 제한','여행·관광·숙소 관련 질문만 답변',NOW()
+WHERE NOT EXISTS (SELECT 1 FROM admin_recommendation_criteria WHERE name='답변 범위 제한');
+INSERT INTO admin_recommendation_criteria(name,setting_value,updated_at)
+SELECT '교통수단별 최대 이동 시간','도보 20분, 대중교통 40분, 자동차 30분',NOW()
+WHERE NOT EXISTS (SELECT 1 FROM admin_recommendation_criteria WHERE name='교통수단별 최대 이동 시간');
+INSERT INTO admin_recommendation_criteria(name,setting_value,updated_at)
+SELECT '숙소 추천 범위 확대 단계','1km → 3km → 5km',NOW()
+WHERE NOT EXISTS (SELECT 1 FROM admin_recommendation_criteria WHERE name='숙소 추천 범위 확대 단계');
 

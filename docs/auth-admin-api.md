@@ -61,12 +61,15 @@
 | GET | `/api/admin/ai-courses/errors` | 생성 실패 코스 |
 | GET | `/api/admin/ai-courses/criteria` | 추천 기준 |
 | POST | `/api/admin/ai-courses/criteria/{id}` | `{"value":"..."}` |
+| GET | `/api/admin/ai-courses/criteria/{id}/history` | 최신 변경부터 배열. `id,oldValue,newValue,adminLoginId,adminNickname,createdAt` |
 | GET | `/api/admin/tour-data` | `region` 기본값 `47130`: 지역·건수·중심 순위·수집 로그 |
 | POST | `/api/admin/tour-data/sync` | `{"region":"47130"}`; 수집 결과 |
 
 조회는 200, 권한 부족은 403, 잘못된 처리 상태는 400입니다. 예약 확정은 결제 최종 상태·금액과 `reservation_inventory`의 유효 점유를 확인한 뒤 재고 수량을 옮깁니다. 기존 Thymeleaf `/admin/**`도 같은 서비스 메서드를 사용합니다.
 
 관리자 전용 표는 `admin_reservation_action_history`, `admin_human_action_history`, `admin_recommendation_criteria`, `admin_recommendation_criteria_history`, `admin_human_featured`, `place_hub_rank`입니다. 팀 ERD 표에는 새 칸을 추가하지 않습니다.
+
+AI 추천 기준은 앱 시작 시 이름이 없는 항목만 추가하며 기존 값은 덮어쓰지 않습니다: **관광지 데이터 범위** (`경주시(47130)`), **추천 제외 장소** (`없음`), **답변 범위 제한** (`여행·관광·숙소 관련 질문만 답변`; CHAT-05·REG-04), **교통수단별 최대 이동 시간** (`도보 20분, 대중교통 40분, 자동차 30분`), **숙소 추천 범위 확대 단계** (`1km → 3km → 5km`). 값은 일반 문자열입니다. AI 코스 생성 담당은 기준을 이름으로 읽어 해석 방식을 협의해야 합니다. 기준을 바꿔도 기존 코스·연결 숙소는 자동 변경되지 않습니다.
 
 ## M63 휴먼 코스 노출·월간 인기
 

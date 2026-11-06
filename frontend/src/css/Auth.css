@@ -27,6 +27,10 @@
 .auth-terms label { display: flex; gap: 10px; align-items: center; font-size: 15px; cursor: pointer; }
 .auth-terms .all { padding-bottom: 8px; border-bottom: 1px solid var(--st-line); font-weight: 700; }
 .auth-terms input { width: 18px; height: 18px; accent-color: var(--st-teal); }
+.auth-term-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.auth-term-view { border: 0; background: none; color: var(--st-teal); font-size: 14px; font-weight: 700; cursor: pointer; padding: 4px 6px; }
+.auth-term-body { margin: 6px 0 4px 28px; padding: 12px 14px; max-height: 220px; overflow-y: auto; white-space: pre-line; font-size: 13px; line-height: 1.6; color: var(--st-ink); background: var(--st-bg, #fafafa); border: 1px solid var(--st-line); border-radius: var(--st-radius-s); }
+.auth-term-body .st-note { display: block; margin-top: 8px; }
 .auth-req { color: var(--st-danger); font-size: 12px; font-weight: 700; }
 .auth-done { text-align: center; }
 .auth-done .st-btn { margin-top: 18px; }
