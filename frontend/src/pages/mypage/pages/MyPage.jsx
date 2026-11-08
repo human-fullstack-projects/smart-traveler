@@ -1,21 +1,42 @@
+import { useState } from 'react';
 import Card from '../components/Card';
-import '../../../css/mypage.css';
 import PageHero from '../components/PageHero';
-import { previewBookings } from '../data/previewBookings';
+import ProfileAvatar from '../components/ProfileAvatar';
+import useMemberResource from '../hooks/useMemberResource';
+import { settingsApi } from '../api/settingsApi';
+import '../../../css/mypage.css';
+import '../mypage-settings.css';
 
-export default function MyPage({ bookings = previewBookings, notify = true, dispatch }) {
-  const active = bookings.filter((booking) => booking.status !== '취소' && !booking.cancelRequested);
+export default function MyPage({ bookings = [], courses = [], posts = [], member, isGuest = true, status }) {
+  const [generationOpen, setGenerationOpen] = useState(false);
+  const profile = useMemberResource(member?.memberId, settingsApi.profile);
+  const name = profile.data?.nickname || member?.nickname || member?.loginId || '여행자';
+  const loaded = isGuest || status === 'ready';
   const summaries = [
-    ['reservations', '예약 내역', bookings.length, '예약 상태와 결제·환불 내역'],
-    ['my-courses', '저장된 코스', active.filter((booking) => booking.versions.length).length, '예약에 연결된 확정 코스와 변경 이력'],
-    ['my-posts', '내 휴먼 추천 코스', bookings.filter((booking) => booking.post).length, '내가 작성한 여행 기록과 최종 코스'],
+    ['my-courses', '내 여행 코스', courses.length, '예약 없이 보관한 초안과 저장된 코스'],
+    ...(!isGuest ? [
+      ['reservations', '내 예약', bookings.length, '본인 예약과 결제 상태'],
+      ['my-posts', '내 여행 추천', posts.length, '본인이 등록한 여행 기록'],
+    ] : []),
   ];
   return <div className="mypage">
-    <PageHero eyebrow="MY TRAVEL" title={<>나의 여행, <em>한곳에서.</em></>}>예약부터 여행 일정, 직접 남긴 이야기까지.</PageHero>
-    <Card className="row"><div><span className="pill">샘플 사용자</span><h2>홍길동님, 안녕하세요.</h2><p className="muted">다음 여행도 나만의 취향으로 채워보세요.</p></div><a className="primary" href="#/">새 여행 만들기 →</a></Card>
-    <div className="grid three" style={{ marginTop: 23 }}>{summaries.map(([page, title, count, description]) => <Card key={title}>
-      <span className="pill">MY TRAVEL</span><h2><a className="card-title-link" href={`#/${page}`}>{title}</a></h2><p className="stats">{count}<span className="note"> 건</span></p><p className="muted">{description}</p><div className="actions"><a className="text-button" href={`#/${page}`} aria-label={`${title} 자세히 보기`}>자세히 보기 →</a></div>
+    <PageHero eyebrow="MY TRAVEL" title={<>나의 여행, <em>한곳에서.</em></>}>나의 정보와 여행 취향, 여행 일정을 한곳에서 관리하세요.</PageHero>
+    <Card>
+      <div className="mp-profile-line"><ProfileAvatar avatarData={isGuest ? null : profile.data?.avatarData} name={name} />
+        <div className="mp-profile-summary"><span className="pill">{isGuest ? '비회원' : '회원'}</span>
+          <h2>{isGuest ? '로그인이 필요합니다.' : `${name}님, 안녕하세요.`}</h2>
+          <p className="muted">{isGuest ? '비회원은 내 여행 코스만 이용할 수 있습니다. 사이트 내 이동 동안만 보관하며 새로고침·사이트 이탈 시 삭제됩니다.' : '내 정보와 기본 취향을 관리하고 다음 여행을 준비하세요.'}</p>
+          {isGuest && <div className="actions"><a className="primary" href="#/login">로그인하고 코스 연결</a><a className="secondary" href="#/signup">회원가입</a></div>}
+          {!isGuest && profile.status === 'loading' && <p role="status" className="note">프로필을 불러오고 있습니다.</p>}
+          {!isGuest && profile.error && <p role="alert" className="warning">프로필을 불러오지 못했습니다. <button type="button" onClick={profile.reload}>다시 확인</button></p>}
+        </div>
+        <button className="primary" type="button" aria-expanded={generationOpen} aria-controls="mypage-generation" onClick={() => setGenerationOpen(open => !open)}>AI여행생성</button>
+      </div>
+      {!isGuest && <div className="mp-home-actions"><a className="secondary" href="#/my-profile">내 정보관리</a><a className="secondary" href="#/my-travel-style">내 여행 스타일 관리</a></div>}
+      {generationOpen && <section id="mypage-generation" className="mp-generation-choice" aria-label="AI여행 생성 방식"><h3>어떤 방식으로 여행을 만들까요?</h3><div className="mp-home-actions"><a className="primary" href="#/ai-course">대화로 AI여행 생성</a><a className="secondary" href="#/conditions">조건선택으로 AI여행 생성</a></div></section>}
+    </Card>
+    <div className="grid three" style={{ marginTop: 23 }}>{summaries.map(([page, title, count, description]) => <Card key={page}>
+      <span className="pill">MY TRAVEL</span><h2><a className="card-title-link" href={`#/${page}`}>{title}</a></h2><p className="stats">{loaded ? count : '—'}<span className="note"> 건</span></p><p className="muted">{description}</p><a className="text-button" href={`#/${page}`}>{title} 보기 →</a>
     </Card>)}</div>
-    <Card style={{ marginTop: 23 }}><h2>알림 설정</h2><label className="checkline"><input type="checkbox" checked={notify} onChange={(event) => dispatch?.({ type: 'notify', value: event.target.checked })} /> 여행 전 일정과 체크아웃 후 코스 작성 요청 알림 받기</label><p className="note">수신 거부 시 알림 대상에서 제외되며, 예약 취소 시 해당 예약의 예정 알림도 취소됩니다.</p></Card>
   </div>;
 }

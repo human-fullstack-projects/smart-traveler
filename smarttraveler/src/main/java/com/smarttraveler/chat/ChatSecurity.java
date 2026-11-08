@@ -18,9 +18,10 @@ public class ChatSecurity {
     }
 
     // 기존 보안 기본값과 같이 나머지 요청은 인증이 필요하다.
-    @Bean @Order(2)
+    //@Bean @Order(2)
     SecurityFilterChain otherSecurityFilterChain(HttpSecurity http) throws Exception {
         return http.authorizeHttpRequests(auth -> auth.dispatcherTypeMatchers(DispatcherType.ERROR).permitAll().anyRequest().authenticated())
                 .formLogin(Customizer.withDefaults()).httpBasic(Customizer.withDefaults()).build();
     }
+
 }
