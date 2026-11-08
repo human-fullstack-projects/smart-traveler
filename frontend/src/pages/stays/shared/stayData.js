@@ -24,6 +24,7 @@ export const stays = [
     amenities: ['오션뷰', '주차', '조식', '와이파이', '짐 보관'],
     theme: 'ocean',
     marker: { left: 61, top: 32 },
+    demoCoordinate: { latitude: 35.1601, longitude: 129.1720 },
     cancellation: '체크인 5일 전까지 무료 취소, 이후 날짜별 환불 비율 적용',
     rooms: [
       { id: 'wave-standard', name: '스탠다드 더블', basis: 2, maxGuests: 2, area: '24㎡', beds: '더블 1', price: 148000, remaining: 2, amenities: ['샤워실', '스마트 TV', '냉장고'] },
@@ -53,6 +54,7 @@ export const stays = [
     amenities: ['해변 인접', '공용 주방', '와이파이', '짐 보관'],
     theme: 'night',
     marker: { left: 38, top: 51 },
+    demoCoordinate: { latitude: 35.1532, longitude: 129.1187 },
     cancellation: '체크인 7일 전까지 무료 취소, 3일 전부터 취소 수수료 발생',
     rooms: [
       { id: 'morrow-double', name: '프라이빗 더블', basis: 2, maxGuests: 2, area: '18㎡', beds: '더블 1', price: 89000, remaining: 4, amenities: ['전용 욕실', '테이블', '냉장고'] },
@@ -82,6 +84,7 @@ export const stays = [
     amenities: ['테라스', '주차', '취사', '바비큐', '와이파이'],
     theme: 'forest',
     marker: { left: 73, top: 58 },
+    demoCoordinate: { latitude: 35.1789, longitude: 129.1990 },
     cancellation: '체크인 7일 전까지 무료 취소, 이후 숙소 환불 규정 적용',
     rooms: [
       { id: 'slow-terrace', name: '테라스 패밀리', basis: 4, maxGuests: 6, area: '46㎡', beds: '더블 2', price: 176000, remaining: 1, amenities: ['개별 테라스', '주방', '바비큐'] },
@@ -110,6 +113,7 @@ export const stays = [
     amenities: ['와이파이', '엘리베이터'],
     theme: 'city',
     marker: { left: 22, top: 70 },
+    demoCoordinate: { latitude: 35.1030, longitude: 129.0350 },
     cancellation: '내부 판매 정보가 확인되지 않았습니다.',
     rooms: [],
   },

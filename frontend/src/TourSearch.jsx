@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { tourApi } from './tourApi.js';
+import KakaoMap from './components/map/KakaoMap.jsx';
 
 // 대화에서 나온 이름은 후보가 하나일 때만 시도 선택에 반영한다.
 function findProvince(regions, regionName) {
@@ -27,6 +28,14 @@ export default function TourSearch({ conditions, onConditionsChange }) {
   const [places, setPlaces] = useState(null);
   const [page, setPage] = useState(1);
   const [applied, setApplied] = useState(false);
+  const [selectedPlaceId, setSelectedPlaceId] = useState(null);
+  const [fitRequest, setFitRequest] = useState(0);
+
+  const mapPlaces = useMemo(() => (places?.items || []).map((place, index) => ({ ...place, markerLabel: String(index + 1), kind: 'course' })).filter((place) =>
+    Number.isFinite(Number(place.latitude)) && Number.isFinite(Number(place.longitude))
+    && Number(place.latitude) !== 0 && Number(place.longitude) !== 0,
+  ), [places]);
+  const selectedPlace = mapPlaces.find((place) => String(place.id) === String(selectedPlaceId));
 
   useEffect(() => {
     if (!open || regions.length) return;
@@ -61,7 +70,7 @@ export default function TourSearch({ conditions, onConditionsChange }) {
     try {
       const result = await tourApi.places(province, district, nextPage);
       if (!Array.isArray(result.items)) throw new Error('관광지 목록 형식 오류');
-      setPlaces(result); setPage(nextPage);
+      setPlaces(result); setPage(nextPage); setSelectedPlaceId(null);
     } catch { setError('관광지를 불러오지 못했습니다. 관광정보 서버와 인증키 설정을 확인해 주세요.'); }
     finally { setLoadingPlaces(false); }
   }
@@ -86,7 +95,14 @@ export default function TourSearch({ conditions, onConditionsChange }) {
       <div className="tour-search-actions"><button type="button" className="primary" disabled={!province || loadingPlaces || loadingDistricts} onClick={() => search(1)}>{loadingPlaces ? '불러오는 중...' : '관광지 가져오기'}</button><button type="button" className="tour-apply" disabled={!province || loadingPlaces} onClick={applyRegion}>대화 조건에 반영</button></div>
       {applied && <p role="status">선택한 지역을 대화 조건에 반영했습니다.</p>}
       {error && <p role="alert">{error}{!regions.length && <button className="tour-retry" type="button" onClick={() => { setOpen(false); setTimeout(() => setOpen(true), 0); }}>다시 시도</button>}</p>}
-      {places && <div aria-live="polite"><p>{places.totalCount ? `관광지 ${places.totalCount}곳` : '조회된 관광지가 없습니다.'}</p><ul className="tour-results">{places.items.map((place) => <li key={place.id}><strong>{place.name}</strong>{place.address && <span>{place.address}</span>}</li>)}</ul><div className="tour-pages"><button type="button" disabled={page <= 1 || loadingPlaces} onClick={() => search(page - 1)}>이전</button><span>{page}쪽</span><button type="button" disabled={page >= 100 || page * places.pageSize >= places.totalCount || loadingPlaces} onClick={() => search(page + 1)}>다음</button></div></div>}
+      {places && <div aria-live="polite"><p>{places.totalCount ? `관광지 ${places.totalCount}곳` : '조회된 관광지가 없습니다.'}</p>
+        {mapPlaces.length > 0 && <div className="tour-map"><div className="tour-map__head"><strong>현재 페이지 관광지 지도</strong><button type="button" onClick={() => { setSelectedPlaceId(null); setFitRequest((value) => value + 1); }}>전체 위치 보기</button></div>
+          <KakaoMap places={mapPlaces} center={selectedPlace || mapPlaces[0]} selectedId={selectedPlaceId} fitPoints={selectedPlace ? undefined : mapPlaces} fitRequest={fitRequest} onMarkerClick={(place) => setSelectedPlaceId(place.id)} height="300px" />
+          {selectedPlace && <p role="status"><strong>{selectedPlace.name}</strong> · {selectedPlace.address || '주소 미확인'}</p>}
+          <p>지도 배경: 카카오 지도 · 관광지 좌표: 한국관광공사 TourAPI. 현재 페이지의 좌표가 있는 항목만 표시합니다.</p>
+        </div>}
+        <ul className="tour-results">{places.items.map((place, index) => <li key={place.id}><button type="button" disabled={!mapPlaces.some((item) => item.id === place.id)} aria-pressed={String(selectedPlaceId) === String(place.id)} onClick={() => setSelectedPlaceId(place.id)}>{index + 1}. {place.name}</button>{place.address && <span>{place.address}</span>}</li>)}</ul>
+        <div className="tour-pages"><button type="button" disabled={page <= 1 || loadingPlaces} onClick={() => search(page - 1)}>이전</button><span>{page}쪽</span><button type="button" disabled={page >= 100 || page * places.pageSize >= places.totalCount || loadingPlaces} onClick={() => search(page + 1)}>다음</button></div></div>}
       <p className="tour-source">조회한 관광지만 저장됩니다. 자료 출처: 한국관광공사 TourAPI</p>
     </div>}
   </section>;

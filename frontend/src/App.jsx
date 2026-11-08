@@ -36,6 +36,7 @@ import HumanCourseDetail from './pages/human_course/pages/HumanCourseDetail';
 import HumanCourseCreate from './pages/human_course/pages/HumanCourseCreate';
 import HumanCourseEdit from './pages/human_course/pages/HumanCourseEdit';
 import HumanCourseModeration from './pages/human_course/pages/HumanCourseModeration';
+import MapDemoPage from './pages/map/MapDemoPage';
 import useHumanCourses from './pages/human_course/hooks/useHumanCourses';
 
 // 한글 조합을 확정하는 Enter는 전송하지 않고, Shift+Enter는 줄바꿈에 사용한다.
@@ -152,6 +153,7 @@ const sidebarPageRoutes = {
   '/search': SearchPage,
   '/stays': StaySearchPage,
   '/stays/booking': StayBookingPage,
+  '/map-demo': MapDemoPage,
 };
 
 export default function App() {

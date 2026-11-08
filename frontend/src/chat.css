@@ -73,6 +73,13 @@
 .tour-results { display: grid; gap: 0; padding: 0; margin: 8px 0 0; list-style: none; }
 .tour-results li { display: grid; gap: 3px; padding: 10px 0; border-top: 1px solid #edf2ef; color: #344d45; font-size: 12px; }
 .tour-results span { color: #83968d; font-size: 11px; line-height: 1.5; }
+.tour-results button { width: fit-content; padding: 0; border: 0; background: none; color: #344d45; font: inherit; font-weight: 700; text-align: left; cursor: pointer; }
+.tour-results button[aria-pressed="true"] { color: #087b65; text-decoration: underline; }
+.tour-results button:disabled { color: #86948e; cursor: default; }
+.tour-map { overflow: hidden; margin-top: 12px; border: 1px solid #dbe6df; border-radius: 10px; }
+.tour-map__head { display: flex; justify-content: space-between; gap: 10px; align-items: center; padding: 9px 12px; font-size: 12px; }
+.tour-map__head button { padding: 4px 8px; border: 1px solid #dbe6df; border-radius: 6px; background: #fff; color: #087b65; cursor: pointer; }
+.tour-map > p { margin: 7px 12px; }
 .tour-pages { display: flex; align-items: center; justify-content: space-between; color: #758d83; font-size: 12px; }
 .tour-pages button, .tour-retry { border: 0; background: transparent; color: #087b65; padding: 6px; }
 .tour-search .tour-source { font-size: 11px; }
