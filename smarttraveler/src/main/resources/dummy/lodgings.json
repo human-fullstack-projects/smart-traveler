@@ -430,31 +430,6 @@
     ]
   },
   {
-    "source_content_id": "1144737",
-    "area_code": "12",
-    "area_name": "전남광주통합특별시",
-    "name": "스카이모텔(여수)",
-    "region_code": "12130",
-    "region_name": "여수시",
-    "address": "전남광주통합특별시 여수시 교동남1길 5-5 (교동)",
-    "address_detail": null,
-    "latitude": 34.7398033,
-    "longitude": 127.7339985,
-    "phone": "061-662-7780",
-    "image_url": "https://tong.visitkorea.or.kr/cms/resource/31/1151131_image2_1.jpg",
-    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/31/1151131_image3_1.jpg",
-    "source": "한국관광공사 TourAPI KorService2",
-    "zipcode": "59735",
-    "homepage_url": null,
-    "description": "여수 연안여객선 터미널과 이순신광장 인근의 스카이모텔은 좌수영음식문화거리에 위치해 있다. 모텔의 외관이나 내부 시설에서 연식이 느껴지지만 여수 원도심에 위치한 지리적 이점은 훌륭하다. 주변으로 상권이 발달되어 있고 맛집이 많아 멀리 가지 않아도 신선한 회를 비롯한 남도의 맛있는 음식을 다양하게 즐길 수 있다. 도보 10분 거리의 여수 연안여객터미널에서 배편을 이용해 거문도, 하화도, 금오도, 개도 등으로 이동이 편리하며 선착장을 따라 바다를 바라보며 종포해양공원까지 산책할 수 있다. 진남관유물전시관과 고소대 등 유적지와 이순신광장의 전라좌수영 거북선이 모두 도보로 방문할 수 있으며 여수수산물 특화시장도 도보로 이동이 가능하다.",
-    "checkin_time": "14:00",
-    "checkout_time": "11:00",
-    "parking_info": "가능",
-    "lodging_type": "PENSION",
-    "rooms": [],
-    "room_names": []
-  },
-  {
     "source_content_id": "1144770",
     "area_code": "12",
     "area_name": "전남광주통합특별시",
@@ -1480,72 +1455,6 @@
     ]
   },
   {
-    "source_content_id": "1204528",
-    "area_code": "28",
-    "area_name": "인천광역시",
-    "name": "고추잠자리",
-    "region_code": "28237",
-    "region_name": "부평구",
-    "address": "인천광역시 부평구 동암광장로4번길 12",
-    "address_detail": null,
-    "latitude": 37.4704426,
-    "longitude": 126.7016012,
-    "phone": "032-421-0381",
-    "image_url": "https://tong.visitkorea.or.kr/cms/resource/18/4109018_image2_1.jpg",
-    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/18/4109018_image3_1.jpg",
-    "source": "한국관광공사 TourAPI KorService2",
-    "zipcode": "21446",
-    "homepage_url": null,
-    "description": "인천 부평구 십정동에 있는 고추잠자리는 동암역 바로 옆에 위치하고 있다. 정갈하고 고급스러운 분위기의 객실은 여행객들에게 인기가 좋으며 일본 감성의 따듯한 분위기와 편안한 휴식을 담은 프라이빗 료칸 호텔이다. 은은하고 조용한 분위기에 객실에서 편안하게 머무를 수 있는 숙소이다.",
-    "checkin_time": "19:00",
-    "checkout_time": "12:00",
-    "parking_info": "가능",
-    "lodging_type": "PENSION",
-    "rooms": [
-      {
-        "name": "특실",
-        "base_capacity": "2",
-        "max_capacity": "2"
-      }
-    ],
-    "room_names": [
-      "특실"
-    ]
-  },
-  {
-    "source_content_id": "138909",
-    "area_code": "28",
-    "area_name": "인천광역시",
-    "name": "명성리조텔",
-    "region_code": "28720",
-    "region_name": "옹진군",
-    "address": "인천광역시 옹진군 영흥면 영흥로722번길 39",
-    "address_detail": null,
-    "latitude": 37.2728123,
-    "longitude": 126.4559945,
-    "phone": "032-885-3366",
-    "image_url": "https://tong.visitkorea.or.kr/cms/resource/18/1946418_image2_1.jpg",
-    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/18/1946418_image3_1.jpg",
-    "source": "한국관광공사 TourAPI KorService2",
-    "zipcode": "23117",
-    "homepage_url": null,
-    "description": "사계절의 아름다움을 간직할 수 있는 곳, 바다 내음과 솔향기가 가득한 명성리조텔은 영흥도 장경리 해수욕장에서 가장 가까운 콘도형 숙박업소이다. 해수욕 및 갯벌체험을 할 수 있어 야유회나 가족모임 등에 아주 좋고 각종 행사 단합대회를 할 수 있는 공간이 마련되어 있다. 넓은 대형 주차장이 있으며 바다낚시와 갯바위낚시 등을 할 수 있다.",
-    "checkin_time": "14:00",
-    "checkout_time": "익일 11:00",
-    "parking_info": "주차 가능",
-    "lodging_type": "PENSION",
-    "rooms": [
-      {
-        "name": "단체룸A",
-        "base_capacity": "8",
-        "max_capacity": "10"
-      }
-    ],
-    "room_names": [
-      "단체룸A"
-    ]
-  },
-  {
     "source_content_id": "142801",
     "area_code": "28",
     "area_name": "인천광역시",
@@ -1801,31 +1710,6 @@
       "스탠다드",
       "트윈"
     ]
-  },
-  {
-    "source_content_id": "1748017",
-    "area_code": "28",
-    "area_name": "인천광역시",
-    "name": "오슬로 무인텔",
-    "region_code": "28185",
-    "region_name": "연수구",
-    "address": "인천광역시 연수구 능허대로 120",
-    "address_detail": null,
-    "latitude": 37.4216308,
-    "longitude": 126.6431221,
-    "phone": "032-834-4848",
-    "image_url": "https://tong.visitkorea.or.kr/cms/resource/31/1745631_image2_1.jpg",
-    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/31/1745631_image3_1.jpg",
-    "source": "한국관광공사 TourAPI KorService2",
-    "zipcode": "21959",
-    "homepage_url": null,
-    "description": "오슬로 호텔은 동북아의 중심도시 경제수도 인천에 있으며 인천은 맑고 깨끗한 천혜 자원이 가득한 곳으로 150여 개의 섬과 근대와 현대가 공존하는 도시이기도 하다. 인천의 관광지로는 월미도 공원, 인천 개항지, 유람선과 낭만의 연안부두, 신선한 해산물이 넘쳐나는 소래포구와 무의도와 송도 등을 손꼽을 수 있다. 또한 살아 있는 교과서라 불리는 강화도는 자녀들과 함께 여행하기에 적합한 곳이다.",
-    "checkin_time": "15:00",
-    "checkout_time": "12:00",
-    "parking_info": "가능",
-    "lodging_type": "PENSION",
-    "rooms": [],
-    "room_names": []
   },
   {
     "source_content_id": "143023",
@@ -2293,51 +2177,6 @@
     "room_names": []
   },
   {
-    "source_content_id": "143089",
-    "area_code": "31",
-    "area_name": "울산광역시",
-    "name": "울산 굿모닝 관광호텔",
-    "region_code": "31170",
-    "region_name": "동구",
-    "address": "울산광역시 동구 바드래1길 15",
-    "address_detail": null,
-    "latitude": 35.5174108,
-    "longitude": 129.4305988,
-    "phone": "052-251-3000",
-    "image_url": "https://tong.visitkorea.or.kr/cms/resource/53/3586853_image2_1.jpg",
-    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/53/3586853_image3_1.jpg",
-    "source": "한국관광공사 TourAPI KorService2",
-    "zipcode": "44035",
-    "homepage_url": null,
-    "description": "한국 최대 공업도시, 비즈니스의 중심지 울산에는 울산 굿모닝 관광호텔이 있다. 여유와 휴식을 즐기며 비즈니스를 완성할 수 있는 호텔이다. 주변에 현대중공업, 현대자동차 등 대규모 산업기지와 함께 울기공원, 일산해수욕장 등의 쾌적한 관광 인프라를 구축하고 있으며 다양한 부대시설과 세련된 서비스로 성공적인 비즈니스와 멋진 추억을 가질 수 있을 것이다. 객실 면적이 넓고 쾌적하며, 인터넷 인프라가 구축되어 비즈니스 고객에게는 최적의 조건을 구비하고 있다. 특히 스위트룸에는 고객 전용 PC를 장착하여 개인 사무실과 응접실을 겸비해 사용할 수 있다. 부대시설은 양식당, 중식당에서도 외국인 고객을 위해 유러피안, 이탈리안, 해산물, 지중해식 등 고객의 기호에 맞는 맞춤식 요리를 제공하고 있으며 간편하게 즐길 수 있는 간편 메뉴도 구비하여 비즈니스 고객을 배려하고 있다. 또한, 기타 오락실, BAR, 노래연습장 등을 한 장소에서 ONE-STOP으로 즐길 수 있어 간단한 유흥과 모임을 가지는데 불편함이 없다.",
-    "checkin_time": "14:00",
-    "checkout_time": "12:00",
-    "parking_info": "가능",
-    "lodging_type": "HOTEL",
-    "rooms": [
-      {
-        "name": "더블 디럭스",
-        "base_capacity": "2",
-        "max_capacity": "2"
-      },
-      {
-        "name": "트윈 디럭스",
-        "base_capacity": "2",
-        "max_capacity": "3"
-      },
-      {
-        "name": "온돌 스위트",
-        "base_capacity": "2",
-        "max_capacity": "4"
-      }
-    ],
-    "room_names": [
-      "더블 디럭스",
-      "트윈 디럭스",
-      "온돌 스위트"
-    ]
-  },
-  {
     "source_content_id": "1804605",
     "area_code": "31",
     "area_name": "울산광역시",
@@ -2405,51 +2244,6 @@
       "호",
       "이",
       "예"
-    ]
-  },
-  {
-    "source_content_id": "2570704",
-    "area_code": "31",
-    "area_name": "울산광역시",
-    "name": "여우비관광호텔",
-    "region_code": "31140",
-    "region_name": "남구",
-    "address": "울산광역시 남구 산업로647번길 14 (삼산동)",
-    "address_detail": null,
-    "latitude": 35.5392989,
-    "longitude": 129.3494973,
-    "phone": "052-267-7777",
-    "image_url": "https://tong.visitkorea.or.kr/cms/resource/93/3579493_image2_1.jpg",
-    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/93/3579493_image3_1.jpg",
-    "source": "한국관광공사 TourAPI KorService2",
-    "zipcode": "44716",
-    "homepage_url": null,
-    "description": "여우비관광호텔은 태화강역에서 도보 5분 거리에 위치한 호텔로 도심지에 자리하고 있어 교통 접근성이 매우 뛰어나다. 호텔 주변에는 다양한 대중교통수단이 밀집해 있어 여행객들이 어디로든 편리하게 이동할 수 있다. 모던하고 감각적인 인테리어의 객실은 아늑한 휴식 공간을 제공하며 고객 만족을 위해 세심하고 친절한 서비스를 지향한다. 한국관광협회중앙회 호텔업 등급 관리국에서 2성 등급을 인증받은 호텔로 총 105개의 다양한 유형과 크기의 객실을 갖추고 있다. 영어가 가능한 프런트 직원이 상주해 있어 해외 관광객도 편리하게 이용할 수 있다. 선착순 무료 주차가 가능한 주차시설을 보유하고 있으며 매일 청소 서비스와 무료 와이파이를 제공하여 편안한 투숙 환경을 마련하고 있다. 또한 조식 뷔페를 운영하여 여행의 시작을 더욱 풍성하게 만들어준다. 설·추석 당일에는 조식당 및 객실 정비로 휴무이니 참고해야 한다.",
-    "checkin_time": "15:00",
-    "checkout_time": "12:00",
-    "parking_info": "가능",
-    "lodging_type": "HOTEL",
-    "rooms": [
-      {
-        "name": "스탠다드 더블",
-        "base_capacity": "2",
-        "max_capacity": "2"
-      },
-      {
-        "name": "디럭스 더블",
-        "base_capacity": "2",
-        "max_capacity": "2"
-      },
-      {
-        "name": "디럭스 트윈",
-        "base_capacity": "3",
-        "max_capacity": "3"
-      }
-    ],
-    "room_names": [
-      "스탠다드 더블",
-      "디럭스 더블",
-      "디럭스 트윈"
     ]
   },
   {
@@ -2586,31 +2380,6 @@
       "스탠다드 패밀리 트윈",
       "디럭스 더블 / 디럭스 트윈"
     ]
-  },
-  {
-    "source_content_id": "2593643",
-    "area_code": "36110",
-    "area_name": "세종특별자치시",
-    "name": "목향재",
-    "region_code": null,
-    "region_name": "만남로6길",
-    "address": "세종특별자치시 만남로6길 33",
-    "address_detail": null,
-    "latitude": 36.5019278,
-    "longitude": 127.2398815,
-    "phone": "010-8666-1217",
-    "image_url": "https://tong.visitkorea.or.kr/cms/resource/31/2594631_image2_1.JPG",
-    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/31/2594631_image3_1.JPG",
-    "source": "한국관광공사 TourAPI KorService2",
-    "zipcode": "30063",
-    "homepage_url": null,
-    "description": "목향재는 세종시에 위치한 한옥이다. 세종시 중심권에 위치하여 중앙정부청사, 영화관, 호수 공원, 한옥마을, 이마트, 홈플러스 모두 5분 이내에 이동이 가능하다. 총 5실이 있는 2층 규모이며 한옥이라는 전통적이고 특별한 건축 양식으로 방문객들의 마음을 사로잡는다. 도심에서도 잠시 쉬어갈 수 있는 숙소이다.",
-    "checkin_time": "15:00",
-    "checkout_time": "11:00",
-    "parking_info": "가능",
-    "lodging_type": "PENSION",
-    "rooms": [],
-    "room_names": []
   },
   {
     "source_content_id": "2708329",
@@ -2904,8 +2673,8 @@
     "region_name": "용인시",
     "address": "경기도 용인시 처인구 포곡읍 에버랜드로 199",
     "address_detail": null,
-    "latitude": 37.2892596,
-    "longitude": 127.214902,
+    "latitude": 37.2940662,
+    "longitude": 127.2021276,
     "phone": "031-320-5000",
     "image_url": "https://tong.visitkorea.or.kr/cms/resource/33/3079033_image2_1.jpg",
     "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/33/3079033_image3_1.jpg",
@@ -3844,51 +3613,6 @@
     ]
   },
   {
-    "source_content_id": "1276115",
-    "area_code": "44",
-    "area_name": "충청남도",
-    "name": "밀라트",
-    "region_code": "44825",
-    "region_name": "태안군",
-    "address": "충청남도 태안군 안면읍 꽃지2길 58-47",
-    "address_detail": null,
-    "latitude": 36.4923605,
-    "longitude": 126.3420654,
-    "phone": "041-673-4957",
-    "image_url": "https://tong.visitkorea.or.kr/cms/resource/41/3579941_image2_1.jpg",
-    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/41/3579941_image3_1.jpg",
-    "source": "한국관광공사 TourAPI KorService2",
-    "zipcode": "32166",
-    "homepage_url": null,
-    "description": "서해안 관광명소인 안면도, 그중에서도 아름답기로 유명한 꽃지해수욕장에 있는 밀라트는 외부 구조는 적삼목으로 부착되어 나무의 향에 취할 수 있으며 내부 구조는 스틸 구조로 형성되어 서구형, 유럽형 건축물 양식으로 설계되어 있다. 각 객실은 개별적으로 이루어져 있는데 시원하게 확 트인 넓은 유리창으로 밖을 내다볼 수 있으며 건물 밖의 넓은 데크에서 편히 여가를 즐길 수 있는 곳이다. 외부에는 넓은 정원과 야외 테이블이 준비되어 있어 신나는 바비큐 파티를 즐길 수 있으며 자연과 함께 즐거운 추억을 만들 수 있다. 서해 3대 낙조 중 하나인 할미바위와 할아비바위가 수문장처럼 전설을 간직한 채 바라보고 서 있는 꽃지해수욕장 인근에 자리 잡고 있어 해수욕, 갯벌 체험, 해양스포츠 등 즐길 거리가 풍부하며 소나무가 쭉쭉 뻗어 시원한 바람과 함께 산림욕을 할 수 있는 안면도자연휴양림이 자가용 10분 거리에 있다. 또한 방포항이 자가용 5분 거리에 있어 싱싱한 해산물을 먹을 수 있다.",
-    "checkin_time": "15:00",
-    "checkout_time": "11:00",
-    "parking_info": "가능요금 (무료)",
-    "lodging_type": "PENSION",
-    "rooms": [
-      {
-        "name": "라일락1 / 라일락2",
-        "base_capacity": "2",
-        "max_capacity": "5"
-      },
-      {
-        "name": "물망초1 / 물망초2",
-        "base_capacity": "2",
-        "max_capacity": "3"
-      },
-      {
-        "name": "백합1 / 백합2",
-        "base_capacity": "2",
-        "max_capacity": "3"
-      }
-    ],
-    "room_names": [
-      "라일락1 / 라일락2",
-      "물망초1 / 물망초2",
-      "백합1 / 백합2"
-    ]
-  },
-  {
     "source_content_id": "127812",
     "area_code": "44",
     "area_name": "충청남도",
@@ -4561,51 +4285,6 @@
     ]
   },
   {
-    "source_content_id": "138701",
-    "area_code": "48",
-    "area_name": "경상남도",
-    "name": "언덕위에 하얀집",
-    "region_code": "48170",
-    "region_name": "진주시",
-    "address": "경상남도 진주시 대평면 호반로 414-23",
-    "address_detail": null,
-    "latitude": 35.1612762,
-    "longitude": 127.9909796,
-    "phone": "010-3866-2063",
-    "image_url": "https://tong.visitkorea.or.kr/cms/resource/47/3587547_image2_1.jpg",
-    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/47/3587547_image3_1.jpg",
-    "source": "한국관광공사 TourAPI KorService2",
-    "zipcode": "52643",
-    "homepage_url": null,
-    "description": "산으로 둘러싸인 잔잔한 풍광의 진양호는 명성이 높아 일찍이 진주 8경으로도 손꼽혀 왔다. 그림 같은 풍광을 품 안에 두르고 있는 언덕위에 하얀집은 이름 그대로 호수를 전망하는 언덕에 하얀색의 목조 펜션이 동화처럼 서 있다. 2007년부터 영업을 시작한 이곳은 객실에서 바라보는 호수의 조망이 가장 큰 매력이다. 창이 동향으로 나 있어서 방 안에서 일출 감상이 가능하다는 점도 자랑거리다. 객실은 4개로 아담한 규모지만 족구장과 텃밭, 야외 식탁, 아기자기한 정원 등이 조화롭다. 꽃과 나무에 관심이 많은 사장님 덕분에 정원이 풍성하고, 펜션 내부에 차를 마실 수 있는 공간이 마련되어 있다. 호숫가에서는 바비큐 파티가 가능하다. 진주 시내에서 픽업 서비스도 제공한다.",
-    "checkin_time": "15:00",
-    "checkout_time": "11:00",
-    "parking_info": "가능",
-    "lodging_type": "PENSION",
-    "rooms": [
-      {
-        "name": "물소리",
-        "base_capacity": "2",
-        "max_capacity": "5"
-      },
-      {
-        "name": "새소리",
-        "base_capacity": "2",
-        "max_capacity": "5"
-      },
-      {
-        "name": "바람소리",
-        "base_capacity": "2",
-        "max_capacity": "5"
-      }
-    ],
-    "room_names": [
-      "물소리",
-      "새소리",
-      "바람소리"
-    ]
-  },
-  {
     "source_content_id": "138724",
     "area_code": "48",
     "area_name": "경상남도",
@@ -5157,8 +4836,8 @@
     "region_name": "평창군",
     "address": "강원특별자치도 평창군 대관령면 올림픽로 715",
     "address_detail": null,
-    "latitude": 37.6509445,
-    "longitude": 128.7055568,
+    "latitude": 37.6457736,
+    "longitude": 128.6804994,
     "phone": "033-335-5757",
     "image_url": "https://tong.visitkorea.or.kr/cms/resource/87/4096887_image2_1.jpg",
     "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/87/4096887_image3_1.jpg",
@@ -5182,8 +4861,8 @@
     "region_name": "춘천시",
     "address": "강원특별자치도 춘천시 남산면 북한강변길 688",
     "address_detail": null,
-    "latitude": 37.8282571,
-    "longitude": 127.5872561,
+    "latitude": 37.8221451,
+    "longitude": 127.5899172,
     "phone": "033-260-2000",
     "image_url": "https://tong.visitkorea.or.kr/cms/resource/87/3335587_image2_1.jpg",
     "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/87/3335587_image3_1.jpg",
@@ -5261,31 +4940,6 @@
     "zipcode": "24765",
     "homepage_url": null,
     "description": "켄싱턴리조트 설악비치는 산과 바다, 호수와 들판 그리고 계곡에서 만나는 강원도의 자연과 그 속에 오롯이 남은 추억들이 영화처럼 펼쳐지는 곳이다. 지난 20년 이상 국내 핵심 관광 지역에 회원제 콘도를 설립, 운영하고 있고 다양한 국내 체인망을 보유하고 있다. 특히 각 체인이 산, 강, 해변, 섬, 온천지구 등 천혜의 입지 조건과 유명 관광지에 위치하고 있어 그 명성이 매우 높은 휴양 콘도미니엄이다. 리조트는 바닷가에 위치해 있으며, 설악과 동해가 한눈에 펼쳐진다. 넓은 백사장과 아름다운 바닷가에서는 가족과 함께 깨끗하고 쾌적하게 해수욕을 즐길 수 있다. 객실은 보다 현대적인 감각으로 안락하게 꾸며져 있으며 다양한 콘셉트로 고객 취향에 한 걸음 더 다가가고자 노력했다. 고품격 인테리어와 차원이 다른 서비스로 고객 감동 그 이상을 맛볼 수 있을 것이다. 부대시설로는 해수사우나, 키즈월드, 애슐리 퀸즈, 로이드, 연회장(50석) 등이 갖추어져 있다. 모든 편리함이 갖추어진 최신 설비와 고객의 취향을 만족시켜 주는 최상의 서비스를 통해 편안하고 안락하게 지내실 수 있도록 모든 편의를 제공하고 있다.",
-    "checkin_time": "15:00",
-    "checkout_time": "11:00",
-    "parking_info": "가능",
-    "lodging_type": "PENSION",
-    "rooms": [],
-    "room_names": []
-  },
-  {
-    "source_content_id": "136616",
-    "area_code": "51",
-    "area_name": "강원특별자치도",
-    "name": "휘닉스 평창 콘도",
-    "region_code": "51760",
-    "region_name": "평창군",
-    "address": "강원특별자치도 평창군 봉평면 태기로 174",
-    "address_detail": null,
-    "latitude": 37.5803481,
-    "longitude": 128.3251569,
-    "phone": "1577-0069",
-    "image_url": "https://tong.visitkorea.or.kr/cms/resource/36/1335736_image2_1.jpg",
-    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/36/1335736_image3_1.jpg",
-    "source": "한국관광공사 TourAPI KorService2",
-    "zipcode": "25307",
-    "homepage_url": null,
-    "description": "인간의 신진대사를 가장 활발하게 해준다는 해발 700미터 청정고원에 위치한 휘닉스 평창 콘도는 국내콘도 중 최고층을 자랑하는 스카이 콘도(28층)를 포함하여 콘도 3개동, 빌라 4개동으로 구성되어 있다. 또한 콘도 내에 수영장 시설과 각종 편의시설 등이 함께 있는 원스톱 시스템으로 구성되어 있으며 기후에 관계없이 동선을 유지할 수 있는 지하보도가 설치되어 있다. 블루, 그린, 오렌지동으로 구성되어 있는 메인 콘도는 동양과 서양의 이미지를 절묘하게 조화시킨 건축물로 유명하다. 특히 KBS 미니시리즈 ‘가을동화’의 메인 촬영지인 빌라콘도는 국내는 물론 동남아 관광객의 발길이 끊이지 않고 있는 관광명소이다. 리조트 내의 부대시설로는 수영장, 볼링장, 당구장, 아로마 마사지, 편의점, 기념품점, 오실, 약국, 사진관 등이 마련되어 있다. 모든 편리함이 갖추어진 최신 설비와 고객의 취향을 만족시켜주는 최상의 서비스를 통해 편안하고 안락하게 지내실 수 있도록 모든 편의를 제공하고 있다. 편안한 여행의 즐거움을 마음껏 만끽하고 삶의 여유와 넉넉함을 즐기며 추억으로 간직할 소중한 시간을 만들 수 있는 격조 높은 휴식처가 될 수 있도록 휘닉스 평창 콘도는 항상 정성이 깃든 서비스를 제공하고 있다.",
     "checkin_time": "15:00",
     "checkout_time": "11:00",
     "parking_info": "가능",
@@ -5442,8 +5096,8 @@
     "region_name": "무주군",
     "address": "전북특별자치도 무주군 설천면 만선로 185",
     "address_detail": null,
-    "latitude": 19.6944771,
-    "longitude": 117.9926027,
+    "latitude": 35.8885165,
+    "longitude": 127.744934,
     "phone": "063-322-9000",
     "image_url": "https://tong.visitkorea.or.kr/cms/resource/86/3064386_image2_1.JPG",
     "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/86/3064386_image3_1.JPG",
