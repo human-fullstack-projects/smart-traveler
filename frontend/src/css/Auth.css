@@ -14,7 +14,7 @@
 .auth-password .st-btn { min-height: 48px; padding: 8px 14px; font-size: 14px; }
 .auth-submit { width: 100%; }
 .auth-social { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
-.auth-social button { min-height: 44px; }
+.auth-social button { min-height: 44px; white-space: nowrap; font-size: 14px; padding-inline: 8px; }
 .auth-notice { margin: 0; padding: 12px 14px; border-radius: var(--st-radius-s); background: rgba(163, 206, 202, .35); color: var(--st-ink); font-size: 14px; }
 .auth-notice.error { background: rgba(168, 59, 75, .1); color: var(--st-danger); }
 .auth-foot { margin: 20px 0 0; padding-top: 16px; border-top: 1px solid var(--st-line); color: var(--st-muted); font-size: 14px; text-align: center; }
@@ -37,6 +37,7 @@
 .auth-modal-head p { margin: 6px 0 14px; }
 .auth-modal-body { min-height: 80px; overflow-y: auto; padding: 16px; border: 1px solid var(--st-line); border-radius: var(--st-radius-s); background: var(--st-bg); white-space: pre-wrap; line-height: 1.7; color: var(--st-ink); }
 .auth-modal-actions { display: flex; justify-content: flex-end; gap: 8px; padding-top: 16px; }
+.auth-modal-actions .st-btn-line { background: transparent; border: 2px solid var(--st-teal); color: var(--st-teal); }
 .auth-req { color: var(--st-danger); font-size: 12px; font-weight: 700; }
 .auth-done { text-align: center; }
 .auth-done .st-btn { margin-top: 18px; }
