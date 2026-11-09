@@ -58,12 +58,16 @@ public class SignupService {
         if (blank(request.nickname()) || request.nickname().length() > 50) throw bad("닉네임을 입력하세요.");
         if (blank(request.email()) || request.email().length() > 255 || !request.email().matches("[^@\\s]+@[^@\\s]+\\.[^@\\s]+"))
             throw bad("올바른 이메일을 입력하세요.");
+        if (members.existsByEmail(request.email().trim()))
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 사용 중인 이메일입니다.");
         if ("OWNER".equals(role) && (blank(request.businessNumber()) || blank(request.businessName())
             || blank(request.representativeName()) || blank(request.businessAddress())
             || blank(request.businessPhone()))) throw bad("업주 사업자 정보 5개 항목은 필수입니다.");
         if ("OWNER".equals(role) && (request.businessNumber().length()>20 || request.businessName().length()>100
             || request.representativeName().length()>50 || request.businessAddress().length()>255
             || request.businessPhone().length()>20)) throw bad("업주 사업자 정보 길이를 확인하세요.");
+        if ("OWNER".equals(role) && owners.existsByBusinessNumber(request.businessNumber().trim()))
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "사업자번호가 이미 사용 중입니다.");
 
         List<Map<String,Object>> activeTerms = jdbc.queryForList("""
             SELECT t.terms_id, t.is_required FROM terms t
@@ -95,7 +99,7 @@ public class SignupService {
         member.setStatus("ACTIVE");
         member.setCreatedAt(now); member.setUpdatedAt(now);
         try { member = members.saveAndFlush(member); }
-        catch (DataIntegrityViolationException e) { throw new ResponseStatusException(HttpStatus.CONFLICT, "아이디 또는 이메일이 이미 사용 중입니다."); }
+        catch (DataIntegrityViolationException e) { throw integrityError(e); }
         for (Map<String, Object> term : activeTerms) {
             Long id = ((Number)term.get("terms_id")).longValue();
             jdbc.update("INSERT INTO member_consents(member_id,terms_id,is_agreed,consented_at) VALUES (?,?,?,?)",
@@ -107,15 +111,26 @@ public class SignupService {
             owner.setBusinessNumber(request.businessNumber().trim());
             owner.setBusinessName(request.businessName().trim());
             owner.setRepresentativeName(request.representativeName().trim());
-            owner.setBusinessAddress(request.businessAddress());
-            owner.setBusinessPhone(request.businessPhone());
+            owner.setBusinessAddress(request.businessAddress().trim());
+            owner.setBusinessPhone(request.businessPhone().trim());
             owner.setReviewStatusCode("PENDING");
             owner.setCreatedAt(now); owner.setUpdatedAt(now);
             try { owners.saveAndFlush(owner); }
-            catch (DataIntegrityViolationException e) { throw new ResponseStatusException(HttpStatus.CONFLICT, "사업자번호가 이미 사용 중입니다."); }
+            catch (DataIntegrityViolationException e) { throw integrityError(e); }
         }
         return new SignupResult(member.getMemberId(), role, "OWNER".equals(role) ? "PENDING" : null);
     }
     private static boolean blank(String s) { return s == null || s.isBlank(); }
     private static ResponseStatusException bad(String message) { return new ResponseStatusException(HttpStatus.BAD_REQUEST, message); }
+    private static ResponseStatusException integrityError(DataIntegrityViolationException error) {
+        String details = error.getMostSpecificCause().getMessage();
+        String constraint = details == null ? "" : details.toLowerCase(java.util.Locale.ROOT);
+        if (constraint.contains("uk_members3") || constraint.contains("members.login_id"))
+            return new ResponseStatusException(HttpStatus.CONFLICT, "이미 사용 중인 아이디입니다.", error);
+        if (constraint.contains("uk_members2") || constraint.contains("members.email"))
+            return new ResponseStatusException(HttpStatus.CONFLICT, "이미 사용 중인 이메일입니다.", error);
+        if (constraint.contains("uk_owner_profiles2") || constraint.contains("owner_profiles.business_number"))
+            return new ResponseStatusException(HttpStatus.CONFLICT, "사업자번호가 이미 사용 중입니다.", error);
+        return new ResponseStatusException(HttpStatus.BAD_REQUEST, "가입 정보 또는 사업자 정보를 확인해주세요.", error);
+    }
 }
