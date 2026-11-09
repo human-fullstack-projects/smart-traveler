@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import HomePage, { Intro, PanelHeader } from './pages/home/HomePage';
 import LoginPage from './pages/auth/LoginPage';
 import SignupPage from './pages/auth/SignupPage';
+import SocialSignupPage from './pages/auth/SocialSignupPage';
 import AdminApp, { AdminGuard } from './pages/admin/AdminApp';
 import AiCoursePage from './pages/ai-course/AiCoursePage';
 import SearchPage from './pages/search/SearchPage';
@@ -143,6 +144,7 @@ const myPageRoutes = {
 const topNavPageRoutes = {
   '/login': LoginPage,
   '/signup': SignupPage,
+  '/signup/social': SocialSignupPage,
 };
 
 const sidebarPageRoutes = {
