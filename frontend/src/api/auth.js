@@ -54,9 +54,6 @@ async function postJsonWithCsrf(path, data) {
 export async function getTerms() { return request('/api/auth/terms'); }
 
 export async function signup(data) { return postJsonWithCsrf('/api/auth/signup', data); }
-export async function getSocialProviders() { return request('/api/auth/social/providers'); }
-export async function getPendingSocial() { return request('/api/auth/social/pending'); }
-export async function socialSignup(data) { return postJsonWithCsrf('/api/auth/social/signup', data); }
 
 export async function getOwnerReview() { return request('/api/auth/owner-review'); }
 export async function reapplyOwner(data) { return postJsonWithCsrf('/api/auth/owner-review/reapply', data); }

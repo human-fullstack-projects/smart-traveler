@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import '../../css/Auth.css';
-import { getSocialProviders, login } from '../../api/auth';
+import { login } from '../../api/auth';
+import { getSocialProviders } from './socialApi';
 import OwnerReviewPage from './OwnerReviewPage';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -26,7 +27,7 @@ export default function LoginPage({ onLogin }) {
 
   function socialLogin(provider) {
     const base = import.meta.env.VITE_SOCIAL_AUTH_BASE_URL
-      || (window.location.port === '5173' ? `${window.location.protocol}//${window.location.hostname}:8080` : window.location.origin);
+      || (import.meta.env.DEV ? `${window.location.protocol}//${window.location.hostname}:8080` : window.location.origin);
     window.location.assign(`${base}/oauth2/authorization/${provider}`);
   }
 

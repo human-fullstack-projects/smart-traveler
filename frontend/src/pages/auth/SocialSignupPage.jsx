@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import '../../css/Auth.css';
-import { getPendingSocial, getTerms, socialSignup } from '../../api/auth';
+import { getTerms } from '../../api/auth';
+import { getPendingSocial, socialSignup } from './socialApi';
 import TermsModal from './TermsModal';
 
 const TERM_NAMES = { SERVICE: '서비스 이용약관', PRIVACY: '개인정보 수집·이용', LOCATION: '위치정보 이용', MARKETING: '마케팅 정보 수신' };
