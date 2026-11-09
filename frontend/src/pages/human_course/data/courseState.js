@@ -17,10 +17,12 @@ export function creationError(state, reservation) {
   return '';
 }
 function postFields(input) {
-  const fields = { title: String(input.title || '').trim(), summary: String(input.summary || '').trim(), body: String(input.body || '').trim(), category: input.category, companion: input.companion, photos: input.photos || [] };
+  const fields = { title: String(input.title || '').trim(), summary: String(input.summary || '').trim(), body: String(input.body || '').trim(), category: input.category, companion: input.companion, photos: input.photos || [], photoAssets: input.photoAssets || [] };
   if (!fields.title || fields.title.length > 80 || !fields.summary || fields.summary.length > 150 || !fields.body || fields.body.length > 2000) return null;
   if (!['맛집', '문화', '힐링', '액티비티'].includes(fields.category) || !['혼자', '친구', '연인', '가족'].includes(fields.companion)) return null;
   if (!Array.isArray(fields.photos) || fields.photos.length > 5 || fields.photos.some((name) => typeof name !== 'string')) return null;
+  if (!Array.isArray(fields.photoAssets) || fields.photoAssets.length > 5 || fields.photoAssets.some((photo) => !photo || typeof photo.name !== 'string' || typeof photo.dataUrl !== 'string' || !/^data:image\/(?:png|jpeg|webp|gif);base64,/.test(photo.dataUrl))) return null;
+  if (fields.photoAssets.length && (fields.photoAssets.length !== fields.photos.length || fields.photoAssets.some((photo, index) => photo.name !== fields.photos[index]))) return null;
   return fields;
 }
 export function filterCourses(courses, filters = {}) {
@@ -47,7 +49,7 @@ export function transition(current, action) {
     if (!fields) return fail('필수 항목·글자 수·사진 개수를 확인해주세요.');
     const final = finalCourse(reservation);
     const id = state.nextId++;
-    state.courses.push({ ...fields, id, reservationId: reservation.id, author: USER, mine: true, region: reservation.region, plan: structuredClone(final.plan), courseVersion: final.version, visibility: 'PUBLIC', likes: 0, likedByMe: false, reportedByMe: false, comments: [], createdAt: new Date().toISOString().slice(0, 10) });
+    state.courses.push({ ...fields, id, reservationId: reservation.id, author: USER, mine: true, region: reservation.region, travelDates: reservation.dates, plan: structuredClone(final.plan), courseVersion: final.version, visibility: 'PUBLIC', likes: 0, likedByMe: false, reportedByMe: false, comments: [], createdAt: new Date().toISOString().slice(0, 10) });
     return { state, id };
   }
   const course = state.courses.find((c) => String(c.id) === String(action.id));
@@ -58,6 +60,11 @@ export function transition(current, action) {
     const fields = postFields(action.fields);
     if (!fields) return fail('필수 항목·글자 수·사진 개수를 확인해주세요.');
     Object.assign(course, fields);
+    return { state, id: course.id };
+  }
+  if (action.type === 'delete') {
+    if (!course.mine) return fail('본인 게시글만 삭제할 수 있습니다.');
+    state.courses = state.courses.filter((item) => item.id !== course.id);
     return { state, id: course.id };
   }
   if (course.visibility === 'BLINDED') return fail('블라인드 처리된 코스입니다.');

@@ -70,7 +70,8 @@
 .human-courses .small-kicker { font-size: 11px; font-weight: 700; color: #78868e; letter-spacing: .02em; margin-bottom: 5px; }
 .human-courses .course-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; }
 .human-courses .course-card { border: 1px solid var(--line); border-radius: 6px; background: #fff; overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
-.human-courses .course-thumb { background: #eff1f2; border-bottom: 1px solid #e4e7e9; height: 110px; display: grid; place-items: center; color: #87929a; font-size: 12px; }
+.human-courses .course-thumb { position: relative; overflow: hidden; flex: 0 0 110px; background: #eff1f2; border-bottom: 1px solid #e4e7e9; display: flex; align-items: center; justify-content: center; color: #87929a; font-size: 12px; }
+.human-courses .course-thumb img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; }
 .human-courses .course-content { padding: 15px; display: flex; flex: 1; flex-direction: column; gap: 8px; }
 .human-courses .course-content h3 { margin: 0; font-size: 16px; }
 .human-courses .course-content p { margin: 0; }
@@ -86,6 +87,7 @@
 .human-courses .article-intro .summary { font-size: 15px; margin: 0; }
 .human-courses .photo-boxes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(128px, 100%), 1fr)); gap: 10px; list-style: none; margin: 0; padding: 0; }
 .human-courses .photo-boxes li { display: flex; align-items: center; justify-content: center; min-height: 108px; text-align: center; padding: 12px; font-size: 12px; background: #f1f3f4; border: 1px dashed #cbd4d9; border-radius: 5px; color: #63727b; overflow-wrap: anywhere; }
+.human-courses .photo-boxes img { display: block; width: 100%; max-height: 240px; object-fit: contain; border-radius: 4px; }
 .human-courses .writing-sample { white-space: pre-wrap; line-height: 1.75; padding: 15px; border: 1px solid #e4e9eb; background: #fcfdfd; border-radius: 5px; margin-bottom: 0; }
 .human-courses .plan-day { border: 1px solid #e2e7e9; padding: 13px 15px; border-radius: 5px; margin-bottom: 10px; }
 .human-courses .plan-day:last-child { margin-bottom: 0; }
@@ -116,6 +118,32 @@
 .human-courses details { margin: 16px 0; padding: 12px; border: 1px dashed #bac6ce; border-radius: 6px; }
 .human-courses summary { cursor: pointer; font-weight: 600; }
 .human-courses details[open] > summary { margin-bottom: 14px; }
+.human-courses .course-preview { background: #fcfdfd; }
+.human-courses .course-preview .writing-sample { margin-bottom: 14px; }
+.human-courses .form-error { color: #a73434; border: 1px solid #ebbbbb; background: #fff7f7; padding: 10px; border-radius: 5px; }
+.human-courses .delete-course { margin-top: 12px; }
+.human-courses .delete-course .note { margin-top: 10px; }
+.human-courses .storage-notice { max-width: 1120px; margin: 16px auto; padding: 0 22px; }
+.human-courses .map-frame { position: relative; overflow: hidden; border: 1px solid var(--line); border-radius: 5px; }
+.human-courses .map-controls { display: flex; flex-wrap: wrap; gap: 7px; margin: 0 0 12px; }
+.human-courses .map-controls button { padding: 5px 11px; font-size: 12px; }
+.human-courses .map-controls button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+.human-courses .map-search-message { margin: 10px 0 0; color: var(--sub); font-size: 13px; }
+.human-courses .map-selected-place { position: absolute; z-index: 5; right: 10px; bottom: 10px; left: 10px; display: flex; flex-wrap: wrap; gap: 5px 12px; align-items: center; padding: 10px 12px; border: 1px solid #c9ddd5; border-radius: 6px; background: #f5faf8f2; box-shadow: 0 3px 14px #173b3333; }
+.human-courses .map-selected-place span { color: var(--sub); font-size: 12px; }
+.human-courses .map-selected-place a { margin-left: auto; }
+.human-courses .map-source { margin: 10px 0 0; color: var(--sub); font-size: 11px; }
+.human-courses .map-stop-days { display: grid; gap: 12px; margin-top: 12px; }
+.human-courses .map-stop-day h3 { margin: 0 0 5px; font-size: 14px; }
+.human-courses .map-stops { display: flex; flex-wrap: wrap; gap: 7px 16px; margin: 0; padding-left: 20px; }
+.human-courses .map-stops button { padding: 0; border: 0; background: none; color: #126a62; font: inherit; cursor: pointer; text-align: left; }
+.human-courses .map-stops button:hover, .human-courses .map-stops button:focus-visible { text-decoration: underline; }
+.human-courses .map-stops button[aria-pressed="true"] { font-weight: 700; }
+.human-courses .map-stay-results { margin-top: 14px; }
+.human-courses .map-stay-results h3 { margin-bottom: 5px; font-size: 14px; }
+.human-courses .map-stay-results ul { display: flex; flex-wrap: wrap; gap: 7px 16px; margin: 0; padding-left: 20px; }
+.human-courses .map-stay-results button { padding: 0; border: 0; background: none; color: #126a62; cursor: pointer; }
+.human-courses .map-stay-results button[aria-pressed="true"] { font-weight: 700; }
 
 @media (max-width: 1050px) {
   .human-courses .layout, .human-courses .layout.wide-left { grid-template-columns: minmax(0, 1fr); }

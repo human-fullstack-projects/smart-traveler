@@ -2,8 +2,11 @@ package com.smarttraveler.admin.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
+import java.util.Map;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -18,8 +21,8 @@ public class HumanManagementService {
     public record CourseCard(Long postId, String title, String region, long likeCount, String authorNickname) {}
     public record Exposure(String slotKey, Long postId, String scope, String region, String title, long likeCount, String authorNickname) {}
     public record CommentCard(Long commentId, Long postId, String postTitle, Long authorId,
-        String authorNickname, String content, String region, java.time.LocalDateTime createdAt,
-        java.time.LocalDateTime deletedAt, boolean deleted) {}
+        String authorNickname, String content, String region, LocalDateTime createdAt,
+        LocalDateTime deletedAt, boolean deleted) {}
     public record PopularCard(Long postId, String title, String region, long likeCount,
         String authorNickname, boolean selected, Integer rank) {}
 
@@ -48,7 +51,7 @@ public class HumanManagementService {
     }
 
     @Transactional(readOnly = true)
-    public List<CommentCard> comments(String region, java.time.LocalDate from, java.time.LocalDate to,
+    public List<CommentCard> comments(String region, LocalDate from, LocalDate to,
                                       String query, Long postId) {
         return jdbc.query("""
             SELECT co.comment_id, co.post_id, p.title AS post_title, co.author_id,
@@ -99,12 +102,12 @@ public class HumanManagementService {
         validateScope(scope, region);
         String slotRegion = normalizedRegion(scope,region);
         if (selected) {
-            var rows = jdbc.queryForList("""
+            List<Map<String, Object>> rows = jdbc.queryForList("""
                 SELECT p.status, p.deleted_at, c.destination FROM human_course_post p
                 JOIN course c ON c.id=p.course_id WHERE p.post_id=?
                 """, postId);
             if (rows.isEmpty()) throw new IllegalArgumentException("코스가 없습니다.");
-            var row=rows.get(0);
+            Map<String, Object> row = rows.get(0);
             if (!"VISIBLE".equals(row.get("status")) || row.get("deleted_at") != null)
                 throw new IllegalArgumentException("게시 중인 코스만 노출할 수 있습니다.");
             if ("REGION".equals(scope) && !String.valueOf(row.get("destination")).contains(slotRegion))
@@ -161,7 +164,7 @@ public class HumanManagementService {
     public void setMonthlyPick(String month, Long postId, boolean selected, String login) {
         parseMonth(month);
         if (selected) {
-            var rows=jdbc.queryForList("SELECT status,deleted_at FROM human_course_post WHERE post_id=?",postId);
+            List<Map<String, Object>> rows = jdbc.queryForList("SELECT status,deleted_at FROM human_course_post WHERE post_id=?",postId);
             if (rows.isEmpty()) throw new IllegalArgumentException("코스가 없습니다.");
             if (!"VISIBLE".equals(rows.get(0).get("status")) || rows.get(0).get("deleted_at") != null)
                 throw new IllegalArgumentException("게시 중인 코스만 선정할 수 있습니다.");

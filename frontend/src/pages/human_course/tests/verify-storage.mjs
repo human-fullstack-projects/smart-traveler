@@ -14,7 +14,8 @@ try {
   const getStorage = () => storage;
   assert.ok(validState(freshState()), '샘플 구조 유효');
   let state = loadCourses(getStorage).state;
-  const fields = { title: '저장할 코스', category: '문화', companion: '친구', summary: '소개', body: '후기', photos: ['여행.jpg'] };
+  const photoAssets = [{ name: '여행.jpg', dataUrl: 'data:image/jpeg;base64,YQ==' }];
+  const fields = { title: '저장할 코스', category: '문화', companion: '친구', summary: '소개', body: '후기', photos: ['여행.jpg'], photoAssets };
   for (const action of [
     { type: 'like', id: 1 },
     { type: 'comment', id: 1, commentId: 'saved-comment', text: '저장 댓글' },
@@ -35,12 +36,16 @@ try {
     state = restored.state;
   }
   assert.equal(state.courses.find((c) => c.id === 6).photos[0], '여행.jpg');
+  assert.deepEqual(state.courses.find((c) => c.id === 6).photoAssets, photoAssets);
   assert.equal(memory.get('smart-travel-mypage-v1'), 'mypage untouched');
   assert.equal(memory.get('human-course-mock-v1'), 'original mock untouched');
   const { default: App } = await server.ssrLoadModule('/src/App.jsx');
+  const { AuthProvider } = await server.ssrLoadModule('/src/contexts/AuthContext.jsx');
+  const renderApp = () => renderToStaticMarkup(React.createElement(AuthProvider, null, React.createElement(App)));
   globalThis.window = { location: { hash: '#/human-courses/6' }, localStorage: storage };
-  const html = renderToStaticMarkup(React.createElement(App));
+  const html = renderApp();
   assert.ok(html.includes('수정한 코스') && html.includes('여행.jpg'), '복원 데이터 상세 렌더링');
+  assert.ok(html.includes('data:image/jpeg;base64,YQ=='), '저장 사진 렌더링');
   for (const bad of [
     'broken JSON', JSON.stringify({ version: 999, state }),
     JSON.stringify({ version: 1, state: { ...state, courses: [null] } }),
@@ -58,7 +63,7 @@ try {
   assert.ok(saveCourses(blocked, state));
   assert.ok(saveCourses(() => ({ setItem() { throw Error('Quota exceeded'); } }), state));
   globalThis.window = { location: { hash: '#/human-courses' }, get localStorage() { throw Error('Storage denied'); } };
-  const warning = renderToStaticMarkup(React.createElement(App));
+  const warning = renderApp();
   assert.ok(warning.includes('role="alert"') && warning.includes('저장 데이터를 읽지 못해'));
   state = transition(state, { type: 'reset' }).state;
   assert.equal(saveCourses(getStorage, state), '');

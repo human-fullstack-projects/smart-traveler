@@ -14,9 +14,11 @@ export function validState(state) {
     && Number.isFinite(Date.parse(r.checkoutAt)) && typeof r.itineraryFinal === 'boolean' && positive(r.courseVersion) && validPlan(r.plan)
     && (r.versions === undefined || (Array.isArray(r.versions) && r.versions.every((v) => v && positive(v.version) && validPlan(v.plan)) && unique(r.versions, 'version'))));
   const coursesValid = state.courses.every((c) => c && positive(c.id) && ['title', 'region', 'category', 'companion', 'summary', 'body', 'author', 'createdAt'].every((key) => text(c[key]))
+    && (c.travelDates === undefined || text(c.travelDates))
     && Number.isFinite(Date.parse(c.createdAt)) && typeof c.mine === 'boolean'
     && (c.reservationId === null || text(c.reservationId)) && ['PUBLIC', 'BLINDED'].includes(c.visibility)
     && positive(c.courseVersion) && validPlan(c.plan) && Array.isArray(c.photos) && c.photos.every(text) && c.photos.length <= 5
+    && (c.photoAssets === undefined || (Array.isArray(c.photoAssets) && c.photoAssets.length === c.photos.length && c.photoAssets.every((photo, index) => photo && text(photo.name) && photo.name === c.photos[index] && text(photo.dataUrl) && /^data:image\/(?:png|jpeg|webp|gif);base64,/.test(photo.dataUrl))))
     && Number.isSafeInteger(c.likes) && c.likes >= 0 && typeof c.likedByMe === 'boolean' && typeof c.reportedByMe === 'boolean'
     && ['reportReason', 'reportDetails', 'moderationReason'].every((key) => c[key] === undefined || text(c[key]))
     && Array.isArray(c.comments) && c.comments.every((comment) => comment && text(comment.id) && text(comment.author) && text(comment.text)) && unique(c.comments, 'id'));

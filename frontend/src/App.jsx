@@ -26,12 +26,17 @@ import MyPage from './pages/mypage/pages/MyPage';
 import Reservations from './pages/mypage/pages/Reservations';
 import MyCourses from './pages/mypage/pages/MyCourses';
 import MyPosts from './pages/mypage/pages/MyPosts';
+import ProfilePage from './pages/mypage/profile/ProfilePage';
+import TravelStylePage from './pages/mypage/preferences/TravelStylePage';
 import useMyPageStore from './pages/mypage/hooks/useMyPageStore';
+import AccessNotice from './pages/mypage/components/AccessNotice';
+import { routeAccess } from './pages/mypage/data/store';
 import HumanCourseList from './pages/human_course/pages/HumanCourseList';
 import HumanCourseDetail from './pages/human_course/pages/HumanCourseDetail';
 import HumanCourseCreate from './pages/human_course/pages/HumanCourseCreate';
 import HumanCourseEdit from './pages/human_course/pages/HumanCourseEdit';
 import HumanCourseModeration from './pages/human_course/pages/HumanCourseModeration';
+import MapDemoPage from './pages/map/MapDemoPage';
 import useHumanCourses from './pages/human_course/hooks/useHumanCourses';
 
 // 한글 조합을 확정하는 Enter는 전송하지 않고, Shift+Enter는 줄바꿈에 사용한다.
@@ -131,6 +136,8 @@ const myPageRoutes = {
   '/reservations': Reservations,
   '/my-courses': MyCourses,
   '/my-posts': MyPosts,
+  '/my-profile': ProfilePage,
+  '/my-travel-style': TravelStylePage,
 };
 
 const topNavPageRoutes = {
@@ -146,11 +153,12 @@ const sidebarPageRoutes = {
   '/search': SearchPage,
   '/stays': StaySearchPage,
   '/stays/booking': StayBookingPage,
+  '/map-demo': MapDemoPage,
 };
 
 export default function App() {
-  const { member, authChecked, authCheckFailed, loggingOut, login, logout } = useAuth();
-  const myPageStore = useMyPageStore();
+  const { member, authChecked, authCheckFailed, loggingOut, authRevision, retryAuth, login, logout } = useAuth();
+  const myPageStore = useMyPageStore({ member, authChecked, authCheckFailed, authRevision });
   const humanCourses = useHumanCourses();
   const [route, setRoute] = useState(window.location.hash.slice(1) || '/');
   const [notice, setNotice] = useState('');
@@ -236,9 +244,10 @@ export default function App() {
   }
 
   function loggedIn(value) {
+    const hasGuestCourses = myPageStore.isGuest && myPageStore.courses.length > 0;
     login(value);
     setNotice('');
-    window.location.hash = value?.roleCode === 'ADMIN' ? '/admin' : '/';
+    window.location.hash = value?.roleCode === 'ADMIN' ? '/admin' : hasGuestCourses ? '/my-courses' : '/';
   }
 
   async function handleLogout() {
@@ -276,7 +285,10 @@ export default function App() {
   }
 
   const routePath = (route.split('?')[0].replace(/\/$/, '')) || '/';
-  const MyPageScreen = myPageRoutes[routePath];
+  const myCourseMatch = routePath.match(/^\/my-courses\/([^/]+)$/);
+  const reservationMatch = routePath.match(/^\/reservations\/([^/]+)$/);
+  const myPostMatch = routePath.match(/^\/my-posts\/([^/]+)$/);
+  const MyPageScreen = myPageRoutes[routePath] || (myCourseMatch ? MyCourses : reservationMatch ? Reservations : myPostMatch ? MyPosts : null);
   const isHumanCourse = routePath === '/human-courses' || routePath.startsWith('/human-courses/');
   const courseMatch = routePath.match(/^\/human-courses\/([^/]+)(\/edit)?$/);
   const HumanCourseScreen = humanCourseRoutes[routePath] || (courseMatch ? (courseMatch[2] ? HumanCourseEdit : HumanCourseDetail) : null);
@@ -284,13 +296,22 @@ export default function App() {
 
   let content;
   if (MyPageScreen) {
+    const access = routeAccess(routePath, { member, authChecked, authCheckFailed });
+    const needsTravelData = !['/mypage', '/my-profile', '/my-travel-style'].includes(routePath);
+    const blocked = access !== 'allowed' ? access : needsTravelData && ['login', 'denied', 'unavailable'].includes(myPageStore.status) ? myPageStore.status : null;
     content = <>
-      <div className="mypage">{routePath === '/mypage' && <MyPageMenu currentPage={routePath.slice(1)} />}<p className="note">샘플 데이터로 동작합니다. 실제 예약·환불·AI 추천·공개 게시는 처리되지 않습니다.</p>{myPageStore.storageError && <p className="warning" role="alert">{myPageStore.storageError}</p>}</div>
-      <MyPageScreen key={routePath} {...myPageStore} />
+      <div className="mypage"><MyPageMenu currentPage={myCourseMatch ? 'my-courses' : routePath.slice(1)} isGuest={!member} />
+        {myPageStore.pendingCount > 0 && <p role="status">회원 연결을 기다리는 임시 코스가 {myPageStore.pendingCount}개 있습니다. 이 페이지를 새로고침하지 말고 다시 시도해 주세요.</p>}
+        {myPageStore.error && <p className="warning" role="alert">{myPageStore.error} <button type="button" onClick={myPageStore.retry}>다시 불러오기·연결</button></p>}
+      </div>
+      {blocked ? <AccessNotice kind={blocked} onRetry={blocked === 'unavailable' ? retryAuth : undefined} /> : needsTravelData && ['checking', 'loading'].includes(myPageStore.status)
+        ? <p role="status">내 자료를 불러오고 있습니다.</p>
+        : needsTravelData && myPageStore.status === 'error' ? <p role="alert">자료를 불러오지 못했습니다. 위의 다시 불러오기 버튼으로 재시도해 주세요.</p>
+        : <MyPageScreen key={`${member?.memberId || 'guest'}-${routePath}`} {...myPageStore} courseId={myCourseMatch?.[1]} reservationId={reservationMatch?.[1]} postId={myPostMatch?.[1]} />}
     </>;
   } else if (isHumanCourse) {
     content = <>
-      {humanCourses.storageNotice && <div className="human-courses"><p className="note" role="alert">{humanCourses.storageNotice}</p></div>}
+      {humanCourses.storageNotice && <div className="human-courses storage-notice"><p className="note" role="alert">{humanCourses.storageNotice}</p>{humanCourses.saveFailed && <button type="button" onClick={humanCourses.retrySave}>브라우저 저장 다시 시도</button>}</div>}
       {HumanCourseScreen ? <HumanCourseScreen key={routePath} {...humanCourses} courseId={courseMatch?.[1]} /> : <div className="human-courses"><section className="panel"><h1>페이지를 찾을 수 없습니다.</h1><a className="button" href="#/human-courses">코스 목록으로</a></section></div>}
     </>;
   } else if (isChat) {
