@@ -3,9 +3,12 @@ package com.smarttraveler.auth.config;
 import com.smarttraveler.auth.service.MemberDetailsService;
 import com.smarttraveler.auth.repository.MemberRepository;
 import com.smarttraveler.auth.repository.SuspensionRepository;
+import com.smarttraveler.domain.entity.Member;
+import com.smarttraveler.domain.entity.MemberSuspensionHistory;
 import tools.jackson.databind.ObjectMapper;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
+import java.util.Optional;
 
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -13,6 +16,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -37,7 +42,7 @@ public class AuthSecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http, MemberDetailsService users,
                                            PasswordEncoder encoder, MemberRepository members,
                                            SuspensionRepository suspensions, ObjectMapper mapper) throws Exception {
-        var provider = new DaoAuthenticationProvider(users);
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(users);
         provider.setPasswordEncoder(encoder);
         http.authenticationProvider(provider);
         // Keep Spring Security's session CSRF protection and session-fixation protection.
@@ -67,12 +72,12 @@ public class AuthSecurityConfig {
                 })
                 .failureHandler((request, response, exception) -> {
                     String message = "아이디 또는 비밀번호를 확인해주세요.";
-                    var member = members.findByLoginId(request.getParameter("loginId"));
+                    Optional<Member> member = members.findByLoginId(request.getParameter("loginId"));
                     if (member.isPresent() && request.getParameter("password") != null && member.get().getPassword() != null
                             && encoder.matches(request.getParameter("password"), member.get().getPassword())) {
-                        var account = member.get();
+                        Member account = member.get();
                         if ("SUSPENDED".equals(account.getStatus())) {
-                            var active = suspensions.findByMemberIdOrderByCreatedAtDesc(account.getMemberId()).stream()
+                            Optional<MemberSuspensionHistory> active = suspensions.findByMemberIdOrderByCreatedAtDesc(account.getMemberId()).stream()
                                     .filter(h -> h.getReleasedAt() == null).findFirst();
                             String reason = active.map(h -> h.getReasonDetail() == null || h.getReasonDetail().isBlank()
                                     ? h.getReasonCode() : h.getReasonDetail()).orElse("사유 미등록");
@@ -112,7 +117,7 @@ public class AuthSecurityConfig {
                 FilterChain chain) throws ServletException, IOException {
             try { chain.doFilter(request, response); }
             finally {
-                var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
                 adminAccess.info("method={} path={} status={} loginId={}", request.getMethod(),
                     request.getRequestURI(), response.getStatus(), auth == null ? "anonymous" : auth.getName());
             }

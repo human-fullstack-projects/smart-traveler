@@ -4,12 +4,14 @@ import com.smarttraveler.auth.repository.MemberRepository;
 import com.smarttraveler.auth.repository.OwnerReviewRepository;
 import com.smarttraveler.auth.repository.SignupOwnerRepository;
 import com.smarttraveler.domain.entity.OwnerProfile;
+import com.smarttraveler.domain.entity.Member;
 import com.smarttraveler.domain.entity.OwnerReviewHistory;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -63,7 +65,7 @@ public class OwnerReviewController {
     }
 
     private OwnerProfile owner(Principal principal) {
-        var member = members.findByLoginId(principal.getName())
+        Member member = members.findByLoginId(principal.getName())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
         if (!"OWNER".equals(member.getRoleCode())) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         return owners.findByMemberId(member.getMemberId())
@@ -81,8 +83,8 @@ public class OwnerReviewController {
     private static boolean blank(String value) { return value == null || value.isBlank(); }
 
     @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class})
-    public org.springframework.http.ResponseEntity<Map<String, String>> invalid(RuntimeException error) {
-        return org.springframework.http.ResponseEntity.badRequest().body(Map.of("message", error.getMessage()));
+    public ResponseEntity<Map<String, String>> invalid(RuntimeException error) {
+        return ResponseEntity.badRequest().body(Map.of("message", error.getMessage()));
     }
 
     public record ReapplyRequest(String businessNumber, String businessName, String representativeName,

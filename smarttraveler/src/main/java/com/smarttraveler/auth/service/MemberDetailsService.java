@@ -1,6 +1,7 @@
 package com.smarttraveler.auth.service;
 
 import com.smarttraveler.auth.repository.MemberRepository;
+import com.smarttraveler.domain.entity.Member;
 
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,11 +20,11 @@ public class MemberDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String loginId) {
-        var member = members.findByLoginId(loginId)
+        Member member = members.findByLoginId(loginId)
                 .orElseThrow(() -> new UsernameNotFoundException("Invalid credentials"));
         if ("SUSPENDED".equals(member.getStatus())) releases.releaseIfExpired(member.getMemberId());
         // The release runs in its own transaction; reload the account for the login decision.
-        var current = members.findById(member.getMemberId()).orElse(member);
+        Member current = members.findById(member.getMemberId()).orElse(member);
         if (current.getPassword() == null || current.getRoleCode() == null) {
             throw new UsernameNotFoundException("Invalid credentials");
         }

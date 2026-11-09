@@ -10,6 +10,7 @@ import tools.jackson.databind.ObjectMapper;
 import com.smarttraveler.auth.service.MemberDetailsService;
 import com.smarttraveler.auth.service.SuspensionReleaseService;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,9 +24,11 @@ import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.hamcrest.Matchers;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -82,16 +85,16 @@ class AuthFlowTest {
         verifyNoInteractions(repository);
     }
     @Test void realCsrfTokenLoginRotatesSessionAndReturnsOnlySafeFields() throws Exception {
-        var csrfResult = mvc.perform(get("/api/auth/csrf"))
+        MvcResult csrfResult = mvc.perform(get("/api/auth/csrf"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.token").isString()).andReturn();
-        var session = (MockHttpSession) csrfResult.getRequest().getSession(false);
-        var token = (CsrfToken) csrfResult.getRequest().getAttribute(CsrfToken.class.getName());
+        MockHttpSession session = (MockHttpSession) csrfResult.getRequest().getSession(false);
+        CsrfToken token = (CsrfToken) csrfResult.getRequest().getAttribute(CsrfToken.class.getName());
         String oldId = session.getId();
-        var result = mvc.perform(post("/api/auth/login").session(session)
+        MvcResult result = mvc.perform(post("/api/auth/login").session(session)
                 .header(token.getHeaderName(), token.getToken())
                 .param("loginId", "test-traveler").param("password", "Test-password-123!"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.authenticated").value(true)).andReturn();
-        var authenticated = (MockHttpSession) result.getRequest().getSession(false);
+        MockHttpSession authenticated = (MockHttpSession) result.getRequest().getSession(false);
         assertNotEquals(oldId, authenticated.getId());
         assertEquals(1800, authenticated.getMaxInactiveInterval());
         mvc.perform(get("/api/auth/me").session(authenticated)).andExpect(status().isOk())
@@ -111,14 +114,14 @@ class AuthFlowTest {
     }
     @Test void suspendedMemberCannotLogin() throws Exception {
         member.setStatus("SUSPENDED");
-        var suspension = new MemberSuspensionHistory();
+        MemberSuspensionHistory suspension = new MemberSuspensionHistory();
         suspension.setReasonDetail("이용 규칙 위반");
         suspension.setSuspendedUntil(LocalDateTime.of(2026, 11, 20, 18, 0));
-        when(suspensions.findByMemberIdOrderByCreatedAtDesc(7L)).thenReturn(java.util.List.of(suspension));
+        when(suspensions.findByMemberIdOrderByCreatedAtDesc(7L)).thenReturn(List.of(suspension));
         mvc.perform(post("/api/auth/login").with(csrf()).param("loginId", "test-traveler")
                 .param("password", "Test-password-123!")).andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("이용 규칙 위반")))
-                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("2026-11-20 18:00")));
+                .andExpect(jsonPath("$.message").value(Matchers.containsString("이용 규칙 위반")))
+                .andExpect(jsonPath("$.message").value(Matchers.containsString("2026-11-20 18:00")));
     }
     @Test void withdrawnMemberGetsOwnFailure() throws Exception {
         member.setStatus("WITHDRAWN");
@@ -137,7 +140,7 @@ class AuthFlowTest {
                 .param("password", "Test-password-123!")).andExpect(status().isUnauthorized());
     }
     @Test void logoutRequiresCsrfAndInvalidatesSession() throws Exception {
-        var session = login();
+        MockHttpSession session = login();
         mvc.perform(post("/api/auth/logout").session(session)).andExpect(status().isForbidden());
         mvc.perform(get("/api/auth/me").session(session)).andExpect(status().isOk());
         mvc.perform(post("/api/auth/logout").session(session).with(csrf())).andExpect(status().isNoContent());
@@ -145,7 +148,7 @@ class AuthFlowTest {
         mvc.perform(get("/api/auth/me")).andExpect(status().isUnauthorized());
     }
     @Test void disabledMemberIsRejectedOnSessionRefresh() throws Exception {
-        var session = login();
+        MockHttpSession session = login();
         member.setStatus("BANNED");
         mvc.perform(get("/api/auth/me").session(session)).andExpect(status().isUnauthorized());
         assertTrue(session.isInvalid());
