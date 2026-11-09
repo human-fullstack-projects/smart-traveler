@@ -18,25 +18,109 @@ import com.smarttraveler.domain.entity.MemberSuspensionHistory;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.junit.jupiter.api.io.TempDir;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 class SocialOAuthTest {
+    @TempDir Path temp;
+
+    private SocialProviders providers(String googleId, String googleSecret, String kakaoId, String kakaoSecret,
+            Path workingDirectory) {
+        return SocialOAuthConfig.resolveProviders(googleId, googleSecret, kakaoId, kakaoSecret,
+                workingDirectory, temp.resolve("empty-user-profile"));
+    }
+
+    @Test void environmentPairWinsOverRepositoryFiles() throws IOException {
+        Path working = Files.createDirectory(temp.resolve("work"));
+        Path secrets = Files.createDirectory(working.resolve("secrets"));
+        Files.writeString(secrets.resolve("google.json"),
+                "{\"web\":{\"client_id\":\"file-id\",\"client_secret\":\"file-secret\"}}");
+        Files.writeString(secrets.resolve("kakao.json"),
+                "{\"rest_api_key\":\"file-id\",\"client_secret\":\"file-secret\"}");
+
+        SocialProviders found = providers("env-google", "env-google-secret", "env-kakao", "env-kakao-secret",
+                working);
+        assertEquals("env-google", found.googleId());
+        assertEquals("env-google-secret", found.googleSecret());
+        assertEquals("env-kakao", found.kakaoId());
+        assertEquals("env-kakao-secret", found.kakaoSecret());
+    }
+
+    @Test void readsJsonFromWorkingDirectorySecrets() throws IOException {
+        Path working = Files.createDirectory(temp.resolve("work"));
+        Path secrets = Files.createDirectory(working.resolve("secrets"));
+        Files.writeString(secrets.resolve("google.json"),
+                "{\"web\":{\"client_id\":\"google-id\",\"client_secret\":\"google-secret\"}}");
+        Files.writeString(secrets.resolve("kakao.json"),
+                "{\"rest_api_key\":\"kakao-id\",\"client_secret\":\"kakao-secret\"}");
+
+        SocialProviders found = providers("", "", "", "", working);
+        assertEquals("google-id", found.googleId());
+        assertEquals("google-secret", found.googleSecret());
+        assertEquals("kakao-id", found.kakaoId());
+        assertEquals("kakao-secret", found.kakaoSecret());
+    }
+
+    @Test void incompleteEnvironmentPairFallsBackToFile() throws IOException {
+        Path working = Files.createDirectory(temp.resolve("work"));
+        Path secrets = Files.createDirectory(working.resolve("secrets"));
+        Files.writeString(secrets.resolve("google.json"),
+                "{\"web\":{\"client_id\":\"file-id\",\"client_secret\":\"file-secret\"}}");
+
+        SocialProviders found = providers("env-id-only", "", "", "", working);
+        assertEquals("file-id", found.googleId());
+        assertEquals("file-secret", found.googleSecret());
+    }
+
+    @Test void readsJsonFromParentSecrets() throws IOException {
+        Path working = Files.createDirectory(temp.resolve("smarttraveler"));
+        Path secrets = Files.createDirectory(temp.resolve("secrets"));
+        Files.writeString(secrets.resolve("google.json"),
+                "{\"installed\":{\"client_id\":\"parent-id\",\"client_secret\":\"parent-secret\"}}");
+
+        SocialProviders found = providers("", "", "", "", working);
+        assertEquals("parent-id", found.googleId());
+        assertEquals("parent-secret", found.googleSecret());
+        assertFalse(found.kakao());
+    }
+
+    @Test void readsUserProfileOnlyAfterRepositoryFiles() throws IOException {
+        Path working = Files.createDirectory(temp.resolve("work"));
+        Path profile = Files.createDirectory(temp.resolve("profile"));
+        Path userSecrets = Files.createDirectory(profile.resolve(".smart_travel_oauth"));
+        Files.writeString(userSecrets.resolve("kakao.json"),
+                "{\"rest_api_key\":\"user-id\",\"client_secret\":\"user-secret\"}");
+
+        SocialProviders found = SocialOAuthConfig.resolveProviders("", "", "", "", working, profile);
+        assertEquals("user-id", found.kakaoId());
+        assertEquals("user-secret", found.kakaoSecret());
+    }
+
+    @Test void brokenJsonLeavesProviderUnavailableWithoutThrowing() throws IOException {
+        Path working = Files.createDirectory(temp.resolve("work"));
+        Path secrets = Files.createDirectory(working.resolve("secrets"));
+        Files.writeString(secrets.resolve("google.json"), "{broken");
+
+        SocialProviders found = assertDoesNotThrow(() -> providers("", "", "", "", working));
+        assertFalse(found.google());
+        assertFalse(found.kakao());
+    }
+
     @Test void providersEndpointReportsBothUnavailableWithoutKeys() {
         SocialAuthController controller = new SocialAuthController(new SocialProviders("", "", "", ""),
                 mock(SocialSignupService.class), mock(SocialSessionLogin.class));
@@ -150,16 +234,4 @@ class SocialOAuthTest {
         verify(links).saveAndFlush(any(MemberSocialAccount.class));
     }
 
-}
-
-@SpringJUnitConfig(SocialOAuthConfig.class)
-@TestPropertySource(properties = {"GOOGLE_CLIENT_ID=", "GOOGLE_CLIENT_SECRET=", "KAKAO_CLIENT_ID=", "KAKAO_CLIENT_SECRET="})
-class MissingKeysContextTest {
-    @Autowired SocialProviders providers;
-    @Autowired ClientRegistrationRepository registrations;
-    @Test void noKeysStillCreateContextWithNoProviders() {
-        assertFalse(providers.google()); assertFalse(providers.kakao());
-        assertNull(registrations.findByRegistrationId("google"));
-        assertNull(registrations.findByRegistrationId("kakao"));
-    }
 }
