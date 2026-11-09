@@ -3,6 +3,7 @@ package com.smarttraveler.admin.controller;
 import com.smarttraveler.admin.repository.*;
 import com.smarttraveler.admin.dto.AdminViews.HumanReportView;
 import com.smarttraveler.domain.entity.Member;
+import com.smarttraveler.domain.entity.OwnerProfile;
 import com.smarttraveler.domain.entity.RoomReservation;
 import com.smarttraveler.domain.entity.Course;
 import com.smarttraveler.admin.service.AdminDataService;
@@ -32,7 +33,7 @@ public class AdminController {
         model.addAttribute("orderCount", data.reservations().size());
         model.addAttribute("lodgingCount", data.lodgings().size());
         model.addAttribute("humanCount", data.humanCourses().size());
-        model.addAttribute("stats", java.util.Map.of(
+        model.addAttribute("stats", Map.of(
             "orderCount", data.reservations().size(),
             "pendingLodgingCount", data.lodgings().stream().filter(x -> "PENDING".equals(x.getStatus())).count(),
             "suspendedMemberCount", data.members().stream().filter(x -> "SUSPENDED".equals(x.getStatus())).count(),
@@ -153,7 +154,7 @@ public class AdminController {
             .filter(x -> !StringUtils.hasText(query) || contains(x.getLoginId(), query)
                 || contains(x.getNickname(), query) || contains(x.getEmail(), query)).toList());
         model.addAttribute("selectedMember", id == null ? null : data.member(id));
-        var owner = id == null ? null : data.ownerByMember(id);
+        OwnerProfile owner = id == null ? null : data.ownerByMember(id);
         model.addAttribute("ownerProfile", owner);
         model.addAttribute("ownerLodgings", owner == null ? List.of() : data.lodgings().stream()
             .filter(x -> owner.getOwnerId().equals(x.getOwnerId())).toList());
@@ -199,7 +200,7 @@ public class AdminController {
                                @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
                                @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
                                @RequestParam(required = false) String query, Model model) {
-        var allReports = data.humanReports();
+        List<HumanReportView> allReports = data.humanReports();
         model.addAttribute("humanCourses", data.humanCourses().stream()
             .filter(x -> !StringUtils.hasText(status) || status.equals(x.getStatus()))
             .filter(x -> {

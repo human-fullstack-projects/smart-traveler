@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.beans.BeanWrapper;
 import lombok.Getter;
 
 /** The public admin fields from before the domain entity consolidation. */
@@ -15,7 +16,7 @@ public final class AdminViews {
     private AdminViews() {}
 
     public static Map<String, Object> of(Object entity) {
-        var fields = switch (entity.getClass().getSimpleName()) {
+        String fields = switch (entity.getClass().getSimpleName()) {
             case "OwnerProfile" -> "ownerId memberId businessNumber businessName representativeName businessAddress businessPhone reviewStatusCode createdAt updatedAt";
             case "OwnerReviewHistory" -> "reviewId ownerId reviewerId reviewStatusCode reviewComment reviewedAt createdAt";
             case "MemberSuspensionHistory" -> "suspensionId memberId reasonCode reasonDetail startedAt suspendedUntil releasedAt processedBy createdAt";
@@ -26,8 +27,8 @@ public final class AdminViews {
             case "Course" -> "id memberNo destination startDate endDate adults children fixedEvents preferencesSnapshot tips assumptions title summary revisionRequest originTemplateId shareConsent generationMethodId status errorMessage model promptVersion isActive createdAt updatedAt deletedAt";
             default -> throw new IllegalArgumentException("No admin view for " + entity.getClass());
         };
-        var result = new LinkedHashMap<String, Object>();
-        var bean = new BeanWrapperImpl(entity);
+        Map<String, Object> result = new LinkedHashMap<>();
+        BeanWrapper bean = new BeanWrapperImpl(entity);
         for (String field : fields.split(" ")) result.put(field, bean.getPropertyValue(field));
         return result;
     }

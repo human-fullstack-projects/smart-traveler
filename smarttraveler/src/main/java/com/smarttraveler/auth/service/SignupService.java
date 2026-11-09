@@ -2,12 +2,14 @@ package com.smarttraveler.auth.service;
 
 import com.smarttraveler.auth.dto.SignupRequest;
 import com.smarttraveler.auth.dto.SignupResult;
+import com.smarttraveler.auth.dto.TermConsent;
 import com.smarttraveler.auth.repository.MemberRepository;
 import com.smarttraveler.auth.repository.SignupOwnerRepository;
 import com.smarttraveler.domain.entity.Member;
 import com.smarttraveler.domain.entity.OwnerProfile;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -72,10 +74,10 @@ public class SignupService {
                  (newer.effective_date=t.effective_date AND newer.terms_id>t.terms_id)))
             """);
         if (activeTerms.isEmpty()) throw bad("가입 약관이 아직 등록되지 않았습니다.");
-        Map<Long,Boolean> consents = new java.util.HashMap<>();
-        if (request.consents() != null) for (var consent : request.consents())
+        Map<Long,Boolean> consents = new HashMap<>();
+        if (request.consents() != null) for (TermConsent consent : request.consents())
             if (consent.termsId() != null) consents.put(consent.termsId(), consent.agreed());
-        for (var term : activeTerms) {
+        for (Map<String, Object> term : activeTerms) {
             Long id = ((Number)term.get("terms_id")).longValue();
             Object required = term.get("is_required");
             if ((Boolean.TRUE.equals(required) || required instanceof Number n && n.intValue() != 0)
@@ -94,7 +96,7 @@ public class SignupService {
         member.setCreatedAt(now); member.setUpdatedAt(now);
         try { member = members.saveAndFlush(member); }
         catch (DataIntegrityViolationException e) { throw new ResponseStatusException(HttpStatus.CONFLICT, "아이디 또는 이메일이 이미 사용 중입니다."); }
-        for (var term : activeTerms) {
+        for (Map<String, Object> term : activeTerms) {
             Long id = ((Number)term.get("terms_id")).longValue();
             jdbc.update("INSERT INTO member_consents(member_id,terms_id,is_agreed,consented_at) VALUES (?,?,?,?)",
                 member.getMemberId(), id, Boolean.TRUE.equals(consents.get(id)), now);

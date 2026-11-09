@@ -1,8 +1,10 @@
 package com.smarttraveler.auth.controller;
 
 import com.smarttraveler.auth.repository.MemberRepository;
+import com.smarttraveler.domain.entity.Member;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,9 +27,9 @@ public class AuthController {
 
     @GetMapping("/me")
     public MemberView me(Authentication authentication, HttpServletRequest request) {
-        var member = members.findByLoginId(authentication.getName()).orElse(null);
+        Member member = members.findByLoginId(authentication.getName()).orElse(null);
         if (member == null || !"ACTIVE".equals(member.getStatus()) || member.getDeletedAt() != null) {
-            var session = request.getSession(false);
+            HttpSession session = request.getSession(false);
             if (session != null) session.invalidate();
             SecurityContextHolder.clearContext();
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
