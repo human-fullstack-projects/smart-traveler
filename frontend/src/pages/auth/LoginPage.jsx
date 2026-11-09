@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import '../../css/Auth.css';
-import { login } from '../../api/auth';
+import { getSocialProviders, login } from '../../api/auth';
 import OwnerReviewPage from './OwnerReviewPage';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -11,7 +11,8 @@ export default function LoginPage({ onLogin }) {
   const [password, setPassword] = useState('');
   const [visible, setVisible] = useState(false);
   const [errors, setErrors] = useState({});
-  const [notice, setNotice] = useState('');
+  const [notice, setNotice] = useState(new URLSearchParams(window.location.search).get('socialError') || '');
+  const [providers, setProviders] = useState({ google: false, kakao: false });
   const [busy, setBusy] = useState(false);
   const [reviewMember, setReviewMember] = useState(null);
   const inFlight = useRef(false);
@@ -21,6 +22,13 @@ export default function LoginPage({ onLogin }) {
   const passwordRef = useRef(null);
 
   useEffect(() => { mounted.current = true; titleRef.current?.focus(); return () => { mounted.current = false; }; }, []);
+  useEffect(() => { getSocialProviders().then(setProviders).catch(() => {}); }, []);
+
+  function socialLogin(provider) {
+    const base = import.meta.env.VITE_SOCIAL_AUTH_BASE_URL
+      || (window.location.port === '5173' ? `${window.location.protocol}//${window.location.hostname}:8080` : window.location.origin);
+    window.location.assign(`${base}/oauth2/authorization/${provider}`);
+  }
 
   async function submit(event) {
     event.preventDefault();
@@ -85,6 +93,12 @@ export default function LoginPage({ onLogin }) {
             <button className="st-btn st-btn-lg auth-submit" type="submit" disabled={busy}>{busy ? '로그인 중…' : '로그인'}</button>
             {notice && <p className="auth-notice error" role="status">{notice}</p>}
           </form>
+          <div className="auth-social" aria-label="소셜 로그인">
+            <button type="button" className="st-btn st-btn-line" disabled={!providers.google}
+              onClick={() => socialLogin('google')}>구글로 로그인{!providers.google && ' · 준비 중'}</button>
+            <button type="button" className="st-btn st-btn-line" disabled={!providers.kakao}
+              onClick={() => socialLogin('kakao')}>카카오로 로그인{!providers.kakao && ' · 준비 중'}</button>
+          </div>
           <p className="auth-foot">아직 회원이 아니신가요? <a href="#/signup">회원가입</a></p>
         </div>
       </section>

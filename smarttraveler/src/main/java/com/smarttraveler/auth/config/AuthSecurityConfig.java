@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.Authentication;
@@ -41,7 +42,9 @@ public class AuthSecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http, MemberDetailsService users,
                                            PasswordEncoder encoder, MemberRepository members,
-                                           SuspensionRepository suspensions, ObjectMapper mapper) throws Exception {
+                                           SuspensionRepository suspensions, ObjectMapper mapper,
+                                           ObjectProvider<SocialOAuthConfig.SocialProviders> socialProviders,
+                                           ObjectProvider<SocialOAuthSuccessHandler> socialHandler) throws Exception {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider(users);
         provider.setPasswordEncoder(encoder);
         http.authenticationProvider(provider);
@@ -51,6 +54,9 @@ public class AuthSecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/auth/signup").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/auth/terms").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/auth/social/providers", "/api/auth/social/pending").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/auth/social/signup").permitAll()
+                .requestMatchers("/oauth2/authorization/**", "/login/oauth2/code/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/human-courses/exposed", "/api/human-courses/monthly-picks").permitAll()
                 .requestMatchers("/admin", "/admin/**", "/api/admin", "/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/", "/login", "/403", "/error", "/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
@@ -92,6 +98,13 @@ public class AuthSecurityConfig {
                     json(response, 401, mapper.writeValueAsString(Map.of("message", message)));
                 }));
         http.addFilterBefore(new AdminAccessLogFilter(), UsernamePasswordAuthenticationFilter.class);
+        SocialOAuthConfig.SocialProviders available = socialProviders.getIfAvailable();
+        if (available != null && available.any()) {
+            SocialOAuthSuccessHandler handler = socialHandler.getObject();
+            http.oauth2Login(oauth -> oauth.loginPage("/login")
+                    .successHandler(handler)
+                    .failureHandler((request, response, exception) -> response.sendRedirect(handler.failureUrl())));
+        }
         http.logout(logout -> logout
                 .logoutUrl("/api/auth/logout")
                 .invalidateHttpSession(true)
