@@ -83,3 +83,12 @@ AI 추천 기준은 앱 시작 시 이름이 없는 항목만 추가하며 기�
 - `POST /api/admin/orders/{id}/status`에서 `CONFIRMED`는 결제 `DONE`, 승인 시각, 예약 금액 일치 및 `reservation_inventory`의 `HELD` 점유가 만료되지 않고 모든 숙박일에 남아 있을 때만 허용합니다. 조건 미달은 한국어 `message`를 담아 400으로 답합니다. PG 승인 호출은 이 API에서 하지 않습니다.
 - `POST /api/admin/members/{id}/status`에서 정지 요청은 `{"status":"SUSPENDED","reasonCode":"OTHER","reason":"...","suspendedUntil":"2026-11-10T12:00:00"}`입니다. `suspendedUntil`을 생략하거나 `null`로 보내면 무기한 정지입니다. 과거 시각은 400입니다.
 - 로그인 시 정지 기한이 지났으면 `members.status=ACTIVE`로 바꾸고 정지 이력의 `released_at`을 실제 시각으로 기록한 후 로그인을 허용합니다. 같은 처리는 앱 시작 10분 후부터 10분 간격의 정기 작업에서도 수행합니다. `processed_by`는 관리자 회원번호를 참조하는 필수 칸이라 정지 당시 처리자 번호를 유지합니다.
+
+## M68 소셜 로그인·가입
+
+- `GET /api/auth/social/providers` → `{ "google": false, "kakao": false }` 형식. 해당 제공자의 ID와 비밀값이 모두 설정됐을 때만 `true`입니다.
+- 사용자가 `GET /oauth2/authorization/google` 또는 `/oauth2/authorization/kakao`로 이동하면 OAuth2 인증을 시작합니다. 제공자 콜백은 `/login/oauth2/code/{registrationId}`입니다.
+- 처음 인증한 계정은 세션에만 제공자·사용자 ID·닉네임·선택적 이메일을 보관하고 프론트 `/#/signup/social`로 이동합니다. `GET /api/auth/social/pending`으로 가입 정보를 읽습니다.
+- `POST /api/auth/social/signup`은 CSRF 토큰을 요구하며 본문은 `{ "nickname": "여행자", "consents": [{ "termsId": 1, "agreed": true }] }`입니다. 필수 약관 검사 후 `USER` 회원, `member_consents`, `member_social_account`를 저장하고 기존 세션 인증 방식으로 로그인합니다. 업주 소셜 가입은 제공하지 않습니다.
+- 이미 연결한 계정은 원래 회원으로 로그인합니다. 정지·탈퇴 회원은 로그인할 수 없습니다. `/api/auth/me`와 `/api/auth/logout`은 기존과 같습니다. 이메일만으로 기존 회원 계정을 자동 연결하지 않습니다.
+- 소셜 키는 제공자별로 환경변수 (`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `KAKAO_CLIENT_ID`, `KAKAO_CLIENT_SECRET`)의 완전한 쌍을 먼저 사용합니다. 없으면 실행 폴더의 `secrets/google.json`·`secrets/kakao.json`, 실행 폴더의 상위 `secrets/`, 마지막으로 사용자 프로필의 `.smart_travel_oauth/`에서 찾습니다. 구글 JSON은 `web.client_id`·`web.client_secret` (또는 `installed`), 카카오 JSON은 `rest_api_key`·`client_secret`을 읽습니다. 팀원은 저장소 루트 `secrets/README.md`를 따라 JSON 2개를 놓고 서버를 다시 켭니다. 실제 키는 저장소에 넣지 않습니다. `APP_FRONTEND_URL`의 기본값은 `http://localhost:5173`입니다. 개발용 Vite는 `/api`만 프록시하므로 소셜 로그인 버튼은 기본적으로 `http://localhost:8080/oauth2/authorization/{provider}`로 이동합니다. 다른 서버 주소는 프론트 빌드 시 `VITE_SOCIAL_AUTH_BASE_URL`로 지정합니다.

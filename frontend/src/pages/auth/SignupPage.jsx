@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import '../../css/Auth.css';
 import { getTerms, signup } from '../../api/auth';
+import TermsModal from './TermsModal';
 
 // 회원가입 (AUTH-01 여행자 · AUTH-02 숙박업주 · AUTH-03 약관 동의)
 const TERM_NAMES = { SERVICE: '서비스 이용약관', PRIVACY: '개인정보 수집·이용', LOCATION: '위치정보 이용', MARKETING: '마케팅 정보 수신' };
@@ -36,10 +37,17 @@ export default function SignupPage() {
   const [terms, setTerms] = useState([]);
   const [termsState, setTermsState] = useState('loading');
   const [openTerm, setOpenTerm] = useState(null);
+  const [returnFocus, setReturnFocus] = useState(null);
   const [agreed, setAgreed] = useState({});
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(null);
+  const inFlight = useRef(false);
+  const closeTerm = useCallback(() => setOpenTerm(null), []);
+  const agreeTerm = useCallback(() => {
+    if (openTerm) setAgreed((current) => ({ ...current, [openTerm.termsId]: true }));
+    setOpenTerm(null);
+  }, [openTerm]);
 
   useEffect(() => { getTerms().then((list) => { setTerms(list || []); setTermsState((list || []).length ? 'ok' : 'empty'); }).catch(() => setTermsState('error')); }, []);
 
@@ -49,10 +57,12 @@ export default function SignupPage() {
 
   async function submit(event) {
     event.preventDefault();
+    if (inFlight.current) return;
     const e = check(role, form);
     setErrors(e);
     if (Object.keys(e).length) { setNotice('입력한 내용을 확인해주세요.'); return; }
     if (terms.some((t) => t.required && !agreed[t.termsId])) { setNotice('필수 약관에 동의해주세요.'); return; }
+    inFlight.current = true;
     setBusy(true); setNotice('');
     try {
       const body = { role, loginId: form.loginId, password: form.password, nickname: form.nickname.trim(), email: form.email.trim(),
@@ -61,7 +71,7 @@ export default function SignupPage() {
       setDone(await signup(body));
     } catch (err) {
       setNotice(err.message);
-    } finally { setBusy(false); }
+    } finally { inFlight.current = false; setBusy(false); }
   }
 
   if (done) {
@@ -124,9 +134,8 @@ export default function SignupPage() {
                       <input type="checkbox" checked={Boolean(agreed[t.termsId])} onChange={() => setAgreed((a) => ({ ...a, [t.termsId]: !a[t.termsId] }))} />
                       {TERM_NAMES[t.type] || t.type} {t.required ? <span className="auth-req">필수</span> : <span className="st-note">선택</span>}
                     </label>
-                    <button type="button" className="auth-term-view" aria-expanded={openTerm === t.termsId} onClick={() => setOpenTerm(openTerm === t.termsId ? null : t.termsId)}>{openTerm === t.termsId ? '접기' : '보기'}</button>
+                    <button type="button" className="auth-term-view" onClick={(event) => { setReturnFocus(event.currentTarget); setOpenTerm(t); }}>보기</button>
                   </div>
-                  {openTerm === t.termsId && <div className="auth-term-body">{t.content || '약관 내용이 없어요.'}<span className="st-note">버전 {t.version}</span></div>}
                 </div>)}
               </>}
             </div>
@@ -136,6 +145,8 @@ export default function SignupPage() {
           <p className="auth-foot">이미 회원이신가요? <a href="#/login">로그인</a></p>
         </div>
       </section>
+      {openTerm && <TermsModal term={openTerm} title={TERM_NAMES[openTerm.type] || openTerm.type}
+        returnFocus={returnFocus} onClose={closeTerm} onAgree={agreeTerm} />}
     </div>
   );
 }
