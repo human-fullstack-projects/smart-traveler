@@ -1,6 +1,7 @@
 package com.smarttraveler.dummy;
 
 import java.io.InputStream;
+import java.net.URI;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
@@ -31,18 +32,25 @@ public class DummyDataLoader implements ApplicationRunner {
     private final TransactionTemplate transactions;
     private final ObjectMapper json = new ObjectMapper();
     private final boolean enabled;
+    private final String datasourceUrl;
 
     public DummyDataLoader(JdbcTemplate jdbc, PasswordEncoder passwords, PlatformTransactionManager manager,
-                           @Value("${app.dummy-data.enabled:true}") boolean enabled) {
+                           @Value("${app.dummy-data.enabled:true}") boolean enabled,
+                           @Value("${spring.datasource.url}") String datasourceUrl) {
         this.jdbc = jdbc;
         this.passwords = passwords;
         this.transactions = new TransactionTemplate(manager);
         this.enabled = enabled;
+        this.datasourceUrl = datasourceUrl;
     }
 
     @Override
     public void run(ApplicationArguments args) {
         if (!enabled) return;
+        if (!isLocalDatasource(datasourceUrl)) {
+            LOG.info("더미 데이터 적재 건너뜀: 로컬 데이터베이스가 아님");
+            return;
+        }
         JsonNode lodgings = resource("lodgings.json");
         JsonNode places = resource("places.json");
         if (lodgings == null || places == null) return;
@@ -95,6 +103,16 @@ public class DummyDataLoader implements ApplicationRunner {
         LOG.info("더미 데이터 새로 추가: 업주/숙소 {}, 객실 {}, 여행자 {}, 관광지 {}", ownerCount, roomCount, userCount, placeCount);
     }
 
+    static boolean isLocalDatasource(String url) {
+        if (url == null || !url.startsWith("jdbc:")) return false;
+        try {
+            String host = URI.create(url.substring(5)).getHost();
+            return "localhost".equalsIgnoreCase(host) || "127.0.0.1".equals(host) || "[::1]".equals(host);
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+
     private JsonNode resource(String name) {
         try (InputStream stream = getClass().getResourceAsStream("/dummy/" + name)) {
             if (stream == null) {
@@ -122,16 +140,26 @@ public class DummyDataLoader implements ApplicationRunner {
         String sourceId = text(row, "source_content_id");
         if (sourceId == null || sourceId.isBlank()) return new int[]{0, 0};
         String login = "dummy_owner_" + sourceId;
+        String business = "DUMMY-" + sourceId;
         Long existingId = id("SELECT lodging_id FROM lodging WHERE source_provider='TOURAPI' AND source_content_id=?", sourceId);
         if (existingId != null && id("""
                 SELECT l.lodging_id FROM lodging l
                 JOIN owner_profiles o ON o.owner_id=l.owner_id
                 JOIN members m ON m.member_id=o.member_id
                 WHERE l.lodging_id=? AND l.source_provider='TOURAPI' AND m.login_id=?
-                """, existingId, login) == null) return new int[]{0, 0};
-        member(login, "OWNER", "숙소 예시 " + index, hash);
+                  AND m.email=? AND m.role_code='OWNER'
+                  AND o.business_number=? AND o.representative_name='예시 업주'
+                """, existingId, login, login + "@example.test", business) == null) {
+            LOG.warn("더미 숙소 {} 건너뜀: 기존 숙소 소유자가 더미 업주와 일치하지 않음", sourceId);
+            return new int[]{0, 0};
+        }
+        boolean newMember = member(login, "OWNER", "숙소 예시 " + index, hash);
         Long memberId = id("SELECT member_id FROM members WHERE login_id=?", login);
         if (memberId == null) return new int[]{0, 0};
+        if (!newMember && dummyOwnerId(memberId, login, business) == null) {
+            LOG.warn("더미 숙소 {} 건너뜀: 기존 계정이 더미 업주 프로필과 일치하지 않음", sourceId);
+            return new int[]{0, 0};
+        }
         String area = text(row, "area_code");
         Long regionId = region(row);
         String name = text(row, "name");
@@ -141,7 +169,6 @@ public class DummyDataLoader implements ApplicationRunner {
         if (regionId == null || name == null || address == null || lat == null || lng == null) {
             throw new IllegalArgumentException("필수 숙소 정보 부족: " + sourceId + ", 지역 " + area);
         }
-        String business = "DUMMY-" + sourceId;
         jdbc.update("""
                 INSERT INTO owner_profiles(member_id,business_number,business_name,representative_name,
                     business_address,business_phone,review_status_code,created_at,updated_at)
@@ -149,7 +176,7 @@ public class DummyDataLoader implements ApplicationRunner {
                 WHERE NOT EXISTS (SELECT 1 FROM owner_profiles WHERE member_id=?)
                 """, memberId, business, limit(name, 100), "예시 업주", limit(address, 255),
                 String.format("000-0000-%04d", index), memberId);
-        Long ownerId = id("SELECT owner_id FROM owner_profiles WHERE member_id=?", memberId);
+        Long ownerId = dummyOwnerId(memberId, login, business);
         if (ownerId == null) return new int[]{0, 0};
         String type = text(row, "lodging_type");
         if (!List.of("HOTEL", "PENSION", "HANOK").contains(type)) type = "PENSION";
@@ -172,13 +199,16 @@ public class DummyDataLoader implements ApplicationRunner {
                         checkout_time=?,parking_info=?
                     WHERE lodging_id=? AND source_provider='TOURAPI' AND source_content_id=?
                       AND EXISTS (SELECT 1 FROM owner_profiles o JOIN members m ON m.member_id=o.member_id
-                                  WHERE o.owner_id=lodging.owner_id AND m.login_id=?)
+                                  WHERE o.owner_id=lodging.owner_id AND m.login_id=?
+                                    AND m.email=? AND m.role_code='OWNER'
+                                    AND o.business_number=? AND o.representative_name='예시 업주')
                     """, regionId, type, limit(name, 200), limit(address, 300),
                     limit(text(row, "address_detail"), 200), limit(text(row, "zipcode"), 10), lat, lng,
                     limit(text(row, "phone"), 30), limit(text(row, "homepage_url"), 1000),
                     "[예시 숙소 데이터] " + value(row, "description", "한국관광공사 TourAPI 제공 숙소"),
                     time(text(row, "checkin_time"), "15:00:00"), time(text(row, "checkout_time"), "11:00:00"),
-                    limit(text(row, "parking_info"), 200), existingId, sourceId, login);
+                    limit(text(row, "parking_info"), 200), existingId, sourceId, login,
+                    login + "@example.test", business);
         }
         Long lodgingId = id("SELECT lodging_id FROM lodging WHERE source_provider='TOURAPI' AND source_content_id=?", sourceId);
         if (lodgingId == null) return new int[]{addedLodging, 0};
@@ -195,10 +225,16 @@ public class DummyDataLoader implements ApplicationRunner {
             RoomCapacity.Spec spec = specs[i];
             int price = prices[i];
             if (i < existingRooms.size()) {
+                Long roomId = existingRooms.get(i);
+                if (id("SELECT room_id FROM room WHERE lodging_id=? AND name=? AND room_id<>? LIMIT 1",
+                        lodgingId, spec.name(), roomId) != null) {
+                    LOG.warn("더미 객실 {} 이름 갱신 건너뜀: 같은 숙소에 '{}' 이름이 이미 있음", roomId, spec.name());
+                    continue;
+                }
                 jdbc.update("""
                         UPDATE room SET name=?,base_capacity=?,max_capacity=?
                         WHERE room_id=? AND lodging_id=? AND description=?
-                        """, spec.name(), spec.base(), spec.max(), existingRooms.get(i), lodgingId, ROOM_NOTE);
+                        """, spec.name(), spec.base(), spec.max(), roomId, lodgingId, ROOM_NOTE);
                 continue;
             }
             rooms += jdbc.update("""
@@ -212,6 +248,15 @@ public class DummyDataLoader implements ApplicationRunner {
                     price + 30000, price + 50000, "와이파이, 냉난방", ROOM_NOTE, lodgingId, spec.name());
         }
         return new int[]{addedLodging, rooms};
+    }
+
+    private Long dummyOwnerId(Long memberId, String login, String business) {
+        return id("""
+                SELECT o.owner_id FROM owner_profiles o
+                JOIN members m ON m.member_id=o.member_id
+                WHERE o.member_id=? AND m.login_id=? AND m.email=? AND m.role_code='OWNER'
+                  AND o.business_number=? AND o.representative_name='예시 업주'
+                """, memberId, login, login + "@example.test", business);
     }
 
     private int place(JsonNode row) {
