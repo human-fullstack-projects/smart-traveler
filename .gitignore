@@ -393,3 +393,7 @@ thumb
 sketch
 
 # End of https://www.toptal.com/developers/gitignore/api/react,java,python,eclipse,intellij
+
+# Local social login credentials
+secrets/*
+!secrets/README.md

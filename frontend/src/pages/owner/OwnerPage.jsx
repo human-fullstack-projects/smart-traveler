@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import '../../css/owner.css';
-import { request } from '../../api/auth.js';
+import { postJsonWithCsrf, request } from '../../api/auth.js';
 
 const tabs = [
   { id: 'dashboard', label: '대시보드' },
@@ -80,6 +80,7 @@ const lodgingStatusLabels = {
   APPROVED: '승인',
   REJECTED: '반려',
   INACTIVE: '운영 중지',
+  SUSPENDED: '운영 중지',
   CLOSED: '폐업',
 };
 
@@ -282,11 +283,218 @@ function Reservations() {
   );
 }
 
-function PropertyForm({ property, setProperty, setToast }) {
-  const facilities = ['주차', '조식', '와이파이', '짐 보관', '수영장', '피트니스', '세탁실', '반려동물 동반'];
-  function submit(event) { event.preventDefault(); setToast('숙소 정보가 임시 저장되었습니다. 주요 정보 변경 시 관리자 재승인 정책을 확인해야 합니다.'); }
+// function PropertyForm({ property, setProperty, setToast }) {
+//   const facilities = ['주차', '조식', '와이파이', '짐 보관', '수영장', '피트니스', '세탁실', '반려동물 동반'];
+//   function submit(event) { event.preventDefault(); setToast('숙소 정보가 임시 저장되었습니다. 주요 정보 변경 시 관리자 재승인 정책을 확인해야 합니다.'); }
+//   return (
+//     <div className="owner-view"><div className="owner-view__title"><div><span>PROPERTY</span><h1>숙소 정보 관리</h1><p>검색·예약 상세에 노출되는 업장 정보를 관리합니다.</p></div><StatusBadge>운영 중</StatusBadge></div><form className="owner-property-form" onSubmit={submit}><section className="owner-panel"><div className="owner-panel__head"><div><span>BASIC INFORMATION</span><h2>기본 정보</h2></div><span className="owner-required">* 필수 입력</span></div><div className="owner-form-grid"><label>숙소명 *<input value={property.name} onChange={(event) => setProperty({ ...property, name: event.target.value })} required /></label><label>숙소 유형 *<select value={property.type} onChange={(event) => setProperty({ ...property, type: event.target.value })}><option>호텔</option><option>리조트</option><option>펜션</option><option>게스트하우스</option></select></label><label>우편번호<input value={property.zip} onChange={(event) => setProperty({ ...property, zip: event.target.value })} /></label><label className="owner-address">주소 *<div><input value={property.address} onChange={(event) => setProperty({ ...property, address: event.target.value })} required /><button type="button">주소 검색</button></div></label><label className="owner-wide">상세 주소<input value={property.addressDetail} onChange={(event) => setProperty({ ...property, addressDetail: event.target.value })} /></label><label>전화번호 *<input value={property.phone} onChange={(event) => setProperty({ ...property, phone: event.target.value })} required /></label><label>홈페이지<input value={property.website} onChange={(event) => setProperty({ ...property, website: event.target.value })} /></label><label className="owner-wide">숙소 소개 *<textarea rows="5" value={property.description} onChange={(event) => setProperty({ ...property, description: event.target.value })} required /></label></div></section><section className="owner-panel"><div className="owner-panel__head"><div><span>OPERATION</span><h2>운영 정보</h2></div></div><div className="owner-form-grid"><label>체크인 시간 *<input type="time" value={property.checkIn} onChange={(event) => setProperty({ ...property, checkIn: event.target.value })} /></label><label>체크아웃 시간 *<input type="time" value={property.checkOut} onChange={(event) => setProperty({ ...property, checkOut: event.target.value })} /></label><label className="owner-wide">주차 안내<textarea rows="3" value={property.parking} onChange={(event) => setProperty({ ...property, parking: event.target.value })} /></label><fieldset className="owner-wide"><legend>편의시설</legend><div className="owner-facility-grid">{facilities.map((item) => <label key={item}><input type="checkbox" checked={property.facilities.includes(item)} onChange={() => setProperty({ ...property, facilities: property.facilities.includes(item) ? property.facilities.filter((value) => value !== item) : [...property.facilities, item] })} />{item}</label>)}</div></fieldset><label className="owner-wide">취소·환불 규정 *<textarea rows="5" value={property.cancellation} onChange={(event) => setProperty({ ...property, cancellation: event.target.value })} required /></label></div></section><section className="owner-panel"><div className="owner-panel__head"><div><span>PHOTOS &amp; LOCATION</span><h2>사진과 지도 위치</h2></div></div><div className="owner-photo-grid"><button type="button" className="owner-photo-add"><strong>＋</strong><span>사진 추가</span><small>JPG, PNG · 최대 10장</small></button>{['대표 이미지', '로비', '외관'].map((label) => <div key={label} className="owner-photo-sample"><span>{label}</span></div>)}</div><div className="owner-location-preview"><i /><strong>부산 해운대구 달맞이길 42</strong><p>주소 지오코딩 실패 시 지도에서 위치를 직접 지정할 수 있습니다.</p><button type="button">지도 위치 조정</button></div></section><div className="owner-form-actions"><button type="button" className="owner-secondary">변경 취소</button><button type="submit" className="owner-primary">숙소 정보 저장</button></div></form></div>
+//   );
+// }
+
+function LodgingDetail({ lodgingId, onBack }) {
+  const [detail, setDetail] = useState(null);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const controller = new AbortController();
+    request('/api/owner/lodgings/' + lodgingId, { signal: controller.signal })
+      .then((data) => {
+        if (!controller.signal.aborted) setDetail(data);
+      })
+      .catch((failure) => {
+        if (!controller.signal.aborted) {
+          setError(failure.status === 404 ? '숙소를 찾을 수 없어요.' : failure.message);
+        }
+      });
+    return () => controller.abort();
+  }, [lodgingId]);
+
   return (
-    <div className="owner-view"><div className="owner-view__title"><div><span>PROPERTY</span><h1>숙소 정보 관리</h1><p>검색·예약 상세에 노출되는 업장 정보를 관리합니다.</p></div><StatusBadge>운영 중</StatusBadge></div><form className="owner-property-form" onSubmit={submit}><section className="owner-panel"><div className="owner-panel__head"><div><span>BASIC INFORMATION</span><h2>기본 정보</h2></div><span className="owner-required">* 필수 입력</span></div><div className="owner-form-grid"><label>숙소명 *<input value={property.name} onChange={(event) => setProperty({ ...property, name: event.target.value })} required /></label><label>숙소 유형 *<select value={property.type} onChange={(event) => setProperty({ ...property, type: event.target.value })}><option>호텔</option><option>리조트</option><option>펜션</option><option>게스트하우스</option></select></label><label>우편번호<input value={property.zip} onChange={(event) => setProperty({ ...property, zip: event.target.value })} /></label><label className="owner-address">주소 *<div><input value={property.address} onChange={(event) => setProperty({ ...property, address: event.target.value })} required /><button type="button">주소 검색</button></div></label><label className="owner-wide">상세 주소<input value={property.addressDetail} onChange={(event) => setProperty({ ...property, addressDetail: event.target.value })} /></label><label>전화번호 *<input value={property.phone} onChange={(event) => setProperty({ ...property, phone: event.target.value })} required /></label><label>홈페이지<input value={property.website} onChange={(event) => setProperty({ ...property, website: event.target.value })} /></label><label className="owner-wide">숙소 소개 *<textarea rows="5" value={property.description} onChange={(event) => setProperty({ ...property, description: event.target.value })} required /></label></div></section><section className="owner-panel"><div className="owner-panel__head"><div><span>OPERATION</span><h2>운영 정보</h2></div></div><div className="owner-form-grid"><label>체크인 시간 *<input type="time" value={property.checkIn} onChange={(event) => setProperty({ ...property, checkIn: event.target.value })} /></label><label>체크아웃 시간 *<input type="time" value={property.checkOut} onChange={(event) => setProperty({ ...property, checkOut: event.target.value })} /></label><label className="owner-wide">주차 안내<textarea rows="3" value={property.parking} onChange={(event) => setProperty({ ...property, parking: event.target.value })} /></label><fieldset className="owner-wide"><legend>편의시설</legend><div className="owner-facility-grid">{facilities.map((item) => <label key={item}><input type="checkbox" checked={property.facilities.includes(item)} onChange={() => setProperty({ ...property, facilities: property.facilities.includes(item) ? property.facilities.filter((value) => value !== item) : [...property.facilities, item] })} />{item}</label>)}</div></fieldset><label className="owner-wide">취소·환불 규정 *<textarea rows="5" value={property.cancellation} onChange={(event) => setProperty({ ...property, cancellation: event.target.value })} required /></label></div></section><section className="owner-panel"><div className="owner-panel__head"><div><span>PHOTOS &amp; LOCATION</span><h2>사진과 지도 위치</h2></div></div><div className="owner-photo-grid"><button type="button" className="owner-photo-add"><strong>＋</strong><span>사진 추가</span><small>JPG, PNG · 최대 10장</small></button>{['대표 이미지', '로비', '외관'].map((label) => <div key={label} className="owner-photo-sample"><span>{label}</span></div>)}</div><div className="owner-location-preview"><i /><strong>부산 해운대구 달맞이길 42</strong><p>주소 지오코딩 실패 시 지도에서 위치를 직접 지정할 수 있습니다.</p><button type="button">지도 위치 조정</button></div></section><div className="owner-form-actions"><button type="button" className="owner-secondary">변경 취소</button><button type="submit" className="owner-primary">숙소 정보 저장</button></div></form></div>
+    <div className="owner-view">
+      <header className="owner-overview-heading">
+        <div><h1>{detail?.name ?? '숙소 상세'}</h1></div>
+        <button type="button" className="owner-overview-action owner-overview-action--line" onClick={onBack}>
+          목록으로
+        </button>
+      </header>
+      <section className="owner-panel owner-lodging-detail" aria-label="숙소 상세 정보">
+        {error && <p role="alert">{error}</p>}
+        {!error && !detail && <p role="status">숙소 정보를 불러오는 중이에요.</p>}
+        {detail && (
+          <>
+            <dl className="owner-form-grid">
+              <div><dt>숙소 유형</dt><dd>{detail.lodgingType}</dd></div>
+              <div><dt>숙소 상태</dt><dd>{lodgingStatusLabels[detail.status] ?? detail.status}</dd></div>
+              <div className="owner-wide"><dt>주소</dt><dd>{detail.address}</dd></div>
+              <div><dt>위도</dt><dd>{detail.latitude}</dd></div>
+              <div><dt>경도</dt><dd>{detail.longitude}</dd></div>
+              <div><dt>체크인</dt><dd>{detail.checkinTime?.slice(0, 5)}</dd></div>
+              <div><dt>체크아웃</dt><dd>{detail.checkoutTime?.slice(0, 5)}</dd></div>
+            </dl>
+            {detail.status === 'REJECTED' && <p>반려 사유 · {detail.rejectReason || '등록된 사유가 없어요.'}</p>}
+          </>
+        )}
+      </section>
+    </div>
+  );
+}
+
+function LodgingManagement({ lodgings, error, onCreated }) {
+  const [creating, setCreating] = useState(false);
+  const [selectedLodgingId, setSelectedLodgingId] = useState(null);
+
+  if (selectedLodgingId !== null) {
+    return <LodgingDetail key={selectedLodgingId} lodgingId={selectedLodgingId} onBack={() => setSelectedLodgingId(null)} />;
+  }
+
+  if (creating) {
+    return (
+      <LodgingCreateForm
+        onCancel={() => setCreating(false)}
+        onCreated={() => {
+          setCreating(false);
+          onCreated();
+        }}
+      />
+    );
+  }
+
+  return (
+    <div className="owner-view">
+      <header className="owner-overview-heading">
+        <div>
+          <h1>숙소 정보 관리</h1>
+          <p>내가 등록한 숙소와 심사 상태를 확인할 수 있어요.</p>
+        </div>
+        <button
+          type="button"
+          className="owner-overview-action"
+          onClick={() => setCreating(true)}
+        >
+          + 새 숙소 등록
+        </button>
+      </header>
+
+      <section className="owner-panel" aria-labelledby="owner-lodging-list-title">
+        <div className="owner-panel__head">
+          <h2 id="owner-lodging-list-title">내 숙소 목록</h2>
+          {lodgings && !error && <span>{lodgings.length}건</span>}
+        </div>
+        {error || !lodgings?.length ? (
+          <OwnerLodgingStatus lodgings={lodgings} error={error} />
+        ) : (
+          <ul>
+            {lodgings.map(({ lodgingId, name, status }) => (
+              <li key={lodgingId}>
+                <button
+                  type="button"
+                  className="owner-overview-action owner-overview-action--line"
+                  onClick={() => setSelectedLodgingId(lodgingId)}
+                >
+                  {name} 상세 보기
+                </button>
+                {' · '}{lodgingStatusLabels[status] ?? status}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    </div>
+  );
+}
+
+function LodgingCreateForm({ onCreated, onCancel }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const inFlight = useRef(false);
+
+  async function submit(event) {
+    event.preventDefault();
+    if (inFlight.current) return;
+
+    const form = event.currentTarget;
+    const fields = new FormData(form);
+    const name = fields.get('name').trim();
+    const address = fields.get('address').trim();
+
+    if (!name || !address) {
+      setError('숙소명과 주소를 입력해 주세요.');
+      return;
+    }
+
+    inFlight.current = true;
+    setBusy(true);
+    setError('');
+
+    try {
+      await postJsonWithCsrf('/api/owner/lodgings', {
+        name,
+        address,
+        lodgingType: fields.get('lodgingType'),
+        latitude: Number(fields.get('latitude')),
+        longitude: Number(fields.get('longitude')),
+        checkinTime: fields.get('checkinTime'),
+        checkoutTime: fields.get('checkoutTime'),
+      });
+      form.reset();
+      onCreated();
+    } catch (error) {
+      setError(error.status === 400
+        ? '입력값을 확인해 주세요. 좌표는 소수점 7자리까지 입력할 수 있어요.'
+        : error.message);
+    } finally {
+      inFlight.current = false;
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="owner-view">
+      <div className="owner-view__title">
+        <div>
+          <span>PROPERTY</span>
+          <h1>숙소 등록</h1>
+          <p>기본 정보를 제출하면 관리자 승인 대기 상태로 저장돼요.</p>
+        </div>
+      </div>
+
+      <form className="owner-property-form" onSubmit={submit} aria-busy={busy}>
+        <section className="owner-panel">
+          <div className="owner-panel__head">
+            <h2>기본 정보와 위치</h2>
+            <span className="owner-required">* 필수 입력</span>
+          </div>
+          <div className="owner-form-grid">
+            <label>숙소명 *<input name="name" maxLength={200} required /></label>
+            <label>숙소 유형 *
+              <select name="lodgingType" defaultValue="" required>
+                <option value="">선택해 주세요</option>
+                <option>호텔</option>
+                <option>리조트</option>
+                <option>펜션</option>
+                <option>게스트하우스</option>
+                <option>한옥</option>
+              </select>
+            </label>
+            <label className="owner-wide">주소 *<input name="address" maxLength={300} required /></label>
+            <label>위도 *<input name="latitude" type="number" min="-90" max="90" step="0.0000001" required /></label>
+            <label>경도 *<input name="longitude" type="number" min="-180" max="180" step="0.0000001" required /></label>
+            <label>체크인 시간 *<input name="checkinTime" type="time" required /></label>
+            <label>체크아웃 시간 *<input name="checkoutTime" type="time" required /></label>
+          </div>
+          <p>주소 검색과 지도 연결 전에는 위도와 경도를 직접 입력해 주세요.</p>
+          {error && <p role="alert">{error}</p>}
+        </section>
+        <div className="owner-form-actions">
+          <button type="button" className="owner-secondary" onClick={onCancel} disabled={busy}>
+            목록으로
+          </button>
+          <button type="submit" className="owner-primary" disabled={busy}>
+            {busy ? '등록 중…' : '숙소 등록 신청'}
+          </button>
+        </div>
+      </form>
+    </div>
   );
 }
 
@@ -312,13 +520,15 @@ export default function OwnerPage({ member, onLogout, loggingOut }) {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [toast, setToast] = useState('');
   const [rooms, setRooms] = useState(initialRooms);
-  const [property, setProperty] = useState({ name: '해운대 웨이브 호텔', type: '호텔', zip: '48099', address: '부산 해운대구 달맞이길 42', addressDetail: '스마트트래블 빌딩', phone: '051-000-1200', website: 'https://wave-hotel.example.com', description: '해운대 바다와 달맞이길을 함께 즐길 수 있는 도심형 호텔입니다.', checkIn: '15:00', checkOut: '11:00', parking: '투숙객은 객실당 1대 무료로 주차할 수 있습니다.', facilities: ['주차', '조식', '와이파이', '짐 보관'], cancellation: '체크인 5일 전까지 무료 취소, 이후 날짜별 환불 비율을 적용합니다.' });
+  // const [property, setProperty] = useState({ name: '해운대 웨이브 호텔', type: '호텔', zip: '48099', address: '부산 해운대구 달맞이길 42', addressDetail: '스마트트래블 빌딩', phone: '051-000-1200', website: 'https://wave-hotel.example.com', description: '해운대 바다와 달맞이길을 함께 즐길 수 있는 도심형 호텔입니다.', checkIn: '15:00', checkOut: '11:00', parking: '투숙객은 객실당 1대 무료로 주차할 수 있습니다.', facilities: ['주차', '조식', '와이파이', '짐 보관'], cancellation: '체크인 5일 전까지 무료 취소, 이후 날짜별 환불 비율을 적용합니다.' });
   const [lodgings, setLodgings] = useState(null);
   const [lodgingError, setLodgingError] = useState('');
+  const [lodgingRevision, setLodgingRevision] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
 
+    setLodgingError('');
     request('/api/owner/lodgings')
       .then((data) => {
         if (!cancelled) setLodgings(data);
@@ -330,15 +540,27 @@ export default function OwnerPage({ member, onLogout, loggingOut }) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [lodgingRevision]);
 
   const view = useMemo(() => {
     if (activeTab === 'reservations') return <Reservations />;
-    if (activeTab === 'property') return <PropertyForm property={property} setProperty={setProperty} setToast={setToast} />;
+    // if (activeTab === 'property') return <PropertyForm property={property} setProperty={setProperty} setToast={setToast} />;
+    if (activeTab === 'property') {
+      return (
+        <LodgingManagement
+          lodgings={lodgings}
+          error={lodgingError}
+          onCreated={() => {
+            setLodgingRevision((revision) => revision + 1);
+            setToast('숙소 등록 신청이 접수됐어요. 관리자 승인 대기 상태예요.');
+          }}
+        />
+      );
+    }
     if (activeTab === 'rooms') return <Rooms rooms={rooms} setRooms={setRooms} setToast={setToast} />;
     // return <Dashboard onNavigate={setActiveTab} />;
     return <Dashboard onNavigate={setActiveTab} lodgings={lodgings} lodgingError={lodgingError} />;
-  }, [activeTab, property, rooms, lodgings, lodgingError]);
+  }, [activeTab, rooms, lodgings, lodgingError]);
   return (
     <div className="owner-page">
       {/* <OwnerHeader propertyName={property.name} member={member} onLogout={onLogout} loggingOut={loggingOut} /> */}
@@ -350,7 +572,7 @@ export default function OwnerPage({ member, onLogout, loggingOut }) {
       />
       <div className="owner-shell">
         <aside className="owner-sidebar"><div className="owner-sidebar__status"><span>PARTNER STATUS</span><strong>업주 승인 완료</strong><small>본인 업장만 조회·수정 가능</small></div><nav aria-label="업주센터 메뉴">{tabs.map((tab) => <button type="button" key={tab.id} className={activeTab === tab.id ? 'is-active' : ''} onClick={() => { setActiveTab(tab.id); setToast(''); }}><i aria-hidden="true">{tab.id === 'dashboard' ? '▦' : tab.id === 'reservations' ? '▤' : tab.id === 'property' ? '⌂' : '₩'}</i>{tab.label}</button>)}</nav><div className="owner-sidebar__help"><strong>도움이 필요하신가요?</strong><span>파트너 운영 가이드를 확인하세요.</span><button type="button">운영 가이드</button></div></aside>
-        <main className="owner-main">{toast && <div className="owner-toast" role="status">{toast}<button type="button" aria-label="알림 닫기" onClick={() => setToast('')}>×</button></div>}{view}<p className="owner-demo-caption">업주센터 프론트엔드 샘플 · 권한, 소유자 검증, 예약·재고·요금 저장은 백엔드 연결 전입니다.</p></main>
+        <main className="owner-main">{toast && <div className="owner-toast" role="status">{toast}<button type="button" aria-label="알림 닫기" onClick={() => setToast('')}>×</button></div>}{view}<p className="owner-demo-caption">숙소 등록·조회는 서버에 연결되어 있어요. 예약·객실·요금은 예시 데이터예요.</p></main>
       </div>
     </div>
   );

@@ -1,0 +1,5363 @@
+[
+  {
+    "source_content_id": "1102250",
+    "area_code": "11",
+    "area_name": "서울특별시",
+    "name": "코트야드 바이 메리어트 서울타임스퀘어",
+    "region_code": "11560",
+    "region_name": "영등포구",
+    "address": "서울특별시 영등포구 영중로 15 (영등포동4가)",
+    "address_detail": null,
+    "latitude": 37.5177806,
+    "longitude": 126.9053677,
+    "phone": "02-2638-3000",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/37/3534037_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/37/3534037_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "07305",
+    "homepage_url": null,
+    "description": "코트야드 바이 메리어트 서울 타임스퀘어는 메리어트 호텔 인터내셔널에서 JW 메리어트, 르네상스, 메리어트 이그제큐티브 아파트먼트에 이어 한국에 처음으로 선보이는 브랜드이다. 현재 코트야드 메리어트 호텔은 전 세계 28개국에 800개 이상의 호텔이 운영되고 있는 메리어트 내 가장 큰 규모의 브랜드 호텔이다. 서울의 새로운 쇼핑 문화의 중심지인 영등포 타임스퀘어에 2009년 9월 21일 개장한 코트야드 바이 메리어트 서울 타임스퀘어는 지상 4층부터 16층까지 총 12개 층의 유리 건물로 현대적인 세련미와 우아함이 강조된 코트야드 바이 메리어트 서울 타임스퀘어는 비즈니스, 쇼핑, 엔터테인먼트의 중심지로 떠오르는 타임스퀘어 쇼핑몰 내에 자리 잡고 있어 탄탄한 주변 인프라 및 편리한 접근성을 자랑한다. 안락함과 스타일을 최우선으로 고려하여 설계된 객실과 스위트에는 무료 와이파이, 대리석 욕실, 미니 냉장고, 푹신한 침구가 갖춰져 있다. 호텔 피트니스센터는 24시간 운영하고 있어 언제든 운동을 할 수 있다. 모모 카페에서는 맛있는 식사를 즐기거나 모모 바에서 친구 또는 동료와 함께 칵테일을 기울이며 편안한 시간을 보내도 좋다. 이벤트 공간을 찾고 있다면 서울 호텔 행사장인 코트야드 서울 타임스퀘어의 다목적 미팅룸과 연회실을 추천한다. 종합적인 이벤트 기획·케이터링 서비스도 이용할 수 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "디럭스 킹",
+        "base_capacity": "2",
+        "max_capacity": "3"
+      },
+      {
+        "name": "디럭스 트윈",
+        "base_capacity": "2",
+        "max_capacity": "3"
+      },
+      {
+        "name": "스위트",
+        "base_capacity": "2",
+        "max_capacity": "3"
+      }
+    ],
+    "room_names": [
+      "디럭스 킹",
+      "디럭스 트윈",
+      "스위트"
+    ]
+  },
+  {
+    "source_content_id": "1190304",
+    "area_code": "11",
+    "area_name": "서울특별시",
+    "name": "하이서울유스호스텔",
+    "region_code": "11560",
+    "region_name": "영등포구",
+    "address": "서울특별시 영등포구 영신로 200 (영등포동7가)",
+    "address_detail": null,
+    "latitude": 37.5252492,
+    "longitude": 126.9026575,
+    "phone": "02-2677-1779",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/14/3562614_image2_1.png",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/14/3562614_image3_1.png",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "07244",
+    "homepage_url": null,
+    "description": "청소년과 여행객을 위한 선물 같은 교류 공간인 시립 하이서울유스호스텔은 서울을 방문한 국내·외 청소년 및 일반인들에게 호텔과 차별화된 시설 및 서비스를 제공하는 편리하고 안전한 숙소이다. 영등포에 위치하여 서울 곳곳의 명소를 가까이서 즐길 수 있으며, 다양한 체험활동, 이벤트를 진행하여 국내외 청소년들의 교류활동은 물론, 해외여행객들에게 다채로운 서울 체험을 제공하는 청소년 대표 수련 시설이다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "스탠다드 싱글",
+        "base_capacity": "1",
+        "max_capacity": "1"
+      },
+      {
+        "name": "스탠다드 트윈",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "스탠다드 트리플",
+        "base_capacity": "3",
+        "max_capacity": "3"
+      }
+    ],
+    "room_names": [
+      "스탠다드 싱글",
+      "스탠다드 트윈",
+      "스탠다드 트리플"
+    ]
+  },
+  {
+    "source_content_id": "1327006",
+    "area_code": "11",
+    "area_name": "서울특별시",
+    "name": "메리어트 이그제큐티브 아파트먼트 서울",
+    "region_code": "11560",
+    "region_name": "영등포구",
+    "address": "서울특별시 영등포구 여의대로 8 (여의도동)",
+    "address_detail": null,
+    "latitude": 37.521213,
+    "longitude": 126.9186049,
+    "phone": "02-2090-8000",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/66/3555066_image2_1.JPG",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/66/3555066_image3_1.JPG",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "07320",
+    "homepage_url": null,
+    "description": "서울 여의도에 위치한 메리어트 이그제큐티브 아파트먼트 서울은 럭셔리한 휴식과 편리함을 모두 갖춘 프리미엄 레지던스다. 대한민국 서울의 상징적인 한강의 섬, 여의도 금융지구에 자리해 여의도공원, 더 현대 서울, IFC 몰 등 여의도 인기 명소와 인접해 있으며, 장·단기 비즈니스 여행 및 가족 여행객에게 최적의 장소다. 18시간 룸서비스, 하우스키핑 서비스, 식료품 배달 및 세탁 서비스, 고품격 피트니스 시설까지 사용이 가능한 체계적이고 특화된 개별 서비스로 최상의 서비스를 제공한다. 파크카페에서 건강한 조식으로 아침을 시작하고, 수 스파에서 피로를 해소하며 진정한 휴식을 경험할 수 있다. 실내 수영장과 골프 연습장, 스쿼시 코트, 사우나를 갖춘 고품격 부대시설로 최상의 웰니스 스테이를 경험할 수 있다. 그뿐만 아니라 총 94개의 객실은 TV를 비롯해 인덕션 냉장고, 세탁기, 건조기, 냉난방 시설까지 생활에 필요한 모든 시설을 갖춘 빌트인 시스템과 고품격 인테리어, 효율적인 가구 배치로 내 집 같은 편안함을 선사한다. 이 밖에도 안전 주차 시스템에서부터 개인 재산 보호를 위한 안전금고까지 최첨단 보안 시스템으로 24시간 안전을 빈틈없이 지켜준다.",
+    "checkin_time": "15:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "스튜디오스위트",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "1 베드룸스위트",
+        "base_capacity": "2",
+        "max_capacity": "4"
+      },
+      {
+        "name": "1 베드룸이그제큐티브스위트",
+        "base_capacity": "2",
+        "max_capacity": "4"
+      }
+    ],
+    "room_names": [
+      "스튜디오스위트",
+      "1 베드룸스위트",
+      "1 베드룸이그제큐티브스위트"
+    ]
+  },
+  {
+    "source_content_id": "136039",
+    "area_code": "11",
+    "area_name": "서울특별시",
+    "name": "서울올림픽파크텔",
+    "region_code": "11710",
+    "region_name": "송파구",
+    "address": "서울특별시 송파구 올림픽로 448 (방이동)",
+    "address_detail": null,
+    "latitude": 37.5222821,
+    "longitude": 127.1165151,
+    "phone": "02-410-2114",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/70/3562570_image2_1.jpeg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/70/3562570_image3_1.jpeg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "05540",
+    "homepage_url": null,
+    "description": "서울올림픽파크텔은 IOC(국제올림픽위원회)가 인정한 글로벌 최고 수준의 올림픽 유산인 올림픽공원에 위치하고 있어 울창한 숲과 맑은 몽촌해자를 객실에서 볼 수 있다. 세계 5대 조각 공원 중 하나이며, 43만 평 규모의 아름다운 경관을 가지고 있는 올림픽공원은 KSPO DOME 등 K-POP 콘서트, 대규모 공연장과 특화된 5곳과 88 잔디마당, 지구촌공원, 피크닉장, 음악 분수가 있는 수변 무대 등 4곳의 다양하고 넓은 이벤트광장이 있어 연회 행사 개최의 최적의 공간을 보유하고 있다. 또한 합리적인 가격, 맛있는 조식 그리고 친절한 서비스를 제공하고 있으며, 다양한 타입의 객실과 각종 세미나와 워크숍, 국제행사 등 다양한 목적에 적합한 연회장의 시설을 갖춘 곳이다. 청소년들이 안전하게 체험활동과 프로그램 운영을 할 수 있는 서울 소재의 대표적인 수련 시설로 여성가족부에서 인정한 청소년 수련 시설 종합평가 최우수기관이다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "듀플렉스 스위트",
+        "base_capacity": "4",
+        "max_capacity": "4"
+      },
+      {
+        "name": "주니어 스위트",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "세미나 스위트",
+        "base_capacity": "2",
+        "max_capacity": "0"
+      }
+    ],
+    "room_names": [
+      "듀플렉스 스위트",
+      "주니어 스위트",
+      "세미나 스위트"
+    ]
+  },
+  {
+    "source_content_id": "136249",
+    "area_code": "11",
+    "area_name": "서울특별시",
+    "name": "트리아 관광호텔",
+    "region_code": "11680",
+    "region_name": "강남구",
+    "address": "서울특별시 강남구 테헤란로33길 16 (역삼동)",
+    "address_detail": null,
+    "latitude": 37.5028717,
+    "longitude": 127.0393946,
+    "phone": "02-553-2471",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/92/4127492_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/92/4127492_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "06142",
+    "homepage_url": null,
+    "description": "트리아호텔은 개성 있고 감각적인 아름다움과 편안함, 즐거움을 제공하는 호텔이다. 고급스러운 라이프스타일을 지향하는 일반 고객과 실용성과 품격을 중시하는 비즈니스 고객에게 새로운 트렌드를 제시하는 공간이자, 도심 속에서 편안한 휴식을 누릴 수 있는 곳이다. 부티크 호텔을 콘셉트로 한 트리아호텔은 기존의 고정관념에서 벗어난 독특한 디자인과 인테리어를 갖춘 곳이다. 사진이나 머릿속으로 그려 온 감각적인 공간을 직접 경험할 수 있으며, 트리아호텔만의 개성 있는 분위기와 세심한 서비스로 편안하고 즐거운 휴식을 제공하는 호텔이다.",
+    "checkin_time": "15:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [
+      {
+        "name": "스탠다드",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "로얄 디럭스",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "스위트",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      }
+    ],
+    "room_names": [
+      "스탠다드",
+      "로얄 디럭스",
+      "스위트"
+    ]
+  },
+  {
+    "source_content_id": "142721",
+    "area_code": "11",
+    "area_name": "서울특별시",
+    "name": "노보텔 앰배서더 서울 강남",
+    "region_code": "11680",
+    "region_name": "강남구",
+    "address": "서울특별시 강남구 봉은사로 130 (역삼동)",
+    "address_detail": null,
+    "latitude": 37.5052859,
+    "longitude": 127.0288955,
+    "phone": "02-567-1101",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/27/3534327_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/27/3534327_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "06124",
+    "homepage_url": null,
+    "description": "1993년 9월 개관한 호텔 노보텔 앰배서더 서울 강남은 프랑스풍 5성 특급 호텔이다. 전 세계 400여 개의 노보텔 체인 중 하나로 세계적인 브랜드에 걸맞은 고품격 서비스와 시설을 자랑한다. 7개의 스위트룸과 57개의 이그제큐티브 룸 등 총 332개의 안락한 객실을 갖추고 있으며 강남 코엑스, 무역 센터, 경부 고속도로와 인접해 있고 인천 국제공항과 김포공항 이용에도 용이한 위치에 있다. 공항과 호텔 간 KAL 리무진버스가 약 1시간마다 호텔 정문에서 출발한다. 6개의 호텔 레스토랑부터 다양한 미팅룸, 사우나, 체련장 등 편의시설을 갖추고 있어 비즈니스 미팅부터 호캉스까지 즐길 수 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "슈페리어 더블 / 트윈",
+        "base_capacity": "2",
+        "max_capacity": "3"
+      },
+      {
+        "name": "디럭스 더블 / 트윈",
+        "base_capacity": "2",
+        "max_capacity": "3"
+      },
+      {
+        "name": "이그제큐티브 더블 / 트윈",
+        "base_capacity": "2",
+        "max_capacity": "3"
+      }
+    ],
+    "room_names": [
+      "슈페리어 더블 / 트윈",
+      "디럭스 더블 / 트윈",
+      "이그제큐티브 더블 / 트윈"
+    ]
+  },
+  {
+    "source_content_id": "142722",
+    "area_code": "11",
+    "area_name": "서울특별시",
+    "name": "서울가든호텔",
+    "region_code": "11440",
+    "region_name": "마포구",
+    "address": "서울특별시 마포구 마포대로 58",
+    "address_detail": null,
+    "latitude": 37.5408356,
+    "longitude": 126.948289,
+    "phone": "02-710-7111",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/39/3562939_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/39/3562939_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "04168",
+    "homepage_url": null,
+    "description": "서울가든호텔은 마포와 공덕의 중심에 위치해 비즈니스와 문화가 공존하는 최적의 장소를 제공한다. 40년 이상의 서비스 노하우를 바탕으로 비즈니스 고객과 여행객 모두에게 수준 높은 맞춤형 서비스를 제공하고 있다. 호텔은 한강에 인접해 있으며, 서울 지하철과 가까워 교통이 매우 편리하다. 총 372개의 객실은 고급스러움과 편안함을 동시에 갖추고 있어 고객께 최상의 휴식을 선사한다. 또한 700명 이상을 수용할 수 있는 대연회장과 10개 이상의 세련된 소규모 연회장, 뷔페, 일식당, 카페 라운지 등 다양한 식음료 공간을 갖추고 있어 웨딩, 컨벤션, 세미나 등 모든 행사를 성공적으로 진행할 수 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [
+      {
+        "name": "스탠다드 더블/트윈",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "슈페리어 더블/트윈",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "테라스 더블",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      }
+    ],
+    "room_names": [
+      "스탠다드 더블/트윈",
+      "슈페리어 더블/트윈",
+      "테라스 더블"
+    ]
+  },
+  {
+    "source_content_id": "142723",
+    "area_code": "11",
+    "area_name": "서울특별시",
+    "name": "로얄호텔서울",
+    "region_code": "11140",
+    "region_name": "중구",
+    "address": "서울특별시 중구 명동길 61 (명동1가)",
+    "address_detail": null,
+    "latitude": 37.5640439,
+    "longitude": 126.9856995,
+    "phone": "02-756-1112",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/50/2815050_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/50/2815050_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "04538",
+    "homepage_url": null,
+    "description": "1971년 개관 이후 50여 년 넘게 명동의 역사와 함께 성장해 온 로얄호텔서울은 대한민국 최초의 민영 특급호텔로서 품격 높은 서비스와 현대적 시설을 바탕으로 새로운 라이프 스타일의 트렌드를 선도하고 있다. 서울 중심부에 위치하여 교통이 편리하고 명동과 을지로 일대를 내려다볼 수 있는 탁 트인 전망은 서울 시티뷰를 감상할 수 있는 최적의 명소이다. 변에는 명동성당과 남산이 인접하고 있으며, 금융, 비즈니스, 관광, 쇼핑의 중심거리에 있다. 아늑하고 편안한 인테리어로 꾸며진 객실은 도심의 밤 풍경을 더욱 풍성하게 만들어주며, 휴식에 많은 의미를 부여하는 고객에게 있어 매우 특별한 곳이 될 것이다. 도심 속의 편안한 휴식처로 하룻밤의 편안한 휴식과 더불어 여행 후 지속될 삶의 재충전까지 선사한다. 21층에 위치한 클럽라운지는 편안한 휴식과 사업 성공을 위한 각종 편의를 제공하는 장소로 비즈니스 업무에 필요한 상담과 다양하고 친절한 비서 서비스를 제공하고 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "142729",
+    "area_code": "11",
+    "area_name": "서울특별시",
+    "name": "더그랜드롯데 서울",
+    "region_code": "11140",
+    "region_name": "중구",
+    "address": "서울특별시 중구 을지로 30 롯데호텔",
+    "address_detail": null,
+    "latitude": 37.5653471,
+    "longitude": 126.9810296,
+    "phone": "02-759-7311",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/10/4116010_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/10/4116010_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "04533",
+    "homepage_url": null,
+    "description": "더그랜드롯데 서울은 섬세하고 품격 있는 시설과 서비스로 뛰어난 명성과 대표성을 가지고 있다. 럭셔리 비즈니스 호텔인 더그랜드 롯데 서울은 서울 소공동에 자리잡고 있으며, 명동, 청계천 등 서울의 중심 관광지들로의 접근성이 뛰어나 서울 관광을 위한 최적의 위치를 자랑한다. 최상의 숙면을 위한 '해온' 베딩 시스템과 다양한 편의시설을 갖춘 객실과 한식부터 일식, 중식까지 즐길 수 있는 레스토랑 등 다양한 부대시설을 갖추고 있다. 넓고 쾌적한 내부와 세심한 서비스로 편안하게 머무를 수 있는 숙소이다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "[메인타워] 그랜드 슈페리어",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "[메인타워] 디럭스",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "[메인타워] 그랜드 디럭스",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      }
+    ],
+    "room_names": [
+      "[메인타워] 그랜드 슈페리어",
+      "[메인타워] 디럭스",
+      "[메인타워] 그랜드 디럭스"
+    ]
+  },
+  {
+    "source_content_id": "142730",
+    "area_code": "11",
+    "area_name": "서울특별시",
+    "name": "웨스틴 조선 서울",
+    "region_code": "11140",
+    "region_name": "중구",
+    "address": "서울특별시 중구 소공로 106",
+    "address_detail": null,
+    "latitude": 37.5644666,
+    "longitude": 126.9800436,
+    "phone": "02-771-0500",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/21/2820921_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/21/2820921_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "04533",
+    "homepage_url": null,
+    "description": "비즈니스와 쇼핑의 최적지인 서울의 심장부에 위치한 특 1급 호텔로 각국의 대사관, 은행, 정부부처, 고궁과 백화점과 명동에 인접한 곳에 자리하고 있다. 1914년 개관한 현존하는 한국 최고(最古)의 호텔로서 100여 년의 전통이 만들어낸 품격 높은 서비스와 현대적 시설, 도심이라는 위치적 편의성 등으로 세계적인 여행과 금융 잡지에서 서울 최고의 비즈니스호텔로 인정받고 있다. SIMMONS사에서 제작한 세계특허 포켓스프링으로 만든 매트리스와 웨스틴의 거위털 듀벳의 만남으로 ‘천상의 편안함’을 제공하는 꿈의 매트리스를 사용하고 있다. 인체 곡선을 따라 따로따로 움직이는 포켓스프링이 인체를 완벽하게 받쳐주며 특별 제작된 필로우 톱 매트리스가 깔려 침구가 몸을 감싸는 듯한 포근함을 선사한다. 전통의 초밥 명가 스시조, 건강한 광동식 중식을 선보이는 홍연, 오페라의 영혼을 느낄 수 있는 라이브 뷔페 아리아, 모던 이탈리안 오스트리아 루브리카, 나인스 트 와인 & 다인, 총 5개의 레스토랑으로 국내 최고의 미식을 즐길 수 있다. 연회 시설로는 대연회장인 그랜드 볼룸과 중, 소연회장이 있다. 그랜드 볼룸은 최대 450명까지 수용이 가능하며 최상급 스피커, 8개의 스크린, 182대의 라이트와 콘솔로 다양한 행사를 연출할 수 있다. 환구단의 아름다움을 만끽할 수 있는 중·소연회장은 최대 200명의 연회가 가능하며 다양한 성격의 연회 진행이 가능하다.",
+    "checkin_time": "15:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "디럭스 킹",
+        "base_capacity": "2",
+        "max_capacity": "3"
+      },
+      {
+        "name": "디럭스 트윈",
+        "base_capacity": "2",
+        "max_capacity": "3"
+      },
+      {
+        "name": "디럭스 패밀리 트윈",
+        "base_capacity": "2",
+        "max_capacity": "3"
+      }
+    ],
+    "room_names": [
+      "디럭스 킹",
+      "디럭스 트윈",
+      "디럭스 패밀리 트윈"
+    ]
+  },
+  {
+    "source_content_id": "1144770",
+    "area_code": "12",
+    "area_name": "전남광주통합특별시",
+    "name": "다이아모텔",
+    "region_code": "12130",
+    "region_name": "여수시",
+    "address": "전남광주통합특별시 여수시 교동남1길 6-3",
+    "address_detail": null,
+    "latitude": 34.7396353,
+    "longitude": 127.7332814,
+    "phone": "061-663-3347",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/64/1151064_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/64/1151064_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "59735",
+    "homepage_url": null,
+    "description": "다이아 모텔은 여수여객선 터미널에서 걸어서 3분 거리, 여수항과 여수역에서는 차로 5분 거리여서 교통이 편리하다. 돌산대교, 하멜 등대, 자산공원, 오동도 등 관광지와 가까운데 바다를 보며 천천히 거닐기 좋다. 방은 일반적인 모텔에 필요한 시설을 두루 갖추었고 화분과 도자기로 운치를 더했다. 방마다 설치된 공기청정기는 공기를 항상 깨끗하게 정화한다. 각 객실에서는 HD 급 채널 100개 이상 시청 가능하며 초고속 와이파이를 이용할 수 있다.",
+    "checkin_time": "17:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "1177256",
+    "area_code": "12",
+    "area_name": "전남광주통합특별시",
+    "name": "홀리데이 인 광주 호텔",
+    "region_code": "12240",
+    "region_name": "서구",
+    "address": "전남광주통합특별시 서구 상무누리로 55",
+    "address_detail": null,
+    "latitude": 35.1474911,
+    "longitude": 126.8381109,
+    "phone": "062-610-7000",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/63/4063663_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/63/4063663_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "61955",
+    "homepage_url": null,
+    "description": "4성급 홀리데이 인 광주 호텔은 김대중 컨벤션 센터 바로 맞은편 도보로 2분 거리에 있다. 203개의 객실과 모던한 스위트룸 그리고 투숙객 전용 실내수영장, 사우나, 헬스클럽이 2층에 위치하고 있다. 모던한 디자인으로 설계된 넓은 객실은 비즈니스 고객과 여행 고객 모두를 위해 최적화되어 있으며 품격 있는 가족모임, 대규모 기업행사와 소규모 세미나를 위한 최상의 장소를 제공하고 있다. 1층 뷔페 레스토랑 모래시계는 시그니처 업장으로 시즌별로 다양한 프로모션을 진행하고 있다. 10층 라 플레이스 레스토랑&바에서는 프라이빗한 분위기에서 프렌치 감성이 담긴 모던 다이닝으로 특별한 날을 더욱 특별하게 할 뿐만 아니라 성공적인 비즈니스를 위해서도 맞춤장소이다.홀리데이 인 광주 호텔은 인터콘티넨탈호텔스그룹(IHG) 브랜드 중 하나로 전 세계에 1,500여 개의 호텔과 리조트를 가지고 있는 세계에서 가장 잘 알려진 브랜드이다.",
+    "checkin_time": "15:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [
+      {
+        "name": "Standard",
+        "base_capacity": "2",
+        "max_capacity": "3"
+      },
+      {
+        "name": "Premium",
+        "base_capacity": "2",
+        "max_capacity": "3"
+      },
+      {
+        "name": "Junior Suite",
+        "base_capacity": "2",
+        "max_capacity": "3"
+      }
+    ],
+    "room_names": [
+      "Standard",
+      "Premium",
+      "Junior Suite"
+    ]
+  },
+  {
+    "source_content_id": "136422",
+    "area_code": "12",
+    "area_name": "전남광주통합특별시",
+    "name": "애플모텔",
+    "region_code": "12240",
+    "region_name": "서구",
+    "address": "전남광주통합특별시 서구 월드컵4강로181번길 35-1",
+    "address_detail": null,
+    "latitude": 35.1519688,
+    "longitude": 126.865386,
+    "phone": "062-382-7540",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/74/742974_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/74/742974_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "61968",
+    "homepage_url": null,
+    "description": "전남광주통합특별시 쌍촌동에 위치한 애플모텔은 넓은 주차장을 보유하고 있어 주차에 불편이 없다. 광주 최대 번화가인 상무 지구와 광주 터미널에서도 멀지 않은 곳에 위치해 있으며 주변 관광지로는 5·18 조각공원이 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "익일 13:00",
+    "parking_info": "주차 가능",
+    "lodging_type": "PENSION",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "136542",
+    "area_code": "12",
+    "area_name": "전남광주통합특별시",
+    "name": "해남유스호스텔",
+    "region_code": "12790",
+    "region_name": "해남군",
+    "address": "전남광주통합특별시 해남군 삼산면 대흥사길 88-88",
+    "address_detail": null,
+    "latitude": 34.4956091,
+    "longitude": 126.6274468,
+    "phone": "061-533-0170",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/64/3543064_image2_1.jpeg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/64/3543064_image3_1.jpeg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "59047",
+    "homepage_url": null,
+    "description": "천년고찰 대흥사가 있는 두륜산도립공원 내에 위치한 해남유스호스텔은 산과 바다와 들이 가장 잘 어우러진 해남과 자연의 신비가 살아 숨 쉬는 서남부 중심에 위치하고 있어 관광과 문화체험에 가장 좋은 곳이다. 또한 청소년 수련활동을 위한 각종 수련 시설 및 프로그램을 완비하여 청소년들의 심신수련의 장이 될 것이다.",
+    "checkin_time": "16:00",
+    "checkout_time": "10:00",
+    "parking_info": null,
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "객실 A",
+        "base_capacity": "6",
+        "max_capacity": "6"
+      },
+      {
+        "name": "객실 B",
+        "base_capacity": "4",
+        "max_capacity": "4"
+      },
+      {
+        "name": "객실 C",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      }
+    ],
+    "room_names": [
+      "객실 A",
+      "객실 B",
+      "객실 C"
+    ]
+  },
+  {
+    "source_content_id": "137315",
+    "area_code": "12",
+    "area_name": "전남광주통합특별시",
+    "name": "태평모텔",
+    "region_code": "12860",
+    "region_name": "진도군",
+    "address": "전남광주통합특별시 진도군 진도읍 남동1길 65",
+    "address_detail": null,
+    "latitude": 34.4808466,
+    "longitude": 126.2655479,
+    "phone": "061-544-7000",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/56/1972256_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/56/1972256_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "58923",
+    "homepage_url": null,
+    "description": "태평모텔은 전남광주통합특별시 진도군에 위치해 있으며, 터미널 인근에 위치하여 교통이 편리하다. 주변 관광지로는 진도향토문화회관 등이 있다.",
+    "checkin_time": "14:00",
+    "checkout_time": "12:00",
+    "parking_info": "주차 가능",
+    "lodging_type": "PENSION",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "137891",
+    "area_code": "12",
+    "area_name": "전남광주통합특별시",
+    "name": "담양리조트",
+    "region_code": "12710",
+    "region_name": "담양군",
+    "address": "전남광주통합특별시 담양군 금성면 금성산성길 202",
+    "address_detail": null,
+    "latitude": 35.3655045,
+    "longitude": 127.0243655,
+    "phone": "061-380-5000",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/37/1338137_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/37/1338137_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "57301",
+    "homepage_url": null,
+    "description": "자연과 인간의 만남을 주제로 설계된 담양리조트는 전남광주통합특별시에서 약 20분, 담양 IC에서 약 10분대의 거리에 위치하고 있으며, 약 16만 5천 제곱미터의 넓은 대지에 갖가지 야외행사를 할 수 있는 야외광장과 7만 2,600제곱미터의 수목원과 소류지, 이벤트광장 그리고 약 300여 대 동시 주차가 가능한 주차장을 확보하고 있다. 최고급 원목가구, 에너지 컨트롤 시스템에 의한 점/소등, 온도조절의 자동화 및 위성방송, 최신 사양의 컴퓨터와 초고속 인터넷, 최첨단 음향시설, 밝고 깨끗한 욕실 등 작고 세심한 곳까지 고객을 위해 설계되었다. 넓은 객실은 주변의 추월산, 담양호 등 아름다운 자연경관과 조화롭게 어울려 내 집처럼 편안하고 안락한 분위기를 제공하고 있다. 전문식당과 고객의 편의를 위한 건강용품점, 특산품 판매점 등의 판매시설 그리고 커피숍, 바 등의 편의시설도 갖춰져 있다. 지하 1층과 지상 3층 규모의 담양리조트는 250명 이상 수용할 수 있는 대연회장과 80명 이상 수용할 수 있는 세미나장을 갖추고 있으며 한식당 및 토속음식점, 바, 매점, 오락실, 단란주점 등의 부대시설이 준비되어 있다.",
+    "checkin_time": "14:00",
+    "checkout_time": "11:00",
+    "parking_info": null,
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "스탠다드 한실",
+        "base_capacity": "4",
+        "max_capacity": "5"
+      },
+      {
+        "name": "스탠다드 양실",
+        "base_capacity": "2",
+        "max_capacity": "3"
+      },
+      {
+        "name": "디럭스 한실",
+        "base_capacity": "6",
+        "max_capacity": "8"
+      }
+    ],
+    "room_names": [
+      "스탠다드 한실",
+      "스탠다드 양실",
+      "디럭스 한실"
+    ]
+  },
+  {
+    "source_content_id": "137965",
+    "area_code": "12",
+    "area_name": "전남광주통합특별시",
+    "name": "지리산산사랑펜션",
+    "region_code": "12730",
+    "region_name": "구례군",
+    "address": "전남광주통합특별시 구례군 마산면 화엄사로 348-12",
+    "address_detail": null,
+    "latitude": 35.2398242,
+    "longitude": 127.4879819,
+    "phone": "010-2082-6911",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/33/4127433_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/33/4127433_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "57616",
+    "homepage_url": null,
+    "description": "관광과 휴양의 명소 지리산 화엄사계곡에 위치한 지리산산사랑펜션은 천혜의 아름다운 계곡과 산이 어우러져 있는 펜션이다. 맑은 공기와 시원한 계곡, 지리산의 멋진 등산은 물론 화엄사, 천은사 등의 사찰을 둘러볼 수 있다. 또한 섬진강 래프팅, 패러글라이딩, 수상스키 등의 레저스포츠와 황토체험, 야생화체험 등의 체험학습도 즐길 수 있다.",
+    "checkin_time": "16:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "[모텔형] 온돌",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "[모텔형] 온돌VIP",
+        "base_capacity": "4",
+        "max_capacity": "4"
+      },
+      {
+        "name": "[모텔형] 커플침대",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      }
+    ],
+    "room_names": [
+      "[모텔형] 온돌",
+      "[모텔형] 온돌VIP",
+      "[모텔형] 커플침대"
+    ]
+  },
+  {
+    "source_content_id": "138116",
+    "area_code": "12",
+    "area_name": "전남광주통합특별시",
+    "name": "보성골망태펜션",
+    "region_code": "12750",
+    "region_name": "보성군",
+    "address": "전남광주통합특별시 보성군 보성읍 노산길 5-56",
+    "address_detail": null,
+    "latitude": 34.7362163,
+    "longitude": 127.0922778,
+    "phone": "061-852-1966",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/13/1972213_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/13/1972213_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "59448",
+    "homepage_url": null,
+    "description": "골망태는 전남광주통합특별시 보성에 위치한 황토 펜션이다. 아무런 방해도 받지 않고 쉴 수 있는 고즈넉한 공간이 특징이다. 주변에 보성녹차밭, 대원사, 율포관광단지, 장홍우드랜드, 강진다산초당 등 다양한 관광명소가 위치해 있다. 이 펜션은 주인장과 함께 하는 힐링캠프를 운영한다. 유기농 채소를 수확하여 아침식사 만들기, 정원산책과 식물이야기, 차밭거리 걸으며 인생이야이 하기 등 색다른 코스가 있다.",
+    "checkin_time": "14:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "곡우(온돌)",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      }
+    ],
+    "room_names": [
+      "곡우(온돌)"
+    ]
+  },
+  {
+    "source_content_id": "138486",
+    "area_code": "12",
+    "area_name": "전남광주통합특별시",
+    "name": "바닷가모텔",
+    "region_code": "12790",
+    "region_name": "해남군",
+    "address": "전남광주통합특별시 해남군 송지면 땅끝해안로 1354-12",
+    "address_detail": null,
+    "latitude": 34.3511022,
+    "longitude": 126.5204465,
+    "phone": "061-535-5757",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/01/1972201_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/01/1972201_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "59064",
+    "homepage_url": null,
+    "description": "해남 송지면에 위치한 바닷가모텔은 내부 인테리어, 전자제품(공기청정기/완전평면 TV/에어컨), 스팀 사우나를 갖추고 있다. 식당식 주방이 설치되어 있어서 객실 이용객들의 간단한 콘도식 취사 이용이 가능하며 바다를 바라보며 테이블에서 휴식할 수 있는 발코니가 모든 객실에 설치되어 있어 여행하면서 편안히 쉬어 갈 수 있는 곳이다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": null,
+    "lodging_type": "PENSION",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "1162526",
+    "area_code": "26",
+    "area_name": "부산광역시",
+    "name": "토요코인호텔 부산서면",
+    "region_code": "26230",
+    "region_name": "부산진구",
+    "address": "부산광역시 부산진구 서전로 39 (전포동)",
+    "address_detail": null,
+    "latitude": 35.1579671,
+    "longitude": 129.0640538,
+    "phone": "051-638-1045",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/49/3476749_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/49/3476749_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "47247",
+    "homepage_url": null,
+    "description": "토요코인호텔 부산서면점은 비즈니스호텔 체인점이다. 지하 4층, 지상 17층 규모의 건물로 2010년 3월 개관했다. 밀리오레와 도보 1분 거리, 롯데백화점, 면세점과는 도보 10분 거리에 있으며, 광안리해수욕장까지 차로 15분 걸리는 등 주변 시설과의 접근성이 좋다. 고령자와 장애인을 위해 호텔이 독자적으로 디자인한 하트풀 트윈 객실을 운영한다. 안심, 쾌적, 청결을 바탕으로 역과 가까운 숙소를 기본 콘셉트로 한 합리적인 가격의 숙박 특화형 호텔이다. 일상생활의 연장으로 안심하고 묵을 만한 시설과 서비스를 제공한다.",
+    "checkin_time": "15:00",
+    "checkout_time": "10:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "137706",
+    "area_code": "26",
+    "area_name": "부산광역시",
+    "name": "한화리조트 해운대",
+    "region_code": "26350",
+    "region_name": "해운대구",
+    "address": "부산광역시 해운대구 마린시티3로 52",
+    "address_detail": "(우동)",
+    "latitude": 35.1544482,
+    "longitude": 129.1450718,
+    "phone": "051-749-5500",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/43/1348043_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/43/1348043_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "48119",
+    "homepage_url": null,
+    "description": "한화호텔앤드리조트는 1979년 콘도미니엄 건설을 통하여 레저산업에 첫발을 디딘 이후 현재 전국에서 가장 많은 직영 콘도 체인 및 골프장을 운영하고 있으며, 다양한 범주의 푸드 서비스를 고객에게 제공하고 있다. 2009년 프라자호텔과 63시티 식음·문화부문을 한 가족으로 맞이한 한화호텔앤드리조트는 국내 최고 프리니엄 종합 레저·서비스 기업으로의 도약을 꿈꾸고 있다. 한화호텔앤드리조트는 현재의 상황에 만족하지 않고 급속한 레저환경 변화에 대응하며, 21세기 건전한 여가 생활문화 창조를 위하여 미래지향적 가치관, 다양한 레저시설 및 풍부한 운영 노하우를 기반으로 기존 사업영역의 확대 및 신규 사업을 추진하여 질적·양적 측면에서 명실상부한 국내 최고·최대의 국민레저기업으로서의 입지를 확고히 하고 있다.전 객실에서 푸른 바다를 볼 수 있는 한화리조트 해운대는 32층의 초고층 호텔식리조트로 서 416실의 객실과 연회장, 세미나실, 사우나 등 각종 부대시설을 갖추고 있다. 국내 최고의 전망과 젠 스타일의 인테리어, 그리고 라이브 클래식 음악이 있는 32층 스카이라운지는 부산의 명소로서 많은 고객들의 사랑을 받고 있다. 또한 최근에 완공된 아름다운 광안대교를 가장 근거리에서 감상할 수 있는 곳이기도 하다. 현대적인 감각의 인테리어와 편의성을 갖춘 객실은 고객의 취향에 따라 이용할 수 있도록 더블 베드룸, 트윈베드룸, 온돌형 한실 등 다양한 형태로 구성되어 있다. 특히 한화리조트 해운대는 객실 내에서 인터넷 이용이 가능하고, 업무용 테이블이 비치된 비즈니스룸과 PC 등의 사무기기와 상담시설이 완비된 비즈니스센터를 운영하고 있다.",
+    "checkin_time": "12:00 주중/비수기15:00 주말/성수기",
+    "checkout_time": "12:00 주중/비수기11:00 주말/성수기",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "137953",
+    "area_code": "26",
+    "area_name": "부산광역시",
+    "name": "호텔 이그니스",
+    "region_code": "26260",
+    "region_name": "동래구",
+    "address": "부산광역시 동래구 중앙대로1473번길 14-13",
+    "address_detail": null,
+    "latitude": 35.2181451,
+    "longitude": 129.0829536,
+    "phone": "051-557-4450",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/69/1899069_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/69/1899069_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "47711",
+    "homepage_url": null,
+    "description": "호텔 이그니스는 부산 동래구 온천1동에 위치하고 있으며 최신 시설과 함께 안락한 잠자리를 제공하고 있다. 고급스럽고 아늑한 인테리어와 최상의 시설이 준비되어 있어 편안한 휴식이 가능하다. 숙소 주변에는 동래온천 노천족탕, 허심청, 동래온천지구, 수가 화랑, 금강공원, 부산해양자연사박물관, 롯데백화점, 동래 문화원, 금강 식물원, 부산대 거리, 금정선원, 복천박물관 등이 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "138089",
+    "area_code": "26",
+    "area_name": "부산광역시",
+    "name": "부산뷰호텔",
+    "region_code": "26170",
+    "region_name": "동구",
+    "address": "부산광역시 동구 중앙대로196번길 16-10 (초량동)",
+    "address_detail": null,
+    "latitude": 35.1133508,
+    "longitude": 129.040564,
+    "phone": null,
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/31/720231_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/31/720231_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "48821",
+    "homepage_url": null,
+    "description": "부산역 바로 옆에 위치한 부산 뷰 호텔은 신개념의 비즈니스 모텔이다. 부산항이 내려다보이는 탁 트인 전망과 역동적인 야경이 더욱더 편안하고 즐거운 여행을 선사할 것이다. 부산 여행은 물론 비즈니스 출장이나 가족·친구와 함께하는 여행에도 편안한 휴식을 제공하는 숙소로, 부산의 다양한 관광명소와 도심 편의시설을 둘러보기에 좋다.",
+    "checkin_time": "16:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "138217",
+    "area_code": "26",
+    "area_name": "부산광역시",
+    "name": "부산도시공사 아르피나",
+    "region_code": "26350",
+    "region_name": "해운대구",
+    "address": "부산광역시 해운대구 해운대해변로 35",
+    "address_detail": null,
+    "latitude": 35.1646357,
+    "longitude": 129.1382332,
+    "phone": "051-731-9800",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/15/4054615_image2_1.JPG",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/15/4054615_image3_1.JPG",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "48089",
+    "homepage_url": null,
+    "description": "부산관광공사가 운영하는 아름답게 피어나다라는 뜻의 아르피나는 지리적으로 해운대, 광안리, 부산전시컨벤션센터, 센텀시티의 중앙에 위치하고 있다. 아르피나는 부산 해운대구에 위치한 청소년 수련시설 유스호스텔로 객실은 단체와 개인 고객 모두 이용할 수 있도록 다양한 형태로 구성되어 있으며, 수영장, 골프장, 연회장 등 부대시설을 갖추어 편리한 이용이 가능하다. 국내외 관광객에게 안정적이고 쾌적한 숙박 서비스를 제공하며, 연수, 단체 행사 및 가족 여행 등 다양한 목적으로 이용되고 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "슈페리어 트윈\\t",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "슈페리어 트리플",
+        "base_capacity": "3",
+        "max_capacity": "3"
+      },
+      {
+        "name": "슈페리어 디럭스",
+        "base_capacity": "4",
+        "max_capacity": "4"
+      }
+    ],
+    "room_names": [
+      "슈페리어 트윈\\t",
+      "슈페리어 트리플",
+      "슈페리어 디럭스"
+    ]
+  },
+  {
+    "source_content_id": "138574",
+    "area_code": "26",
+    "area_name": "부산광역시",
+    "name": "브릿지모텔",
+    "region_code": "26500",
+    "region_name": "수영구",
+    "address": "부산광역시 수영구 광안해변로 155",
+    "address_detail": null,
+    "latitude": 35.1486677,
+    "longitude": 129.1145303,
+    "phone": "051-755-0573",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/51/218151_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/51/218151_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "48303",
+    "homepage_url": null,
+    "description": "부산광역시 수영구에 위치한 브릿지모텔은 고급스러운 인테리어가 돋보이는 고급 모텔로 비교적 넓은 크기의 객실은 포인트 중후하고 고급스러운 인테리어 자재로 세련되게 잘 꾸며놓았으며 쾌적하게 머물다 갈 수 있도록 위생과 청결에 신경을 쓰고 있다. 특히 침구는 항상 잘 정돈되어 있고 청결하게 관리되고 있다. 객실에 따라 대형 벽걸이 TV 혹은 프로젝션 TV 등이 구비되어 있으며 욕실에는 고급 월풀 욕조도 마련되어 있다. 또한 특실에는 인터넷이 연결된 PC와 대형 소파가 있어 편안하고 안락하게 머물다 갈 수 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "익일 11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "스위트",
+        "base_capacity": "2",
+        "max_capacity": "0"
+      }
+    ],
+    "room_names": [
+      "스위트"
+    ]
+  },
+  {
+    "source_content_id": "138575",
+    "area_code": "26",
+    "area_name": "부산광역시",
+    "name": "엘리제호텔",
+    "region_code": "26110",
+    "region_name": "중구",
+    "address": "부산광역시 중구 대청로126번길 22",
+    "address_detail": null,
+    "latitude": 35.1009552,
+    "longitude": 129.0339892,
+    "phone": null,
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/85/1899085_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/85/1899085_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "48951",
+    "homepage_url": null,
+    "description": "엘리제호텔은 용두산공원에 위치하여 인근의 국제시장, 자갈치시장, 용두산공원, 남포동 관광을 하고 편히 쉴 수 있는 곳이다. 부산시 모범 숙박업소로 선정되기도 하였으며, 스탠다드 더블, 디럭스 트윈, 슈페리어 더블 등 다양한 객실 유형을 갖추고 있어 편안한 휴식이 가능하다.",
+    "checkin_time": "15:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "142851",
+    "area_code": "26",
+    "area_name": "부산광역시",
+    "name": "웨스틴 조선 부산",
+    "region_code": "26350",
+    "region_name": "해운대구",
+    "address": "부산광역시 해운대구 동백로 67 (우동)",
+    "address_detail": null,
+    "latitude": 35.1559933,
+    "longitude": 129.1540427,
+    "phone": "051-749-7000",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/72/4078572_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/72/4078572_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "48100",
+    "homepage_url": null,
+    "description": "웨스틴 조선 부산은 해운대 해변과 동백섬이 맞닿은 곳에 자리한 특급 호텔로 아름다운 바다 전망과 도심 접근성을 동시에 갖춘 부산의 대표적인 럭셔리 숙소이다. 총 290개의 객실을 운영하며 해운대 바다와 마린시티를 조망할 수 있는 객실에서 편안한 휴식과 비즈니스를 함께 누릴 수 있다. 또한 부산전시컨벤션센터(BEXCO), 누리마루 APEC하우스, 해운대해수욕장 등 주요 관광지와 가까워 여행과 출장 모두에 적합하다. 호텔 내에는 실내 수영장과 피트니스, 사우나를 비롯해 대연회장 및 중·소연회장, 비즈니스 시설 등 다양한 부대시설이 마련되어 있다. 또한 뷔페 레스토랑과 한식당, 라운지 및 펍 등 수준 높은 다이닝 공간을 운영하며 동백섬 산책로와 해운대 해변을 가까이에서 즐길 수 있어 부산 바다의 매력을 만끽하기 좋은 곳이다.",
+    "checkin_time": "15:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "디럭스 공원전망",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "디럭스 해변전망",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "이그제큐티브 공원전망",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      }
+    ],
+    "room_names": [
+      "디럭스 공원전망",
+      "디럭스 해변전망",
+      "이그제큐티브 공원전망"
+    ]
+  },
+  {
+    "source_content_id": "142852",
+    "area_code": "26",
+    "area_name": "부산광역시",
+    "name": "코모도 호텔 부산",
+    "region_code": "26110",
+    "region_name": "중구",
+    "address": "부산광역시 중구 중구로 151 (영주동)",
+    "address_detail": null,
+    "latitude": 35.1088998,
+    "longitude": 129.0348127,
+    "phone": "051-466-9101",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/49/2722649_image2_1.JPG",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/49/2722649_image3_1.JPG",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "48912",
+    "homepage_url": null,
+    "description": "1979년 7월 7일에 개관한 코모도호텔 부산은 '조선왕궁'을 주제로 설계되었다. 한국의 전통미와 현대의 고급스러움이 조화를 이룬 특급호텔이다. 코모도(Commodore)의 뜻은 해군 제독을 의미하며, 왜구의 침입이 빈번했던 시기에 나라를 지킨 이순신 장군을 상징화한 호텔이다. 최근 성황리에 종영된 드라마 '사랑의 불시착' 촬영지 호텔로 다양한 관광객들에게 관심과 사랑을 받고 있다. 총 311개의 객실, 5개의 연회장, 한식당, 뷔페식당, 로비라운지 등등의 식음 시설을 보유하고 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "142853",
+    "area_code": "26",
+    "area_name": "부산광역시",
+    "name": "파라다이스 호텔 부산",
+    "region_code": "26350",
+    "region_name": "해운대구",
+    "address": "부산광역시 해운대구 해운대해변로 296",
+    "address_detail": null,
+    "latitude": 35.1599007,
+    "longitude": 129.1640921,
+    "phone": "051-742-2121",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/55/3510355_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/55/3510355_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "48099",
+    "homepage_url": null,
+    "description": "파라다이스 호텔 부산은 국제 관광도시, 부산 해운대 해변에 자리한 호텔이다. 객실에는 바다 전망 발코니가 마련되어 있어, 탁 트인 해운대 바다를 감상하며 여유로운 휴식을 즐길 수 있다. 또한, 사계절 내내 온천수와 함께 바다를 바라보며 힐링 할 수 있는 야외 온천 오션스파 씨메르와 야외 온수 풀, 그리고 가족 여행객을 위한 다양한 시설과 프로그램이 마련되어 있어 연인, 친구, 아이와 함께하는 가족단위 손님까지 편안한 휴식을 즐길 수 있다. 이뿐만 아니라 고급스러운 분위기의 다채로운 다이닝 레스토랑이 즐비해 있어 취향에 맞게 선택해 음식을 즐길 수 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [
+      {
+        "name": "본관 디럭스 시티",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "신관 디럭스 시티",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "신관 디럭스 오션",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      }
+    ],
+    "room_names": [
+      "본관 디럭스 시티",
+      "신관 디럭스 시티",
+      "신관 디럭스 오션"
+    ]
+  },
+  {
+    "source_content_id": "1162469",
+    "area_code": "27",
+    "area_name": "대구광역시",
+    "name": "팔공산온천관광호텔",
+    "region_code": "27140",
+    "region_name": "동구",
+    "address": "대구광역시 동구 팔공산로185길 11",
+    "address_detail": null,
+    "latitude": 35.9909629,
+    "longitude": 128.6922379,
+    "phone": "053-985-8080",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/53/1196553_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/53/1196553_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "41007",
+    "homepage_url": null,
+    "description": "대구 팔공산 쪽에 있는 온천관광호텔로 온천 이용객 및 휴양을 위해 찾는 이들이 많은 곳이다. 팔공산 온천은 팔공산의 정기가 숨 쉬는 비로봉 남동쪽 계곡부에서 발견된 물 맑은 신비의 온천으로 팔공산 화강암을 기반으로 지하 687.04m에서 용출되는 섭씨 28.9도의 염화나트륨 성분이 우세한 양질의 약 알칼리성 온천수를 이용할 수 있는 곳이다. 팔공산 온천호텔은 온천시설뿐만 아니라, 각종 단체 모임 행사 및 세미나 장소로 활용이 용이하여 각종 예식 칠순잔치 등 다양한 행사를 할 수 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "익일 11:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [
+      {
+        "name": "한실",
+        "base_capacity": "2",
+        "max_capacity": "3"
+      }
+    ],
+    "room_names": [
+      "한실"
+    ]
+  },
+  {
+    "source_content_id": "1315136",
+    "area_code": "27",
+    "area_name": "대구광역시",
+    "name": "호텔인터불고 엑스코",
+    "region_code": "27230",
+    "region_name": "북구",
+    "address": "대구광역시 북구 유통단지로 80 (산격동)",
+    "address_detail": null,
+    "latitude": 35.9070259,
+    "longitude": 128.6113113,
+    "phone": "053-380-0114",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/33/3533733_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/33/3533733_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "41515",
+    "homepage_url": null,
+    "description": "현재 현대S라이프 그룹 계열사인 인터불고 엑스코는 대구 북구 엑스코(대구전시 컨벤션 센터) 맞은편에 위치하고 있으며, 2008년 개업하여 대구의 대표적인 도심 속 특급호텔로 자리매김했다. 2020년부터 시작된 리노베이션을 통해 다양함을 바탕으로 한 감성과 휴식이 공존하는 고객의 라이프스타일을 분석한 복합문화공간으로 재탄생했다. 호텔 내 곳곳에 위치한 예술품과 음악적 요소는 고객에게 창의적 사고를 유발하며, 다양한 디자인적 공간구성은 젊은 층의 라이프스타일을 반영했다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [
+      {
+        "name": "디럭스 트윈",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "디럭스 더블",
+        "base_capacity": "2",
+        "max_capacity": "3"
+      },
+      {
+        "name": "디럭스 패밀리 트윈",
+        "base_capacity": "3",
+        "max_capacity": "3"
+      }
+    ],
+    "room_names": [
+      "디럭스 트윈",
+      "디럭스 더블",
+      "디럭스 패밀리 트윈"
+    ]
+  },
+  {
+    "source_content_id": "139909",
+    "area_code": "27",
+    "area_name": "대구광역시",
+    "name": "창앤영펜션",
+    "region_code": "27710",
+    "region_name": "달성군",
+    "address": "대구광역시 달성군 유가읍 휴양림길 532",
+    "address_detail": null,
+    "latitude": 35.7006824,
+    "longitude": 128.4842963,
+    "phone": "053-614-3108",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/74/220174_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/74/220174_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "42990",
+    "homepage_url": null,
+    "description": "창앤영펜션은 비슬산 자락 양지 바른 곳에 위치한 숙박업소이다. 상성폭포에서 내려오는 개울물이 흘러가는 배산임수 명당으로, 자연을 사랑하는 노부부가 손수 가꾸는 시설이 돋보이는 곳이다. 소음으로부터 방해 받지 않고 조용하게 쉬어갈 수 있으며, 아름다운 해돋이와 노을을 볼 수 있는 곳이다. 예약은 전화 및 홈페이지에서 가능하며, 자세한 사항은 홈페이지에서 확인이 가능하다. 인근 관광지로 비슬산 자연휴양림, 비슬산 사효자굴, 쌍성폭포 등이 있다.",
+    "checkin_time": "14:00",
+    "checkout_time": "10:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "희망방/햇살방/푸른방",
+        "base_capacity": "4",
+        "max_capacity": "5"
+      }
+    ],
+    "room_names": [
+      "희망방/햇살방/푸른방"
+    ]
+  },
+  {
+    "source_content_id": "142884",
+    "area_code": "27",
+    "area_name": "대구광역시",
+    "name": "대구그랜드호텔",
+    "region_code": "27260",
+    "region_name": "수성구",
+    "address": "대구광역시 수성구 동대구로 305",
+    "address_detail": null,
+    "latitude": 35.8576552,
+    "longitude": 128.6251619,
+    "phone": "053-742-0001",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/00/3569300_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/00/3569300_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "42117",
+    "homepage_url": null,
+    "description": "대구그랜드호텔은 대구 교통과 비즈니스의 중심지인 수성구 범어동에 위치하고 있다. 한식, 일식, 중식, 뷔페식당 그리고 남녀 사우나, 헬스클럽, 골프연습장 등과 예식 및 다양한 연회 행사를 위한 다목적의 연회장들을 갖추고 있다. 고급스러운 분위기를 주는 인테리어와 최고급 가구 및 집기들이 마련되어 있으며 내 집처럼 편안한 휴식과 업무를 동시에 볼 수 있는 비즈니스맨에게 적합하도록 설계된 객실을 갖추고 있다. 고객의 비즈니스 업무가 호텔 내에서 보다 편리하고 성공적으로 이루어질 수 있도록 최신형 개인 컴퓨터와 프린터, 복사기 등 사무기기가 갖추어진 워크스테이션 시설도 보유하고 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [
+      {
+        "name": "디럭스 더블/트윈",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "프리미어 더블/트윈",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "한실 스위트",
+        "base_capacity": "2",
+        "max_capacity": "6"
+      }
+    ],
+    "room_names": [
+      "디럭스 더블/트윈",
+      "프리미어 더블/트윈",
+      "한실 스위트"
+    ]
+  },
+  {
+    "source_content_id": "143042",
+    "area_code": "27",
+    "area_name": "대구광역시",
+    "name": "호텔인터불고 대구",
+    "region_code": "27260",
+    "region_name": "수성구",
+    "address": "대구광역시 수성구 팔현길 212",
+    "address_detail": null,
+    "latitude": 35.8743558,
+    "longitude": 128.6598073,
+    "phone": "053-602-7114",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/64/4093464_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/64/4093464_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "42064",
+    "homepage_url": null,
+    "description": "인터불고는 스페인어에 그 어원을 두고 있으며 모두의 마음과 뜻을 함께하는 화목한 마을이라는 뜻이다. 금호강 변 망우공원에 위치해 자연과 도심이 어우러지는 최적의 입지를 자랑하며 수려한 경관과 청정한 공기 속에서 품격있는 객실과 다양한 부대시설을 갖추고 있어 머무르는 동안 편안하게 숙박이 가능하다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [
+      {
+        "name": "인터스탠다드더블",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "인터디럭스더블",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "인터프리미엄더블",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      }
+    ],
+    "room_names": [
+      "인터스탠다드더블",
+      "인터디럭스더블",
+      "인터프리미엄더블"
+    ]
+  },
+  {
+    "source_content_id": "143169",
+    "area_code": "27",
+    "area_name": "대구광역시",
+    "name": "AW호텔",
+    "region_code": "27290",
+    "region_name": "달서구",
+    "address": "대구광역시 달서구 성서로 413",
+    "address_detail": null,
+    "latitude": 35.8545173,
+    "longitude": 128.5066704,
+    "phone": "053-589-6700",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/13/2498513_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/13/2498513_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "42612",
+    "homepage_url": null,
+    "description": "AW 호텔은 대구 2호선 성서산업단지 역 인근에 위치하여 우수한 접근성을 가지고 있으며 와룡산, 성서 체육센터, 공원 등 도심 속 쾌적한 자연환경과 대구 성서산업단지에서 차량으로 5분 거리에 위치하고 있어 비즈니스 장소로 효과적이다. 성서 IC 인근에 위치하여 원활한 교통여건을 갖추고 있다. 또한 객실 내에 냉장고, 미니바, 무선인터넷 등이 갖춰져 있으며 건물 내에 레스토랑, 커피숍이 있어 편리하게 이용할 수 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "1981882",
+    "area_code": "27",
+    "area_name": "대구광역시",
+    "name": "호텔아시아",
+    "region_code": "27140",
+    "region_name": "동구",
+    "address": "대구광역시 동구 동부로22길 75-1",
+    "address_detail": null,
+    "latitude": 35.8698344,
+    "longitude": 128.6276336,
+    "phone": "053-742-0550",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/38/1981838_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/38/1981838_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "41251",
+    "homepage_url": null,
+    "description": "대구광역시 동대구역세권의 중심에 위치하고 있는 호텔아시아는 비즈니스 업무와 영화, 쇼핑, 외식, 문화시설을 한꺼번에 즐길 수 있다. 대구국제공항에서 10분, KTX가 도착하는 동대구역에서 5분, 고속버스터미널에서 3분, 지하철에서 4분 거리에 위치해 있으며 주변에 MBC 방송국, 영화관, 금융기관, 동 대구벤처벨리와 관광지, 대형 쇼핑몰을 골고루 갖추고 있다. 이외에 전 객실 PC, 와이파이, 3DTV, 최신 영화 시스템, 전신안마의자, 스파 욕조, 단체 이벤트 룸, 공기청정기를 갖추어 고객에게 최상의 볼거리, 즐길 거리, 휴식이 공존하는 도심 속 문화공간이다. 호텔아시아는 고객편의를 최우선으로 고품격 최고의 서비스를 제공한다.",
+    "checkin_time": "18:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [
+      {
+        "name": "트윈",
+        "base_capacity": "2",
+        "max_capacity": "4"
+      }
+    ],
+    "room_names": [
+      "트윈"
+    ]
+  },
+  {
+    "source_content_id": "228912",
+    "area_code": "27",
+    "area_name": "대구광역시",
+    "name": "호텔 아리아나",
+    "region_code": "27260",
+    "region_name": "수성구",
+    "address": "대구광역시 수성구 동대구로 27",
+    "address_detail": "(두산동)",
+    "latitude": 35.8327276,
+    "longitude": 128.6228906,
+    "phone": "053-763-9000",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/56/4089856_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/56/4089856_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "42175",
+    "homepage_url": null,
+    "description": "짙푸른 녹음 속에 감각적인 유럽풍 실내장식으로 이루어진 아리아나 호텔은 교통이 편리하며 도보 10분 이내에 야경이 아름다운 수성못이 있다. 양질의 서비스로 비즈니스 고객들에게 편안한 휴식을 제공하고자 정성을 다하며 현대적인 감각으로 인테리어 된 53개의 객실과 예식장이 마련되어 있다. 다양한 부대시설이 있어 편리하게 이용이 가능하며 수성호반의 아름다운 분위기와 함께 머무를 수 있는 호텔이다.",
+    "checkin_time": "14:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [
+      {
+        "name": "royal suite",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "deluxe twin",
+        "base_capacity": "2",
+        "max_capacity": "3"
+      },
+      {
+        "name": "family twin",
+        "base_capacity": "2",
+        "max_capacity": "4"
+      }
+    ],
+    "room_names": [
+      "royal suite",
+      "deluxe twin",
+      "family twin"
+    ]
+  },
+  {
+    "source_content_id": "2366080",
+    "area_code": "27",
+    "area_name": "대구광역시",
+    "name": "호텔 라온제나",
+    "region_code": "27260",
+    "region_name": "수성구",
+    "address": "대구광역시 수성구 범어천로 73 (범어동)",
+    "address_detail": null,
+    "latitude": 35.853536,
+    "longitude": 128.6224945,
+    "phone": "053-718-7000",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/09/4089709_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/09/4089709_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "42139",
+    "homepage_url": null,
+    "description": "호텔 라온제나는 대구 수성구에 위치한 프리미엄 웨딩전문 호텔이다. 컨벤션홀과 끌레르홀을 운영하며 대구에서 호텔 예식을 찾는 예비부부를 위한 맞춤 웨딩 상담을 제공한다. 객실은 깔끔한 분위기이며 시티뷰가 특징이다. 다양한 부대시설이 마련되어 있어 머무르는 동안 편안한 시간을 보낼 수 있는 호텔이다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [
+      {
+        "name": "스탠다드 트윈",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "스탠다드 더블",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "디럭스 트윈",
+        "base_capacity": "2",
+        "max_capacity": "4"
+      }
+    ],
+    "room_names": [
+      "스탠다드 트윈",
+      "스탠다드 더블",
+      "디럭스 트윈"
+    ]
+  },
+  {
+    "source_content_id": "2377774",
+    "area_code": "27",
+    "area_name": "대구광역시",
+    "name": "퀸벨호텔",
+    "region_code": "27140",
+    "region_name": "동구",
+    "address": "대구광역시 동구 동촌로 200",
+    "address_detail": null,
+    "latitude": 35.8824252,
+    "longitude": 128.6621411,
+    "phone": "053-282-1000",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/69/4105369_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/69/4105369_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "41159",
+    "homepage_url": null,
+    "description": "대구 동구에 위치한 퀸벨호텔은 동대구권의 랜드마크로서의 면모를 갖추고 있으며 또한 품격 높은 호텔웨딩의 명소로 자리잡고 있다. 기존의 일반 호텔과는 차별화된 우아하면서도 격조 높은 객실들로 이루어져 있으며, 컨벤션 및 연회장은 결혼식, 돌잔치, 기업행사 등 대형 행사부터 소규모 가족모임까지 다양하게 할 수 있다. 호텔은 넓고 편안한 분위기로 관광객들이 머무는 동안 편리하고 편안하게 이용이 가능하다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [
+      {
+        "name": "디럭스 더블",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "패밀리 트윈",
+        "base_capacity": "0",
+        "max_capacity": "0"
+      },
+      {
+        "name": "스탠다드 트윈",
+        "base_capacity": "0",
+        "max_capacity": "0"
+      }
+    ],
+    "room_names": [
+      "디럭스 더블",
+      "패밀리 트윈",
+      "스탠다드 트윈"
+    ]
+  },
+  {
+    "source_content_id": "142801",
+    "area_code": "28",
+    "area_name": "인천광역시",
+    "name": "라마다송도호텔",
+    "region_code": "28185",
+    "region_name": "연수구",
+    "address": "인천광역시 연수구 능허대로267번길 29",
+    "address_detail": null,
+    "latitude": 37.4142014,
+    "longitude": 126.65541,
+    "phone": "032-832-2000",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/75/1577575_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/75/1577575_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "21944",
+    "homepage_url": null,
+    "description": "라마다송도호텔은 경영의 전문성을 위하여 전 세계적인 예약망과 마케팅 시스템을 구비한 ‘라마다 인터내셔널’ 호텔로 2006년 4월 인천 송도에 개관하였다. 지상 12층, 지하 2층의 규모인 라마다송도호텔은 송도국제도시와 5분 거리에 위치해 편리한 교통망을 갖추고 있고 객실은 세련된 인테리어와 아늑한 분위기로 꾸며져 있다. 객실은 언제 들어서더라도 깨끗함과 안락함을 느낄 수 있도록 늘 준비되어 있으며 현대적인 감각에 발맞춰 모던하고 심플하게 꾸며져 있다. 또한 세심한 서비스와 인천 앞바다가 보이는 전망이 좋은 뷔페 레스토랑을 갖추고 있다. 비즈니스호텔로서 대형 컨벤션센터와 중·소연회장을 구비하고 있으며, 스파&사우나 등의 부대시설도 마련되어 있다. 호텔 주변에는 해안도시의 특성을 살려 산과 바다가 어우러진 청량산 등산코스 및 송도유원지, 해안친수공원, LNG가스 과학관 등을 연결하는 여행코스가 있다. 편안한 여행의 즐거움을 마음껏 만끽하고 삶의 여유와 넉넉함을 즐기며 추억으로 간직할 소중한 시간을 만들 수 있는 격조 높은 휴식처가 될 수 있도록 라마다송도호텔은 항상 정성이 깃든 서비스를 제공하고 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "주차가능",
+    "lodging_type": "HOTEL",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "143090",
+    "area_code": "28",
+    "area_name": "인천광역시",
+    "name": "그랜드 하얏트 인천",
+    "region_code": "28155",
+    "region_name": "영종구",
+    "address": "인천광역시 영종구 영종해안남로321번길 208",
+    "address_detail": null,
+    "latitude": 37.4403863,
+    "longitude": 126.4574314,
+    "phone": "032-745-1234",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/42/4070042_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/42/4070042_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "23358",
+    "homepage_url": null,
+    "description": "인천국제공항과 가장 가까운 특급 호텔 그랜드 하얏트 인천은 세련된 공간과 차별화된 서비스로 비즈니스와 휴식이 어우러지는 환경을 제공한다. 영종도의 여유로운 분위기 속에서 편안하면서도 품격 있는 시간을 누릴 수 있으며, 서해안 주요 관광지와 인접해 도심을 벗어난 휴식을 즐기기에 적합하다. 서울 및 수도권에서 약 1시간 거리에 있어 가족 여행이나 주말 나들이 장소로도 인기가 높다. 계절마다 변화하는 요리를 선보이는 레스토랑과 바에서는 감각적인 다이닝을 경험할 수 있고, 16개의 연회 공간과 전문 인력을 기반으로 기업 행사, 국제회의, 웨딩 등 다양한 이벤트를 완성도 높게 운영한다. 세심한 서비스와 전문적인 지원으로 모든 행사를 성공적으로 이끌어간다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "킹 베드 1개 / 트윈 베드 2개",
+        "base_capacity": "2",
+        "max_capacity": "3"
+      },
+      {
+        "name": "킹 베드 1개 / 트윈 베드 2개 (고층)",
+        "base_capacity": "2",
+        "max_capacity": "3"
+      },
+      {
+        "name": "킹 베드 1개 / 트윈 베드 2개 (클럽 이용)",
+        "base_capacity": "2",
+        "max_capacity": "3"
+      }
+    ],
+    "room_names": [
+      "킹 베드 1개 / 트윈 베드 2개",
+      "킹 베드 1개 / 트윈 베드 2개 (고층)",
+      "킹 베드 1개 / 트윈 베드 2개 (클럽 이용)"
+    ]
+  },
+  {
+    "source_content_id": "143106",
+    "area_code": "28",
+    "area_name": "인천광역시",
+    "name": "베스트웨스턴 프리미어 인천 에어포트 호텔",
+    "region_code": "28155",
+    "region_name": "영종구",
+    "address": "인천광역시 영종구 공항로424번길 48-27",
+    "address_detail": null,
+    "latitude": 37.4411901,
+    "longitude": 126.4574859,
+    "phone": "032-743-1000",
+    "image_url": "http://tong.visitkorea.or.kr/cms/resource/66/3003666_image2_1.jpg",
+    "thumbnail_url": "http://tong.visitkorea.or.kr/cms/resource/66/3003666_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "22382",
+    "homepage_url": "http://www.airporthotel.co.kr",
+    "description": "‘베스트웨스턴 인터내셔널’은 미국 아리조나주 피닉스에 본사를 두고 있으며, 전 세계 80여 개국에 4,000여 개가 넘는 다양한 호텔을 소유한 56년 역사의 세계 최대 호텔 체인이다. 베스트웨스턴인천에어포트호텔은 동북아 허브 공항인 인천 국제공항과 직선거리로 700m 밖에 위치해 자동차로 5분 내에 연결되는 특급호텔이다. 2004년 5월 14일에 정식으로 개관했으며 306개 객실과 멀티 레스토랑, 로비 라운지 등을 갖춘 특급 비즈니스호텔이다. 지하 1층, 지상 10층의 규모로 공항 및 바다가 보이는 전망 엘리베이터와 건물 꼭대기에 비행기 모양의 지붕을 얹은 것이 특징이다. 또한, 대연회장(그랜드볼룸, 다이아몬드룸)과 2층의 다양한 소연회장도 갖추고 있다. 최소 20명에서 최대 400명까지 수용 가능한 연회장은 각종 세미나, 기업 행사 등을 위해 첨단 설비를 갖추고 있다. 호텔 1층에 위치한 파티오는 커피와 전통차가 있는 세련되고 아늑한 로비라운지와 국내 최고의 주방장이 제공하는 세계적인 품격의 양식 및 한식 바, 베이커리를 갖춘 멀티레스토랑이다. 비즈니스센터는 모든 편리함이 갖추어진 최신 설비와 고객의 취향을 만족시켜 주는 최상의 서비스를 통해 가장 편안하고 안락하게 지내실 수 있도록 모든 편의를 제공하고 있다. 피트니스센터는 고객 여러분을 위한 공간으로 다양한 체육 시설이 있으며 소형 골프 연습장이 마련되어 있다. 베스트웨스턴인천에어포트호텔은 고객 한 분 한 분의 만족을 위해 신속하고 정성 어린 서비스를 제공하기 위해 최선을 다하고 있다.",
+    "checkin_time": "14:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [
+      {
+        "name": "프리미어 스위트",
+        "base_capacity": "2",
+        "max_capacity": "0"
+      },
+      {
+        "name": "디럭스 트윈",
+        "base_capacity": "2",
+        "max_capacity": "3"
+      },
+      {
+        "name": "DELUXE TRIPLE",
+        "base_capacity": "3",
+        "max_capacity": "3"
+      }
+    ],
+    "room_names": [
+      "프리미어 스위트",
+      "디럭스 트윈",
+      "DELUXE TRIPLE"
+    ]
+  },
+  {
+    "source_content_id": "143151",
+    "area_code": "28",
+    "area_name": "인천광역시",
+    "name": "호텔 카리스",
+    "region_code": "28245",
+    "region_name": "계양구",
+    "address": "인천광역시 계양구 계양대로 28",
+    "address_detail": null,
+    "latitude": 37.5263361,
+    "longitude": 126.7229281,
+    "phone": "032-556-0880",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/94/1348094_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/94/1348094_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "21120",
+    "homepage_url": null,
+    "description": "인천광역시 계양구에 위치한 호텔 카리스는 고객에게 편안한 휴식과 안락함을 제공하며, 세련된 객실 인테리어, 편리한 접근성을 갖춘 도심 속 프리미엄 호텔이다. 10여 종류의 다양한 객실과 총 160실을 보유하고 있으며 합리적인 금액으로 여행자와 비즈니스 고객 모두 만족할 수 있는 최상의 서비스를 제공하고 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [
+      {
+        "name": "스탠다드 트윈",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "레지던스 더블/트윈",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "디럭스 더블/트윈",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      }
+    ],
+    "room_names": [
+      "스탠다드 트윈",
+      "레지던스 더블/트윈",
+      "디럭스 더블/트윈"
+    ]
+  },
+  {
+    "source_content_id": "1747952",
+    "area_code": "28",
+    "area_name": "인천광역시",
+    "name": "프로방스 호텔",
+    "region_code": "28177",
+    "region_name": "미추홀구",
+    "address": "인천광역시 미추홀구 미추홀대로722번길 24",
+    "address_detail": null,
+    "latitude": 37.4615905,
+    "longitude": 126.6816867,
+    "phone": null,
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/11/1745511_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/11/1745511_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "22135",
+    "homepage_url": null,
+    "description": "프로방스 호텔은 동북아의 중심도시 경제수도 인천에 위치하고 있다. 노하드 PC와 고정 IP 사용으로 매끄러운 온라인 게임을 숙소 내에서 즐길 수 있다. OTT 사용이 가능해 객실 내에서 영화 등을 편안하게 시청할 수 있다. 주변 관광지로는 월미도 공원, 인천 개항지, 유람선과 낭만의 연안 부두, 신선한 해산물이 넘쳐나는 소래포구와 무의도와 송도 등을 손꼽을 수 있다. 또한 살아 있는 교과서라 불리는 강화도는 자녀들과 함께 여행하기에 적합한 곳이다.",
+    "checkin_time": "16:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "1747999",
+    "area_code": "28",
+    "area_name": "인천광역시",
+    "name": "리치호텔",
+    "region_code": "28185",
+    "region_name": "연수구",
+    "address": "인천광역시 연수구 능허대로 124",
+    "address_detail": null,
+    "latitude": 37.4212947,
+    "longitude": 126.6432694,
+    "phone": "032-831-2234",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/07/1745607_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/07/1745607_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "21959",
+    "homepage_url": null,
+    "description": "리치호텔은 동북아의 중심도시 경제수도 인천에 위치하고 있는 숙소이다. 객실 타입으로는 스탠다드룸과 싱글룸이 있으며 가성비가 좋아 인천 여행시 방문하기 좋다. 인천은 맑고 깨끗한 천혜자원이 가득한 곳으로 150여 개의 섬과 근대와 현대가 공존하는 도시이기도 하다. 인천의 관광지로는 월미도 공원, 인천 개항지, 유람선과 낭만의 연안부두, 신선한 해산물이 넘쳐나는 소래포구와 무의도와 송도 등을 손꼽을 수 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [
+      {
+        "name": "스탠다드 더블",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      }
+    ],
+    "room_names": [
+      "스탠다드 더블"
+    ]
+  },
+  {
+    "source_content_id": "1748010",
+    "area_code": "28",
+    "area_name": "인천광역시",
+    "name": "보보스호텔",
+    "region_code": "28185",
+    "region_name": "연수구",
+    "address": "인천광역시 연수구 능허대로104번길 59",
+    "address_detail": null,
+    "latitude": 37.4216002,
+    "longitude": 126.6389198,
+    "phone": "032-831-2141",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/76/4103776_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/76/4103776_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "21959",
+    "homepage_url": null,
+    "description": "보보스호텔은 동북아의 중심도시 경제수도 인천에 위치하고 있으며 인천은 맑고 깨끗한 천혜자원이 가득한 곳으로 150여 개의 섬과 근대와 현대가 공존하는 도시이기도 하다. 객실은 깔끔하고 편안한 시설로 되어 있으며 조용히 쉬기에 좋다. 근처 관광지로는 월미도 공원, 인천 개항지, 유람선과 낭만의 연안부두, 신선한 해산물이 넘쳐나는 소래포구와 무의도와 송도 등을 손꼽을 수 있다. 또한 살아 있는 교과서라 불리는 강화도는 자녀들과 함께 여행하기에 적합한 곳이다.",
+    "checkin_time": "14:00",
+    "checkout_time": "13:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [
+      {
+        "name": "스탠다드",
+        "base_capacity": "0",
+        "max_capacity": "0"
+      },
+      {
+        "name": "트윈",
+        "base_capacity": "0",
+        "max_capacity": "0"
+      }
+    ],
+    "room_names": [
+      "스탠다드",
+      "트윈"
+    ]
+  },
+  {
+    "source_content_id": "143023",
+    "area_code": "30",
+    "area_name": "대전광역시",
+    "name": "호텔인터시티",
+    "region_code": "30200",
+    "region_name": "유성구",
+    "address": "대전광역시 유성구 온천로 92",
+    "address_detail": null,
+    "latitude": 36.354292,
+    "longitude": 127.3478585,
+    "phone": "042-600-6000",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/38/3577938_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/38/3577938_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "34187",
+    "homepage_url": null,
+    "description": "대전 유성구 갑천변에 위치한 호텔인터시티는 탁 트인 전망과 세련된 시설을 갖춘 대전 대표 4성급 호텔이다. 도심과 자연이 어우러진 입지 속에서 쾌적하고 안락한 객실, 품격 있는 연회장과 회의실을 갖추어 비즈니스와 휴식을 모두 만족시키는 최적의 공간을 제공한다. 객실에서는 갑천과 도심 전경을 한눈에 바라볼 수 있으며, 다양한 규모의 행사를 지원하는 연회장과 웨딩홀은 세련된 인테리어와 세심한 서비스로 완성도를 더한다. 호텔 내 뷔페 레스토랑 더스크래치(The Scratch)는 신선한 제철 식재료를 사용한 다채로운 메뉴와 감각적인 분위기로 대전 도심 속 특별한 미식 경험을 선사한다. 온천 특구의 중심에서 편안한 휴식과 품격 있는 서비스를 제공하며, 대전의 새로운 호텔 기준을 제시하는 도시형 프리미엄 호텔이다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [
+      {
+        "name": "스탠다드",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "디럭스",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "스위트",
+        "base_capacity": "2",
+        "max_capacity": "4"
+      }
+    ],
+    "room_names": [
+      "스탠다드",
+      "디럭스",
+      "스위트"
+    ]
+  },
+  {
+    "source_content_id": "1932079",
+    "area_code": "30",
+    "area_name": "대전광역시",
+    "name": "굿모닝레지던스호텔휴",
+    "region_code": "30170",
+    "region_name": "서구",
+    "address": "대전광역시 서구 둔산로73번길 21 (둔산동)",
+    "address_detail": null,
+    "latitude": 36.3522898,
+    "longitude": 127.3816856,
+    "phone": null,
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/51/4127551_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/51/4127551_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "35233",
+    "homepage_url": null,
+    "description": "굿모닝레지던스호텔휴는 주방과 세탁기를 갖춘 레지던스로 출장과 장기 숙박에 최적인 곳이다. 신선한 재료로 만드는 뷔페 조식도 제공하고 있으며, 목적에 알맞게 이용할 수 있는 세미나실도 갖추고 있다. 시청역과 정부청사 고속터미널과도 가까워 방문하기 편리하다. 호텔 인근에는 편의점과 음식점 거리, 쇼핑센터 등 생활에 필요한 시설이 도보로 가까운 곳에 위치해 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [
+      {
+        "name": "스탠다드 더블",
+        "base_capacity": "1",
+        "max_capacity": "2"
+      },
+      {
+        "name": "디럭스 트윈",
+        "base_capacity": "2",
+        "max_capacity": "3"
+      },
+      {
+        "name": "로얄스위트",
+        "base_capacity": "2",
+        "max_capacity": "4"
+      }
+    ],
+    "room_names": [
+      "스탠다드 더블",
+      "디럭스 트윈",
+      "로얄스위트"
+    ]
+  },
+  {
+    "source_content_id": "1933910",
+    "area_code": "30",
+    "area_name": "대전광역시",
+    "name": "롯데시티호텔 대전",
+    "region_code": "30200",
+    "region_name": "유성구",
+    "address": "대전광역시 유성구 엑스포로123번길 33 (도룡동)",
+    "address_detail": null,
+    "latitude": 36.3761915,
+    "longitude": 127.3930274,
+    "phone": "042-333-1000",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/89/3578989_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/89/3578989_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "34125",
+    "homepage_url": null,
+    "description": "동북아의 대표적인 연구개발과 교육의 허브이며, 첨단 과학 기술의 메카이자 대한민국의 실리콘밸리인 대전에 위치한 롯데시티호텔 대전은 2014년 3월에 오픈하였다. 대전 컨벤션센터 앞에 위치한 18층 규모의 호텔로서 모던한 디자인의 304개의 객실, 아름다운 스카이뷰를 자랑하는 고급 레스토랑 및 다목적 연회장을 보유하고 있으며, 기업체 세미나 및 학술회의 행사에 최적의 프리미엄 호텔이다.",
+    "checkin_time": "15:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [
+      {
+        "name": "스탠다드 룸",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "디럭스 패밀리 룸",
+        "base_capacity": "3",
+        "max_capacity": "3"
+      },
+      {
+        "name": "스탠다드 패밀리 룸",
+        "base_capacity": "3",
+        "max_capacity": "3"
+      }
+    ],
+    "room_names": [
+      "스탠다드 룸",
+      "디럭스 패밀리 룸",
+      "스탠다드 패밀리 룸"
+    ]
+  },
+  {
+    "source_content_id": "1952929",
+    "area_code": "30",
+    "area_name": "대전광역시",
+    "name": "베니키아 테크노밸리 호텔",
+    "region_code": "30200",
+    "region_name": "유성구",
+    "address": "대전광역시 유성구 테크노중앙로 57 (관평동)",
+    "address_detail": null,
+    "latitude": 36.4263331,
+    "longitude": 127.3920913,
+    "phone": "042-671-0500",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/38/4127638_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/38/4127638_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "34014",
+    "homepage_url": null,
+    "description": "베니키아 테크노밸리 호텔은 대전광역시 유성구 테크노중앙로에 자리한 호텔이다. 대전 북부의 관평동 테크노밸리 권역에 있어 인근 산업단지와 업무시설을 방문하는 출장객이 머물기 편리하다. 객실은 숙박과 휴식을 위한 공간이며, 호텔에는 세미나실과 연회장 등 모임을 위한 시설이 마련되어 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "2392995",
+    "area_code": "30",
+    "area_name": "대전광역시",
+    "name": "디 엠프레스 호텔",
+    "region_code": "30170",
+    "region_name": "서구",
+    "address": "대전광역시 서구 한밭대로570번길 29-20 (월평동)",
+    "address_detail": null,
+    "latitude": 36.3569328,
+    "longitude": 127.3632639,
+    "phone": "042-485-3030",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/76/2392976_image2_1.JPG",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/76/2392976_image3_1.JPG",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "35222",
+    "homepage_url": null,
+    "description": "디 엠프레스 호텔은 대전 중심가에 위치한 신개념 비즈니스호텔로서 품격 있는 서비스와 경제적인 가격, 우수한 입지조건을 바탕으로 방문 목적과 상관없이 최고의 만족감을 선사한다. 대전 도시철도 1호선 월평역과 인접해 있어 대중교통 이용이 편리하고 주변 환경이 쾌적하여 관광 또는 비즈니스 여행 시 가장 적합한 호텔이다. 최고급 건축자재를 사용하여 시공한 현대적인 건물과 아기자기하고 세련된 인테리어, 깨끗하고 넓은 객실은 여행의 피곤함과 스트레스를 훌훌 날려 버릴 수 있는 아늑함과 편안함을 선사한다. 또한 모든 객실에서 WiFi 사용이 가능하며 비즈니스 여행객을 위하여 초고속 인터넷을 무료로 사용할 수 있는 비즈니스 센터가 준비되어 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "2594874",
+    "area_code": "30",
+    "area_name": "대전광역시",
+    "name": "호텔 더 에이치(Hotel The H)",
+    "region_code": "30230",
+    "region_name": "대덕구",
+    "address": "대전광역시 대덕구 신탄진동로23번길 58 (신탄진동)",
+    "address_detail": null,
+    "latitude": 36.4504413,
+    "longitude": 127.4314603,
+    "phone": "042-932-0005",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/42/4127542_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/42/4127542_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "34309",
+    "homepage_url": null,
+    "description": "호텔 더 에이치(Hotel The H)는 모던한 감각으로 편안한 휴식을 제공하는 호텔이다. 객실은 스탠다드와 트윈, 펜트로 구성되어 있다. 스탠다드룸과 트윈룸은 모던한 감각이 뛰어나며, 펜트룸은 테라스에 전용 수영장을 갖추고 있어 프라이빗하게 휴식하기 좋다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [
+      {
+        "name": "스탠다드룸",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "트윈룸",
+        "base_capacity": "2",
+        "max_capacity": "3"
+      },
+      {
+        "name": "펜트룸",
+        "base_capacity": "6",
+        "max_capacity": "8"
+      }
+    ],
+    "room_names": [
+      "스탠다드룸",
+      "트윈룸",
+      "펜트룸"
+    ]
+  },
+  {
+    "source_content_id": "2770452",
+    "area_code": "30",
+    "area_name": "대전광역시",
+    "name": "호텔스카이파크 대전1호점",
+    "region_code": "30200",
+    "region_name": "유성구",
+    "address": "대전광역시 유성구 테크노중앙로 161 (용산동)",
+    "address_detail": null,
+    "latitude": 36.4247879,
+    "longitude": 127.3980759,
+    "phone": "042-323-4500",
+    "image_url": "http://tong.visitkorea.or.kr/cms/resource/14/2771914_image2_1.jpg",
+    "thumbnail_url": "http://tong.visitkorea.or.kr/cms/resource/14/2771914_image2_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "34030",
+    "homepage_url": "http://www.skyparkhotel.com/",
+    "description": "호텔 스카이파크 대전 1호점은 첨단 과학기술의 메카인 대덕 테크노밸리 인근에 자리 잡고 있다. 대전 현대 프리미엄 아울렛 안에 위치해 다양한 문화생활, 쇼핑, 휴식을 함께 즐길 수 있는 호텔이다. 성공적인 비즈니스를 위해 개인별 맞춤 서비스와 내 집 같은 편안함을 제공하고 있어 인기다. 호텔은 북대전IC에서 가까운 거리에 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [
+      {
+        "name": "스탠다드 퀸",
+        "base_capacity": "0",
+        "max_capacity": "0"
+      },
+      {
+        "name": "패밀리",
+        "base_capacity": "0",
+        "max_capacity": "0"
+      },
+      {
+        "name": "디럭스 트윈",
+        "base_capacity": "0",
+        "max_capacity": "0"
+      }
+    ],
+    "room_names": [
+      "스탠다드 퀸",
+      "패밀리",
+      "디럭스 트윈"
+    ]
+  },
+  {
+    "source_content_id": "2913368",
+    "area_code": "30",
+    "area_name": "대전광역시",
+    "name": "대전라마다호텔",
+    "region_code": "30200",
+    "region_name": "유성구",
+    "address": "대전광역시 유성구 계룡로 127 (봉명동)",
+    "address_detail": null,
+    "latitude": 36.3531935,
+    "longitude": 127.3446984,
+    "phone": "042-540-1000",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/17/4127417_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/17/4127417_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "34187",
+    "homepage_url": null,
+    "description": "대전라마다호텔은 현대적인 감각이 돋보이는 외관과 세련된 분위기를 연출하는 인테리어가 눈에 띈다. 모던하고 부티크한 디자인으로 완성된 222개의 객실은 더욱 편안한 휴식을 취하게 해준다. 또한, 다양한 규모의 연회공간과 웨딩홀, 카페, 피트니스센터, 비즈니스센터 등 여행을 위한 최적의 시설을 갖추고 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "2930309",
+    "area_code": "30",
+    "area_name": "대전광역시",
+    "name": "S& 나봄호텔",
+    "region_code": "30200",
+    "region_name": "유성구",
+    "address": "대전광역시 유성구 테크노중앙로 69 (관평동)",
+    "address_detail": null,
+    "latitude": 36.4258589,
+    "longitude": 127.3932787,
+    "phone": "042-936-1500",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/06/4095106_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/06/4095106_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "34014",
+    "homepage_url": null,
+    "description": "대전 유성구 관평동에 위치한 에스앤 나봄호텔은 비즈니스와 여행, 휴식을 모두 만족시키는 프리미엄 비즈니스 호텔이다. 쾌적하고 세련된 객실, 편안한 침구와 다양한 편의시설을 갖추어 출장 고객은 물론 가족, 커플 여행객까지 누구나 편안한 시간을 보낼 수 있다. 전 객실 무료 와이파이와 24시간 프런트 서비스를 제공하여 더욱 편리하게 숙박 이용이 가능하다. 호텔 주변에는 현대 프리미엄 아울렛 대전점과 다양한 맛집, 카페가 위치해 있으며, 대덕 연구단지와 정부출연연구기관, 카이스트 등 주요 비즈니스 및 연구시설과의 접근성이 뛰어나 출장객들에게도 최적의 입지를 자랑한다. 청결한 객실관리와 친절한 서비스로 머무르는 동안 편안한 시간을 보낼 수 있다.",
+    "checkin_time": "16:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [
+      {
+        "name": "비즈니스 슈페리어",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "비즈니스 디럭스",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "비즈니스 로얄",
+        "base_capacity": "3",
+        "max_capacity": "3"
+      }
+    ],
+    "room_names": [
+      "비즈니스 슈페리어",
+      "비즈니스 디럭스",
+      "비즈니스 로얄"
+    ]
+  },
+  {
+    "source_content_id": "2931417",
+    "area_code": "30",
+    "area_name": "대전광역시",
+    "name": "스탕달호텔",
+    "region_code": "30200",
+    "region_name": "유성구",
+    "address": "대전광역시 유성구 온천북로 14 (봉명동)",
+    "address_detail": null,
+    "latitude": 36.3568171,
+    "longitude": 127.3445298,
+    "phone": "042-822-1435",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/97/4127597_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/97/4127597_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "34186",
+    "homepage_url": null,
+    "description": "호텔 스탕달은 대전광역시 유성구에 위치하고 있으며, 대전 도심 속에서 고객들을 위한 최적의 부티크 호텔로 최고의 서비스를 제공하는 호텔이다. 지하 1층부터 지상 14층으로 이루어져 있으며, 지하 주차장 및 주차 타워, 지상 1층 레스토랑 부대시설을 갖추고 있다. 도심 속의 위치한 호텔 스탕달은 고품격 인테리어와 각각의 유니크한 콘셉트의 객실을 갖춘 호텔로서 비즈니스와 레지던스의 실용성을 조합해 새로운 개념의 호텔이다. 「적과 흑」의 저자로 널리 알려진 19세기 프랑스 문학의 거장 앙리 벨르가 가장 아끼던 필명 스탕달을 차용하여 이름을 지었다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "1144607",
+    "area_code": "31",
+    "area_name": "울산광역시",
+    "name": "경원BIZ모텔",
+    "region_code": "31170",
+    "region_name": "동구",
+    "address": "울산광역시 동구 녹수7길 58 (전하동)",
+    "address_detail": null,
+    "latitude": 35.5150568,
+    "longitude": 129.4317426,
+    "phone": "052-233-2000",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/53/2606153_image2_1.JPG",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/53/2606153_image3_1.JPG",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "44034",
+    "homepage_url": null,
+    "description": "경원 BIZ 모텔은 울산광역시 동구에 위치한 비즈니스형 숙박시설로, 출장객과 관광객 모두 편안하게 머물 수 있는 다양한 객실과 편의시설을 갖추고 있다. 컴퓨터와 프린터를 이용할 수 있는 비즈니스 공간과 세탁실을 갖추고 있으며, 자전거 무료 대여와 퇴실 후 수하물 보관 등 방문객의 편의를 고려한 서비스도 제공한다. 이러한 객실 구성과 실용적인 편의시설을 바탕으로 경원 BIZ 모텔은 울산을 방문하는 출장객과 여행객에게 편리하고 쾌적한 숙박 환경을 제공하는 곳이다.",
+    "checkin_time": "13:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "142903",
+    "area_code": "31",
+    "area_name": "울산광역시",
+    "name": "호텔현대 바이 라한 울산",
+    "region_code": "31170",
+    "region_name": "동구",
+    "address": "울산광역시 동구 방어진순환도로 875",
+    "address_detail": null,
+    "latitude": 35.5196577,
+    "longitude": 129.4303015,
+    "phone": "052-251-2233",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/93/4118393_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/93/4118393_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "44033",
+    "homepage_url": null,
+    "description": "호텔현대 바이 라한 울산은 아름다운 동해안에 위치한 비즈니스 호텔로, 현대중공업 옆에 자리하고 있다. 1983년 1월 개장 이래, 국제 행사를 성공적으로 개최하고 손님들을 맞이한 경험이 있는 호텔이다. 비즈니스와 레저 여행객 모두에게 편안하고 신뢰할 수 있는 숙박을 제공하려 한다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [
+      {
+        "name": "디럭스 더블",
+        "base_capacity": "2",
+        "max_capacity": "3"
+      },
+      {
+        "name": "디럭스 트윈",
+        "base_capacity": "3",
+        "max_capacity": "4"
+      },
+      {
+        "name": "프리미엄 디럭스 더블",
+        "base_capacity": "2",
+        "max_capacity": "3"
+      }
+    ],
+    "room_names": [
+      "디럭스 더블",
+      "디럭스 트윈",
+      "프리미엄 디럭스 더블"
+    ]
+  },
+  {
+    "source_content_id": "143064",
+    "area_code": "31",
+    "area_name": "울산광역시",
+    "name": "롯데호텔 울산",
+    "region_code": "31140",
+    "region_name": "남구",
+    "address": "울산광역시 남구 삼산로 282 롯데호텔",
+    "address_detail": null,
+    "latitude": 35.5386343,
+    "longitude": 129.3380541,
+    "phone": "052-960-1000",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/12/3579012_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/12/3579012_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "44719",
+    "homepage_url": null,
+    "description": "1938년 개관한 ‘반도호텔’로부터 탄생한 롯데호텔 울산은 1973년 창립 이래 고객의 사랑과 성원에 힘입어 세계적 경쟁력을 갖춘 국내의 호텔&리조트 그룹으로 성장, 발전해 왔다. 그리고 2010년 아시아계 호텔 브랜드로서 러시아 모스크바에 6성급 호텔을 오픈하였고, 향후 베트남 하노이, 중국 심양 등지에도 호텔을 준비하는 등 글로벌 체인호텔로 거듭나고 있다. 롯데호텔의 정신은 바로 ‘고객 사랑의 마음’이다. 시설과 서비스를 바탕으로 사랑과 자유, 그리고 풍요의 꿈을 실현하는 호텔이 될 것이며, ‘언제나 그 이상의 고객만족’을 위해 전 임직원은 진심 어린 마음을 모아 고객 한 분 한 분을 정성껏 모시고 있다. 울산의 호텔 문화에 새로운 장을 연 롯데호텔 울산은 신도심에 위치한 지리적 편리함과 함께 버스터미널과 금융권, 영화관 그리고 롯데백화점과 인접해 있어 최적의 비즈니스 환경을 제공하고 있다. 롯데호텔 울산은 안락하고 편안한 객실 200개를 보유하고 있으며, 그 가운데 7층과 11층에 각 1개씩 모두 2개의 장애인용 객실을 별도로 마련하고 있다. 울산롯데호텔은 매우 깨끗하며 연회장, 실내체련장, 실내수영장, 실내 골프연습장, 비즈니스센터 등을 운영하고 있다. (정보제공자: 울산광역시청)",
+    "checkin_time": "15:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "1804605",
+    "area_code": "31",
+    "area_name": "울산광역시",
+    "name": "아젤란리조트",
+    "region_code": "31710",
+    "region_name": "울주군",
+    "address": "울산광역시 울주군 상북면 덕현남천길 7",
+    "address_detail": null,
+    "latitude": 35.6296625,
+    "longitude": 129.0508089,
+    "phone": null,
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/68/1804568_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/68/1804568_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "44901",
+    "homepage_url": null,
+    "description": "아젤란리조트는 각종 단체의 연수 및 교육을 위해 효과적인 프로그램을 실시할 수 있도록 다양한 시설을 갖추고 있다. 편안한 객실과 정갈한 음식, 100인 이상 수용 가능한 세미나 장비, 등산로, 숲속 산책로 등 다양한 즐길 거리와 함께 힐링할 수 있다. 주변 관광지로는 영남 알프스, 운문사, 태화강 십 리 대숲이 있어 연계 관광하기에 용이하다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "2050197",
+    "area_code": "31",
+    "area_name": "울산광역시",
+    "name": "어련당",
+    "region_code": "31110",
+    "region_name": "중구",
+    "address": "울산광역시 중구 산전길 61 어련당",
+    "address_detail": null,
+    "latitude": 35.5740498,
+    "longitude": 129.3502769,
+    "phone": "052-297-5796",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/33/4058233_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/33/4058233_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "44488",
+    "homepage_url": null,
+    "description": "동천의 옛 이름인 어련천에서 어원을 찾아 아름다운 말이 흐르는 집이라는 의미를 담고 있는 어련당은 한옥의 멋스러움과 웅장함을 담고, 동천강이 흐르는 동동에 위치하고 있다. 주요 시설로는 어련당의 중심이라는 의미의 어련재와 누마루 형태의 어련현이 있다. 나머지 6개의 방은 울산 경상좌도병영성이 군사적인 요충지의 역할을 했던 조선시대의 의정부 조직인 6방, 이·호·예·병·형·공방의 첫음에, 좋은 의미가 있는 한자를 넣어 각 방별 테마를 부여하고 이름을 정하였다. 어련당은 숙박체험을 통해 한옥의 아름다운 멋과 우리 선조들의 지혜를 느껴볼 수 있는 좋은 기회가 될 것이다.",
+    "checkin_time": "14:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "호",
+        "base_capacity": "4",
+        "max_capacity": "6"
+      },
+      {
+        "name": "이",
+        "base_capacity": "4",
+        "max_capacity": "6"
+      },
+      {
+        "name": "예",
+        "base_capacity": "4",
+        "max_capacity": "6"
+      }
+    ],
+    "room_names": [
+      "호",
+      "이",
+      "예"
+    ]
+  },
+  {
+    "source_content_id": "2570731",
+    "area_code": "31",
+    "area_name": "울산광역시",
+    "name": "블루오션뷰",
+    "region_code": "31710",
+    "region_name": "울주군",
+    "address": "울산광역시 울주군 서생면 진하해변길 74",
+    "address_detail": null,
+    "latitude": 35.3842832,
+    "longitude": 129.3459022,
+    "phone": "052-238-0006",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/15/4005915_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/15/4005915_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "45013",
+    "homepage_url": null,
+    "description": "블루오션뷰는 합리적인 가격과 편의성을 추구하는 레지던스 호텔이며 각 객실별로 개별 냉난방, 취사, 세탁 등의 편의시설을 갖추고 이용객들로 하여금 호텔 같은 집처럼 쉴 수 있는 환경을 제공한다. 거의 모든 객실에서 바다 조망이 가능한 구조로 되어 있어 침대에서 해돋이를 볼 수 있으며 창문을 열면 차도 소리를 들을 수 있다. 그리고 호텔 출구에서 열 걸음이면 해변 모래를 밟을 수 있고 하절기엔 수영복 차림으로 객실 출입이 가능한 낭만적인 곳이기도 하다. 주변으로 진하해수욕장과 진하간절곶 등 여러 관광지가 있어 다양한 볼거리를 체험할 수 있다. (출처 : 블루오션뷰 홈페이지)",
+    "checkin_time": "14:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "일반실",
+        "base_capacity": "2",
+        "max_capacity": "4"
+      },
+      {
+        "name": "특실",
+        "base_capacity": "2",
+        "max_capacity": "4"
+      },
+      {
+        "name": "VIP",
+        "base_capacity": "2",
+        "max_capacity": "4"
+      }
+    ],
+    "room_names": [
+      "일반실",
+      "특실",
+      "VIP"
+    ]
+  },
+  {
+    "source_content_id": "2570790",
+    "area_code": "31",
+    "area_name": "울산광역시",
+    "name": "롯데시티호텔 울산",
+    "region_code": "31140",
+    "region_name": "남구",
+    "address": "울산광역시 남구 삼산로 204",
+    "address_detail": null,
+    "latitude": 35.5375343,
+    "longitude": 129.3296132,
+    "phone": "052-990-1000",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/05/3579005_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/05/3579005_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "44718",
+    "homepage_url": null,
+    "description": "한국 최대의 산업과 관광으로 이루어진 울산 중심에 위치한 354실 규모의 롯데시티호텔울산은 금융권, 쇼핑타운, 공항, 버스터미널과 인접하여, 비즈니스와 관광에 특화된 비즈니스 호텔로서 고객 한 분 한 분이 만족 할 수 있도록 품격과 서비스를 높였다. 울산 고속버스터미널에서 차로 단 5분 거리, 울산 공항에서 차로 20분 거리에 있다. 또한 울산의 대표 관광지인 간절곶과 통도사가 차로 약 50분 거리에 있다. (정보제공자: 울산광역시청)",
+    "checkin_time": "14:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [
+      {
+        "name": "스탠다드(더블/트윈/엑세서블)",
+        "base_capacity": "0",
+        "max_capacity": "0"
+      },
+      {
+        "name": "디럭스 패밀리트윈",
+        "base_capacity": "0",
+        "max_capacity": "0"
+      },
+      {
+        "name": "디럭스 패밀리트윈",
+        "base_capacity": "0",
+        "max_capacity": "0"
+      }
+    ],
+    "room_names": [
+      "스탠다드(더블/트윈/엑세서블)",
+      "디럭스 패밀리트윈",
+      "디럭스 패밀리트윈"
+    ]
+  },
+  {
+    "source_content_id": "2570801",
+    "area_code": "31",
+    "area_name": "울산광역시",
+    "name": "신라스테이 울산",
+    "region_code": "31140",
+    "region_name": "남구",
+    "address": "울산광역시 남구 삼산로 200 (달동)",
+    "address_detail": null,
+    "latitude": 35.5374089,
+    "longitude": 129.3291477,
+    "phone": "052-901-9000",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/62/4128862_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/62/4128862_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "44718",
+    "homepage_url": null,
+    "description": "역사와 문화, 비즈니스가 역동적으로 공존하는 울산 중심에 위치한 신라스테이는 세련된 공간과 품격 있는 서비스를 제공하는 호텔이다. 출장객에게는 효율적인 비즈니스 환경을, 여행객에게는 아늑한 휴식과 재충전의 시간을 제공하며, 편안하고 여유로운 일정을 계획하기에 적합한 숙박 공간이다.",
+    "checkin_time": "15:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "스탠다드 더블/ 스탠다드 트윈",
+        "base_capacity": "2",
+        "max_capacity": "3"
+      },
+      {
+        "name": "스탠다드 패밀리 트윈",
+        "base_capacity": "3",
+        "max_capacity": "3"
+      },
+      {
+        "name": "디럭스 더블 / 디럭스 트윈",
+        "base_capacity": "2",
+        "max_capacity": "3"
+      }
+    ],
+    "room_names": [
+      "스탠다드 더블/ 스탠다드 트윈",
+      "스탠다드 패밀리 트윈",
+      "디럭스 더블 / 디럭스 트윈"
+    ]
+  },
+  {
+    "source_content_id": "2708329",
+    "area_code": "36110",
+    "area_name": "세종특별자치시",
+    "name": "학림재",
+    "region_code": null,
+    "region_name": "장군면",
+    "address": "세종특별자치시 장군면 태산길 75-3",
+    "address_detail": null,
+    "latitude": 36.5510558,
+    "longitude": 127.1899356,
+    "phone": "010-3478-1004",
+    "image_url": "http://tong.visitkorea.or.kr/cms/resource/56/2707656_image2_1.jpg",
+    "thumbnail_url": "http://tong.visitkorea.or.kr/cms/resource/56/2707656_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "30050",
+    "homepage_url": "https://haklimjaetest.modoo.at",
+    "description": "학림재는 세종시 장군면 태산리에 위치한 한옥스테이다. 마당이 딸린 독채 한옥을 대여하는데, 방 3개, 주방, 거실, 화장실 2개를 갖추고 있다. 빔프로젝터와 노래방 기기가 있어 기업 수련회나 동호회 등 모임 장소로 많이 이용한다. 전통혼례나 야외 전시 행사도 이루어진다. 야외바비큐를 할 수 있고, 가마솥 장작구이도 가능하다. 계절별로 텃밭 채소와 과일을 제공하고 사전 예약시 전통장담그기, 목공예 등을 체험할 수 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "학림재",
+        "base_capacity": "2",
+        "max_capacity": "10"
+      }
+    ],
+    "room_names": [
+      "학림재"
+    ]
+  },
+  {
+    "source_content_id": "2770436",
+    "area_code": "36110",
+    "area_name": "세종특별자치시",
+    "name": "베스트웨스턴 플러스 호텔세종",
+    "region_code": null,
+    "region_name": "도움1로",
+    "address": "세종특별자치시 도움1로 7 (어진동)",
+    "address_detail": null,
+    "latitude": 36.5002689,
+    "longitude": 127.2584075,
+    "phone": "044-330-3300",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/40/4113540_image2_1.png",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/40/4113540_image3_1.png",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "30116",
+    "homepage_url": null,
+    "description": "베스트웨스턴 플러스 호텔 세종은 세종특별자치시 어진동 중심행정타운에 위치한 도심형 호텔로, 정부세종청사와 인접한 입지로 공무·기업 출장과 각종 회의 및 행사 참석 시 이용하기 편리한 숙박시설이다. 총 367개의 객실을 운영하며, 300개 이상의 스탠더드 객실과 온돌을 포함한 여러 유형의 특수 객실, 스위트 객실로 구성되어 있다. 호텔은 건물 4층부터 8층에 위치하며, 투숙객을 위한 넓은 지하 주차시설과 무료 Wi-Fi를 제공한다. 호텔에는 미팅룸, 연회장, 다목적 회의시설, 비즈니스 라운지, 코인세탁실 등이 마련되어 있어 소규모 회의부터 단체 행사까지 이용 가능하다. 조식은 호텔 3층 마키노차야 세종점에서 제공되며, 호텔 건물 1~3층의 식음료 및 상업시설도 이용할 수 있다. 장애인 전용 객실과 장애인 주차구역, 점자블록과 휠체어 등 무장애 편의시설을 갖추고 있어 다양한 방문객의 이용을 지원하는 호텔이다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [
+      {
+        "name": "스탠다드 더블",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "스탠다드 트윈",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "온돌",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      }
+    ],
+    "room_names": [
+      "스탠다드 더블",
+      "스탠다드 트윈",
+      "온돌"
+    ]
+  },
+  {
+    "source_content_id": "2668426",
+    "area_code": "36110",
+    "area_name": "세종특별자치시",
+    "name": "학림재",
+    "region_code": null,
+    "region_name": "장군면",
+    "address": "세종특별자치시 장군면 태산길 75-3",
+    "address_detail": null,
+    "latitude": 36.5510558,
+    "longitude": 127.1899356,
+    "phone": "010-3478-1004",
+    "image_url": null,
+    "thumbnail_url": null,
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "30050",
+    "homepage_url": "http://haklimjae.com",
+    "description": "세종시 공식 지정 한옥 체험관 학림재는 다양한 힐링의 공간이다. 가족, 연인, 친구들과 독채로 프라이빗 공간에서 심신의 안정을 만끽하실 수 있다. 비지니스 숙박,기업워크샵,한옥체험,컨퍼러스,전통혼례 등 각종 행사모임이 가능한 파티룸으로도 이용 가능하다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "희망룸",
+        "base_capacity": "2",
+        "max_capacity": "3"
+      },
+      {
+        "name": "세종룸",
+        "base_capacity": "1",
+        "max_capacity": "2"
+      },
+      {
+        "name": "독채",
+        "base_capacity": "2",
+        "max_capacity": "15"
+      }
+    ],
+    "room_names": [
+      "희망룸",
+      "세종룸",
+      "독채"
+    ]
+  },
+  {
+    "source_content_id": "4064963",
+    "area_code": "36110",
+    "area_name": "세종특별자치시",
+    "name": "코트야드 바이 메리어트 세종",
+    "region_code": null,
+    "region_name": "다솜3로",
+    "address": "세종특별자치시 다솜3로 6 (어진동)",
+    "address_detail": null,
+    "latitude": 36.4959894,
+    "longitude": 127.2667806,
+    "phone": "044-251-4000",
+    "image_url": null,
+    "thumbnail_url": null,
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "30120",
+    "homepage_url": null,
+    "description": "코트야드 바이 메리어트 세종은 세종시 최초의 메리어트 인터내셔널 호텔로, 정부세종청사와 인접한 뛰어난 입지를 자랑한다. 세종 호수공원과 세종 도심을 아우르는 전망의 객실과 최신 AV 시스템을 갖춘 연회 공간을 보유하고 있으며, 제철 식재료를 활용한 세종 키친의 ‘SUBSTANCE’ 다이닝을 비롯해 세종 카페, 세종 라운지, 더 셀러 와인 비스트로, 24시간 피트니스센터를 통해 비즈니스와 레저 모두에 최적화된 경험을 제공한다.",
+    "checkin_time": "15:00",
+    "checkout_time": "12:00",
+    "parking_info": "1층~B1~B3 / 총 242대 주차 가능 (일반 225대, 전기차 5대, 장애인전용 12대)",
+    "lodging_type": "PENSION",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "1073480",
+    "area_code": "41",
+    "area_name": "경기도",
+    "name": "호수창이예쁜가",
+    "region_code": "41650",
+    "region_name": "포천시",
+    "address": "경기도 포천시 일동면 운악청계로1480번길 8",
+    "address_detail": null,
+    "latitude": 37.9375829,
+    "longitude": 127.3392833,
+    "phone": null,
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/98/3555998_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/98/3555998_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "11119",
+    "homepage_url": null,
+    "description": "호수창이예쁜가는 럭셔리 키즈 풀빌라이다. 키즈 호텔급 환경과 고품격 시설이 완비된 곳이다. 객실마다 전용 온수 수영장이 있어 안전하고 따뜻하게 이용할 수 있다. 수영장 수심은 70㎝로 안전하게 이용이 가능하며 객실마다 워터슬라이드와 유아용 보행기 튜브가 비치되어 있다. 객실 내에는 미끄럼틀, 방방이 존, 클라이밍 존, 그물 놀이존, 오락실 존, 주방놀이존, 역할놀이존, 낚시 존, 블록놀이존 등 다양한 키즈 전용 놀이공간이 마련되어 있어 실내에서 마음껏 뛰어놀 수 있다. 또한 VIP 룸 내에는 3층에서 2층으로 떨어지는 액티비티 한 미끄럼틀이 설치되어 있다. 전동 자동차를 타고 연못과 정원을 한 바퀴 돌 수 있는 액티비티 한 키즈 레이싱존이 마련되어 있다. 아이들이 피해 갈 수 없는 매력 중 하나이다. 직접 운전이 어려운 아이들은 부모님들이 리모컨으로 조정할 수 있으며, 부모님이 함께 탈 수도 있고, 드라이빙 전 구간이 인조 잔디로 되어 있어 안전하게 이용할 수 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "VIP",
+        "base_capacity": "4",
+        "max_capacity": "8"
+      },
+      {
+        "name": "L01",
+        "base_capacity": "4",
+        "max_capacity": "8"
+      },
+      {
+        "name": "L02",
+        "base_capacity": "4",
+        "max_capacity": "8"
+      }
+    ],
+    "room_names": [
+      "VIP",
+      "L01",
+      "L02"
+    ]
+  },
+  {
+    "source_content_id": "136063",
+    "area_code": "41",
+    "area_name": "경기도",
+    "name": "한화리조트 용인 베잔송",
+    "region_code": "41461",
+    "region_name": "용인시",
+    "address": "경기도 용인시 처인구 남사읍 봉무로153번길 79",
+    "address_detail": null,
+    "latitude": 37.1336284,
+    "longitude": 127.1469823,
+    "phone": "031-332-1122",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/39/4011339_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/39/4011339_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "17119",
+    "homepage_url": null,
+    "description": "한화리조트 용인 베잔송은 자연 속에서 편안한 휴식을 즐길 수 있는 리조트이다. 객실 안에는 TV, 냉장고, 전자레인지, 드라이기 등 필수 가전제품과 식기류도 잘 준비되어 있어서 쾌적하고 편리한 숙박이 가능하다. 리조트 내에는 편안한 휴식 공간뿐만 아니라 골프장(플라자 CC 용인)도 조성되어 있다. 또한 세미나실도 갖추고 있어 기업 행사나 단체 모임 장소로도 이용할 수 있다. 주변에 용인 민속촌, 에버랜드 같은 관광명소와 가까워 리조트에서 휴식 후 다양한 체험과 놀이도 할 수 있다. 자연과 레저, 힐링을 모두 누리고 싶을 때 방문하기 좋다.",
+    "checkin_time": "- 평일/비수기 14:00- 주말/연휴/성수기 15:00",
+    "checkout_time": "- 평일/비수기 12:00- 주말/연휴/성수기 11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "디럭스",
+        "base_capacity": "4",
+        "max_capacity": "4"
+      },
+      {
+        "name": "디럭스(싱글트윈)",
+        "base_capacity": "4",
+        "max_capacity": "4"
+      },
+      {
+        "name": "디럭스(티니핑 프린세스룸_호텔형)",
+        "base_capacity": "4",
+        "max_capacity": "4"
+      }
+    ],
+    "room_names": [
+      "디럭스",
+      "디럭스(싱글트윈)",
+      "디럭스(티니핑 프린세스룸_호텔형)"
+    ]
+  },
+  {
+    "source_content_id": "136520",
+    "area_code": "41",
+    "area_name": "경기도",
+    "name": "한화리조트 산정호수 안시",
+    "region_code": "41650",
+    "region_name": "포천시",
+    "address": "경기도 포천시 영북면 산정호수로 402",
+    "address_detail": null,
+    "latitude": 38.0657421,
+    "longitude": 127.3143324,
+    "phone": "031-534-5500",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/22/4006322_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/22/4006322_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "11103",
+    "homepage_url": null,
+    "description": "포천 산정호수 근처에 위치한 한화리조트 산정호수 안시는 숲과 호수가 절경을 이루고 있는 순수 자연의 공간, 천혜의 자연환경 속에 위치한 숙박시설이다. 덕분에 사계절 여행의 휴양지로 고객들에게 많은 사랑을 받고 있다. 봄, 가을에는 명성산의 청정한 나무들과 억새를, 여름에는 한탄강에서 스릴 넘치는 래프팅을, 겨울에는 눈썰매와 얼음썰매 등을 즐길 수 있다.",
+    "checkin_time": "- 주말/연휴/성수기 15:00- 평일/비수기 14:00",
+    "checkout_time": "- 주말/연휴/성수기 11:00- 평일/비수기 12:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "디럭스",
+        "base_capacity": "4",
+        "max_capacity": "4"
+      },
+      {
+        "name": "디럭스(싱글트윈)",
+        "base_capacity": "4",
+        "max_capacity": "4"
+      },
+      {
+        "name": "디럭스(호텔형)",
+        "base_capacity": "4",
+        "max_capacity": "4"
+      }
+    ],
+    "room_names": [
+      "디럭스",
+      "디럭스(싱글트윈)",
+      "디럭스(호텔형)"
+    ]
+  },
+  {
+    "source_content_id": "136639",
+    "area_code": "41",
+    "area_name": "경기도",
+    "name": "에버랜드 홈브리지",
+    "region_code": "41461",
+    "region_name": "용인시",
+    "address": "경기도 용인시 처인구 포곡읍 에버랜드로 199",
+    "address_detail": null,
+    "latitude": 37.2940662,
+    "longitude": 127.2021276,
+    "phone": "031-320-5000",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/33/3079033_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/33/3079033_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "17023",
+    "homepage_url": null,
+    "description": "에버랜드 홈브리지는 에버랜드에 위치해있다. 식음료장이 있어 조리가 가능하고 인덕션, 냉장고 등 편의 물품이 있다. 1층에는 편의점 포토부스가 있다. 근처 호암미술관으로 가는 셔틀버스를 운행한다. 홈브리지 투숙 고객을 대상으로 숙박 첫날부터 다음날까지 이용 가능한 에버랜드 2DAY 이용권을 특별 판매한다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "137483",
+    "area_code": "41",
+    "area_name": "경기도",
+    "name": "일성남한강콘도&리조트",
+    "region_code": "41670",
+    "region_name": "여주시",
+    "address": "경기도 여주시 신륵로 5 (천송동)",
+    "address_detail": null,
+    "latitude": 37.3012617,
+    "longitude": 127.6507889,
+    "phone": "031-883-1199",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/46/4141846_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/46/4141846_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "12636",
+    "homepage_url": null,
+    "description": "일성남한강콘도&리조트는 여주에 위치한 숙박 시설로, 남한강의 아름다운 자연경관과 편리한 시설을 갖추고 있어 가족여행객에게 안성맞춤이다. 신륵사의 전통적인 멋과 여주의 청명한 남한강을 배경으로 힐링할 수 있다. 객실 골드스위트A / B, 로얄스위트, 플래티늄스위트 등 4가지 타입의 객실로 구성되어 있어 다양한 취향과 인원에 맞춘 선택이 가능하다. 부대시설도 잘 갖춰져 있어 여행 중 편리함과 쾌적함을 느끼실 수 있다.",
+    "checkin_time": "14:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "139488",
+    "area_code": "41",
+    "area_name": "경기도",
+    "name": "월드관광호텔",
+    "region_code": "41591",
+    "region_name": "화성시",
+    "address": "경기도 화성시 만세구 향남읍 발안공단로5길 7-23",
+    "address_detail": null,
+    "latitude": 37.0861356,
+    "longitude": 126.908586,
+    "phone": "031-353-7833",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/38/4006638_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/38/4006638_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "18623",
+    "homepage_url": null,
+    "description": "월드관광호텔은 화성시 향남제약 일반산업단지에 위치한 숙박시설이다. 2022년 4월에 리모델링하여 고객에게 최상의 객실 컨디션을 제공한다. 전 객실에 70인치 대형 TV와 공기청정기 설치로 편안하고 깨끗한 객실 환경을 유지하고 있다. 여행과 비즈니스 출장 등의 관광객들이 묵기 좋으며, 편리한 접근성과 편의 시설로 안락한 휴식 공간을 제공한다.",
+    "checkin_time": "15:00",
+    "checkout_time": "13:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [
+      {
+        "name": "일반룸",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "특실",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "트윈룸",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      }
+    ],
+    "room_names": [
+      "일반룸",
+      "특실",
+      "트윈룸"
+    ]
+  },
+  {
+    "source_content_id": "139512",
+    "area_code": "41",
+    "area_name": "경기도",
+    "name": "폴라리스호텔",
+    "region_code": "41192",
+    "region_name": "부천시",
+    "address": "경기도 부천시 원미구 소향로13번길 27 (상동)",
+    "address_detail": null,
+    "latitude": 37.5051352,
+    "longitude": 126.7490742,
+    "phone": "032-323-1570",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/84/3573884_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/84/3573884_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "14544",
+    "homepage_url": null,
+    "description": "호수가 보이는 부천 폴라리스호텔은 입구에서부터 고급스러움을 느낄 수 있다. 객실은 서로 다른 인테리어로 디자인을 해 찾아올 때마다 새로운 즐거움을 느낄 수 있다. 호수가 내려다보이는 전경 속 최고급 인테리어와 최신식 시설이 완비되어 있는 각 룸은 다시 찾고 싶은 즐거움을 선사한다. 방문하는 고객의 편의를 위해 비즈니스 센터, 피트니스센터, 미팅룸, 조식당 등 다양한 시설을 갖추고 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [
+      {
+        "name": "스탠다드 더블",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "스탠다드 패밀리 트윈",
+        "base_capacity": "2",
+        "max_capacity": "3"
+      },
+      {
+        "name": "디럭스 더블",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      }
+    ],
+    "room_names": [
+      "스탠다드 더블",
+      "스탠다드 패밀리 트윈",
+      "디럭스 더블"
+    ]
+  },
+  {
+    "source_content_id": "143138",
+    "area_code": "41",
+    "area_name": "경기도",
+    "name": "고려호텔(부천)",
+    "region_code": "41192",
+    "region_name": "부천시",
+    "address": "경기도 부천시 원미구 길주로 66 (상동)",
+    "address_detail": null,
+    "latitude": 37.5054131,
+    "longitude": 126.7495563,
+    "phone": "032-329-0001",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/37/3573937_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/37/3573937_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "14544",
+    "homepage_url": null,
+    "description": "부천 유일의 특급호텔로 개관한 고려호텔은 예술과 문화, 그리고 비즈니스의 중심가인 부천시 상동에 위치해 있다. 독창적인 서비스와 상품 개발로 고객들의 문화공간과 휴식공간으로서 기능을 수행하여 호텔에서 가장 아름다운 서비스를 만들어가고 있다. 프레지덴셜 룸은 회의실, 수행원실, 넓고 품위 있는 귀빈 접견실, 스팀 사우나실, 샤워 부스실, 홈바 등이 있어 귀빈 고객 초대 및 비즈니스를 위한 최상의 고품격 분위기와 시간을 만들어준다. 로열 스위트룸은 부천시 내 전경이 한눈에 들어오며, 고급스러운 인테리어를 갖춘 디럭스룸, 관광객과 비즈니스맨을 위해 설계된 스탠더드룸까지 갖추고 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [
+      {
+        "name": "스탠다드 트윈",
+        "base_capacity": "2",
+        "max_capacity": "4"
+      },
+      {
+        "name": "스탠다드 더블",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "디럭스 트윈",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      }
+    ],
+    "room_names": [
+      "스탠다드 트윈",
+      "스탠다드 더블",
+      "디럭스 트윈"
+    ]
+  },
+  {
+    "source_content_id": "143140",
+    "area_code": "41",
+    "area_name": "경기도",
+    "name": "수원 코리아 호텔",
+    "region_code": "41115",
+    "region_name": "수원시",
+    "address": "경기도 수원시 팔달구 권광로175번길 62 (인계동)",
+    "address_detail": null,
+    "latitude": 37.2643423,
+    "longitude": 127.0289192,
+    "phone": "010-6799-6071",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/91/4006691_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/91/4006691_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "16490",
+    "homepage_url": null,
+    "description": "수원 코리아 호텔은 수원시청 뒤, 수원시청역 인근에 위치해 있어 접근성이 좋다. 특히 삼성전자, LG전자, SK케미칼, 현대자동차, 현대모비스 등 국내 대기업들이 인근에 위치하여 효율적인 비즈니스가 가능하다. 모던한 인테리어의 편안한 객실과 휴식 공간은 고객의 피로를 말끔히 씻어주어 재충전의 시간에 도움을 주며, 실용적인 업무 공간은 최상의 비즈니스 환경을 제공한다. 또한, 일상을 벗어나 조용하고 편안한 휴식을 원하는 분들께도 최상의 공간이 되어준다. 호텔 내에는 비즈니스 센터, 회의실, 피트니스센터, 무선 인터넷 등 다양한 시설이 준비되어 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [
+      {
+        "name": "슈페리어",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "스탠다드",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "디럭스 더블",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      }
+    ],
+    "room_names": [
+      "슈페리어",
+      "스탠다드",
+      "디럭스 더블"
+    ]
+  },
+  {
+    "source_content_id": "1745972",
+    "area_code": "41",
+    "area_name": "경기도",
+    "name": "호텔나비야",
+    "region_code": "41390",
+    "region_name": "시흥시",
+    "address": "경기도 시흥시 월곶중앙로58번길 27 (월곶동)",
+    "address_detail": null,
+    "latitude": 37.3909206,
+    "longitude": 126.7404668,
+    "phone": "031-318-5306",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/05/1742005_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/05/1742005_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "14966",
+    "homepage_url": null,
+    "description": "나비야 호텔은 서해만이 줄 수 있는 특유의 여유롭고 편안한 시흥의 월곶포구에 위치하고 있다. 월곶은 신선한 삶의 생기를 더한 얼굴로 여행객들을 맞이하며 바다와 풍성한 먹거리가 있는 곳이다. 여느 포구들처럼 부산스럽지 않아 도시생활에서 쌓인 이런저런 스트레스를 말끔히 지워버리고 새로운 생기를 충전시키고 싶다면 누구나 부담 없이 찾을 수 있는 곳이다.",
+    "checkin_time": "16:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "1161739",
+    "area_code": "43",
+    "area_name": "충청북도",
+    "name": "리솜포레스트(제천)",
+    "region_code": "43150",
+    "region_name": "제천시",
+    "address": "충청북도 제천시 백운면 금봉로 365",
+    "address_detail": null,
+    "latitude": 37.1588459,
+    "longitude": 128.0461583,
+    "phone": "043-649-6000",
+    "image_url": "http://tong.visitkorea.or.kr/cms/resource/90/2769490_image2_1.jpg",
+    "thumbnail_url": "http://tong.visitkorea.or.kr/cms/resource/90/2769490_image2_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "27105",
+    "homepage_url": "http://www.resomforest.com",
+    "description": "울창한 원시림의 아름다운 사계를 즐길 수 있는 리솜포레스트는 자연을 훼손하지 않는 방식으로 개발된 친환경 리조트이다. 자연지형과 식생을 그대로 보존하고 친환경 자재를 사용하여 자연과 인간이 함께 휴식을 누릴 수 있도록 설계했다. 리조트 단지 내에는 전깃줄과 자동차를 찾아볼 수 없으며 친환경 에너지 이용 및 재활용품 사용을 권장하고 있다. 사계절 아름다운 야생화와 다람쥐, 청설모를 만나볼 수 있는 자연과 함께하는 친환경 리조트이다. 구학산과 주론산의 품에 아늑하게 둘러싸여 있고 시야가 탁 트여 시원한 느낌을 주는 분지형 구조의 리솜포레스트는 손꼽히는 명당으로 주목받는 곳이며 숲에서 뿜어져 나오는 음이온과 피톤치드는 생활에 지친 몸과 마음을 건강하게 만들어 준다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": null,
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "S25",
+        "base_capacity": "5",
+        "max_capacity": "7"
+      },
+      {
+        "name": "G50",
+        "base_capacity": "6",
+        "max_capacity": "8"
+      },
+      {
+        "name": "G70",
+        "base_capacity": "7",
+        "max_capacity": "9"
+      }
+    ],
+    "room_names": [
+      "S25",
+      "G50",
+      "G70"
+    ]
+  },
+  {
+    "source_content_id": "136642",
+    "area_code": "43",
+    "area_name": "충청북도",
+    "name": "켄싱턴리조트 충주",
+    "region_code": "43130",
+    "region_name": "충주시",
+    "address": "충청북도 충주시 앙성면 산전장수1길 103",
+    "address_detail": null,
+    "latitude": 37.101766,
+    "longitude": 127.7956755,
+    "phone": "043-857-0055",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/85/3525285_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/85/3525285_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "27302",
+    "homepage_url": null,
+    "description": "켄싱턴리조트 충주는 사랑하는 반려견과 함께 펫캉스를 즐길 수 있는 ‘펫 프렌들리 리조트’이다. 반려동물 입양률이 높아지는 추세에 맞춰 반려동물 동반 여행 수요가 늘어갈 것을 예상해 2020년 12월에 펫 프렌들리 리조트로 탈바꿈하여 오픈했다. 수도권에서 1시간 거리에 위치한 켄싱턴리조트 충주는 충주 월악산과 단양의 아름다운 8가지 절경인 단양팔경, 국내 최대 천연 동굴인 고수 동굴, 신라 적성비와 길거리 고인돌 등 풍부한 주변 관광자원과 인접해 있다. 다양한 종류의 펫 객실을 보유하고 있으며 실내 펫 플레이그라운드, 펫 파크, 펫워시 드라이존, 펫 프랜들리 케어 서비스 등 반려동물과 함께 즐길 수 있는 다양한 편의시설이 구비되어 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "로얄 스위트",
+        "base_capacity": "6",
+        "max_capacity": "6"
+      },
+      {
+        "name": "켄싱턴 디럭스 펫",
+        "base_capacity": "4",
+        "max_capacity": "6"
+      },
+      {
+        "name": "켄싱턴 스튜디오 펫",
+        "base_capacity": "3",
+        "max_capacity": "3"
+      }
+    ],
+    "room_names": [
+      "로얄 스위트",
+      "켄싱턴 디럭스 펫",
+      "켄싱턴 스튜디오 펫"
+    ]
+  },
+  {
+    "source_content_id": "137379",
+    "area_code": "43",
+    "area_name": "충청북도",
+    "name": "나인밸리파크",
+    "region_code": "43720",
+    "region_name": "보은군",
+    "address": "충청북도 보은군 마로면 임곡길 66-80",
+    "address_detail": null,
+    "latitude": 36.4291006,
+    "longitude": 127.8606851,
+    "phone": "043-542-0981",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/00/4129600_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/00/4129600_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "28964",
+    "homepage_url": null,
+    "description": "나인밸리파크는 기업, 학교, 단체 등의 대규모 인원을 수용할 수 있는 객실과 부대행사를 진행할 수 있는 각종 공연장 및 행사공간을 보유하고 있다. 아울러 가족 단위의 펜션동을 보유하고 있고 수영장, 천문대를 비롯하여 아이들의 자연학습을 위한 장소라고 말할 수 있다. 또한 나무, 돌 모든 재료를 천연 형태와 재질로 조성한 28만 평의 자연 공간으로 놀거리, 먹거리를 제공할 수 있는 웰빙 복합 문화 공간이다. 방문하는 고객들을 위해 한실, 양식, 카페, 야외 바비큐 등 다양한 시설과 먹거리도 마련하였다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "Pine House",
+        "base_capacity": "4",
+        "max_capacity": "4"
+      },
+      {
+        "name": "Pent House A",
+        "base_capacity": "6",
+        "max_capacity": "6"
+      },
+      {
+        "name": "Pent House B",
+        "base_capacity": "6",
+        "max_capacity": "6"
+      }
+    ],
+    "room_names": [
+      "Pine House",
+      "Pent House A",
+      "Pent House B"
+    ]
+  },
+  {
+    "source_content_id": "137486",
+    "area_code": "43",
+    "area_name": "충청북도",
+    "name": "클럽이에스제천리조트",
+    "region_code": "43150",
+    "region_name": "제천시",
+    "address": "충청북도 제천시 수산면 옥순봉로 1248",
+    "address_detail": null,
+    "latitude": 36.9895727,
+    "longitude": 128.1953703,
+    "phone": "043-648-0480",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/70/4040670_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/70/4040670_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "27218",
+    "homepage_url": null,
+    "description": "이에스리조트클럽은 청풍호반에 위치한 회원 전용 별장형 콘도미니엄 형태의 숙박시설이다. 전 객실에서 충주호와 월악산의 조망이 확보되도록 건물을 배치하여 넓은 거실 창을 통해 월악산과 충주호가 한눈에 펼쳐진다. 또한, 호수가 보이는 숲속 수영장, 작은 동물들이 뛰노는 잔디광장, 산책과 명상에 최적의 장소인 오솔길들, 통나무집과 나무 놀이터 등 시설이 갖추어져 있어 자연과 하나 됨을 느낄 수 있으며 반려동물과 함께 숙소를 이용할 수 있는 펫 프랜들리 리조트라 반려동물과 함께 즐거운 추억을 쌓을 수 있다.",
+    "checkin_time": "- 14:00 - 주말/성수기 15:00",
+    "checkout_time": "- 12:00- 주말/성수기 11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "패밀리룸",
+        "base_capacity": "5",
+        "max_capacity": "7"
+      },
+      {
+        "name": "로얄룸",
+        "base_capacity": "6",
+        "max_capacity": "8"
+      },
+      {
+        "name": "펫 프렌들리룸",
+        "base_capacity": "5",
+        "max_capacity": "5"
+      }
+    ],
+    "room_names": [
+      "패밀리룸",
+      "로얄룸",
+      "펫 프렌들리룸"
+    ]
+  },
+  {
+    "source_content_id": "137497",
+    "area_code": "43",
+    "area_name": "충청북도",
+    "name": "월악산 유스호스텔",
+    "region_code": "43150",
+    "region_name": "제천시",
+    "address": "충청북도 제천시 한수면 월악로 1372",
+    "address_detail": null,
+    "latitude": 36.9140094,
+    "longitude": 128.0828248,
+    "phone": null,
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/53/2946953_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/53/2946953_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "27221",
+    "homepage_url": null,
+    "description": "월악산 유스호스텔은 아름다운 자연을 그저 멀리서 바라보는 것도 충분히 가치 있지만 머무는 여행자들에게 진정으로 필요하고 오랫동안 기억될 수 있는 것은 그 속에 흠뻑 빠져들어 땀 흘리고 온전히 느껴보는 것이다. 따사로운 햇살, 촉촉이 내리는 빗방울, 소복이 쌓이는 눈 속에서 숨겨진 장소들을 발견하고 마음껏 탐험한 후에, 고요하고 차분한 숙소에서 오롯이 쉴 수 있는 공간이다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "138352",
+    "area_code": "43",
+    "area_name": "충청북도",
+    "name": "블루밍데이즈펜션",
+    "region_code": "43150",
+    "region_name": "제천시",
+    "address": "충청북도 제천시 금성면 청풍호로 1511",
+    "address_detail": null,
+    "latitude": 37.0320034,
+    "longitude": 128.1782957,
+    "phone": "043-642-4600",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/06/4087806_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/06/4087806_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "27211",
+    "homepage_url": null,
+    "description": "청풍명월의 고장 제천에 위치한 블루밍데이즈는 청풍호반이 한눈에 내려다 보이는 곳에 위치하고 있으며 꽃이 만발한 날들과 인생의 절정기를 의미하는 명칭으로서 화사한 꽃이 만발한 정원의 이미지를 연상시키는 고급 펜션이다. 서울에서 고속도로로 불과 1시간 30분 이면 올 수 있는 블루밍데이즈에서 편안한 휴식을 보낼 수 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "튤립B, 라벤더A, 라일락B",
+        "base_capacity": "6",
+        "max_capacity": "6"
+      },
+      {
+        "name": "릴리C/D, 와일드C, 튤립C, 로즈C/D",
+        "base_capacity": "4",
+        "max_capacity": "4"
+      },
+      {
+        "name": "와일드B/D, 튤립C, 라벤더C/D, 라일락C/D",
+        "base_capacity": "3",
+        "max_capacity": "3"
+      }
+    ],
+    "room_names": [
+      "튤립B, 라벤더A, 라일락B",
+      "릴리C/D, 와일드C, 튤립C, 로즈C/D",
+      "와일드B/D, 튤립C, 라벤더C/D, 라일락C/D"
+    ]
+  },
+  {
+    "source_content_id": "139880",
+    "area_code": "43",
+    "area_name": "충청북도",
+    "name": "주봉산펜션",
+    "region_code": "43130",
+    "region_name": "충주시",
+    "address": "충청북도 충주시 동량면 미라실로 662",
+    "address_detail": null,
+    "latitude": 37.0065956,
+    "longitude": 128.0448676,
+    "phone": "043-851-2951",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/87/220087_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/87/220087_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "27321",
+    "homepage_url": null,
+    "description": "충주댐 왼쪽을 막아서 있는 산이 주봉산이다. 충주호 물길에 둘러싸여 작은 반도를 형성하고 있는 산이기도 하다. 주봉산을 중심에 두고 충주댐 반대편 주봉산 자락과 충주호변은 청정지역으로 소문 나 있다. 이곳 주봉산 등산로 초입에 주봉산 펜션이 있다. 나무로 지어진 펜션은 계곡을 따라 길게 배치되어 있어 주변 경관과 무척이나 잘 어울린다. 주봉산자락을 타고 내리는 계곡이 펜션 바로 앞을 흐른다. 계곡이 작음에도 항시 물이 흘러 계곡 욕을 즐기기에도 모자람이 없다. 객실마다 계곡 쪽으로 커다란 테라스가 나 있는데 테라스에 나서면 계곡 건너 충주호의 풍경까지 한눈에 들어온다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "바람소리 / 물소리",
+        "base_capacity": "7",
+        "max_capacity": "10"
+      }
+    ],
+    "room_names": [
+      "바람소리 / 물소리"
+    ]
+  },
+  {
+    "source_content_id": "142833",
+    "area_code": "43",
+    "area_name": "충청북도",
+    "name": "수안보파크호텔",
+    "region_code": "43130",
+    "region_name": "충주시",
+    "address": "충청북도 충주시 수안보면 탑골1길 36",
+    "address_detail": null,
+    "latitude": 36.8437391,
+    "longitude": 127.9807757,
+    "phone": "043-846-2331",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/15/1338415_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/15/1338415_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "27497",
+    "homepage_url": null,
+    "description": "수안보파크호텔은 넓은 객실과 연회장, 한식당과 양식당, 초현대식의 노천온천탕과 맥반석 사우나, 천연온천, 실내수영장, 산책로, 조깅코스 등 다양한 부대시설을 갖추고 수안보 여행의 다채로운 즐거움을 선사할 것이다. 특히 탁 트인 수안보의 사계와 함께하는 노천탕이 있다. 수안보파크호텔에는 고객의 건강을 위한 테니스장도 별도 설치되어 있어 여가 시간을 보낼 수 있다. 평범한 일상에서 벗어난 산뜻한 기분을 즐길 수 있으며 좋은 분들과 행복한 추억을 만들 기회도 제공해 드리고 있다. 신관 1층에 위치한 한국도자기 전문 매장은 본차이나, 슈퍼스트롱 등 한국도자기의 여러 제품들을 판매하고 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "142839",
+    "area_code": "43",
+    "area_name": "충청북도",
+    "name": "호텔 더베이스",
+    "region_code": "43130",
+    "region_name": "충주시",
+    "address": "충청북도 충주시 호암대로 8",
+    "address_detail": "(호암동)",
+    "latitude": 36.9590297,
+    "longitude": 127.9267915,
+    "phone": "043-848-9900",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/27/1848227_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/27/1848227_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "27480",
+    "homepage_url": null,
+    "description": "호텔 더베이스는 실내,외 웨딩홀에는 첨단 웨딩연출 장비 배치되어 있으며 각 연회실 별 빔프로젝트, 초대형 벽면스크린, 음향시스템, 노래방기기, 축소형 에펠탑 설치로 운치를 더 해주는 아름다운 호수가의 낭만이 있는 호텔이다.",
+    "checkin_time": "15:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "142840",
+    "area_code": "43",
+    "area_name": "충청북도",
+    "name": "수안보상록호텔",
+    "region_code": "43130",
+    "region_name": "충주시",
+    "address": "충청북도 충주시 수안보면 주정산로 22",
+    "address_detail": null,
+    "latitude": 36.8475526,
+    "longitude": 127.9884638,
+    "phone": "043-880-3700",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/98/3005898_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/98/3005898_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "27497",
+    "homepage_url": null,
+    "description": "청정지역의 수안보상록호텔은 천혜의 자연경관과 중원 관광명소가 있고 중부내륙고속도로가 인접하여 수도권 및 영남권에서 2시간 이내에 접근할 수 있는 온천 휴양 시설로 각종 세미나 및 연수 등 각종 단체 행사를 성공적으로 진행할 수 있도록 맞춤형 서비스를 제공하고 있다. 수안보 온천은 천 년 전부터 알려진 우리나라 온천으로 pH 8.3 약알칼리성 단순 유황 온천으로 위장병, 부인병, 피부병, 신경통 등에 효험이 있는 온천이다. 국토의 중심부에 위치한 수안보온천은 소백산맥의 조령산 북서쪽 산록에 자리 잡고, 동쪽으로는 월악산국립공원으로 둘러싸인 휴양지로서 내륙의 바다 충주호, 송계계곡, 단양 8경, 미륵리사지(하늘재), 탄금대 등을 함께 즐길 수 있는 사계절 천혜의 온천 휴양지이다. 20년 역사를 지니고 있는 수안보 상록호텔은 다양한 객실과 건강식을 즐길 수 있는 분위기의 레스토랑, 연회장, 세미나실 등을 갖춘 휴식처이다. 특히 수안보 상록호텔 온천사우나는 참나무 숯과 맥반석을 투입하여 온천 효과를 배가시켜 피로에 지친 분들에게 생기와 스태미나를 보완해 드리며 피부미용, 신경통, 위장병, 부인병 등에 뛰어난 효능이 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [
+      {
+        "name": "한실일반",
+        "base_capacity": "2",
+        "max_capacity": "4"
+      },
+      {
+        "name": "양실특트윈",
+        "base_capacity": "2",
+        "max_capacity": "3"
+      },
+      {
+        "name": "한실특실",
+        "base_capacity": "7",
+        "max_capacity": "8"
+      }
+    ],
+    "room_names": [
+      "한실일반",
+      "양실특트윈",
+      "한실특실"
+    ]
+  },
+  {
+    "source_content_id": "1003654",
+    "area_code": "44",
+    "area_name": "충청남도",
+    "name": "태안 서초휴양소",
+    "region_code": "44825",
+    "region_name": "태안군",
+    "address": "충청남도 태안군 남면 안면대로 571-12",
+    "address_detail": null,
+    "latitude": 36.6988874,
+    "longitude": 126.2880374,
+    "phone": "041-673-8470",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/74/4010174_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/74/4010174_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "32151",
+    "homepage_url": null,
+    "description": "태안 서초휴양소는 사계절 다채로운 자연 속에서 팜스테이를 지향하는 리조트 형태의 숙박시설로 2006년 5월 개원했다. 충남 태안군과 자매결연 관계인 서울 서초구가 한 폐교 부지를 매입해 47개 객실을 갖춘 지하 1층, 지상 5층 규모의 휴양소를 건립했다. 사전예약 필수이다. 객실은 콘도형으로 4인실과 8인실 중 선택할 수 있으며 4인실은 온돌형이고 8인실은 온돌형과 침대가 같이 있다. 식당, 사우나, 노래방, 강당 등의 시설과 바비큐장, 체육시설, 휴게실 등의 부대시설이 마련되어 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": null,
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "4인실",
+        "base_capacity": "4",
+        "max_capacity": "4"
+      },
+      {
+        "name": "8인실",
+        "base_capacity": "8",
+        "max_capacity": "10"
+      },
+      {
+        "name": "장애인실",
+        "base_capacity": "3",
+        "max_capacity": "0"
+      }
+    ],
+    "room_names": [
+      "4인실",
+      "8인실",
+      "장애인실"
+    ]
+  },
+  {
+    "source_content_id": "1271229",
+    "area_code": "44",
+    "area_name": "충청남도",
+    "name": "하울펜션",
+    "region_code": "44825",
+    "region_name": "태안군",
+    "address": "충청남도 태안군 고남면 옷점길 147-58",
+    "address_detail": null,
+    "latitude": 36.4128073,
+    "longitude": 126.4015979,
+    "phone": "010-4470-5590",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/08/4108508_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/08/4108508_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "32172",
+    "homepage_url": null,
+    "description": "충남 태안군 고남면에 위치한 하울펜션은 전 객실에서 바다 조망이 가능하며 바다에 떠 있는 통통배와 작은 섬들은 한 폭의 아름다운 그림과 같다. 바다를 아주 가깝게 느낄 수 있으며 바다 전경은 어디를 비교해도 뒤처지지 않는다고 자부한다. 일출과 일몰을 함께 볼 수 있으며 일출은 일몰 못지않게 아름답다. 하울의 정원은 바다 위에 떠 있는 정원처럼 느껴진다. 언제나 조용하고 아름다운 음악이 흐르는 이곳, 바쁜 일상에 지친 이들에게 평온함을 선사하고 정원에서 행복한 식사도 가능하다. 정원을 통해 바다로 내려가는 길을 통하며 전용 해변을 갈 수 있다. 가까이서 파도소리도 듣고 바닷물이 빠졌을 때는 갯벌 탐사도 가능하다. 객실마다 단독 테라스가 붙어 있어 오붓이 둘이서 또는 가족끼리 시간을 보내기 좋은 펜션이다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "stay 1",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "stay 2",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "stay 3",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      }
+    ],
+    "room_names": [
+      "stay 1",
+      "stay 2",
+      "stay 3"
+    ]
+  },
+  {
+    "source_content_id": "1271286",
+    "area_code": "44",
+    "area_name": "충청남도",
+    "name": "레몬트리",
+    "region_code": "44825",
+    "region_name": "태안군",
+    "address": "충청남도 태안군 고남면 구매길 56-9",
+    "address_detail": null,
+    "latitude": 36.4242008,
+    "longitude": 126.4281645,
+    "phone": "010-8583-1300",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/04/4105204_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/04/4105204_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "32172",
+    "homepage_url": null,
+    "description": "충남 태안군 고남면에 위치해 바다가 내려다 보이는 곳에 자연과 어우러진 안면도 레몬트리 펜션은 바다가 바로 앞에 위치해 있다. 각 객실마다 테라스와 예쁜 인테리어등 편리한 시설이 구비되어 포근하고 아늑한 분위기로 이곳을 찾는 이들의 휴식을 취할 수 있다. 레몬트리펜션에서는 배 위에서 바로잡아 올리는 배낚시, 갯벌체험, 바비큐 파티 등을 즐길 수 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "라벤더",
+        "base_capacity": "2",
+        "max_capacity": "4"
+      },
+      {
+        "name": "티파니",
+        "base_capacity": "2",
+        "max_capacity": "4"
+      },
+      {
+        "name": "로즈",
+        "base_capacity": "2",
+        "max_capacity": "4"
+      }
+    ],
+    "room_names": [
+      "라벤더",
+      "티파니",
+      "로즈"
+    ]
+  },
+  {
+    "source_content_id": "1271632",
+    "area_code": "44",
+    "area_name": "충청남도",
+    "name": "빅토리아펜션",
+    "region_code": "44825",
+    "region_name": "태안군",
+    "address": "충청남도 태안군 고남면 큰장돌길 283-42",
+    "address_detail": null,
+    "latitude": 36.4241441,
+    "longitude": 126.3606099,
+    "phone": null,
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/85/4093185_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/85/4093185_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "32170",
+    "homepage_url": null,
+    "description": "빅토리아펜션은 충남 태안군 고남면에 자리한 펜션으로 바쁜 일상에서 벗어나 자연 속에서 편안한 휴식을 즐길 수 있는 공간이다. 깔끔하고 아늑한 객실과 감각적인 인테리어를 갖추고 있으며 가족과 연인, 친구가 함께 머물며 여유로운 시간을 보내기 좋다. 펜션에서는 바비큐 시설을 이용해 특별한 식사를 즐기며 여행의 추억을 더할 수 있다. 넓은 야외 공간과 휴식 시설을 갖춰 자연을 가까이에서 만끽할 수 있으며 여행객의 편의를 위한 다양한 부대시설을 운영한다. 태안의 관광지와 해변으로 이동하기 좋은 입지에 있어 관광과 휴식을 함께 즐기기에 적합한 숙소이다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능요금 (무료)",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "101호",
+        "base_capacity": "4",
+        "max_capacity": "6"
+      },
+      {
+        "name": "102호",
+        "base_capacity": "4",
+        "max_capacity": "8"
+      },
+      {
+        "name": "201호",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      }
+    ],
+    "room_names": [
+      "101호",
+      "102호",
+      "201호"
+    ]
+  },
+  {
+    "source_content_id": "1272708",
+    "area_code": "44",
+    "area_name": "충청남도",
+    "name": "지중해아침펜션",
+    "region_code": "44825",
+    "region_name": "태안군",
+    "address": "충청남도 태안군 고남면 큰장돌길 141-98",
+    "address_detail": null,
+    "latitude": 36.4145065,
+    "longitude": 126.3712063,
+    "phone": "010-6425-8655",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/14/4010114_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/14/4010114_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "32170",
+    "homepage_url": null,
+    "description": "지중해아침펜션은 태안군에 자리한 휴식형 펜션이다. 안면도의 자연 풍경과 이국적인 유럽 감성을 느낄 수 있도록 꾸며진 곳이다. 펜션은 전반적으로 청결하고 정원이 아름다운 공간으로 꾸며져 있으며 곳곳이 사진 포토존처럼 설계되어 여행자에게 시각적 즐거움을 선사한다. 객실은 깨끗하고 안락한 분위기로 정비되어 있어 편안함을 제공한다. 객실 내에는 기본 주방기구와 포근한 침구가 갖춰져 있다. 부대시설로는 실내 온수 수영장과 야외 수영장이 있으며 계절과 날씨에 따라 언제든 이용할 수 있는 시설로 운영된다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "파라다이스1/2/3",
+        "base_capacity": "2",
+        "max_capacity": "4"
+      },
+      {
+        "name": "카리브1/2/3",
+        "base_capacity": "2",
+        "max_capacity": "4"
+      },
+      {
+        "name": "몰디브1/2",
+        "base_capacity": "2",
+        "max_capacity": "3"
+      }
+    ],
+    "room_names": [
+      "파라다이스1/2/3",
+      "카리브1/2/3",
+      "몰디브1/2"
+    ]
+  },
+  {
+    "source_content_id": "1273588",
+    "area_code": "44",
+    "area_name": "충청남도",
+    "name": "숲속의바다펜션",
+    "region_code": "44825",
+    "region_name": "태안군",
+    "address": "충청남도 태안군 이원면 원이로 2170-5",
+    "address_detail": null,
+    "latitude": 36.9173528,
+    "longitude": 126.3014081,
+    "phone": "041-675-1222",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/70/4108970_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/70/4108970_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "32100",
+    "homepage_url": null,
+    "description": "태안에 위치한 숲속의바다펜션은 전 객실 오션뷰로 눈을 뜨면 서해가 펼쳐지는 곳이다. 모든 객실에는 프라이빗 월풀형 욕조와 오션뷰 실내 바비큐장이 완비되어 있으며 가족 맞춤형 공간 구성으로 되어 있어 아이와 함께 방문하기에도 좋다. 바다를 바라보며 즐기는 한 여름의 야외 수영장과 펜션 아래에 위치한 모래사장, 갯벌 등 해안가와 가까이 위치하고 있어 어촌 체험 마을에 방문하기에도 좋은 위치에 있다. 숲속 자연과 조화를 이루는 클래식 스타일의 목조 펜션으로 편안하게 머무르기 좋은 숙소이다.",
+    "checkin_time": "- 성수기 16:00- 비수기 15:00",
+    "checkout_time": "- 성수기 11:00- 비수기 12:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "룸바/란도라/블루문",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "엘르",
+        "base_capacity": "2",
+        "max_capacity": "3"
+      },
+      {
+        "name": "안젤라/사하라/마가렛/로코코",
+        "base_capacity": "2",
+        "max_capacity": "4"
+      }
+    ],
+    "room_names": [
+      "룸바/란도라/블루문",
+      "엘르",
+      "안젤라/사하라/마가렛/로코코"
+    ]
+  },
+  {
+    "source_content_id": "1274868",
+    "area_code": "44",
+    "area_name": "충청남도",
+    "name": "꿈에그린펜션",
+    "region_code": "44825",
+    "region_name": "태안군",
+    "address": "충청남도 태안군 근흥면 신진대교길 94-63",
+    "address_detail": null,
+    "latitude": 36.6768488,
+    "longitude": 126.1479599,
+    "phone": "010-8982-7427",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/88/3577088_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/88/3577088_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "32132",
+    "homepage_url": null,
+    "description": "꿈에그린펜션은 5개 동으로 이루어져 있으며 객실마다 고급스럽고 편안한 분위기의 인테리어로 꾸며져 있다. 각 객실에서는 아름다운 바다가 한눈에 보이며 주방용품과 객실 용품 등 이용하는데 불편함이 없도록 편의 시설이 잘 갖추어져 있다. 서해안의 아름다운 바닷가를 한눈에 바라보며 즐기는 안락한 휴식, 예쁜 바다 정원과 즐거운 야외 바비큐 파티, 이 모든 즐거움이 함께 하는 꿈에 그린 펜션으로 초대한다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "A동 201호 패밀리 스위트",
+        "base_capacity": "6",
+        "max_capacity": "8"
+      },
+      {
+        "name": "A동 202호 더블룸",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "A동 203호 패밀리 더블",
+        "base_capacity": "2",
+        "max_capacity": "4"
+      }
+    ],
+    "room_names": [
+      "A동 201호 패밀리 스위트",
+      "A동 202호 더블룸",
+      "A동 203호 패밀리 더블"
+    ]
+  },
+  {
+    "source_content_id": "127812",
+    "area_code": "44",
+    "area_name": "충청남도",
+    "name": "천안상록리조트",
+    "region_code": "44131",
+    "region_name": "천안시",
+    "address": "충청남도 천안시 동남구 수신면 수신로 576",
+    "address_detail": null,
+    "latitude": 36.7366138,
+    "longitude": 127.2841419,
+    "phone": "041-560-9114",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/60/3067460_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/60/3067460_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "31251",
+    "homepage_url": null,
+    "description": "천안상록리조트는 중부권 최대의 테마파크형 종합휴양 단지이다. 천안 상록 골프장과 숙박시설, 놀이시설과 기타 부대시설이 있다. 숙박시설에는 호텔과 유스호스텔 있으며 놀이시설은 놀이공원, 아쿠아피아 야외 물놀이장, 눈썰매장이 있다. 그 밖에 컨벤션 센터, 식당, 카페, 편의점, 마트, 기념품점 등의 부대시설이 있다. 상록호텔은 한실, 양실, 단체실, 특실 등의 100개 객실을 보유하고 있다. 컨트리클럽은 27홀(18홀 퍼블릭, 9홀) 코스로 국내 골프장 중 가장 코스가 길면서도 업·다운이 적고 페어웨이가 넓기 때문에 편안하게 골프를 즐길 수 있다. 컨벤션 센터는 국제 비즈니스를 위한 최첨단의 동시통역 시설과 단체, 연수, 결혼 및 각종 모임을 완벽하게 치를 수 있다. 여름에는 실외 물놀이장을 겨울에는 눈썰매장을 개장하며, 사계절 즐길 수 있는 놀이공원에는 10여 가지의 놀이시설이 있다. 인근에 독립기념관 및 유관순 생가 등의 역사 깊은 사적지가 많다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "1281934",
+    "area_code": "44",
+    "area_name": "충청남도",
+    "name": "솔뫼마을펜션",
+    "region_code": "44825",
+    "region_name": "태안군",
+    "address": "충청남도 태안군 남면 몽산포길 126",
+    "address_detail": null,
+    "latitude": 36.674768,
+    "longitude": 126.2838329,
+    "phone": "010-6363-8685",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/22/3573622_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/22/3573622_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "32152",
+    "homepage_url": null,
+    "description": "충남 태안군 남면 몽산포해수욕장 근처에 위치한 솔뫼마을펜션은 황토형 펜션과 콘도형으로 이루어진 다양한 평수의 객실이 있는 숙소이다. 울창한 소나무 숲과 몽산포의 깨끗하고 넓은 갯벌은 모래갯벌로 갯벌체험이 가능하며, 인근 몽대 포구에서 청정해역 서해안의 싱싱한 회와 해산물을 맛볼 수도 있다. 해수욕장과 가까이에 위치해 있어 파도 소리를 들으며 휴식을 취할 수 있으며 건강에 좋은 황토형 펜션으로 편안하게 힐링 할 수 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "펜션 101호",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "펜션 105호",
+        "base_capacity": "2",
+        "max_capacity": "4"
+      },
+      {
+        "name": "콘도 101호 / 102호 / 103호",
+        "base_capacity": "4",
+        "max_capacity": "8"
+      }
+    ],
+    "room_names": [
+      "펜션 101호",
+      "펜션 105호",
+      "콘도 101호 / 102호 / 103호"
+    ]
+  },
+  {
+    "source_content_id": "136208",
+    "area_code": "47",
+    "area_name": "경상북도",
+    "name": "한화리조트 경주",
+    "region_code": "47130",
+    "region_name": "경주시",
+    "address": "경상북도 경주시 보문로 182-27 (북군동)",
+    "address_detail": null,
+    "latitude": 35.8597774,
+    "longitude": 129.2694693,
+    "phone": "054-777-8900",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/00/3592400_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/00/3592400_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "38116",
+    "homepage_url": null,
+    "description": "한화리조트 경주는 세계적인 문화유산인 경주 보문 단지의 대표적인 숙박시설이다. 객실은 에톤과 담톤으로 구성되어 있으며, 수영장, 온천사우나, 연회장, 세미나실 등 다양한 부대시설을 갖추고 있다. 객실은 깨끗함과 안락함을 자랑하며, 현대적인 감각에 발맞춰 모던하고 심플하게 꾸며져 있다. 넉넉한 여유를 느낄 수 있는 객실에는 다양한 최신 설비를 갖추고 있으며, 고객을 한 번 더 생각하는 서비스를 통해 편안하게 머무를 수 있도록 모든 편의를 제공하고 있다.",
+    "checkin_time": "- 주말/연휴/성수기 15:00- 비수기 14:00",
+    "checkout_time": "- 주말/연휴/성수기 11:00- 비수기 12:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "[에톤] 디럭스",
+        "base_capacity": "4",
+        "max_capacity": "4"
+      },
+      {
+        "name": "[에톤] 디럭스(호텔형)",
+        "base_capacity": "4",
+        "max_capacity": "4"
+      },
+      {
+        "name": "[에톤] 플래티넘",
+        "base_capacity": "4",
+        "max_capacity": "4"
+      }
+    ],
+    "room_names": [
+      "[에톤] 디럭스",
+      "[에톤] 디럭스(호텔형)",
+      "[에톤] 플래티넘"
+    ]
+  },
+  {
+    "source_content_id": "136485",
+    "area_code": "47",
+    "area_name": "경상북도",
+    "name": "가야호텔",
+    "region_code": "47840",
+    "region_name": "성주군",
+    "address": "경상북도 성주군 수륜면 가야산식물원길 52",
+    "address_detail": null,
+    "latitude": 35.8028577,
+    "longitude": 128.142268,
+    "phone": "054-931-3500",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/32/3549832_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/32/3549832_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "40063",
+    "homepage_url": null,
+    "description": "해발 560m 고지에 위치한 가야호텔은 일체의 오염원으로부터 벗어난 청정지역인 가야산에 자리하고 있다. 천연 알칼리 암반수 사우나 등 천혜의 자연경관을 통해 지친 몸과 마음에 힐링을 할 수 있는 공간이다. 또한 가야산의 야생화를 관람할 수 있는 가야산 야생화 식물원이 바로 앞에 위치하고 있어 도시와는 또 다른 경험을 할 수 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [
+      {
+        "name": "스탠다드 더블",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "스탠다드 온돌",
+        "base_capacity": "2",
+        "max_capacity": "3"
+      },
+      {
+        "name": "패밀리 온돌(일출)",
+        "base_capacity": "4",
+        "max_capacity": "6"
+      }
+    ],
+    "room_names": [
+      "스탠다드 더블",
+      "스탠다드 온돌",
+      "패밀리 온돌(일출)"
+    ]
+  },
+  {
+    "source_content_id": "136641",
+    "area_code": "47",
+    "area_name": "경상북도",
+    "name": "켄싱턴리조트 경주",
+    "region_code": "47130",
+    "region_name": "경주시",
+    "address": "경상북도 경주시 보문로 182-29 (북군동)",
+    "address_detail": null,
+    "latitude": 35.860726,
+    "longitude": 129.2684224,
+    "phone": "1588-9337",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/00/4002600_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/00/4002600_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "38116",
+    "homepage_url": null,
+    "description": "경주 대표 휴양지인 보문관광단지에 위치한 리조트로, 온 가족이 함께 숲 속에서 즐기는 프라이빗 가든 BBQ와 자녀와 함께 여유로운 시간과 체험을 누릴 수 있는 팜빌리지를 갖추고 있다. 또한 리조트 내 애슐리퀸즈와 카페 등 다양한 F&B 시설을 운영하여 편리하고 풍성한 식음 경험을 제공하며, 인근 주요 관광 명소와의 뛰어난 접근성으로 도시가 품은 역사와 자연의 아름다움을 함께 느낄 수 있는 경주 여행의 매력을 완성한다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "그랜드 스위트",
+        "base_capacity": "8",
+        "max_capacity": "9"
+      },
+      {
+        "name": "켄싱턴 주니어 스위트",
+        "base_capacity": "6",
+        "max_capacity": "8"
+      },
+      {
+        "name": "켄싱턴 디럭스 플러스",
+        "base_capacity": "4",
+        "max_capacity": "4"
+      }
+    ],
+    "room_names": [
+      "그랜드 스위트",
+      "켄싱턴 주니어 스위트",
+      "켄싱턴 디럭스 플러스"
+    ]
+  },
+  {
+    "source_content_id": "138363",
+    "area_code": "47",
+    "area_name": "경상북도",
+    "name": "일성 경주보문콘도&리조트",
+    "region_code": "47130",
+    "region_name": "경주시",
+    "address": "경상북도 경주시 보문로 365",
+    "address_detail": null,
+    "latitude": 35.8485715,
+    "longitude": 129.2811255,
+    "phone": "054-744-1199",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/01/2378201_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/01/2378201_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "38116",
+    "homepage_url": null,
+    "description": "'신라 천년의 숨결이 살아있는 예술의 휴양지' 현대와 전통의 아름다운 조화 속에 고품격 레저를 선보이는 '일성 경주보문콘도&리조트' 는 신라 천년의 역사를 한눈에 볼 수 있는 다양한 관광지와 다채로운 행사로 휴양의 또 다른 묘미를 느낄 수 있다.",
+    "checkin_time": "14:00",
+    "checkout_time": "11:00",
+    "parking_info": "주차 가능",
+    "lodging_type": "PENSION",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "138513",
+    "area_code": "47",
+    "area_name": "경상북도",
+    "name": "울릉 대아리조트",
+    "region_code": "47940",
+    "region_name": "울릉군",
+    "address": "경상북도 울릉군 울릉읍 사동1길 43",
+    "address_detail": null,
+    "latitude": 37.4766951,
+    "longitude": 130.8917558,
+    "phone": "054-791-8800",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/10/2726010_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/10/2726010_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "40230",
+    "homepage_url": null,
+    "description": "울릉 대아리조트는 울릉읍 사동리 새각단 관광휴양시설 지구 내에 105,600㎡ 부지 위에 연면적 7,260㎡의 건물과 야외 부대시설을 갖춘 종합관광 휴양시설이다. 전 객실에서 바다와 산을 동시에 조망할 수 있는 경관이다. 또한 목재로 건축되어 이국적이면서 자연친화적인 시설로 되어있다. 해안을 바라보며 자연과 함께하는 산책로가 있고 각종 회의, 연회 행사가 가능한 세미나실이 준비되어 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "10:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "142892",
+    "area_code": "47",
+    "area_name": "경상북도",
+    "name": "힐튼 경주",
+    "region_code": "47130",
+    "region_name": "경주시",
+    "address": "경상북도 경주시 보문로 484-7 (신평동)",
+    "address_detail": null,
+    "latitude": 35.8399133,
+    "longitude": 129.2859477,
+    "phone": "054-745-7788",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/39/4097839_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/39/4097839_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "38117",
+    "homepage_url": null,
+    "description": "세계적인 체인 호텔, 힐튼 경주는 ‘벽 없는 박물관’으로 불리는 경주의 아름다운 보문 호수 옆에 위치한 호텔로써, 신라의 천년 수도인 경주를 둘러보는 출발점이 되어준다. 가족들과 함께 즐거운 시간을 보낼 수 있는 모던하고 안락한 객실과 다양한 레크리에이션 시설이 잘 갖추어져 있으며, 각종 연회와 비즈니스 고객을 위한 연회장과 미팅룸이 준비되어 있다. 이외에도 피트니스센터와 실·내외 수영장, 사우나 등을 갖추고 있으며, 호텔 내에 위치한 우양미술관에서는 세계적으로 유명한 현대미술작품을 만나 볼 수 있다. KTX 경주역에서는 약 30분 정도 소요되며, 부산 김해공항에서는 약 1시간 10분 정도 거리에 위치해 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "142893",
+    "area_code": "47",
+    "area_name": "경상북도",
+    "name": "코오롱호텔",
+    "region_code": "47130",
+    "region_name": "경주시",
+    "address": "경상북도 경주시 불국로 289-17 (마동)",
+    "address_detail": null,
+    "latitude": 35.7873154,
+    "longitude": 129.3227064,
+    "phone": "054-746-9001",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/87/3567587_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/87/3567587_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "38126",
+    "homepage_url": null,
+    "description": "코오롱호텔은 경주를 대표하는 특급호텔이다. 세계문화유산 불국사와 석굴암을 품은 토함산 자락에 위치해 있어 고즈넉한 자연 속에서 품격 있는 휴식을 제공한다. 성곽 형태의 대궐 같은 외관을 자랑하는 경주 코오롱호텔은 중탄산나트륨 사우나, 야외 정원, 골프장, 산책로 시설을 갖추고 있다. 객실 타입이 다양하게 마련되어 있어 취향에 따라 선택할 수 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [
+      {
+        "name": "자미원",
+        "base_capacity": "4",
+        "max_capacity": "4"
+      },
+      {
+        "name": "임페리얼 스위트 2",
+        "base_capacity": "4",
+        "max_capacity": "6"
+      },
+      {
+        "name": "임페리얼 스위트 3",
+        "base_capacity": "4",
+        "max_capacity": "6"
+      }
+    ],
+    "room_names": [
+      "자미원",
+      "임페리얼 스위트 2",
+      "임페리얼 스위트 3"
+    ]
+  },
+  {
+    "source_content_id": "142894",
+    "area_code": "47",
+    "area_name": "경상북도",
+    "name": "코모도호텔 경주",
+    "region_code": "47130",
+    "region_name": "경주시",
+    "address": "경상북도 경주시 보문로 422",
+    "address_detail": null,
+    "latitude": 35.8441888,
+    "longitude": 129.2851058,
+    "phone": "054-740-8100",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/51/1377751_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/51/1377751_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "38117",
+    "homepage_url": null,
+    "description": "경주 보문 단지 중앙에 있는 코모도호텔 경주는 20년이라는 오랜 역사와 전통을 가지고 있다. ‘신라 천 년의 고도, 역사가 살아 숨 쉬는 경주’라는 역사 도시로서의 강점과 불교문화 특유의 독특한 실내/외 디자인 및 인테리어로 사진촬영장소 및 드라마, 영화 촬영 장소로도 쓰였다. 보문호수를 따라 산책로 및 하이킹 코스로도 유명하다. ‘옛사람의 정취 속에서 만나는 따뜻한 가족의 정’, 코모도호텔 경주가 추구하는 고객 감동의 주제이며 서비스 정신이다. 코모도호텔 경주는 국제행사 참가, 방문 및 관광, 비즈니스맨을 위한 편리하고 안락한 휴식 공간을 제공한다. 코모도호텔 경주의 객실은 고풍스러운 멋과 현대적 감각이 어우러진 아늑한 공간으로 고객 여러분의 편안함을 지켜준다. 한식당 ‘아리랑’에서는 우아한 장식과 잘 정돈된 테이블 위에서 한국 전통의 맛과 신라 천 년의 향취, 서비스와 저렴한 가격, 편안함을 맛볼 수 있다. 또 일식당 ‘아사가와’는 언제나 고객에게 가까이 다가가고자 하는 마음으로 엄선되고 신선한 재료만을 사용하여 정통 일식 요리의 진수를 보여줄 것이다. 그뿐만 아니라 코모도호텔경주의 사우나는 천연 온천수로 일상생활에서 쌓였던 스트레스와 피부미용, 성인병 예방에 큰 효과를 줄 것이다.",
+    "checkin_time": "15:00",
+    "checkout_time": "익일 11:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [
+      {
+        "name": "슈페리어 쿼드",
+        "base_capacity": "2",
+        "max_capacity": "0"
+      }
+    ],
+    "room_names": [
+      "슈페리어 쿼드"
+    ]
+  },
+  {
+    "source_content_id": "142898",
+    "area_code": "47",
+    "area_name": "경상북도",
+    "name": "코모도호텔 포항",
+    "region_code": "47111",
+    "region_name": "포항시",
+    "address": "경상북도 포항시 남구 송도로 71 (송도동)",
+    "address_detail": null,
+    "latitude": 36.0346909,
+    "longitude": 129.3779567,
+    "phone": "054-241-1400",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/14/4010614_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/14/4010614_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "37733",
+    "homepage_url": null,
+    "description": "코모도호텔 포항은 경상북도 포항시 송도에 위치하고 있다. 격조 높은 시설과 고급 서비스로 고객에게 편안함을 제공하며 최신식 연회장과 레스토랑, 비즈니스 센터 등 다양한 부대시설을 완비하고 있다. 또한 객실은 다양한 타입을 보유하고 있으며, 아늑하고 고급스러워 편안한 이용이 가능하다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [
+      {
+        "name": "스탠다드 더블",
+        "base_capacity": "2",
+        "max_capacity": "3"
+      },
+      {
+        "name": "스탠다드 트윈",
+        "base_capacity": "2",
+        "max_capacity": "3"
+      },
+      {
+        "name": "스탠다드 패밀리 트윈",
+        "base_capacity": "3",
+        "max_capacity": "4"
+      }
+    ],
+    "room_names": [
+      "스탠다드 더블",
+      "스탠다드 트윈",
+      "스탠다드 패밀리 트윈"
+    ]
+  },
+  {
+    "source_content_id": "142962",
+    "area_code": "47",
+    "area_name": "경상북도",
+    "name": "덕구온천호텔&콘도",
+    "region_code": "47930",
+    "region_name": "울진군",
+    "address": "경상북도 울진군 북면 덕구온천로 924",
+    "address_detail": null,
+    "latitude": 37.0790079,
+    "longitude": 129.2842024,
+    "phone": "054-782-0677",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/39/3503639_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/39/3503639_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "36307",
+    "homepage_url": null,
+    "description": "덕구온천호텔&콘도는 행정자치부가 인정한 국민보양온천이며, 태백산맥 동쪽, 경북 울진군 북면 덕구리에 위치한 응봉산 중턱 4,000여 평의 수려한 자연경관과 어우러져 있는 자연용출온천이다. 국내 최고의 수질을 자랑하는 42.4℃의 약 알칼리 성분을 함유하고 있으며 특히 신경통, 관절염, 근육통, 피부질환, 당뇨병 등 성인병에 뛰어난 효과가 있다. 자연 용출 온천수가 자연으로 뿜어져 나오는 원탕의 광경과 기암괴석 맑은 계곡물 등 천하절경의 아름다운 협곡으로 이루어져 찾는 분의 탄성을 자아내는 곳이기도 하다. 최고의 가치와 품위를 지켜드리며 최상의 서비스로 최선을 다해 고객을 모시고 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [
+      {
+        "name": "[호텔] 스탠다드 온돌",
+        "base_capacity": "2",
+        "max_capacity": "4"
+      },
+      {
+        "name": "[호텔] 스탠다드 트윈",
+        "base_capacity": "2",
+        "max_capacity": "3"
+      },
+      {
+        "name": "[호텔] 스위트 프리미어",
+        "base_capacity": "3",
+        "max_capacity": "5"
+      }
+    ],
+    "room_names": [
+      "[호텔] 스탠다드 온돌",
+      "[호텔] 스탠다드 트윈",
+      "[호텔] 스위트 프리미어"
+    ]
+  },
+  {
+    "source_content_id": "136211",
+    "area_code": "48",
+    "area_name": "경상남도",
+    "name": "일성부곡온천콘도&리조트",
+    "region_code": "48740",
+    "region_name": "창녕군",
+    "address": "경상남도 창녕군 부곡면 온천로 594",
+    "address_detail": null,
+    "latitude": 35.4364712,
+    "longitude": 128.58783,
+    "phone": null,
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/06/2372106_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/06/2372106_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "50365",
+    "homepage_url": null,
+    "description": "자연이 내린 최고의 축복된 공간인 부곡온천리조트는 다양한 레저타운과 편의시설로 최고의 기쁨과 편안함을 고객에게 제공한다. 대자연의 아름다움을 만끽하며 휴식을 즐길 수 있고 , 저녁 노을이 아름다운 영취산 분지에 자리 잡고 있다.",
+    "checkin_time": "14:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "136213",
+    "area_code": "48",
+    "area_name": "경상남도",
+    "name": "금호통영마리나리조트",
+    "region_code": "48220",
+    "region_name": "통영시",
+    "address": "경상남도 통영시 큰발개1길 33",
+    "address_detail": "(도남동)",
+    "latitude": 34.8275792,
+    "longitude": 128.4401047,
+    "phone": "055-643-8000",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/05/4125005_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/05/4125005_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "53079",
+    "homepage_url": null,
+    "description": "금호통영마리나리조트는 통영 미륵도관광특구안에 있는 국내 최초의 육·해상 종합 리조트이다. 마리나란 해안가에 방파제 등을 쌓아 파도가 없는 구역을 확보하고 그곳에 요트를 정박시킬 수 있는 시설과 육상에 요트를 타는데 필요한 모든 시설을 갖춘 요트 전용 항구를 뜻하는 말로 금호통영마리나리조트에서는 고품격 객실과 요트시설을 즐길 수 있다. 지상 15층에 4인부터 10인까지 수용 가능한 다양한 크기의 객실을 보유하고 있으며 연회장, 다이닝, 카페, 사우나, 편의점, 노래연습장, 볼링장, 당구장, 탁구장, 오락실 등의 부대시설을 보유하고 있어 남녀노소 누구나 리조트에서의 시간을 즐길 수 있다.",
+    "checkin_time": "14:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "1365261",
+    "area_code": "48",
+    "area_name": "경상남도",
+    "name": "달그리고강",
+    "region_code": "48170",
+    "region_name": "진주시",
+    "address": "경상남도 진주시 대평면 호반로 405",
+    "address_detail": null,
+    "latitude": 35.1596264,
+    "longitude": 127.9911907,
+    "phone": "010-5297-3571",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/93/3575193_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/93/3575193_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "52643",
+    "homepage_url": null,
+    "description": "서정적인 이름을 가진 펜션 달그리고강은 진양호에 비친 달이 너무 아름다워 이름을 이처럼 지었다고 한다. 처음에는 카페로 시작했다가 점차 펜션 건물을 지으면서 어느덧 총 10개의 객실을 갖춘 규모 있는 펜션으로 변모하여 오늘에 이르렀다. 이름에서 느껴지듯 자연친화적인 펜션을 표방하였다. 100% 순수 황토와 소나무를 사용한 것도 그 이유다. 황토가 신진대사를 원활하게 하고 만성피로 해소 등에 효과적인 것은 널리 알려진 사실. 피로가 심한 도시인들이라면 특히 반가워할 만하다. 여기에 누구나 이곳을 한눈에 반하게 만드는 것이 바로 호숫가에 조성된 산책로다. 이후 이것을 더욱 확대하여 펜션을 한 바퀴 에두르는 둘레길로 만들 예정이라고 한다. 아늑한 호수를 유유히 산책을 즐기고 저녁에는 황토 방에서 꿀 같은 단잠을 즐기는 100% 휴식이라면 그 어느 곳도 부럽지 않을 듯하다. 규모가 큰 만큼 여러 가지 즐길 거리도 풍부하다. 우선 족구장과 작은 골프 연습장이 마련되어 있고 펜션 자체가 정원이라고 해도 될 만큼 꽃과 나무가 많다. 객실별로 바비큐 시설이 마련되었고 온실에선 분재를 감상할 수 있으며 자전거를 타고 진양호를 만끽할 수도 있다. 잔디밭에 마련된 야외무대는 단체 손님들도 사용 가능하다. 객실은 깨끗하게 관리되며 수련, 물망초, 진달래, 들국화, 봉선화, 수선화 객실은 침실이 2층에 따로 있어 편안한 분위기를 더한다.",
+    "checkin_time": "14:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "105호",
+        "base_capacity": "7",
+        "max_capacity": "8"
+      },
+      {
+        "name": "106호",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      }
+    ],
+    "room_names": [
+      "105호",
+      "106호"
+    ]
+  },
+  {
+    "source_content_id": "1369549",
+    "area_code": "48",
+    "area_name": "경상남도",
+    "name": "해모로펜션",
+    "region_code": "48840",
+    "region_name": "남해군",
+    "address": "경상남도 남해군 미조면 미송로 7",
+    "address_detail": null,
+    "latitude": 34.7156047,
+    "longitude": 128.043253,
+    "phone": "055-867-0331",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/40/3476240_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/40/3476240_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "52442",
+    "homepage_url": null,
+    "description": "해모로펜션은 미조항의 고요한 전경을 마음껏 감상할 수 있는 편안한 숙박시설이다. 탁 트인 남해의 풍경을 방 어느 곳에서나 감상할 수 있고 아침마다 발코니 너머로 펼쳐지는 아름다운 일출의 감동을 느낄 수 있다. 총 8개의 객실이 있으며 1층에는 향기로운 차를 마실 수 있는 찻방이 마련되어 있다. 숙소 바로 앞에 배가 정박하는 선착장과 조용하게 남해 바다를 감상할 수 있는 공원, 정자가 있어 관광객이 많이 찾는다. 또 인근에 농협 지점, 농협마트, 낚시용구점, 미조 어판장 등 편의시설이 있어 여행객이 머물기 편리하다. 남해 금산, 천연기념물인 방조어부림, 상주와 송정솔바람해수욕장 등의 관광명소와도 가깝다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "201호/301호",
+        "base_capacity": "5",
+        "max_capacity": "5"
+      },
+      {
+        "name": "202호/302호",
+        "base_capacity": "4",
+        "max_capacity": "4"
+      },
+      {
+        "name": "203호/303호",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      }
+    ],
+    "room_names": [
+      "201호/301호",
+      "202호/302호",
+      "203호/303호"
+    ]
+  },
+  {
+    "source_content_id": "1373262",
+    "area_code": "48",
+    "area_name": "경상남도",
+    "name": "연우펜션",
+    "region_code": "48850",
+    "region_name": "하동군",
+    "address": "경상남도 하동군 화개면 화개로 1433",
+    "address_detail": null,
+    "latitude": 35.2892327,
+    "longitude": 127.645767,
+    "phone": null,
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/99/4004399_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/99/4004399_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "52300",
+    "homepage_url": null,
+    "description": "전라도와 경상도를 가로지르는 화개 장터에서 쌍계사를 지나 직진하면 의신마을이 나오고 이어 화개계곡을 지나면 의신계곡이 나온다. 그곳에 자리한 연우펜션은 물 맑고 공기 좋은, 한마디로 청정 펜션이다. 도시에서는 결코 느낄 수 없는 맑은 공기를 깊게 들이마시며 펜션 안으로 들어가면 주인이 마치 산 사람 같은 순박한 표정으로 반갑게 맞이해 준다. 마산이 고향인 주인은 정년퇴직 후 펜션 사업을 하려 여러 곳을 다니다 지인의 소개로 이곳에 터를 잡았다. 그는 펜션을 운영하면서 산이 더 좋아졌고 거의 매일 지리산에 오른다고 한다. 주인은 하룻밤이라도 손님들이 맑은 공기 속에서 쉬고 갈 수 있도록 전체 객실을 황토와 숯으로 도배했다. 각 룸은 취사 시설을 갖추고 있으며 고기를 구울 때 필요한 강원도 참숯도 유료로 제공된다. 3층으로 올라가니 의신계곡이 한눈에 들어온다. 가슴이 탁 트이는 느낌이다. 의신마을을 따라 흐르는 의신계곡은 여름에 온 가족이 함께 물놀이를 즐기기에 안성맞춤이다. 더불어 부담 없이 다녀올 수 있는 벽소령(2시간 코스) 트레킹 코스도 추천한다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "참나리",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "고욤/국화",
+        "base_capacity": "5",
+        "max_capacity": "6"
+      },
+      {
+        "name": "뽕잎",
+        "base_capacity": "5",
+        "max_capacity": "6"
+      }
+    ],
+    "room_names": [
+      "참나리",
+      "고욤/국화",
+      "뽕잎"
+    ]
+  },
+  {
+    "source_content_id": "137799",
+    "area_code": "48",
+    "area_name": "경상남도",
+    "name": "온천호텔사우나",
+    "region_code": "48850",
+    "region_name": "하동군",
+    "address": "경상남도 하동군 화개면 화개로 413",
+    "address_detail": null,
+    "latitude": 35.2208031,
+    "longitude": 127.6383004,
+    "phone": "010-4215-2182",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/08/4126208_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/08/4126208_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "52303",
+    "homepage_url": null,
+    "description": "하동 최고의 시설을 자랑하는 온천호텔사우나는 유황 광천수로 온천을 즐길 수 있는 곳이다. 객실 내부는 편백나무로 마감되어 있으며, 항상 청결한 객실을 유지하고 있다. 욕장 또한 새물로 교체를 하고 있으며, 소독도 필수로 하고 있다.",
+    "checkin_time": "17:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [
+      {
+        "name": "특실",
+        "base_capacity": "0",
+        "max_capacity": "0"
+      },
+      {
+        "name": "일반실",
+        "base_capacity": "0",
+        "max_capacity": "0"
+      },
+      {
+        "name": "편백 A",
+        "base_capacity": "0",
+        "max_capacity": "0"
+      }
+    ],
+    "room_names": [
+      "특실",
+      "일반실",
+      "편백 A"
+    ]
+  },
+  {
+    "source_content_id": "138724",
+    "area_code": "48",
+    "area_name": "경상남도",
+    "name": "백무산장 황토방 펜션",
+    "region_code": "48870",
+    "region_name": "함양군",
+    "address": "경상남도 함양군 마천면 백무동로 321",
+    "address_detail": null,
+    "latitude": 35.3622719,
+    "longitude": 127.6804118,
+    "phone": "055-962-5277",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/10/3567310_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/10/3567310_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "50057",
+    "homepage_url": null,
+    "description": "백무산장 황토방 펜션은 경상남도 함양군 마천면 백무동로 321에 위치한 숙박 시설이다. 이 펜션은 지리산 백무동 한신계곡 인근에 자리 잡고 있으며, 탐방객의 편의 도모를 목적으로 운영되고 있다. 숙소는 복층형을 포함한 다양한 객실 타입을 보유하고 있으며, 모든 객실에는 에어컨, 전용 욕실, 냉장고, 전자레인지, 전기 주전자 등이 구비되어 있다. 무료 Wi-Fi 이용이 전 객실에서 가능하다. 이곳은 계곡 인접 숙소이며, 백무동 계곡까지는 도보로 2~5분 내 거리에 있다. 부대시설로는 야외 바비큐장이 마련되어 있으며, 이용은 사전 예약 필수이다. 펜션 내 주차가 가능하다. 백무산장 황토방 펜션은 지리산의 맑고 시원한 자연을 느낄 수 있는 환경이다. 주변 관광지로는 뱀사골, 지리산 조망공원, 서암정사 등이 있다. 체크인은 오후 2시부터 오후 10시까지이며, 체크아웃은 오전 11시까지이다. 반려동물 동반 입실은 불가능하다.",
+    "checkin_time": "14:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "201호(원룸형)",
+        "base_capacity": "2",
+        "max_capacity": "4"
+      },
+      {
+        "name": "202호(원룸형)",
+        "base_capacity": "2",
+        "max_capacity": "5"
+      },
+      {
+        "name": "203호(원룸형)",
+        "base_capacity": "2",
+        "max_capacity": "5"
+      }
+    ],
+    "room_names": [
+      "201호(원룸형)",
+      "202호(원룸형)",
+      "203호(원룸형)"
+    ]
+  },
+  {
+    "source_content_id": "138764",
+    "area_code": "48",
+    "area_name": "경상남도",
+    "name": "카리브콘도호텔",
+    "region_code": "48220",
+    "region_name": "통영시",
+    "address": "경상남도 통영시 도남로 257-29 (도남동)",
+    "address_detail": null,
+    "latitude": 34.8293861,
+    "longitude": 128.4322894,
+    "phone": null,
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/70/3476370_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/70/3476370_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "53079",
+    "homepage_url": null,
+    "description": "카리브콘도호텔은 동양의 나폴리인 통영시 도남관광단지 내에 있는 콘도형 호텔로, 바다와 관광단지에 인접하여 관광객에게 최고의 휴식공간이다. 총 43개의 객실을 보유하고 있으며 객실 내부를 할로겐 조명과 거울을 이용해 장식했다. 여유롭고 쾌적한 공간의 객실을 운영하며 특히 객실 모두가 다른 디자인으로 방문할 때마다 늘 새로운 분위기를 느낄 수 있다고 한다. 단체 위주의 여행객과 대학생 MT, 가족, 친구, 연인들 모두에게 어울리는 숙박시설이다. 호텔 로비에서 시원한 바다 전경을 볼 수 있다. 인근에는 충렬사, 해저터널, 한려해상국립공원, 전혁림미술관, 미륵산, 달아공원, 통영수산과학관, 한산도 이충무공 유적 등이 있다.",
+    "checkin_time": "- 비수기 15:00- 성수기/연휴 16:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "138964",
+    "area_code": "48",
+    "area_name": "경상남도",
+    "name": "트로피칼드림 스파리조트",
+    "region_code": "48310",
+    "region_name": "거제시",
+    "address": "경상남도 거제시 일운면 망양1길 16",
+    "address_detail": null,
+    "latitude": 34.815532,
+    "longitude": 128.6697947,
+    "phone": "055-681-5550",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/56/3592356_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/56/3592356_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "53329",
+    "homepage_url": null,
+    "description": "트로피칼드림 스파리조트는 따뜻한 바다와 싱그러운 야자수가 있는 이국적인 모습의 리조트형 펜션으로 거제도 해상국립공원의 아름다운 자연 속에 위치해 있다. 스파 카라반은 국내 최초로 트로피칼 드림이 자체 개발한 실내에 스파가 있는 카라반으로 거제도 해금강 청정해역을 바라보며 로맨틱한 분위기에서 스파를 즐길 수 있다. 각 객실에는 스파, 월풀, 노천탕이 있고 별장식 펜션으로 구성되어 있으며 모든 객실에서 한려해상국립공원의 에메랄드빛 바다가 훤히 내려다보인다. 이벤트를 원하는 고객을 위하여 객실 내 풍선 장식, 레드와인, 웰빙스파, 웨버 바비큐 그릴 등 유료 서비스를 제공하고 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "파파야",
+        "base_capacity": "2",
+        "max_capacity": "4"
+      },
+      {
+        "name": "코코넛",
+        "base_capacity": "2",
+        "max_capacity": "4"
+      },
+      {
+        "name": "아보카도",
+        "base_capacity": "2",
+        "max_capacity": "4"
+      }
+    ],
+    "room_names": [
+      "파파야",
+      "코코넛",
+      "아보카도"
+    ]
+  },
+  {
+    "source_content_id": "1348840",
+    "area_code": "50",
+    "area_name": "제주특별자치도",
+    "name": "예래펜션",
+    "region_code": "50130",
+    "region_name": "서귀포시",
+    "address": "제주특별자치도 서귀포시 예래해안로 527 (상예동)",
+    "address_detail": null,
+    "latitude": 33.2539654,
+    "longitude": 126.4002456,
+    "phone": "010-9744-7768",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/62/1933462_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/62/1933462_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "63536",
+    "homepage_url": null,
+    "description": "예래펜션은 발코니에서 바라보는 제주 먼바다와 한라산 정경이 수려하고 인근이 절대 개발 불가 지역으로서 자연이 잘 보호되어 있다. 중문 해변까지 차로 4분 거리, 중문 관광단지 2분 거리이며 주상절리, 자동차 박물관 등 각종 박물관과 및 올레 8코스가 통과한다. 편의 시설로는 취사가 가능하고 객실마다 인터넷 선 및 홀에서는 pc, 무선인터넷, 와이파이가 가능하다. 마을 용천수가 나오는 곳이 있어 한여름에 시원한 목욕을 즐길 수 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "136453",
+    "area_code": "50",
+    "area_name": "제주특별자치도",
+    "name": "썬랜드 호텔",
+    "region_code": "50110",
+    "region_name": "제주시",
+    "address": "제주특별자치도 제주시 신광로 92",
+    "address_detail": null,
+    "latitude": 33.4839671,
+    "longitude": 126.4895584,
+    "phone": "064-744-1601",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/07/4145907_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/07/4145907_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "63132",
+    "homepage_url": null,
+    "description": "푸른 바다와 천혜의 자연히 살아 숨쉬는 아름다운 섬, 썬래드호텔은 제주 시내 중심에 위치하여 관광과 쇼핑의 메카라 불릴 수 있는 현대식으로 꾸며진 최고급 객실을 비롯한 편리하고 아름다운 호텔로서 최고의 서비스와 정성으로 고객의 편안하고 즐거운 여정을 위해 최선을 다하고 있다. 아름다운 제주 바다의 밤하늘과 정정한 자연의 푸르름이 묻어나는 호텔에서 편안한 휴식을 취할 수 있다.",
+    "checkin_time": "16:00",
+    "checkout_time": "11:00",
+    "parking_info": "불가능",
+    "lodging_type": "HOTEL",
+    "rooms": [
+      {
+        "name": "디럭스",
+        "base_capacity": "0",
+        "max_capacity": "0"
+      },
+      {
+        "name": "프리미엄 트윈",
+        "base_capacity": "0",
+        "max_capacity": "0"
+      },
+      {
+        "name": "패밀리 트윈",
+        "base_capacity": "0",
+        "max_capacity": "0"
+      }
+    ],
+    "room_names": [
+      "디럭스",
+      "프리미엄 트윈",
+      "패밀리 트윈"
+    ]
+  },
+  {
+    "source_content_id": "137476",
+    "area_code": "50",
+    "area_name": "제주특별자치도",
+    "name": "토비스콘도 제주",
+    "region_code": "50110",
+    "region_name": "제주시",
+    "address": "제주특별자치도 제주시 애월읍 애월로1길 8",
+    "address_detail": null,
+    "latitude": 33.4631306,
+    "longitude": 126.3117199,
+    "phone": null,
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/08/2650208_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/08/2650208_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "63043",
+    "homepage_url": null,
+    "description": "토비스콘도 제주는 애월의 한담해변(패들보드, 서핑, 스쿠버, 카약)에 있는 전통 있는 휴양콘도이다. 이곳은 올레길이나 라이딩코스와 이어져 있고 전지훈련, 수학여행, 기업 연수 등의 편리한 입지조건을 가지고 있다. 가성비 숙소라 제주도에 잠시 있다가 가는 관광객, 한달살이를 하는 방문객들도 많이 찾는 숙소이다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "137788",
+    "area_code": "50",
+    "area_name": "제주특별자치도",
+    "name": "서귀포 귤림성",
+    "region_code": "50130",
+    "region_name": "서귀포시",
+    "address": "제주특별자치도 서귀포시 일주동로 8941 (호근동)",
+    "address_detail": null,
+    "latitude": 33.2502911,
+    "longitude": 126.5360076,
+    "phone": "064-739-3331",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/45/3569245_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/45/3569245_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "63571",
+    "homepage_url": null,
+    "description": "자연 친화형 휴양 펜션인 서귀포 귤림성은 천혜의 자연환경을 더 많은 이들과 함께 나누고자 시작하게 되었다. 1만여 평의 대지에 제주의 야생화와 석부작을 대대로 조성된 공원과 친환경 원목 펜션은 복잡한 도심을 떠나 진정한 휴식을 얻고자 하는 여러분께 다양한 힐링의 시간을 선사한다.",
+    "checkin_time": "14:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "콘도형 15평형",
+        "base_capacity": "2",
+        "max_capacity": "4"
+      },
+      {
+        "name": "미국식목조형 15평형",
+        "base_capacity": "2",
+        "max_capacity": "4"
+      },
+      {
+        "name": "통나무형 17평형",
+        "base_capacity": "2",
+        "max_capacity": "4"
+      }
+    ],
+    "room_names": [
+      "콘도형 15평형",
+      "미국식목조형 15평형",
+      "통나무형 17평형"
+    ]
+  },
+  {
+    "source_content_id": "137814",
+    "area_code": "50",
+    "area_name": "제주특별자치도",
+    "name": "제주 금강산콘도",
+    "region_code": "50110",
+    "region_name": "제주시",
+    "address": "제주특별자치도 제주시 한림읍 협재로 210-18",
+    "address_detail": null,
+    "latitude": 33.379556,
+    "longitude": 126.2502553,
+    "phone": "064-795-7800",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/65/1341265_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/65/1341265_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "63015",
+    "homepage_url": null,
+    "description": "제주 금강산콘도는 전원형 별장식 휴양 콘도미니엄으로서 천혜의 자연경관을 이용한 전원속의 빌라 형태로 내장 시설과 시스템을 갖춘 한 차원 높은 미래형 콘도이다. 제주도 내 재릉 관광단지인 협재해수욕장 인근에 위치한 콘도는 천연 자연경관을 그대로 살린 전원 별장형 콘도로서 제주도 내 콘도 중 최고 수준의 콘도를 목표로 완성된 콘도이다. 한림공원, 분재예술원, 비양도, 쌍룡굴 등 다양한 관광명소를 갖추고 있어 방문한 고객들로부터 큰 호평을 받고 있다. 객실은 고객이 만족할 수 있도록 안락하고 편안하게 꾸며져 있으며 작은 소품 하나에도 세심한 정성을 다한 흔적이 역력하다. 피곤한 몸과 마음을 쉬어갈 수 있는 비즈니스맨과 관광객에게 최고의 호텔로 다가갈 것이다. 콘도 내의 부대시설로는 수영장, 슈퍼마켓, 야외행사장 등이 마련되어 있으며 모든 편리함이 갖추어진 최신 설비와 고객의 취향을 만족시켜주는 최상의 서비스를 통해 편안하고 안락하게 지내실 수 있도록 모든 편의를 제공하고 있다. 고객 여러분의 안락한 휴식과 품위 유지를 위해 전 직원들이 항상 최선을 다하며 정성된 마음으로 다가가고자 끊임없이 노력하고 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "27평형",
+        "base_capacity": "5",
+        "max_capacity": "5"
+      }
+    ],
+    "room_names": [
+      "27평형"
+    ]
+  },
+  {
+    "source_content_id": "137826",
+    "area_code": "50",
+    "area_name": "제주특별자치도",
+    "name": "라운지하우스 제주다",
+    "region_code": "50130",
+    "region_name": "서귀포시",
+    "address": "제주특별자치도 서귀포시 안덕면 사계남로50번길 60",
+    "address_detail": null,
+    "latitude": 33.2232499,
+    "longitude": 126.2926715,
+    "phone": "064-792-5670",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/06/4105706_image2_1.png",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/06/4105706_image3_1.png",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "63528",
+    "homepage_url": null,
+    "description": "라운지하우스 제주다는 제주도의 자연과 감성이 어우러진 동남아풍 감성 펜션이다. 사계해변과 산방산, 마라도 인근에 위치해 주변 관광지를 둘러보기 좋으며, 아침에는 창밖으로 따스한 제주 햇살을 맞이하고 저녁에는 수많은 별을 바라보며 여유로운 휴식을 즐길 수 있다. 별빛이 쏟아지는 잔디에서는 바비큐 파티를 즐길 수 있으며, 음악과 책을 함께하며 좋은 사람들과 이야기를 나누고 추억을 만들기에도 좋다. 사계해변이 도보 3분 거리에 있어 해변을 가볍게 산책하기에도 좋다.",
+    "checkin_time": "17:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "138184",
+    "area_code": "50",
+    "area_name": "제주특별자치도",
+    "name": "해비치 호텔&리조트 제주",
+    "region_code": "50130",
+    "region_name": "서귀포시",
+    "address": "제주특별자치도 서귀포시 표선면 민속해안로 537",
+    "address_detail": null,
+    "latitude": 33.3214834,
+    "longitude": 126.844732,
+    "phone": "064-780-8000",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/58/3520858_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/58/3520858_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "63629",
+    "homepage_url": null,
+    "description": "해비치 호텔&리조트 제주는 현대자동차그룹의 대표적인 호스피탈리티 계열사로, ‘해가 처음 비추는 곳’이라는 뜻을 지닌 종합 휴양 리조트이다. 제주의 민속 문화와 자연이 잘 보존된 표선에 위치하며, 288실의 호텔과 215실의 리조트로 구성되어 있다. 전체 503개 객실 중 대부분이 오션뷰로, 넓은 객실을 보유하고 있다. 프렌치 파인 다이닝을 포함한 8개의 레스토랑과 바, 사계절 이용 가능한 실내외 수영장 세 곳, 피트니스, 스파, 100평 규모의 라운지, 오락 공간 등 다양한 부대 시설을 갖추고 있다. 골프장은 한라산과 바다를 조망하며 사계절 내내 플레이가 가능하다. 또한 총 네 개의 대소 연회장에서 다양한 회의와 행사를 개최할 수 있으며, 제주 평화 포럼을 비롯한 국제적인 대형 행사들이 열린 바 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [
+      {
+        "name": "클래식 스위트",
+        "base_capacity": "4",
+        "max_capacity": "6"
+      },
+      {
+        "name": "그랜드 스위트",
+        "base_capacity": "4",
+        "max_capacity": "6"
+      },
+      {
+        "name": "마스터 스위트",
+        "base_capacity": "4",
+        "max_capacity": "6"
+      }
+    ],
+    "room_names": [
+      "클래식 스위트",
+      "그랜드 스위트",
+      "마스터 스위트"
+    ]
+  },
+  {
+    "source_content_id": "138185",
+    "area_code": "50",
+    "area_name": "제주특별자치도",
+    "name": "금호리조트 제주",
+    "region_code": "50130",
+    "region_name": "서귀포시",
+    "address": "제주특별자치도 서귀포시 남원읍 태위로 522-12",
+    "address_detail": null,
+    "latitude": 33.2740041,
+    "longitude": 126.7030721,
+    "phone": "064-766-8000",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/67/3024967_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/67/3024967_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "63620",
+    "homepage_url": null,
+    "description": "금호리조트 제주는 남원관광단지에 위치해 있으며 초원과 해안절벽을 끼고 세워졌다. 서귀포에서 동측 방향으로 15km, 표선으로부터 서남방향으로 5km 지점에 위치하고지점에 있어 서귀포 중문 관광단지와 제주민속촌, 성산일출봉 등 풍부한 주변관광지를 가지고 있다. 로얄스위트룸을 포함한 5가지, 총 320여개의 객실이 있으며 객실에 따라 양실, 한실을 선택할 수 있다. 주변 관광지로는 큰엉해안경승지, 코코몽에코파크, 신영영화박물관, 표선해수욕장 등이 있고, 제주국제공항으로부터 승용차로 약 1시간 소요된다.",
+    "checkin_time": "14:00~22:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "138195",
+    "area_code": "50",
+    "area_name": "제주특별자치도",
+    "name": "한화리조트 제주",
+    "region_code": "50110",
+    "region_name": "제주시",
+    "address": "제주특별자치도 제주시 명림로 575-107",
+    "address_detail": null,
+    "latitude": 33.4488263,
+    "longitude": 126.6380538,
+    "phone": "064-725-9000",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/10/4145510_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/10/4145510_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "63330",
+    "homepage_url": null,
+    "description": "한화리조트 제주는 43 평화공원, 노루생태관찰원 맞은편에 있는 콘도미니엄으로 주변에 절물자연휴양림 등 볼거리가 많고 가을이면 특히 리조트 주변의 억새밭이 아름답다. 다양한 부대시설이 마련되어 있으며 넉넉한 여유를 느낄 수 있는 객실에는 다양한 최신 설비를 갖추고 있다. 고객을 한 번 더 생각하는 서비스를 통해 편안하게 머무를 수 있도록 모든 편의를 제공하고 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "디럭스멍패커",
+        "base_capacity": "4",
+        "max_capacity": "4"
+      },
+      {
+        "name": "디럭스 원룸",
+        "base_capacity": "4",
+        "max_capacity": "4"
+      },
+      {
+        "name": "디럭스 투룸",
+        "base_capacity": "4",
+        "max_capacity": "4"
+      }
+    ],
+    "room_names": [
+      "디럭스멍패커",
+      "디럭스 원룸",
+      "디럭스 투룸"
+    ]
+  },
+  {
+    "source_content_id": "139008",
+    "area_code": "50",
+    "area_name": "제주특별자치도",
+    "name": "비치스토리호텔",
+    "region_code": "50110",
+    "region_name": "제주시",
+    "address": "제주특별자치도 제주시 조천읍 조함해안로 492-5",
+    "address_detail": null,
+    "latitude": 33.5421216,
+    "longitude": 126.665397,
+    "phone": "064-784-7400",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/86/2596486_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/86/2596486_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "63333",
+    "homepage_url": null,
+    "description": "비치스토리호텔은 함덕해수욕장 앞에 위치하여 제주의 바다를 매순간 누릴 수 있다. 객실은 트윈, 더블, 온돌로 구성되었고 깔끔하게 관리된다. 호텔 앞 조함해안로에서 해안 경치를 감상하며 드라이브를 즐기기에 좋고, 서우봉과 제주올레길 19코스를 산책하기에도 좋다. 근처에 유명한 카페델문도가 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "1122064",
+    "area_code": "51",
+    "area_name": "강원특별자치도",
+    "name": "강가에 하얀집 펜션",
+    "region_code": "51750",
+    "region_name": "영월군",
+    "address": "강원특별자치도 영월군 영월읍 선돌길 83-9",
+    "address_detail": null,
+    "latitude": 37.1788016,
+    "longitude": 128.4347723,
+    "phone": "033-373-1139",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/77/4010077_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/77/4010077_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "26226",
+    "homepage_url": null,
+    "description": "영월 읍내에 가까이 위치한 강가에 하얀집 펜션은 영월 IC에서 3분 거리, 청령포 2분 거리, 하이원스키장 및 정선 5일장 30분 거리에 있으며 펜션 앞에는 깨끗한 강이 있고 강에서 물놀이, 다슬기 잡기, 낚시 등이 가능하다. 강 건너에 태백선 기찻길과 숲이 우거진 산 및 운치 있는 산책로가 있는 유럽풍 목조펜션으로 전 객실이 강변을 바라보고 있어 경치가 아름답고 좋은 추억을 만들 수 있는 펜션이다.",
+    "checkin_time": "14:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "101호 햇님",
+        "base_capacity": "5",
+        "max_capacity": "7"
+      },
+      {
+        "name": "102호 달님",
+        "base_capacity": "5",
+        "max_capacity": "7"
+      },
+      {
+        "name": "201호 햇님",
+        "base_capacity": "2",
+        "max_capacity": "4"
+      }
+    ],
+    "room_names": [
+      "101호 햇님",
+      "102호 달님",
+      "201호 햇님"
+    ]
+  },
+  {
+    "source_content_id": "1266427",
+    "area_code": "51",
+    "area_name": "강원특별자치도",
+    "name": "향기나라 사랑이 펜션",
+    "region_code": "51790",
+    "region_name": "화천군",
+    "address": "강원특별자치도 화천군 사내면 화악산로 938-14",
+    "address_detail": null,
+    "latitude": 38.0576832,
+    "longitude": 127.5324641,
+    "phone": "010-3834-3476",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/50/1849150_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/50/1849150_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "24158",
+    "homepage_url": null,
+    "description": "향기나라 사랑이 펜션은 하얀 건물과 잘 정돈된 야외 정원이 깔끔한 유럽식 펜션으로, 삼일계곡으로 가는 길 옆 곡운구곡 8곡의 절경을 볼 수 있는 곳에 위치해 있다. 허브농장을 겸하고 있어 허브향이 온 펜션을 감싸며 기분을 좋아지게 만드는 곳이다. 야외엔 여러 개의 테이블이 있어 휴식을 취하기 좋으며 바비큐 시설도 갖추고 있다. 모든 객실은 취사시설과 목욕시설, 인터넷을 사용할 수 있다.",
+    "checkin_time": "14:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "사랑이방(본관)",
+        "base_capacity": "4",
+        "max_capacity": "4"
+      },
+      {
+        "name": "은방울꽃방(본관)",
+        "base_capacity": "4",
+        "max_capacity": "4"
+      },
+      {
+        "name": "백합향기방(본관)",
+        "base_capacity": "4",
+        "max_capacity": "6"
+      }
+    ],
+    "room_names": [
+      "사랑이방(본관)",
+      "은방울꽃방(본관)",
+      "백합향기방(본관)"
+    ]
+  },
+  {
+    "source_content_id": "126715",
+    "area_code": "51",
+    "area_name": "강원특별자치도",
+    "name": "모나용평",
+    "region_code": "51760",
+    "region_name": "평창군",
+    "address": "강원특별자치도 평창군 대관령면 올림픽로 715",
+    "address_detail": null,
+    "latitude": 37.6457736,
+    "longitude": 128.6804994,
+    "phone": "033-335-5757",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/87/4096887_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/87/4096887_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "25352",
+    "homepage_url": null,
+    "description": "강원 평창군의 명산인 발왕산 기슭에 위치한 리조트로 ‘한국 스키의 메카’로 불린다. 1975년 한국 최초로 스키장을 개장했고, 아시아에서 두 번째로 국제스키연맹(FIS)으로부터 국제대회 개최가 가능한 수준으로 공인받았다. 리조트가 들어선 대관령면은 연평균 적설량이 250㎝에 달하고 겨울이 길어 자연설이 쌓인 슬로프에서 스키를 즐길 수 있다. 스키장 외에도 호텔과 콘도, 골프장, 워터파크, 발왕산 관광케이블카 등 다채로운 시설을 갖췄다. 모나용평이 자리한 해발 1,458m의 발왕산은 희귀목과 야생화가 살아가는 훌륭한 생태 여행지다. 발왕산의 아름다운 자연을 만끽할 수 있는 다양한 웰니스 프로그램을 운영한다. 숲해설가에게 산과 희귀 나무에 관한 이야기 듣기, 티베트의 명상 도구인 싱잉볼을 활용한 뮤직 테라피, 힐링 요가 등 발왕산의 청정한 기운 속에서 양질의 휴식을 누릴 수 있다. 발왕산 정상에 조성된 발왕산氣스카이워크는 일대 풍광을 감상할 수 있는 명소다. KTX 진부역과 모나용평을 오가는 셔틀버스가 정기 운행한다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능요금 (무료)",
+    "lodging_type": "PENSION",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "127654",
+    "area_code": "51",
+    "area_name": "강원특별자치도",
+    "name": "엘리시안 강촌",
+    "region_code": "51110",
+    "region_name": "춘천시",
+    "address": "강원특별자치도 춘천시 남산면 북한강변길 688",
+    "address_detail": null,
+    "latitude": 37.8221451,
+    "longitude": 127.5899172,
+    "phone": "033-260-2000",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/87/3335587_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/87/3335587_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "24464",
+    "homepage_url": null,
+    "description": "엘리시안 강촌은 스키장, 골프장, 콘도 등을 결합한 사계절 종합 리조트 단지이다. 굴봉산, 검봉산, 북한강이 둘러싼 청정 자연 속에 다채로운 시설을 완비해 휴양과 레저를 두루 만끽할 수 있다. 엘리시안 강촌의 스키장은 수도권에서 가까워 접근성이 좋고 초보자나 중급자가 즐기기 좋은 슬로프로 알려져 있다. 전체 10개 슬로프 중 8개가 초·중급자용이고 스키학교도 운영한다. 눈썰매장도 있어 가족 단위로 즐기기 좋다. 골프장은 27홀 코스로 밸리, 레이크, 힐 코스로 이뤄진다. 밸리 코스는 조경이 아름답고 레이크 코스는 호수를 따라 이어진다. 가장 높은 곳에 위치한 힐 코스는 북한강까지 내다보일 정도로 탁 트인 전망을 제공한다. 콘도는 총 222개 객실과 사우나, 게임존, 식당 등의 부대시설을 갖췄다. 객실에서 시원한 전망이 내다보이고 시네마 룸 테마 객실도 운영한다. 그 밖에도 야외 수영장, 캠핑장, 예식장 등 다양한 시설이 있고 경춘선 백양리역과 리조트를 오가는 무료 셔틀버스를 운행한다.",
+    "checkin_time": "15:00",
+    "checkout_time": "- 평일/비수기- 주말/성수기 11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "1300411",
+    "area_code": "51",
+    "area_name": "강원특별자치도",
+    "name": "호텔인터불고 원주",
+    "region_code": "51130",
+    "region_name": "원주시",
+    "address": "강원특별자치도 원주시 동부순환로 200",
+    "address_detail": null,
+    "latitude": 37.3326493,
+    "longitude": 127.9744538,
+    "phone": "033-769-8114",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/17/4092617_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/17/4092617_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "26460",
+    "homepage_url": null,
+    "description": "강원 원주시에 위치한 호텔인터불고 원주는 건물 후면의 전체가 각각의 사계절마다 그림 같은 절경을 자랑하는 치악산을 바라보고 있다. ‘인터불고(Inter burgo)’는 스페인어로 화목한 작은 마을이라는 뜻을 지닌 단어다. 이곳은 편안함과 안락함을 선사할 145여 개의 객실을 보유하고 있다. 또한, 매일 신선한 재료로 제공되는 조식 뷔페, 도심 속에서 즐길 수 있는 골프장 그리고 각종 세미나 및 워크숍, 국제행사 등 성공적인 비즈니스를 위한 연회장과 맞춤형 전문 컨설팅을 통한 품격 있는 웨딩홀을 보유한 원주 유일의 컨벤션 호텔이다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [
+      {
+        "name": "스탠다드(더블)",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "스탠다드(트윈)",
+        "base_capacity": "3",
+        "max_capacity": "3"
+      },
+      {
+        "name": "디럭스(더블)",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      }
+    ],
+    "room_names": [
+      "스탠다드(더블)",
+      "스탠다드(트윈)",
+      "디럭스(더블)"
+    ]
+  },
+  {
+    "source_content_id": "136093",
+    "area_code": "51",
+    "area_name": "강원특별자치도",
+    "name": "켄싱턴리조트 설악비치",
+    "region_code": "51820",
+    "region_name": "고성군",
+    "address": "강원특별자치도 고성군 토성면 동해대로 4800",
+    "address_detail": null,
+    "latitude": 38.2427389,
+    "longitude": 128.5722152,
+    "phone": "033-631-7601",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/52/3330552_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/52/3330552_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "24765",
+    "homepage_url": null,
+    "description": "켄싱턴리조트 설악비치는 산과 바다, 호수와 들판 그리고 계곡에서 만나는 강원도의 자연과 그 속에 오롯이 남은 추억들이 영화처럼 펼쳐지는 곳이다. 지난 20년 이상 국내 핵심 관광 지역에 회원제 콘도를 설립, 운영하고 있고 다양한 국내 체인망을 보유하고 있다. 특히 각 체인이 산, 강, 해변, 섬, 온천지구 등 천혜의 입지 조건과 유명 관광지에 위치하고 있어 그 명성이 매우 높은 휴양 콘도미니엄이다. 리조트는 바닷가에 위치해 있으며, 설악과 동해가 한눈에 펼쳐진다. 넓은 백사장과 아름다운 바닷가에서는 가족과 함께 깨끗하고 쾌적하게 해수욕을 즐길 수 있다. 객실은 보다 현대적인 감각으로 안락하게 꾸며져 있으며 다양한 콘셉트로 고객 취향에 한 걸음 더 다가가고자 노력했다. 고품격 인테리어와 차원이 다른 서비스로 고객 감동 그 이상을 맛볼 수 있을 것이다. 부대시설로는 해수사우나, 키즈월드, 애슐리 퀸즈, 로이드, 연회장(50석) 등이 갖추어져 있다. 모든 편리함이 갖추어진 최신 설비와 고객의 취향을 만족시켜 주는 최상의 서비스를 통해 편안하고 안락하게 지내실 수 있도록 모든 편의를 제공하고 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "137477",
+    "area_code": "51",
+    "area_name": "강원특별자치도",
+    "name": "금강산콘도",
+    "region_code": "51820",
+    "region_name": "고성군",
+    "address": "강원특별자치도 고성군 현내면 금강산로 416",
+    "address_detail": null,
+    "latitude": 38.5108275,
+    "longitude": 128.4193587,
+    "phone": "033-680-7800",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/83/4141783_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/83/4141783_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "24702",
+    "homepage_url": null,
+    "description": "금강산콘도는 1998년 5월 강원도 고성군 화진포해수욕장 인근에 개관한 콘도이다. 천혜의 관광지인 금강산 자락에 위치하여 동해의 푸른 파도와 소나무 숲으로 둘러싸인 무송정섬과 해수욕장에 접해있는 콘도이다. 아름다운 위치만큼이나 고급 시설을 갖추었고 호텔형 객실, 한식당, 해수사우나, 볼링장, 커피숍, 당구장, 노래방 등 다양한 부대시설은 이용자의 즐거움을 한층 더 높여준다. 특히 해수사우나는 이곳 청정해역의 해수를 직접 끌어들여 운영하며 많은 고객들로부터 사랑을 받고 있다. 객실은 베란다 앞에 바로 펼쳐진 푸른 바다와 하늘 그리고 소나무가 울창한 무송정섬이 어우러진 멋진 풍경과 함께 한적한 여유로움을 선사한다. 넓은 창문 너머 탁 트인 바다가 한눈에 보이며 창을 열면 시원한 바닷바람이 가슴속까지 들어온다. 신비롭고 장엄하기까지 한 동해바다의 경관은 잊지 못할 추억으로 남을 것이다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "137809",
+    "area_code": "51",
+    "area_name": "강원특별자치도",
+    "name": "한화리조트 설악",
+    "region_code": "51210",
+    "region_name": "속초시",
+    "address": "강원특별자치도 속초시 미시령로2983번길 111",
+    "address_detail": null,
+    "latitude": 38.2096838,
+    "longitude": 128.5287899,
+    "phone": "033-630-5500",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/91/3071291_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/91/3071291_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "24801",
+    "homepage_url": null,
+    "description": "한화리조트 설악은 테마형 리조트이다. 고풍스러운 건축물과 설악산, 울산바위, 호수 공원 등의 자연경관이 어우러진 곳으로, 영동 지역 최고의 전통과 아름다운 절경을 자랑하는 설악에 자리 잡고 있다. 동해와 설악산을 조망할 수 있는 객실을 보유하고 있으며 디럭스, 로열, 프리미어 스위트룸 등 총 331실로 구성되어 있다. 전기포트, 드라이기, 전기밥솥 등의 가전제품과 프라이팬, 냄비, 식기 등의 주방용품이 갖춰져 있다. 뽀로로 룸과 같은 캐릭터 객실도 있어 아이들과 함께 가족 여행하기에 적합하다. 테마파크로는 사계절 이용할 수 있는 설악 워터피아가 있다. 워터피아는 가족 중심의 100% 천연 보양 온천 워터파크로 다양한 수영장과 슬라이드, 사우나 등을 즐길 수 있다. 플라자 CC 설악은 설악산과 동해를 바라보며 골프를 즐길 수 있는 천혜의 골프 코스로, 18홀 코스와 9홀 코스가 각각 있다. 퓨전 한식과 신선한 지역 특산물을 이용한 한식당이 있어 멀리 나가지 않아도 식사를 해결할 수 있다. 노래방, 당구장, 전자오락실을 갖추어 온 가족이 함께 즐길 수 있는 종합 엔터테인먼트 시설과 유아들의 휴식처 및 편안한 놀이공간도 있다. 온 가족이 편하게 즐길 수 있는 특별한 문화 체험 공간도 있다. 주변에 설악산 국립공원, 속초해수욕장 등 전국 최고의 관광지들이 있어 관광과 스포츠, 편안한 휴식을 취하기 좋은 곳으로 알려져 많은 이들이 찾고 있다.",
+    "checkin_time": "- 비수기/평일 14:00- 성수기/주말/연휴 15:00",
+    "checkout_time": "- 비수/평일 12:00- 성수기/주말/연휴 11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "138081",
+    "area_code": "51",
+    "area_name": "강원특별자치도",
+    "name": "아웃도어패밀리",
+    "region_code": "51810",
+    "region_name": "인제군",
+    "address": "강원특별자치도 인제군 인제읍 내린천로 6215",
+    "address_detail": null,
+    "latitude": 38.0432395,
+    "longitude": 128.2063071,
+    "phone": "033-461-1659",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/31/3592431_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/31/3592431_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "24640",
+    "homepage_url": null,
+    "description": "아웃도어패밀리는 캐나다산 목재로 지은 서구식 스튜디오형 펜션으로 인제읍에서 31번 국도를 따라 6㎞지점의 내린천 강변에 자리하고 있다. 넓은 주차장과 개별 아웃도어 마니아를 위한 게스트룸도 운영하고 있다. 객실에서는 조리와 식사도 할 수 있고 에어컨이 설치되어 있어 쾌적하게 이용할 수 있다. 객실 외부 데크에서 감상할 수 있는 내린천 경치가 일품이며 목재 내벽이 주는 목향과 습도 조절도 자연스럽게 되어 쾌적함을 더한다. 40명 이상이 동시에 앉을 수 있는 넓은 중앙계단은 단체사진 촬영 명소로도 유명하다.",
+    "checkin_time": "14:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "커플룸",
+        "base_capacity": "2",
+        "max_capacity": "4"
+      },
+      {
+        "name": "가족룸",
+        "base_capacity": "6",
+        "max_capacity": "8"
+      },
+      {
+        "name": "멀티룸",
+        "base_capacity": "8",
+        "max_capacity": "10"
+      }
+    ],
+    "room_names": [
+      "커플룸",
+      "가족룸",
+      "멀티룸"
+    ]
+  },
+  {
+    "source_content_id": "1161581",
+    "area_code": "52",
+    "area_name": "전북특별자치도",
+    "name": "라비치호텔",
+    "region_code": "52130",
+    "region_name": "군산시",
+    "address": "전북특별자치도 군산시 비응남로 36",
+    "address_detail": null,
+    "latitude": 35.938272,
+    "longitude": 126.5266204,
+    "phone": null,
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/34/4055334_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/34/4055334_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "54003",
+    "homepage_url": null,
+    "description": "라비치호텔은 비응항 바다전경을 볼 수 있는 호텔식 숙박업소이다. 새만금방조제의 북쪽 관문인 비응항 중심에 위치하고 있으며, 유람선 선착장과 항구가 바로 앞에 있다. 아침에는 방조제 위로 떠오르는 일출이 있고, 저녁에는 수평선 너머로 지는 해넘이를 볼 수 있어 인기가 높다. 그래서 일출을 볼 수 있는 방과 일몰을 볼 수 있는 방을 선택할 수도 있다. 주변 먹거리로는 신선한 해산물을 즐기실 수 있는 회센터 및 어시장, 음식점들이 바로 있어 보다 저렴하고 맛있게 바다향을 한껏 담아갈 수 있다.",
+    "checkin_time": "16:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [
+      {
+        "name": "한실",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "스위트",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      },
+      {
+        "name": "특실",
+        "base_capacity": "2",
+        "max_capacity": "2"
+      }
+    ],
+    "room_names": [
+      "한실",
+      "스위트",
+      "특실"
+    ]
+  },
+  {
+    "source_content_id": "129565",
+    "area_code": "52",
+    "area_name": "전북특별자치도",
+    "name": "무주리조트 관광곤도라",
+    "region_code": "52730",
+    "region_name": "무주군",
+    "address": "전북특별자치도 무주군 설천면 만선로 185",
+    "address_detail": null,
+    "latitude": 35.8885165,
+    "longitude": 127.744934,
+    "phone": "063-322-9000",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/86/3064386_image2_1.JPG",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/86/3064386_image3_1.JPG",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "55556",
+    "homepage_url": null,
+    "description": "무주리조트 관광곤도라는 덕유산 국립 공원에 자리한 대표적인 산악형 휴양지인 무주덕유산리조트내에 있다. 관광곤도라를 타고 해발 1,520m 설천봉에 오르면 덕유산 정상 향적봉을 20분만에 쉽게 오를 수 있다. 산이 험하지 않아 노부부나 가족들이 쉬엄쉬엄 오르기에 좋으며, 향적봉 정상에 오르면 적상산, 마이산, 가야산, 지리산, 계룡산, 무등산을 한 눈에 볼 수 있는 파노라마 조망이 펼쳐진다.",
+    "checkin_time": null,
+    "checkout_time": null,
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "1351056",
+    "area_code": "52",
+    "area_name": "전북특별자치도",
+    "name": "지리산유스캠프",
+    "region_code": "52190",
+    "region_name": "남원시",
+    "address": "전북특별자치도 남원시 주천면 웅치윗길 133-5",
+    "address_detail": null,
+    "latitude": 35.3680919,
+    "longitude": 127.4374485,
+    "phone": "063-630-1000",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/50/3512750_image2_1.JPG",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/50/3512750_image3_1.JPG",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "55803",
+    "homepage_url": null,
+    "description": "지리산유스캠프는 지리산 자연환경 속에 현대적인 자연친화 시설을 갖추고 새롭게 단장한 청소년 수련시설이다. 전문 교육팀이 운영하는 다양한 인증 프로그램을 통해 체계적인 인성교육이 이루어진다. 참가 청소년들은 체험활동을 통해 자기 이해와 도전정신, 극기심을 기를 수 있다. 더불어 소통, 배려, 협동, 봉사 등 공동체 의식을 함양할 수 있도록 구성되어 있다. 21세기 한국 사회의 건강한 리더 양성을 목표로 하는 교육의 장이다.",
+    "checkin_time": "12:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "136538",
+    "area_code": "52",
+    "area_name": "전북특별자치도",
+    "name": "켄싱턴리조트 지리산남원점",
+    "region_code": "52190",
+    "region_name": "남원시",
+    "address": "전북특별자치도 남원시 소리길 66 (어현동)",
+    "address_detail": null,
+    "latitude": 35.4026674,
+    "longitude": 127.3851258,
+    "phone": "063-636-7007",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/98/2950298_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/98/2950298_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "55795",
+    "homepage_url": null,
+    "description": "켄싱턴리조트 지리산남원점은 예로부터 예향이라 불리어온 남도문화의 중심지인 지리산 남원에 위치하고 있다. 주변에는 음악분수대 공원, 오작교, 춘향 예술 회관, 남원 국악원, 동편제 거리, 광한루 등의 관광단지가 형성되어 있어 옛 정취와 풍류를 즐길 수 있다. 주변 관광지로는 지리산을 비롯하여 변산반도, 한려수도, 구례 화엄사, 구례 게르마늄온천 등이 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "켄싱턴 디럭스 리버뷰",
+        "base_capacity": "4",
+        "max_capacity": "6"
+      }
+    ],
+    "room_names": [
+      "켄싱턴 디럭스 리버뷰"
+    ]
+  },
+  {
+    "source_content_id": "137499",
+    "area_code": "52",
+    "area_name": "전북특별자치도",
+    "name": "고창 선운산 유스호스텔",
+    "region_code": "52790",
+    "region_name": "고창군",
+    "address": "전북특별자치도 고창군 아산면 선운사로 158-36",
+    "address_detail": null,
+    "latitude": 35.5033889,
+    "longitude": 126.5831817,
+    "phone": "063-561-3333",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/92/1976292_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/92/1976292_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "56452",
+    "homepage_url": null,
+    "description": "고창 선운산 유스호스텔은 선운사 입구에 위치해 사계절 아름다운 선운산의 자연을 가까이에서 만날 수 있는 숙박시설이다. 주변이 한적하고 공기가 맑아 조용한 휴식을 즐기기 좋으며, 약 250명이 숙박할 수 있는 53개의 객실을 갖추고 있다. 식당, 대강당, 세미나실, 회의실 등의 시설도 마련되어 있어 학생 수련활동, 수학여행, 기업 연수, 대학생 엠티와 오티 등 단체 숙박에 적합하다. 가족 여행객이 머물기에도 좋다. 시설을 지속적으로 보완하고 관리해 쾌적하게 이용할 수 있으며, 합리적인 가격으로 숙박과 편의시설을 이용할 수 있다는 점도 장점이다.",
+    "checkin_time": "15:00~22:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "137762",
+    "area_code": "52",
+    "area_name": "전북특별자치도",
+    "name": "일성무주리조트",
+    "region_code": "52730",
+    "region_name": "무주군",
+    "address": "전북특별자치도 무주군 무풍면 라제통문로 455",
+    "address_detail": null,
+    "latitude": 35.9789817,
+    "longitude": 127.8267786,
+    "phone": "063-324-3939",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/40/2378140_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/40/2378140_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "55559",
+    "homepage_url": null,
+    "description": "'덕유산과 구천동 계곡이 어우러진 천혜의 휴양지' 여름엔 시원한 계곡, 겨울에는 신나는 스키로 계절마다 다채로운 즐거움이 가득하다. 자연의 조화와 맑은 공기로 편안한 휴식을 선사한다.",
+    "checkin_time": "14:00",
+    "checkout_time": "11:00",
+    "parking_info": "주차 가능",
+    "lodging_type": "PENSION",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "138675",
+    "area_code": "52",
+    "area_name": "전북특별자치도",
+    "name": "채석강리조트",
+    "region_code": "52800",
+    "region_name": "부안군",
+    "address": "전북특별자치도 부안군 변산면 채석강길 19",
+    "address_detail": null,
+    "latitude": 35.627375,
+    "longitude": 126.4706032,
+    "phone": "063-583-1234",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/61/584761_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/61/584761_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "56337",
+    "homepage_url": null,
+    "description": "채석강리조트는 격포해수욕장에 있는 숙박시설이다. 채석강 리조트 유스호스텔은 기존의 유스호스텔의 공용화장실, 공동취사장이 아닌 전형적인 콘도형 객실을 갖추고 있다. 개인, 가족, 단체 이용이 가능하며 콘도형 객실에서는 자가 취사를 할 수 있다. 온돌과 침대가 있는 객실을 선택할 수 있다. 객실에서는 바다를 볼 수가 있고, 한 걸음만 떼어도 격포해수욕장의 모래사장을 밟을 수가 있을 정도로 바닷가가 바로 앞에 자리 잡고 있다. 각층 휴게실과 야외 테라스 및 전망대가 있어 조용한 휴식과 수려한 서해의 자연도 감상할 수 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "143000",
+    "area_code": "52",
+    "area_name": "전북특별자치도",
+    "name": "선운산호텔",
+    "region_code": "52790",
+    "region_name": "고창군",
+    "address": "전북특별자치도 고창군 아산면 중촌길 21",
+    "address_detail": null,
+    "latitude": 35.5036639,
+    "longitude": 126.5849815,
+    "phone": "063-561-3377",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/29/4141629_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/29/4141629_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "56452",
+    "homepage_url": null,
+    "description": "선운산관광호텔은 선운산 내에 위치하고 있는 호텔이다. 보통실, 준특실, 특실, 단체실로 구성되어 있으며 아늑하고 편안한 내부공간으로 가족과 함께 머물기 좋은 숙소이다. 또한, 대연회장과 소연회장을 갖추고 있어 단체 모임 행사로도 방문하기 좋고 인근에 선운레이크밸리와 고창컨트리클럽 등 골프장과 함께 연계하여 이용하기 좋은 숙소이다.",
+    "checkin_time": "14:00",
+    "checkout_time": "12:00",
+    "parking_info": "가능",
+    "lodging_type": "HOTEL",
+    "rooms": [],
+    "room_names": []
+  },
+  {
+    "source_content_id": "1638588",
+    "area_code": "52",
+    "area_name": "전북특별자치도",
+    "name": "라비치펜션",
+    "region_code": "52800",
+    "region_name": "부안군",
+    "address": "전북특별자치도 부안군 변산면 고사길 90",
+    "address_detail": null,
+    "latitude": 35.6539669,
+    "longitude": 126.509796,
+    "phone": "063-584-5939",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/42/3574342_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/42/3574342_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "56339",
+    "homepage_url": null,
+    "description": "부안군의 산과 바다 자연경관이 어우러진 지중해풍의 라비치펜션은 바로크 양식의 건축을 연상하게 하는 건물과 모던하고 아기자기한 예쁜 객실들, 넓은 테라스가 있어 더욱 상쾌한 여행의 즐거움을 느끼게 해 주는 곳이다. 실내, 야외 바비큐 시설이 있어 궂은 날씨나 겨울에도 바비큐 파티를 즐길 수 있다. 물 정화 기능 장치가 설치되어 있어 안심하고 즐길 수 있는 수영장과 유아용 풀장까지 마련되어 있다. 주변 관광지로 고사포해수욕장, 직소폭포, 변산 해수욕장, 하섬, 변산반도 국립공원 등이 있다.",
+    "checkin_time": "14:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "M룸",
+        "base_capacity": "2",
+        "max_capacity": "3"
+      },
+      {
+        "name": "J룸",
+        "base_capacity": "2",
+        "max_capacity": "3"
+      },
+      {
+        "name": "L룸",
+        "base_capacity": "4",
+        "max_capacity": "6"
+      }
+    ],
+    "room_names": [
+      "M룸",
+      "J룸",
+      "L룸"
+    ]
+  },
+  {
+    "source_content_id": "1882371",
+    "area_code": "52",
+    "area_name": "전북특별자치도",
+    "name": "학인당",
+    "region_code": "52111",
+    "region_name": "전주시",
+    "address": "전북특별자치도 전주시 완산구 향교길 45 (교동)",
+    "address_detail": null,
+    "latitude": 35.8118115,
+    "longitude": 127.1520573,
+    "phone": "063-284-9929",
+    "image_url": "https://tong.visitkorea.or.kr/cms/resource/01/4090701_image2_1.jpg",
+    "thumbnail_url": "https://tong.visitkorea.or.kr/cms/resource/01/4090701_image3_1.jpg",
+    "source": "한국관광공사 TourAPI KorService2",
+    "zipcode": "55044",
+    "homepage_url": null,
+    "description": "인재고택 학인당은 전주한옥마을에서 가장 오래된 고택 문화유산이다. 영빈관 객실은 인재고택을 대표하는 공간으로, 구한말 최고의 장인들이 궁중 건축 양식으로 지은 건축물이다. 사랑채는 대청을 중심으로 좌우에 방이 딸린 독채로, 가족 단위 숙박에 적합하다. 별당채는 모두 3개 공간으로 전통 정원의 야경을 보며 소중한 사람과 추억을 만들 수 있다.",
+    "checkin_time": "15:00",
+    "checkout_time": "11:00",
+    "parking_info": "가능(국립무형유산원 주차장 이용)",
+    "lodging_type": "PENSION",
+    "rooms": [
+      {
+        "name": "자쿠지",
+        "base_capacity": "4",
+        "max_capacity": "4"
+      },
+      {
+        "name": "가든",
+        "base_capacity": "2",
+        "max_capacity": "6"
+      },
+      {
+        "name": "영빈관",
+        "base_capacity": "6",
+        "max_capacity": "6"
+      }
+    ],
+    "room_names": [
+      "자쿠지",
+      "가든",
+      "영빈관"
+    ]
+  }
+]
