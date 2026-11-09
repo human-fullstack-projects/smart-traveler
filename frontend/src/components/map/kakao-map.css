@@ -1,0 +1,15 @@
+.kakao-map-marker {
+  min-width: 30px;
+  min-height: 30px;
+  padding: 5px 9px;
+  border: 2px solid #fff;
+  border-radius: 16px;
+  background: #247e67;
+  color: #fff;
+  box-shadow: 0 2px 10px #173b3380;
+  font: 700 12px/1.2 sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.kakao-map-marker--stay { background: #fff; color: #24584b; }
+.kakao-map-marker.is-selected { outline: 3px solid #f7bb45; transform: scale(1.1); }
