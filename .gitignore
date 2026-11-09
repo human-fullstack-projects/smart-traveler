@@ -397,3 +397,5 @@ sketch
 # Local social login credentials
 secrets/*
 !secrets/README.md
+**/google.json
+**/kakao.json
