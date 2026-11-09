@@ -1,31 +1,36 @@
 import { useMemo, useState } from 'react';
 import { StayArtwork, StayFooter, StayHeader, StatusPill } from '../shared/StayShell.jsx';
 import { formatWon, getDefaultStayDates, stays, stayTypes, toDateInputValue } from '../shared/stayData.js';
+import KakaoMap from '../../../components/map/KakaoMap.jsx';
 import '../../../css/stay-search.css';
+import './stay-kakao-map.css';
 
 const amenityOptions = ['주차', '조식', '오션뷰', '취사', '와이파이'];
 
-function SearchMap({ results, selectedId, onSelect }) {
+const regionCenters = {
+  부산: { latitude: 35.1796, longitude: 129.0756 },
+  서울: { latitude: 37.5665, longitude: 126.9780 },
+  제주: { latitude: 33.4996, longitude: 126.5312 },
+};
+
+function SearchMap({ results, selectedId, onSelect, query, region }) {
+  const [fitRequest, setFitRequest] = useState(0);
+  const places = useMemo(() => results.filter((stay) => stay.demoCoordinate).map((stay) => ({
+    ...stay.demoCoordinate,
+    id: stay.id,
+    name: stay.name,
+    kind: 'stay',
+    markerLabel: stay.saleable ? `${Math.round(stay.price / 10000)}만` : '정보',
+  })), [results]);
+  const selected = results.find((stay) => stay.id === selectedId) || results[0];
+  const center = selected?.demoCoordinate || regionCenters[region];
+  const bookingQuery = selected ? new URLSearchParams({ stay: selected.id, ...query }).toString() : '';
+
   return (
-    <section className="stay-map" aria-label="검색 결과 지도 모형">
-      <div className="stay-map__water" />
-      <div className="stay-map__road stay-map__road--one" />
-      <div className="stay-map__road stay-map__road--two" />
-      <div className="stay-map__label stay-map__label--beach">해운대 해수욕장</div>
-      <div className="stay-map__label stay-map__label--park">동백공원</div>
-      {results.map((stay) => (
-        <button
-          key={stay.id}
-          type="button"
-          className={`stay-map__marker${selectedId === stay.id ? ' is-selected' : ''}${!stay.saleable ? ' is-info' : ''}`}
-          style={{ left: `${stay.marker.left}%`, top: `${stay.marker.top}%` }}
-          onClick={() => onSelect(stay.id)}
-          aria-label={`${stay.name}, ${stay.saleable ? `${formatWon(stay.price)}부터` : '정보 조회만 가능'}`}
-        >
-          {stay.saleable ? `${Math.round(stay.price / 10000)}만` : '정보'}
-        </button>
-      ))}
-      <div className="stay-map__legend"><span><i className="is-sale" />예약 가능</span><span><i />정보 조회</span></div>
+    <section className="stay-kakao-map" aria-label="숙소 검색 결과 지도">
+      <KakaoMap places={places} center={center} selectedId={selected?.id} fitPoints={places} fitRequest={fitRequest} onMarkerClick={(place) => onSelect(place.id)} height="100%" />
+      <div className="stay-kakao-map__tools"><button type="button" onClick={() => setFitRequest((value) => value + 1)}>전체 보기</button><span>카카오 지도 · 숙소 위치는 시연용 좌표</span></div>
+      {selected && <div className="stay-kakao-map__details" role="status"><strong>{selected.name}</strong><span>{selected.saleable ? `1박 ${formatWon(selected.price)}부터` : '판매 정보 미확인'}</span>{selected.saleable && <a href={`#/stays/booking?${bookingQuery}`}>객실 보기 →</a>}</div>}
     </section>
   );
 }
@@ -34,7 +39,7 @@ function StayCard({ stay, selected, query, onSelect }) {
   const bookingQuery = new URLSearchParams({ stay: stay.id, ...query }).toString();
   return (
     <article className={`stay-result-card${selected ? ' is-selected' : ''}`} onMouseEnter={() => onSelect(stay.id)}>
-      <button type="button" className="stay-result-card__image" onClick={() => onSelect(stay.id)} aria-label={`${stay.name} 지도에서 보기`}>
+      <button type="button" className="stay-result-card__image" onClick={() => onSelect(stay.id)} aria-pressed={selected} aria-label={`${stay.name} 지도에서 보기`}>
         <StayArtwork theme={stay.theme} label={`${stay.name} 이미지 영역`} compact />
         {stay.saleable && stay.remaining <= 3 && <span className="stay-result-card__remaining">남은 객실 {stay.remaining}</span>}
       </button>
@@ -152,7 +157,7 @@ export default function StaySearchPage() {
             {results.length ? results.map((stay) => <StayCard key={stay.id} stay={stay} selected={selectedId === stay.id} query={query} onSelect={setSelectedId} />) : <div className="stay-results__empty"><strong>조건에 맞는 숙소가 없습니다.</strong><span>가격 범위를 넓히거나 다른 지역·날짜를 선택해 주세요.</span></div>}
           </section>
 
-          <div className="stay-map-column"><SearchMap results={results} selectedId={selectedId} onSelect={setSelectedId} /><p>지도는 카카오 지도 API 연결 전 위치 연동 UI입니다.</p></div>
+          <div className="stay-map-column"><SearchMap results={results} selectedId={selectedId} onSelect={setSelectedId} query={query} region={applied.region} /><p>검색 필터와 지도 마커는 같은 숙소 목록을 사용합니다. 표시 좌표는 실제 숙소 위치가 아닙니다.</p></div>
         </div>
       </main>
       <StayFooter />

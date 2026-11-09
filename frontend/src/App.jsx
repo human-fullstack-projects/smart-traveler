@@ -36,6 +36,7 @@ import HumanCourseDetail from './pages/human_course/pages/HumanCourseDetail';
 import HumanCourseCreate from './pages/human_course/pages/HumanCourseCreate';
 import HumanCourseEdit from './pages/human_course/pages/HumanCourseEdit';
 import HumanCourseModeration from './pages/human_course/pages/HumanCourseModeration';
+import MapDemoPage from './pages/map/MapDemoPage';
 import useHumanCourses from './pages/human_course/hooks/useHumanCourses';
 
 // 한글 조합을 확정하는 Enter는 전송하지 않고, Shift+Enter는 줄바꿈에 사용한다.
@@ -152,6 +153,7 @@ const sidebarPageRoutes = {
   '/search': SearchPage,
   '/stays': StaySearchPage,
   '/stays/booking': StayBookingPage,
+  '/map-demo': MapDemoPage,
 };
 
 export default function App() {
@@ -309,7 +311,7 @@ export default function App() {
     </>;
   } else if (isHumanCourse) {
     content = <>
-      {humanCourses.storageNotice && <div className="human-courses"><p className="note" role="alert">{humanCourses.storageNotice}</p></div>}
+      {humanCourses.storageNotice && <div className="human-courses storage-notice"><p className="note" role="alert">{humanCourses.storageNotice}</p>{humanCourses.saveFailed && <button type="button" onClick={humanCourses.retrySave}>브라우저 저장 다시 시도</button>}</div>}
       {HumanCourseScreen ? <HumanCourseScreen key={routePath} {...humanCourses} courseId={courseMatch?.[1]} /> : <div className="human-courses"><section className="panel"><h1>페이지를 찾을 수 없습니다.</h1><a className="button" href="#/human-courses">코스 목록으로</a></section></div>}
     </>;
   } else if (isChat) {
