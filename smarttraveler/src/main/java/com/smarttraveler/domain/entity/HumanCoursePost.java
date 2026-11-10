@@ -46,6 +46,12 @@ public class HumanCoursePost {
     /** 제목 */
     private String title;
 
+    @Column(name = "category", length = 30)
+    private String category;
+
+    @Column(name = "summary", length = 150)
+    private String summary;
+
     @Column(name = "companion_type", length = 30)
     /** 동행 유형 */
     private String companionType;

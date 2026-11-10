@@ -20,7 +20,7 @@ function findPlace(search, maps, query) {
   });
 }
 
-export default function CourseMap({ region, plan = EMPTY_PLAN }) {
+export default function CourseMap({ region, plan = EMPTY_PLAN, showDemoStays = true }) {
   const stops = useMemo(() => plan.flatMap((day) => day.stops.map((stop, index) => ({
     id: `${day.day}-${index}`,
     day: day.day,
@@ -34,7 +34,7 @@ export default function CourseMap({ region, plan = EMPTY_PLAN }) {
   const [selectedId, setSelectedId] = useState(null);
   const [fitRequest, setFitRequest] = useState(0);
   const regionCenter = centers[region];
-  const stayResults = useMemo(() => stays.filter((stay) => stay.region === region && stay.demoCoordinate), [region]);
+  const stayResults = useMemo(() => showDemoStays ? stays.filter((stay) => stay.region === region && stay.demoCoordinate) : [], [region, showDemoStays]);
   const stayPlaces = useMemo(() => stayResults.map((stay) => ({
     ...stay.demoCoordinate,
     id: stay.id,
@@ -76,8 +76,6 @@ export default function CourseMap({ region, plan = EMPTY_PLAN }) {
     return () => { cancelled = true; };
   }, [region, stops]);
 
-  if (!regionCenter) return <p className="note">이 지역의 지도 미리보기가 아직 준비되지 않았습니다.</p>;
-
   function selectStop(id) {
     if (!loading && !coursePlaces.some((place) => place.id === id)) return;
     setView('course');
@@ -87,7 +85,7 @@ export default function CourseMap({ region, plan = EMPTY_PLAN }) {
   return <div className="course-map">
     <p className="form-help">방문지를 누르면 지도와 번호 마커가 이동합니다. 마커를 눌러도 같은 방문지가 선택됩니다.</p>
     <div className="map-controls" role="group" aria-label="지도 표시 대상">
-      {['all', 'course', 'stay'].map((mode) => <button key={mode} type="button" aria-pressed={view === mode} onClick={() => { setView(mode); setSelectedId(null); }}>
+      {(showDemoStays ? ['all', 'course', 'stay'] : ['course']).map((mode) => <button key={mode} type="button" aria-pressed={view === mode} onClick={() => { setView(mode); setSelectedId(null); }}>
         {{ all: '전체', course: '코스', stay: '숙소' }[mode]}
       </button>)}
       <button type="button" onClick={() => { setSelectedId(null); setFitRequest((value) => value + 1); }}>전체 위치 보기</button>
@@ -99,7 +97,7 @@ export default function CourseMap({ region, plan = EMPTY_PLAN }) {
       </div>}
     </div>
     {message && <p className="map-search-message" role="status">{message}</p>}
-    <p className="map-source">지도 배경: 카카오 지도. 방문지 좌표: 카카오 장소 검색 결과이며 실제 일정 장소와 다를 수 있습니다. 숙소 좌표·요금: 시연용 데이터. 점선은 방문지 사이의 직선 개요로, 실제 이동 경로가 아닙니다.</p>
+    <p className="map-source">지도 배경: 카카오 지도. 방문지 좌표: 카카오 장소 검색 결과이며 실제 일정 장소와 다를 수 있습니다. {showDemoStays && '숙소 좌표·요금: 시연용 데이터. '}점선은 방문지 사이의 직선 개요로, 실제 이동 경로가 아닙니다.</p>
     {view !== 'stay' && <div className="map-stop-days">{plan.map((day) => <section className="map-stop-day" key={day.day}>
       <h3>{day.day}일차</h3>
       <ul className="map-stops">{day.stops.map((stop, index) => {
@@ -108,7 +106,7 @@ export default function CourseMap({ region, plan = EMPTY_PLAN }) {
         return <li key={id}><button type="button" onClick={() => selectStop(id)} disabled={!loading && !coursePlaces.some((item) => item.id === id)} aria-pressed={selectedId === id}>{index + 1}. {place}</button></li>;
       })}</ul>
     </section>)}</div>}
-    {view !== 'course' && <section className="map-stay-results"><h3>같은 지역 숙소 시연 목록</h3>
+    {showDemoStays && view !== 'course' && <section className="map-stay-results"><h3>같은 지역 숙소 시연 목록</h3>
       {stayResults.length ? <ul>{stayResults.map((stay) => <li key={stay.id}><button type="button" onClick={() => setSelectedId(stay.id)} aria-pressed={selectedId === stay.id}>{stay.name} · {stay.saleable ? `${formatWon(stay.price)}부터` : '정보 조회'}</button></li>)}</ul> : <p>이 지역의 숙소 시연 데이터가 없습니다.</p>}
     </section>}
   </div>;

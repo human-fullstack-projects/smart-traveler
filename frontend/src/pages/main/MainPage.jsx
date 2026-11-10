@@ -427,6 +427,7 @@ export default function MainPage({ onStart, busy = false }) {
             </button>
           ))}
         </div>
+        <a className="landing-toss-demo" href="#/payments/demo">토스 1,000원 테스트 결제 →</a>
       </div>
 
       <section className="landing-recommendations" aria-labelledby="courses-title">

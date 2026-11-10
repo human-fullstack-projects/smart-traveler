@@ -19,6 +19,8 @@ import TourSearch from './TourSearch.jsx';
 import { createEmptyConditions } from './travelConditions.js';
 import StaySearchPage from './pages/stays/search/StaySearchPage.jsx';
 import StayBookingPage from './pages/stays/booking/StayBookingPage.jsx';
+import TossCheckoutPage from './pages/payment/TossCheckoutPage.jsx';
+import TossDemoPage from './pages/payment/TossDemoPage.jsx';
 import OwnerPage from './pages/owner/OwnerPage.jsx';
 import OwnerAccess from './pages/owner/OwnerAccess.jsx';
 
@@ -161,7 +163,7 @@ const sidebarPageRoutes = {
 export default function App() {
   const { member, authChecked, authCheckFailed, loggingOut, authRevision, retryAuth, login, logout } = useAuth();
   const myPageStore = useMyPageStore({ member, authChecked, authCheckFailed, authRevision });
-  const humanCourses = useHumanCourses();
+  const humanCourses = useHumanCourses(member);
   const [route, setRoute] = useState(window.location.hash.slice(1) || '/');
   const [notice, setNotice] = useState('');
 
@@ -289,6 +291,7 @@ export default function App() {
   const routePath = (route.split('?')[0].replace(/\/$/, '')) || '/';
   const myCourseMatch = routePath.match(/^\/my-courses\/([^/]+)$/);
   const reservationMatch = routePath.match(/^\/reservations\/([^/]+)$/);
+  const paymentMatch = routePath.match(/^\/payments\/(\d+)(?:\/(success|failure))?$/);
   const myPostMatch = routePath.match(/^\/my-posts\/([^/]+)$/);
   const MyPageScreen = myPageRoutes[routePath] || (myCourseMatch ? MyCourses : reservationMatch ? Reservations : myPostMatch ? MyPosts : null);
   const isHumanCourse = routePath === '/human-courses' || routePath.startsWith('/human-courses/');
@@ -311,8 +314,17 @@ export default function App() {
         : needsTravelData && myPageStore.status === 'error' ? <p role="alert">자료를 불러오지 못했습니다. 위의 다시 불러오기 버튼으로 재시도해 주세요.</p>
         : <MyPageScreen key={`${member?.memberId || 'guest'}-${routePath}`} {...myPageStore} courseId={myCourseMatch?.[1]} reservationId={reservationMatch?.[1]} postId={myPostMatch?.[1]} />}
     </>;
+  } else if (routePath === '/payments/demo' || new URLSearchParams(window.location.search).has('tossDemo')) {
+    content = <TossDemoPage />;
+  } else if (paymentMatch) {
+    content = member ? <TossCheckoutPage key={routePath} reservationId={paymentMatch[1]} result={paymentMatch[2]} /> : <AccessNotice kind="login" />;
   } else if (isHumanCourse) {
     content = <>
+      <div className="human-courses storage-notice">
+        {humanCourses.loading && <p className="note" role="status">휴먼 코스를 서버에서 불러오고 있습니다.</p>}
+        {!humanCourses.serverMode && !humanCourses.loading && <p className="note" role="alert">서버에 연결하지 못해 샘플 데이터로 시연 중입니다. {humanCourses.serverError} <button type="button" onClick={humanCourses.refresh}>서버 다시 연결</button></p>}
+        {humanCourses.serverMode && humanCourses.serverError && <p className="note" role="alert">서버 자료를 다시 불러오지 못했습니다. {humanCourses.serverError} <button type="button" onClick={humanCourses.refresh}>다시 시도</button></p>}
+      </div>
       {humanCourses.storageNotice && <div className="human-courses storage-notice"><p className="note" role="alert">{humanCourses.storageNotice}</p>{humanCourses.saveFailed && <button type="button" onClick={humanCourses.retrySave}>브라우저 저장 다시 시도</button>}</div>}
       {HumanCourseScreen ? <HumanCourseScreen key={routePath} {...humanCourses} courseId={courseMatch?.[1]} /> : <div className="human-courses"><section className="panel"><h1>페이지를 찾을 수 없습니다.</h1><a className="button" href="#/human-courses">코스 목록으로</a></section></div>}
     </>;

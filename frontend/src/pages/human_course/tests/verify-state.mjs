@@ -72,6 +72,7 @@ try {
   assert.ok(run({ type: 'delete', id: 1 }).error, '타인 글 삭제 방지');
   assert.equal(run({ type: 'delete', id: result.id }).id, result.id);
   assert.ok(!state.courses.some((c) => c.id === result.id));
+  assert.ok(run({ type: 'create', reservationId: 'R101', fields }).error, '삭제 후 같은 예약 재작성 방지');
   run({ type: 'reset' }); assert.deepEqual(state, freshState());
   console.log('Filters, likes, comments, reports, create/edit/delete, batch, moderation, reset: OK');
 } finally { await server.close(); }
