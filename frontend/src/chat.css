@@ -1,30 +1,4 @@
-/* 대화 화면은 기존 메인페이지의 색상과 카드 스타일을 따른다. */
-.chat-page { max-width: 790px; margin: 0 auto; }
-.chat-page-heading { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin: 8px 0 24px; }
-.chat-page-heading h1 { margin: 10px 0 5px; font-size: clamp(25px, 3vw, 33px); letter-spacing: -1px; }
-.chat-page-heading p { margin: 0; color: #718780; font-size: 14px; }
-.chat-home-link { color: #548276; font-size: 13px; white-space: nowrap; }
-.chat-window { background: white; border: 1px solid #e0eae5; border-radius: 22px; padding: 25px 30px 28px; box-shadow: 0 20px 60px rgba(30, 75, 57, .07); }
-.chat-messages { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; min-height: 230px; padding: 28px 0; }
-.chat-empty { align-self: center; margin: auto; color: #8b9d95; font-size: 14px; }
-.chat-message { max-width: 85%; padding: 12px 16px; border-radius: 16px 16px 4px 16px; color: white; background: #0c806b; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 14px; line-height: 1.6; }
-.chat-pending { margin: 0 0 15px; color: #758d83; font-size: 12px; line-height: 1.6; }
-.chat-send { padding: 14px 16px; border: 1px solid #dbe9e1; border-radius: 15px; background: #f9fcfa; }
-.chat-send:focus-within { border-color: #91c8b7; }
-.chat-send textarea { display: block; width: 100%; min-height: 64px; resize: none; border: 0; outline: none; background: transparent; line-height: 1.6; }
-.chat-send textarea::placeholder { color: #94a6a1; }
-.chat-send-bottom { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #8a9e95; font-size: 11px; }
-@media (max-width: 700px) {
-  .chat-page-heading { align-items: flex-start; flex-direction: column; }
-  .chat-window { padding: 22px 20px; }
-  .chat-messages { min-height: 190px; }
-  .chat-send-bottom { align-items: flex-start; flex-direction: column; }
-  .chat-send-bottom .primary { align-self: flex-end; }
-}
-
-/* 입력한 여행 조건은 대화 옆에서 바로 확인할 수 있다. */
-.chat-page { max-width: 1120px; }
-.chat-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; align-items: start; }
+/* 입력한 여행 조건을 보여주는 패널. 대화 화면 레이아웃은 AiChatPage.css에서 다룬다. */
 .travel-conditions { min-width: 0; padding: 24px; background: #fff; border: 1px solid #e0eae5; border-radius: 22px; box-shadow: 0 20px 60px rgba(30,75,57,.05); }
 .travel-conditions-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
 .travel-conditions-heading h2 { margin: 6px 0 0; font-size: 20px; letter-spacing: -.5px; }
@@ -54,10 +28,7 @@
 .condition-confirm { width: 100%; }
 .conditions-errors { padding: 10px 12px; border-radius: 8px; background: #fff5ef; color: #89543e; font-size: 12px; line-height: 1.6; }
 .conditions-errors ul { margin: 5px 0 0; padding-left: 17px; }
-@media (max-width: 850px) { .chat-layout { grid-template-columns: 1fr; } }
 
-/* 안내 메시지는 사용자 메시지와 위치와 색을 구분한다. */
-.chat-message.assistant { align-self: flex-start; border-radius: 16px 16px 16px 4px; color: #344d45; background: #edf6f1; }
 .condition-controls { min-width: 0; margin: 0; padding: 0; border: 0; }
 
 /* 기존 여행 조건 카드와 어울리는 관광지 조회 영역이다. */
