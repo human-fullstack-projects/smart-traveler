@@ -30,6 +30,8 @@ public class TourApiClient {
     public static final String HUB = BASE + "/LocgoHubTarService1/areaBasedList1";
     public static final String RELATED = BASE + "/TarRlteTarService1/areaBasedList1";
     public static final String KOR_AREA = BASE + "/KorService2/areaBasedList2";
+    public static final String KOR_DETAIL_COMMON = BASE + "/KorService2/detailCommon2";
+    public static final String KOR_DETAIL_INTRO = BASE + "/KorService2/detailIntro2";
 
     private final HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
     private final ObjectMapper mapper = new ObjectMapper();
@@ -55,8 +57,23 @@ public class TourApiClient {
 
     /** 관광지(contentTypeId=12) 목록 · 새 법정동 코드 기준. */
     public Page attractionPage(String lDongRegnCd, String lDongSignguCd, int pageNo, int rows) {
-        return call(KOR_AREA, Map.of("lDongRegnCd", lDongRegnCd, "lDongSignguCd", lDongSignguCd, "contentTypeId", "12",
+        return areaPage(lDongRegnCd, lDongSignguCd, "12", pageNo, rows);
+    }
+
+    /** contentTypeId별 목록 (12 관광지, 14 문화시설, 28 레포츠, 38 쇼핑, 39 음식점) · 새 법정동 코드 기준. */
+    public Page areaPage(String lDongRegnCd, String lDongSignguCd, String contentTypeId, int pageNo, int rows) {
+        return call(KOR_AREA, Map.of("lDongRegnCd", lDongRegnCd, "lDongSignguCd", lDongSignguCd, "contentTypeId", contentTypeId,
                 "arrange", "C", "pageNo", String.valueOf(pageNo), "numOfRows", String.valueOf(rows)));
+    }
+
+    /** 소개글(overview)·홈페이지. 응답 1건 고정이며 선택 플래그(overviewYN 등)는 이 API에서 받지 않음. */
+    public Page detailCommon(String contentId) {
+        return call(KOR_DETAIL_COMMON, Map.of("contentId", contentId));
+    }
+
+    /** 타입별 소개정보(이용시간, 휴무일, 대표메뉴 등). contentTypeId에 따라 필드명이 달라진다. */
+    public Page detailIntro(String contentId, String contentTypeId) {
+        return call(KOR_DETAIL_INTRO, Map.of("contentId", contentId, "contentTypeId", contentTypeId));
     }
 
     /** 실패하면 1번 더 시도(2초 뒤). 그래도 실패하면 TourApiException. */

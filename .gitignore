@@ -207,6 +207,9 @@ fabric.properties
 hs_err_pid*
 replay_pid*
 
+### ai-server (Chroma) ###
+ai-server/chroma_data/
+
 ### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/
