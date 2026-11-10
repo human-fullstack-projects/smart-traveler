@@ -15,7 +15,7 @@ public class StoredPlaceCandidates {
         Long id = regionId(conditions);
         if (id == null) return List.of();
         return jdbc.query("SELECT p.place_id,p.name,COALESCE(p.address,'') FROM place p JOIN region r ON r.region_id=p.region_id " +
-                        "WHERE (p.region_id=? OR r.parent_region_id=?) AND p.source_provider='TOURAPI' AND p.is_active=TRUE ORDER BY p.name,p.place_id LIMIT 30",
+                        "WHERE (p.region_id=? OR r.parent_region_id=?) AND p.source_provider IN ('TOURAPI','KTO_TOURAPI') AND p.is_active=TRUE ORDER BY p.name,p.place_id LIMIT 30",
                 (rs, row) -> Map.<String,Object>of("placeId", rs.getLong(1), "name", rs.getString(2), "address", rs.getString(3)), id, id);
     }
     private Long regionId(ObjectNode conditions) {

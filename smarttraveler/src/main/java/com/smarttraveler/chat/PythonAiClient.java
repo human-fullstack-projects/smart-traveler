@@ -20,7 +20,8 @@ import java.util.List;
 public class PythonAiClient {
     private final ObjectMapper mapper;
     private final URI endpoint;
-    private final HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
+    /** HTTP/2 평문 업그레이드 시도가 uvicorn(h11)과 맞지 않아 POST 본문이 비어 전달되므로 HTTP/1.1로 고정한다. */
+    private final HttpClient client = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).connectTimeout(Duration.ofSeconds(5)).build();
     public PythonAiClient(ObjectMapper mapper, @Value("${AI_SERVICE_URL:http://127.0.0.1:8001}") String baseUrl) {
         this.mapper = mapper;
         this.endpoint = URI.create(baseUrl.replaceAll("/+$", "") + "/internal/dialogue");

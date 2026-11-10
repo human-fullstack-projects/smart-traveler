@@ -94,6 +94,10 @@ public class Place {
     /** 추천체류시간 */
     private Integer recommendedMinutes;
 
+    @Column(name = "is_market")
+    /** 전통시장 여부 (쇼핑 분류 SH06 또는 이름 판정) */
+    private Boolean isMarket;
+
     @Column(name = "source_modified_at")
     /** 원본수정일시 */
     private LocalDateTime sourceModifiedAt;
