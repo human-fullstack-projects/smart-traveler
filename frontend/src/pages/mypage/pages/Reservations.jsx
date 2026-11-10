@@ -12,7 +12,7 @@ export default function Reservations({ bookings = [], reservationId }) {
     {!list.length && <p className="empty">예약 내역이 없습니다.</p>}
     <div className="stack">{list.map(b => <Card key={b.id}><span className="pill">{b.status}</span>
       <h2>{b.stay || '숙소 정보 확인 필요'}</h2><p>예약번호: {b.reservationNo}</p><p>{b.date} ~ {b.endDate} · {b.guests}명 · {b.room}</p><strong>{money(b.price)}</strong>
-      <div className="actions">{!reservationId && <a href={`#/reservations/${b.id}`}>예약 상세</a>}{b.courseId && <a href={`#/my-courses/${b.courseId}`}>이 예약의 내 코스</a>}</div>
+      <div className="actions">{!reservationId && <a href={`#/reservations/${b.id}`}>예약 상세</a>}{b.status === 'PENDING_PAYMENT' && <a href={`#/payments/${b.id}`}>토스 테스트 결제</a>}{b.courseId && <a href={`#/my-courses/${b.courseId}`}>이 예약의 내 코스</a>}{b.status === 'COMPLETED' && <a href="#/human-courses/create">휴먼 추천 코스 작성·수정</a>}</div>
       <p className="note">취소·환불 기능은 서버 연결을 준비 중입니다.</p>
     </Card>)}</div></div>;
 }

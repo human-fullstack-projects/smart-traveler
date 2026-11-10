@@ -76,11 +76,6 @@ export default function StayBookingPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  function finishDemoPayment() {
-    setOrderState('confirmed');
-    setNotice('프론트엔드 데모 예약이 완료되었습니다. 실제 결제 승인과 예약 확정은 서버 연동 후 처리됩니다.');
-  }
-
   return (
     <div className="stay-ui stay-booking-page">
       <StayHeader active="booking" />
@@ -157,8 +152,8 @@ export default function StayBookingPage() {
               <PriceSummary room={room} nights={nights} />
               <label className="booking-agreement"><input type="checkbox" checked={agreed} onChange={(event) => setAgreed(event.target.checked)} /><span>취소·환불 규정과 개인정보 제공 내용을 확인했습니다.</span></label>
               {notice && <p className="booking-notice" role={notice.includes('해 주세요') ? 'alert' : 'status'}>{notice}</p>}
-              {orderState === 'held' ? <button type="button" className="booking-pay-button" onClick={finishDemoPayment}>테스트 결제 완료 처리</button> : orderState === 'confirmed' ? <a className="booking-pay-button is-link" href="#/">여행 홈으로</a> : <button type="submit" className="booking-pay-button">예약 내용 확인</button>}
-              <p className="booking-demo-note">PG 결제 전 프론트엔드 데모입니다. 버튼을 눌러도 실제 결제는 발생하지 않습니다.</p>
+              {orderState === 'held' ? <a className="booking-pay-button is-link" href="#/reservations">서버 예약에서 테스트 결제</a> : <button type="submit" className="booking-pay-button">예약 내용 확인</button>}
+              <p className="booking-demo-note">이 화면은 샘플 숙소 정보입니다. 토스 테스트 결제는 서버에서 생성된 내 예약의 결제 대기 주문에서 진행합니다.</p>
             </form>
           </aside>
         </div>

@@ -10,6 +10,8 @@ const validPlan = (plan) => Array.isArray(plan) && plan.every((day) => day && po
 
 export function validState(state) {
   if (!state || !Array.isArray(state.courses) || !Array.isArray(state.reservations) || !positive(state.nextId)) return false;
+  if (state.deletedReservationIds !== undefined && (!Array.isArray(state.deletedReservationIds) || !state.deletedReservationIds.every(text)
+    || new Set(state.deletedReservationIds).size !== state.deletedReservationIds.length)) return false;
   const reservationsValid = state.reservations.every((r) => r && ['id', 'name', 'region', 'dates', 'status', 'checkoutAt'].every((key) => text(r[key]))
     && Number.isFinite(Date.parse(r.checkoutAt)) && typeof r.itineraryFinal === 'boolean' && positive(r.courseVersion) && validPlan(r.plan)
     && (r.versions === undefined || (Array.isArray(r.versions) && r.versions.every((v) => v && positive(v.version) && validPlan(v.plan)) && unique(r.versions, 'version'))));

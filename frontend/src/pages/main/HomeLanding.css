@@ -479,6 +479,7 @@
 }
 
 /* 모바일: 사진을 왼쪽에 둔 작은 가로 카드 */
+.landing-toss-demo { display: inline-flex; align-items: center; min-height: 40px; margin-top: 10px; padding: 0 14px; border: 1px solid #176855; border-radius: 8px; color: #176855; font-size: 13px; font-weight: 700; text-decoration: none; }
 @media (max-width: 700px) {
   .landing-course-grid {
     grid-template-columns: 1fr;

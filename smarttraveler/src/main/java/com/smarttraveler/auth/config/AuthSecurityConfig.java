@@ -56,12 +56,16 @@ public class AuthSecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/auth/terms").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/auth/social/providers", "/api/auth/social/pending").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/auth/social/signup").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/payments/webhook").permitAll()
+                .requestMatchers("/api/payments/demo/**").permitAll()
                 .requestMatchers("/oauth2/authorization/**", "/login/oauth2/code/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/human-courses/exposed", "/api/human-courses/monthly-picks").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/human-courses", "/api/human-courses/*", "/api/human-courses/photos/*").permitAll()
                 .requestMatchers("/admin", "/admin/**", "/api/admin", "/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/", "/login", "/403", "/error", "/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
                 .anyRequest().authenticated());
         http.requestCache(cache -> cache.disable());
+        http.csrf(csrf -> csrf.ignoringRequestMatchers("/api/payments/webhook"));
         http.exceptionHandling(errors -> errors
                 .authenticationEntryPoint((request, response, exception) ->
                         json(response, 401, "{\"message\":\"로그인이 필요합니다.\"}"))

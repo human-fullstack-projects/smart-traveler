@@ -13,6 +13,7 @@ export function creationError(state, reservation) {
   if (reservation.status !== 'COMPLETED') return `${statusNames[reservation.status] || reservation.status}은 작성할 수 없습니다.`;
   if (!(Date.parse(reservation.checkoutAt) < Date.parse(DEMO_NOW))) return '체크아웃 시각이 지나야 작성할 수 있습니다.';
   if (!finalCourse(reservation)?.plan?.length) return '최종 확정된 내 코스가 없습니다.';
+  if (state.deletedReservationIds?.includes(reservation.id)) return '이 예약으로 작성한 글은 삭제 후 다시 작성할 수 없습니다.';
   if (state.courses.some((course) => course.reservationId === reservation.id)) return '이미 작성한 코스가 있습니다. 기존 글을 수정해주세요.';
   return '';
 }
@@ -64,6 +65,7 @@ export function transition(current, action) {
   }
   if (action.type === 'delete') {
     if (!course.mine) return fail('본인 게시글만 삭제할 수 있습니다.');
+    if (course.reservationId) state.deletedReservationIds = [...(state.deletedReservationIds || []), course.reservationId];
     state.courses = state.courses.filter((item) => item.id !== course.id);
     return { state, id: course.id };
   }
