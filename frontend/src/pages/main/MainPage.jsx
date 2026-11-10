@@ -336,11 +336,8 @@ export default function MainPage({ onStart, busy = false }) {
 
     if (busy || inFlight.current) return;
 
-    if (!message.trim()) {
-      setNotice('여행 이야기를 입력해 주세요.');
-      inputRef.current?.focus();
-      return;
-    }
+    const text = message.trim();
+    if (!text) { window.location.hash = '/chat'; return; } // 빈 입력은 챗봇 시작 화면으로
 
     if (!onStart) {
       setNotice('대화 연결을 준비 중이에요. 잠시 후 다시 이용해 주세요.');
@@ -351,7 +348,7 @@ export default function MainPage({ onStart, busy = false }) {
     inFlight.current = true;
 
     try {
-      await onStart(message.trim());
+      await onStart(text);
     } catch {
       setNotice('대화를 시작하지 못했어요. 잠시 후 다시 시도해 주세요.');
     } finally {

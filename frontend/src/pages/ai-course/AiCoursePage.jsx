@@ -40,13 +40,11 @@ export default function AiCoursePage({ onStart, busy = false }) {
 
   async function startConversation() {
     if (busy) return;
-    if (!message.trim()) {
-      setNotice('여행 이야기를 입력해 주세요.');
-      return;
-    }
+    const text = message.trim();
+    if (!text) { window.location.hash = '/chat'; return; } // 빈 입력은 챗봇 시작 화면으로
     if (!onStart) { setNotice('대화 연결을 준비 중입니다.'); return; }
     setNotice('');
-    try { await onStart(message.trim()); }
+    try { await onStart(text); }
     catch { setNotice('대화를 시작하지 못했습니다. 서버 연결을 확인하고 다시 시도해 주세요.'); }
   }
 
