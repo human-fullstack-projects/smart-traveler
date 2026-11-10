@@ -19,8 +19,10 @@ import java.time.LocalTime;
 @DynamicInsert
 @DynamicUpdate
 @Entity
-@Table(name = "place_image")
-/** 장소 이미지 */
+@Table(name = "place_image", uniqueConstraints = {
+        @UniqueConstraint(name = "UQ_place_image_slot", columnNames = {"place_id", "sort_order"})
+})
+/** 장소 이미지. place_id+sort_order는 한 슬롯(대표·썸네일 등)이며 재동기화 때 덮어써야 한다. */
 public class PlaceImage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

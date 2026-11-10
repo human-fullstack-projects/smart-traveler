@@ -48,9 +48,10 @@
 - 호출 한도(`LIMITED_NUMBER_OF_SERVICE_REQUESTS`)에 걸리지 않고 전체 완료.
 - 기존 `syncHub()`(중심관광지 순위)가 만드는 설명 없는 placeholder 장소(73건, `source_provider='KTO_HUB'`)는 Phase 1 대상이 아니라 원래부터 있던 별도 경로이며 의도된 동작이다.
 
-### 2-3. 수집 중 발견한 추가 버그
+### 2-3. 수집 중 발견·수정한 추가 버그: `place_image` 중복 저장
 
-- `place_image`에 `(place_id, sort_order)` 유니크 키가 없어 재동기화할 때마다 같은 이미지가 중복 저장되고 있었다(기존 버그, 이번 작업과 무관하게 존재). 인덱싱 조회 쿼리가 이 중복 때문에 "Subquery returns more than 1 row" 오류로 죽는 걸 발견해, 해당 쿼리만 `ORDER BY place_image_id LIMIT 1`로 방어했다. **근본 수정(유니크 키 추가·기존 중복 정리)은 범위 밖이라 하지 않았음** — 별도 작업으로 필요.
+- `place_image`에 `(place_id, sort_order)` 유니크 키가 없어, `TourSyncService.upsertImage()`의 `ON DUPLICATE KEY UPDATE`가 걸릴 유니크 키 자체가 없어서 **재동기화할 때마다 같은 이미지가 새 행으로 계속 쌓이고 있었다**(기존 버그, DB 전체에 1988행 중 1058행이 중복). 인덱싱 조회 쿼리가 이 중복 때문에 "Subquery returns more than 1 row" 오류로 죽는 걸 보고 발견했다.
+- 조치: ① 중복 그룹별로 가장 최신 행만 남기고 나머지 삭제(1988→930행), ② `PlaceImage` 엔티티에 `@UniqueConstraint(place_id, sort_order)` 추가해 Hibernate `ddl-auto=update`로 제약을 실제로 생성. 이후 해운대구를 다시 동기화해 `place_image` 행 수가 늘지 않고(352→352) `ON DUPLICATE KEY UPDATE`가 정상 동작함을 확인, DB 전체에 중복 그룹이 0건임도 재확인했다.
 
 ## 3. Phase 2: ai-server 임베딩(Chroma) 연결
 
@@ -81,7 +82,6 @@ Spring → ai-server 연동을 실제로 돌렸을 때 `PlaceIndexClient`가 매
 - **Phase 3**: 앵커 선택(이름 우선 매칭) + 반경 필터(위경도 사각형 → haversine) + 의미 검색 + 점수 조합, `/internal/places/search` API.
 - **Phase 4**: LLM이 슬롯별 1곳 선택 + 이유(strict schema), 서버 검증, 시간 계산.
 - **Phase 5**: `PlaceCandidateFinder`/`AiCourseGenerator` 구현체 연결, `RecommendationService`의 503 교체, 프론트 연동.
-- **별도 처리 필요(발견했지만 이번 범위에 포함 안 함)**: `place_image`의 `(place_id, sort_order)` 유니크 키 부재로 인한 중복 저장.
 
 ## 5. 참고
 
@@ -95,6 +95,7 @@ Spring → ai-server 연동을 실제로 돌렸을 때 `PlaceIndexClient`가 매
 - `smarttraveler/src/main/java/com/smarttraveler/chat/StoredPlaceCandidates.java`
 - `smarttraveler/src/main/java/com/smarttraveler/chat/PythonAiClient.java`
 - `smarttraveler/src/main/java/com/smarttraveler/domain/entity/Place.java`
+- `smarttraveler/src/main/java/com/smarttraveler/domain/entity/PlaceImage.java`
 - `smarttraveler/src/main/java/com/smarttraveler/tour/client/TourApiClient.java`
 - `smarttraveler/src/main/java/com/smarttraveler/tour/client/PlaceIndexClient.java` (신규)
 - `smarttraveler/src/main/java/com/smarttraveler/tour/service/TourSyncService.java`
