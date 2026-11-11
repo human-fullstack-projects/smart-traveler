@@ -35,8 +35,7 @@
 
 /* 대화 입력창 */
 .landing-composer {
-  width: min(100%, 1000px);
-  margin: 0 auto;
+  width: 100%;
   padding: 20px;
   border: 1px solid var(--st-line);
   border-radius: 18px;

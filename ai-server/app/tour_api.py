@@ -2,16 +2,31 @@ import logging
 import os
 import threading
 import time
+from pathlib import Path
 from typing import Any
 import httpx
 
 # 인증키가 포함된 외부 요청 주소가 로그에 남지 않도록 한다.
 logging.getLogger("httpx").setLevel(logging.WARNING)
 BASE_URL = "https://apis.data.go.kr/B551011/KorService2"
+_KEY_FILE = Path.home() / ".tourapi_key.txt"
 
 
 class TourApiError(Exception):
     """외부 서비스 설정 또는 응답 오류다."""
+
+
+def _read_key_file() -> str:
+    """환경변수 TOUR_API_KEY가 없을 때 %USERPROFILE%\\.tourapi_key.txt 첫 줄을 읽는다."""
+    try:
+        with _KEY_FILE.open("r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line:
+                    return line
+    except OSError:
+        pass
+    return ""
 
 
 class TourApiClient:
@@ -23,7 +38,11 @@ class TourApiClient:
 
     def _request(self, operation: str, params: dict[str, Any]) -> dict[str, Any]:
         # 공공데이터포털에서 제공하는 일반 인증키(Decoding)를 사용한다.
-        key = (self._key if self._key is not None else os.getenv("TOUR_API_KEY", "")).strip()
+        # 우선순위: 생성자에 직접 넘긴 키 > 환경변수 TOUR_API_KEY > .tourapi_key.txt 첫 줄 (Spring TourApiClient와 동일한 규칙).
+        if self._key is not None:
+            key = self._key.strip()
+        else:
+            key = os.getenv("TOUR_API_KEY", "").strip() or _read_key_file()
         if not key:
             raise TourApiError("관광정보 API 인증키가 설정되지 않았습니다.")
         query = {"serviceKey": key, "MobileOS": "ETC", "MobileApp": "SmartTraveler", "_type": "json", **params}

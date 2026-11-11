@@ -5,11 +5,15 @@ load_dotenv(pathlib.Path(__file__).resolve().parent.parent / ".env")  # 실행 �
 from fastapi import FastAPI, HTTPException, Query
 from .tour_api import TourApiClient, TourApiError
 from .graph import build_graph
-from .rag import index_places, remove_places
-from .schemas import DialogueRequest, DialogueResponse, PlaceIndexRequest, PlaceRemoveRequest
+from .rag import index_places, remove_places, sync_from_mariadb
+from .search import search_candidates
+from .course_graph import build_course_graph
+from .schemas import (DialogueRequest, DialogueResponse, PlaceIndexRequest, PlaceRemoveRequest,
+                      PlaceSyncRequest, PlaceSearchRequest, CourseRecommendRequest)
 
 app = FastAPI(title="스마트 트래블 AI 서버")
-graph = build_graph()
+graph = build_graph()                 # 기존 대화 그래프
+course_graph = build_course_graph()   # 새 코스 그래프
 tour = TourApiClient()
 
 
@@ -62,3 +66,34 @@ def place_remove(request: PlaceRemoveRequest):
     """is_active=FALSE가 된 장소를 Chroma에서 지운다."""
     remove_places(request.placeIds)
     return {"removed": len(request.placeIds)}
+
+
+@app.post("/internal/places/sync")
+def place_sync(request: PlaceSyncRequest):
+    """MariaDB → Chroma 적재. 한 시군구의 장소를 MariaDB에서 읽어 임베딩해 넣는다."""
+    try:
+        return sync_from_mariadb(request.sigunguCode)
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail="MariaDB 연결 또는 임베딩(OpenAI) 설정을 확인해 주세요.") from exc
+
+
+@app.post("/internal/places/search")
+def place_search(request: PlaceSearchRequest):
+    """앵커 1곳과 앵커 반경 안의 슬롯별 후보를 돌려준다."""
+    try:
+        return search_candidates(request.sigunguCode, request.anchorName, request.transportType,
+                                 request.slots, request.queries, request.excludePlaceIds)
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail="장소 검색을 처리할 수 없습니다. 임베딩(OpenAI)과 Chroma 상태를 확인해 주세요.") from exc
+
+
+@app.post("/internal/courses/recommend")
+def course_recommend(request: CourseRecommendRequest):
+    """LangGraph 코스 그래프를 실행한다: Chroma 검색(RAG) → 조합 → OpenAI 응답 생성 → 검증."""
+    try:
+        result = course_graph.invoke({"request": request.model_dump()})["result"]
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail="코스를 만들 수 없습니다. 임베딩(OpenAI)과 Chroma 상태를 확인해 주세요.") from exc
+    if "error" in result:
+        raise HTTPException(status_code=422, detail=result["error"])
+    return result

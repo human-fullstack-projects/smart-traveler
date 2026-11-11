@@ -1,9 +1,13 @@
 import os
+from pathlib import Path
 import chromadb
 from langchain_openai import OpenAIEmbeddings
+from . import db
 from .schemas import PlaceRow
 
-client = chromadb.PersistentClient(path="./chroma_data")
+# 실행 위치와 상관없이 ai-server/chroma_data를 쓴다
+CHROMA_PATH = Path(__file__).resolve().parent.parent / "chroma_data"
+client = chromadb.PersistentClient(path=str(CHROMA_PATH))
 places = client.get_or_create_collection("places", metadata={"hnsw:space": "cosine"})
 _embeddings: OpenAIEmbeddings | None = None
 
@@ -38,8 +42,27 @@ def popularity(p: PlaceRow) -> float:
     return round(0.5 * has_image + 0.5 * rich_desc, 3)
 
 
+def is_indexable(p: PlaceRow) -> bool:
+    """주소와 소개가 둘 다 없는 장소(이름만 있는 행)는 의미 검색에 쓸 수 없어 넣지 않는다."""
+    return bool(p.description or p.address)
+
+
+def to_metadata(r: PlaceRow) -> dict:
+    """Chroma 메타데이터. None은 넣을 수 없으니 기본값을 채운다."""
+    return {
+        "place_id": r.placeId,
+        "place_type": r.placeType,
+        "is_market": bool(r.isMarket),
+        "sigungu_code": r.sigunguCode,
+        "lat": float(r.lat),
+        "lng": float(r.lng),
+        "popularity": popularity(r),
+    }
+
+
 def index_places(rows: list[PlaceRow]) -> int:
-    """장소를 임베딩해 Chroma에 upsert한다. 같은 place_id는 덮어쓴다."""
+    """장소를 임베딩(OpenAI)해 Chroma에 upsert한다. 같은 place_id는 덮어쓴다."""
+    rows = [r for r in rows if is_indexable(r)]
     if not rows:
         return 0
     docs = [to_document(r) for r in rows]
@@ -47,15 +70,7 @@ def index_places(rows: list[PlaceRow]) -> int:
         ids=[str(r.placeId) for r in rows],
         embeddings=get_embeddings().embed_documents(docs),
         documents=docs,
-        metadatas=[{
-            "place_id": r.placeId,
-            "place_type": r.placeType,
-            "is_market": bool(r.isMarket),
-            "sigungu_code": r.sigunguCode,
-            "lat": float(r.lat),
-            "lng": float(r.lng),
-            "popularity": popularity(r),
-        } for r in rows],
+        metadatas=[to_metadata(r) for r in rows],
     )
     return len(rows)
 
@@ -65,3 +80,46 @@ def remove_places(place_ids: list[int]) -> None:
     if not place_ids:
         return
     places.delete(ids=[str(i) for i in place_ids])
+
+
+def to_bool(v) -> bool:
+    """MariaDB BIT(1) 칼럼은 pymysql이 bytes(b'\\x00'/b'\\x01')로 돌려준다.
+    bool(b'\\x00')은 True이므로(빈 바이트가 아니라서) 그대로 bool()에 넘기면 안 된다."""
+    if isinstance(v, bytes):
+        return v != b"\x00"
+    return bool(v)
+
+
+def to_place_row(r: dict) -> PlaceRow:
+    """MariaDB 한 행 → PlaceRow (Spring이 보내는 형식과 같다)."""
+    return PlaceRow(
+        placeId=r["place_id"], placeType=r["place_type"], name=r["name"], address=r["address"],
+        description=r["description"], mainMenu=r["main_menu"], closedDays=r["closed_days"],
+        isMarket=to_bool(r["is_market"]), sigunguCode=r["region_code"],
+        lat=float(r["latitude"]), lng=float(r["longitude"]),
+        imageUrl=r["image_url"], hubRank=r["hub_rank"],
+    )
+
+
+def sync_from_mariadb(sigungu_code: str, batch_size: int = 100) -> dict:
+    """MariaDB → Chroma 적재 (한 시군구).
+    1) MariaDB에서 활성·좌표 보유 장소를 읽는다
+    2) 문서가 새로 생겼거나 바뀐 장소만 OpenAI로 임베딩해 넣는다 (비용 절약)
+    3) 문서가 같은 장소는 메타데이터(인기도·시장 여부 등)만 고친다
+    4) MariaDB에서 비활성이 됐거나 넣을 수 없게 된 장소는 Chroma에서 지운다"""
+    all_rows = [to_place_row(x) for x in db.read_places(sigungu_code)]
+    rows = [r for r in all_rows if is_indexable(r)]
+    existing = places.get(where={"sigungu_code": sigungu_code}, include=["documents"])
+    old_docs = dict(zip(existing["ids"], existing["documents"]))
+
+    changed = [r for r in rows if old_docs.get(str(r.placeId)) != to_document(r)]
+    same = [r for r in rows if old_docs.get(str(r.placeId)) == to_document(r)]
+    for i in range(0, len(changed), batch_size):
+        index_places(changed[i:i + batch_size])
+    if same:
+        places.update(ids=[str(r.placeId) for r in same], metadatas=[to_metadata(r) for r in same])
+
+    keep = {str(r.placeId) for r in rows}
+    stale = [int(i) for i in old_docs if i not in keep]
+    remove_places(stale)
+    return {"read": len(all_rows), "skipped": len(all_rows) - len(rows), "embedded": len(changed), "unchanged": len(same), "removed": len(stale)}
