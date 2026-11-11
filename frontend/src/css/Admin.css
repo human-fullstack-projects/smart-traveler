@@ -1,16 +1,38 @@
-/* 관리자 화면 (공유 CSS 변수만 사용) */
-.adm { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; background: var(--st-bg); }
-.adm-side { position: sticky; top: 0; height: 100vh; padding: 24px 16px; border-right: 1px solid var(--st-line); background: var(--st-surface); display: flex; flex-direction: column; gap: 4px; }
+/* 관리자 전용 색상은 관리자 루트에만 적용 */
+.adm {
+  --st-bg: #F1F4FA;
+  --st-surface: #FFFFFF;
+  --st-ink: #202A3F;
+  --st-muted: #43516A;
+  --st-title: #233A63;
+  --st-teal: #244A91;
+  --st-aqua: #DDE8FA;
+  --st-aqua-hover: #C9DCF8;
+  --st-line: #C9D5E7;
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  width: 100%;
+  min-height: 100vh;
+  background: var(--st-bg);
+}
+.adm * { box-sizing: border-box; }
+.adm-side { min-width: 0; }
+.adm-side .adm-logo { color: #FFFFFF; }
+.adm-side .adm-logo small { color: #C9DCF8; }
+.adm-side .adm-badge { background: #DDE8FA; color: #202A3F; }
+.adm-side .adm-side-foot { color: #DDE8FA; border-top-color: #52698B; }
+.adm-side { position: sticky; top: 0; height: 100vh; padding: 24px 16px; border-right: 1px solid #52698B; background: #233A63; display: flex; flex-direction: column; gap: 4px; }
 .adm-logo { display: block; margin: 0 8px 18px; color: var(--st-title); font-family: var(--st-font-title); font-weight: 900; font-size: 24px; line-height: 1.1; }
 .adm-logo small { display: block; margin-top: 4px; color: var(--st-muted); font-family: var(--st-font-body); font-weight: 700; font-size: 12px; letter-spacing: .1em; }
-.adm-side a { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-radius: var(--st-radius-s); color: var(--st-muted); font-weight: 700; font-size: 15px; }
-.adm-side a:hover { color: var(--st-teal); background: rgba(163, 206, 202, .2); }
+.adm-side a { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-radius: var(--st-radius-s); color: #DDE8FA; font-weight: 700; font-size: 15px; }
+.adm-side a:hover { color: #FFFFFF; background: #314D79; }
 .adm-side a[aria-current="page"] { color: var(--st-ink); background: var(--st-aqua); }
 .adm-badge { min-width: 22px; padding: 1px 7px; border-radius: 999px; background: var(--st-teal); color: #fff; font-size: 12px; text-align: center; }
 .adm-side-foot { margin-top: auto; padding: 12px; border-top: 1px solid var(--st-line); font-size: 13px; color: var(--st-muted); }
-.adm-side-foot button { margin-top: 8px; width: 100%; min-height: 38px; font-size: 14px; padding: 6px 12px; }
 .adm-main { padding: 28px 40px 60px; min-width: 0; }
 .adm-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; margin-bottom: 20px; }
+.adm-head-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.adm-head-actions .st-btn { min-height: 38px; padding: 6px 16px; font-size: 14px; white-space: nowrap; }
 .adm-head h1 { margin: 0; color: var(--st-title); font-family: var(--st-font-title); font-weight: 900; font-size: 34px; }
 .adm-head p { margin: 4px 0 0; color: var(--st-muted); font-size: 14px; }
 .adm-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-bottom: 24px; }
@@ -28,13 +50,13 @@
 .adm-card-title { margin: 0; padding: 14px 18px; border-bottom: 1px solid var(--st-line); color: var(--st-ink); font-weight: 700; font-size: 16px; }
 .adm-table-wrap { overflow-x: auto; }
 .adm-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-.adm-table th { padding: 10px 14px; background: rgba(163, 206, 202, .25); color: var(--st-muted); font-weight: 700; text-align: left; white-space: nowrap; }
+.adm-table th { padding: 10px 14px; background: #E7EEFA; color: var(--st-muted); font-weight: 700; text-align: left; white-space: nowrap; }
 .adm-table td { padding: 10px 14px; border-top: 1px solid var(--st-line); color: var(--st-ink); vertical-align: middle; }
 .adm-table tbody tr { cursor: pointer; }
-.adm-table tbody tr:hover td { background: rgba(163, 206, 202, .15); }
-.adm-table tbody tr[aria-selected="true"] td { background: rgba(163, 206, 202, .35); }
+.adm-table tbody tr:hover td { background: #F1F4FA; }
+.adm-table tbody tr[aria-selected="true"] td { background: #DDE8FA; }
 .adm-empty { padding: 28px 18px; color: var(--st-muted); text-align: center; font-size: 14px; }
-.adm-pill { display: inline-block; padding: 2px 10px; border-radius: 999px; background: rgba(163, 206, 202, .45); color: var(--st-ink); font-weight: 700; font-size: 12px; white-space: nowrap; }
+.adm-pill { display: inline-block; padding: 2px 10px; border-radius: 999px; background: #DDE8FA; color: var(--st-ink); font-weight: 700; font-size: 12px; white-space: nowrap; }
 .adm-pill.warn { background: #F3E3B8; }
 .adm-pill.bad { background: rgba(168, 59, 75, .15); color: var(--st-danger); }
 .adm-pill.off { background: var(--st-line); color: var(--st-muted); }
@@ -46,7 +68,7 @@
 .adm-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--st-line); }
 .adm-actions .st-btn { min-height: 38px; padding: 6px 16px; font-size: 14px; }
 .adm-actions .st-input { flex: 1 1 100%; min-height: 40px; margin: 0; font-size: 14px; }
-.adm-msg { margin: 0 0 14px; padding: 10px 14px; border-radius: var(--st-radius-s); background: rgba(163, 206, 202, .4); font-size: 14px; }
+.adm-msg { margin: 0 0 14px; padding: 10px 14px; border-radius: var(--st-radius-s); background: #DDE8FA; font-size: 14px; }
 .adm-msg.error { background: rgba(168, 59, 75, .12); color: var(--st-danger); }
 .adm-mini td, .adm-mini th { padding: 6px 10px; font-size: 13px; }
 .adm-guard { display: grid; place-items: center; min-height: 100vh; background: var(--st-bg); }
@@ -70,7 +92,7 @@
 .adm-tabs { display: inline-flex; gap: 4px; padding: 4px; border-radius: 12px; background: var(--st-surface); border: 1px solid var(--st-line); }
 .adm-tabs button { display: inline-flex; align-items: center; gap: 8px; min-height: 38px; padding: 6px 16px; border: 0; border-radius: 9px; background: transparent; color: var(--st-muted); font-family: var(--st-font-body); font-weight: 700; font-size: 14px; cursor: pointer; }
 .adm-tabs button[aria-selected="true"] { background: var(--st-aqua); color: var(--st-ink); }
-.adm-tab-count { min-width: 22px; padding: 1px 7px; border-radius: 999px; background: rgba(47,111,109,.15); color: var(--st-teal); font-size: 12px; }
+.adm-tab-count { min-width: 22px; padding: 1px 7px; border-radius: 999px; background: #DDE8FA; color: var(--st-teal); font-size: 12px; }
 .adm-sub { display: flex; align-items: center; gap: 8px; margin: 12px 0 6px; }
 .adm-mini-pager { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; color: var(--st-muted); font-size: 12px; }
 .adm-mini-pager button { width: 26px; height: 26px; border: 1px solid var(--st-line); border-radius: 6px; background: var(--st-surface); cursor: pointer; }
@@ -85,3 +107,17 @@
 .adm-stats-row .adm-stat strong { font-size: 28px; }
 .adm-table td { padding: 8px 14px; }
 @media (max-width: 1100px) { .adm-stats-row { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+/* 큰 PC 화면에서는 폭을 모두 쓰고 표는 카드 안에서만 넘치게 한다. */
+.adm .adm-main { width: 100%; max-width: none; }
+.adm .adm-split > *, .adm .adm-card { min-width: 0; }
+.adm .adm-table-wrap { max-width: 100%; }
+.adm .adm-table td { overflow-wrap: anywhere; }
+@media (min-width: 1600px) {
+  .adm .adm-stats { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .adm .adm-split { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); }
+  .adm .adm-main { padding-inline: 40px; }
+}
+@media (max-width: 800px) {
+  .adm .adm-head { align-items: flex-start; flex-wrap: wrap; }
+}
