@@ -1,0 +1,5 @@
+.guest-ai-notice::backdrop { background: rgb(0 0 0 / 40%); }
+.guest-ai-notice { width: min(calc(100% - 48px), 480px); border: 0; padding: 28px; border-radius: 20px; background: white; color: #253b33; box-shadow: 0 20px 60px rgb(0 0 0 / 20%); }
+.guest-ai-notice h2 { margin-top: 0; }
+.guest-ai-notice p { line-height: 1.7; }
+.guest-ai-notice .actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }

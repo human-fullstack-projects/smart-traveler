@@ -46,7 +46,7 @@ export default function MyCourses({ courses = [], isGuest, member, addCourse, co
       <p>{course.region} · {course.startDate} ~ {course.endDate}</p>
       {courseId && course.days.map((day, index) => <section key={day.date}><h3>{index + 1}일차 · {day.date}</h3>{day.places.length ? <ol>{day.places.map((p, i) => <li key={`${i}-${p}`}>{p}</li>)}</ol> : <p>등록된 장소가 없습니다.</p>}</section>)}
     </Card>)}</div>
-    {!courseId && <Card style={{ marginTop: 24 }}>
+    {!isGuest && !courseId && <Card style={{ marginTop: 24 }}>
       <h2>임시 코스 보관</h2><p className="note">직접 입력한 초안입니다. AI 생성이나 예약 확정은 처리하지 않습니다. 장소는 첫날에 보관합니다.</p>
       <form onSubmit={submit}><fieldset disabled={busy}>
         <label>코스명<input name="title" maxLength={200} required /></label>

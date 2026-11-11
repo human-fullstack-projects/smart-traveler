@@ -32,6 +32,7 @@ export function createMyPageSession(api) {
   let viewer = null;
   let epoch = 0;
   let drafts = [];
+  let trialCourseId = null;
   const listeners = new Set();
   const publish = value => { snapshot = { ...snapshot, ...value }; listeners.forEach(fn => fn()); };
   const pending = id => drafts.filter(d => d.owner === id);
@@ -69,6 +70,23 @@ export function createMyPageSession(api) {
   return {
     subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
     getSnapshot() { return snapshot; },
+    saveTrialCourse(conditions) {
+      if (snapshot.identity !== 'guest' || snapshot.status !== 'ready') throw new Error('비회원 상태를 확인한 뒤 다시 시도해 주세요.');
+      if (trialCourseId) throw new Error('비회원 임시 코스는 1회만 보관할 수 있습니다. 내 여행 코스에서 확인해 주세요.');
+      if (!Number.isInteger(conditions.durationDays) || conditions.durationDays < 1 || conditions.durationDays > 7) throw new Error('여행 기간을 확인해 주세요.');
+      const end = new Date(`${conditions.startDate}T00:00:00Z`);
+      if (Number.isNaN(end.getTime())) throw new Error('출발 날짜를 확인해 주세요.');
+      end.setUTCDate(end.getUTCDate() + conditions.durationDays - 1);
+      const course = makeDraft({ title: `${conditions.regionName || '여행'} 임시 코스`, region: conditions.regionName,
+        startDate: conditions.startDate, endDate: end.toISOString().slice(0, 10) });
+      course.days = course.days.map(day => ({ ...day, places: (conditions.fixedEvents || [])
+        .filter(event => event.date === day.date).sort((a, b) => a.startTime.localeCompare(b.startTime))
+        .map(event => `${event.startTime} ${event.placeName}`) }));
+      drafts.push({ owner: null, course });
+      trialCourseId = course.clientId;
+      publish({ courses: pending(null).map(d => ({ ...d.course, id: d.course.clientId, state: 'GUEST' })) });
+      return course.clientId;
+    },
     setIdentity(member, checked, failed) {
       ++epoch;
       viewer = checked && !failed ? member?.memberId || null : null;
@@ -94,6 +112,6 @@ export function createMyPageSession(api) {
       else publish({ courses: pending(null).map(d => ({ ...d.course, id: d.course.clientId, state: 'GUEST' })) });
     },
     refresh,
-    clear() { ++epoch; viewer = null; drafts = []; publish({ identity: 'guest', status: 'ready', error: '', ...emptyData(), pendingCount: 0 }); },
+    clear() { ++epoch; viewer = null; drafts = []; trialCourseId = null; publish({ identity: 'guest', status: 'ready', error: '', ...emptyData(), pendingCount: 0 }); },
   };
 }

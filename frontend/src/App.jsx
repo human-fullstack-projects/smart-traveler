@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import HomePage, { Intro, PanelHeader } from './pages/home/HomePage';
 import LoginPage from './pages/auth/LoginPage';
 import SignupPage from './pages/auth/SignupPage';
 import SocialSignupPage from './pages/auth/SocialSignupPage';
+import { createReturnPage } from './pages/auth/returnPage';
 import AdminApp, { AdminGuard } from './pages/admin/AdminApp';
 import AiCoursePage from './pages/ai-course/AiCoursePage';
 import AiChatPage from './pages/ai-chat/AiChatPage';
@@ -82,6 +83,8 @@ export default function App() {
   const myPageStore = useMyPageStore({ member, authChecked, authCheckFailed, authRevision });
   const humanCourses = useHumanCourses(member);
   const [route, setRoute] = useState(window.location.hash.slice(1) || '/');
+  const returnPage = useRef(null);
+  if (!returnPage.current) returnPage.current = createReturnPage(route);
   const [notice, setNotice] = useState('');
   const chat = useAiChat();
 
@@ -90,16 +93,19 @@ export default function App() {
   }, [authCheckFailed]);
 
   useEffect(() => {
-    const update = () => { setRoute(window.location.hash.slice(1) || '/'); setNotice(''); window.scrollTo(0, 0); };
+    const update = () => {
+      const next = window.location.hash.slice(1) || '/';
+      returnPage.current.remember(next);
+      setRoute(next); setNotice(''); window.scrollTo(0, 0);
+    };
     window.addEventListener('hashchange', update);
     return () => window.removeEventListener('hashchange', update);
   }, []);
 
   function loggedIn(value) {
-    const hasGuestCourses = myPageStore.isGuest && myPageStore.courses.length > 0;
     login(value);
     setNotice('');
-    window.location.hash = value?.roleCode === 'ADMIN' ? '/admin' : hasGuestCourses ? '/my-courses' : '/';
+    window.location.hash = returnPage.current.get();
   }
 
   async function handleLogout() {
@@ -131,7 +137,7 @@ export default function App() {
     return <div className="app-shell">
       <SiteHeader route={route} member={member} onLogout={handleLogout} loggingOut={loggingOut} onUnavailable={(label) => setNotice(`${label} 페이지는 연결 준비 중입니다.`)} />
       {notice && <div className="navigation-notice" role="status">{notice}<button onClick={() => setNotice('')} aria-label="알림 닫기">×</button></div>}
-      <main className="main-content"><TopNavScreen onLogin={loggedIn} /></main>
+      <main className="main-content"><TopNavScreen onLogin={loggedIn} guestCourseCount={myPageStore.isGuest ? myPageStore.courses.length : 0} /></main>
       <SiteFooter />
     </div>;
   }
@@ -154,8 +160,8 @@ export default function App() {
     const blocked = access !== 'allowed' ? access : needsTravelData && ['login', 'denied', 'unavailable'].includes(myPageStore.status) ? myPageStore.status : null;
     content = <>
       <div className="mypage"><MyPageMenu currentPage={myCourseMatch ? 'my-courses' : routePath.slice(1)} isGuest={!member} />
-        {myPageStore.pendingCount > 0 && <p role="status">회원 연결을 기다리는 임시 코스가 {myPageStore.pendingCount}개 있습니다. 이 페이지를 새로고침하지 말고 다시 시도해 주세요.</p>}
-        {myPageStore.error && <p className="warning" role="alert">{myPageStore.error} <button type="button" onClick={myPageStore.retry}>다시 불러오기·연결</button></p>}
+        {member && myPageStore.pendingCount > 0 && <p role="status">회원 연결을 기다리는 임시 코스가 {myPageStore.pendingCount}개 있습니다. 이 페이지를 새로고침하지 말고 다시 시도해 주세요.</p>}
+        {member && myPageStore.error && <p className="warning" role="alert">{myPageStore.error} <button type="button" onClick={myPageStore.retry}>다시 불러오기·연결</button></p>}
       </div>
       {blocked ? <AccessNotice kind={blocked} onRetry={blocked === 'unavailable' ? retryAuth : undefined} /> : needsTravelData && ['checking', 'loading'].includes(myPageStore.status)
         ? <p role="status">내 자료를 불러오고 있습니다.</p>
@@ -177,7 +183,12 @@ export default function App() {
       {HumanCourseScreen ? <HumanCourseScreen key={routePath} {...humanCourses} courseId={courseMatch?.[1]} /> : <div className="human-courses"><section className="panel"><h1>페이지를 찾을 수 없습니다.</h1><a className="button" href="#/human-courses">코스 목록으로</a></section></div>}
     </>;
   } else if (isChat) {
-    content = <AiChatPage {...chat} />;
+    content = <AiChatPage {...chat} onSaveTrialCourse={myPageStore.isGuest ? () => {
+      try {
+        myPageStore.saveTrialCourse(chat.conditions);
+        window.location.hash = '/my-courses';
+      } catch (error) { setNotice(error.message); }
+    } : undefined} />;
   } else {
     const SidebarScreen = sidebarPageRoutes[routePath] || HomePage;
     content = <SidebarScreen key={routePath} onLogin={loggedIn} onStart={chat.startChat} busy={chat.busy} />;

@@ -32,7 +32,7 @@ for (const bad of [{ endDate: '2026-12-09' }, { startDate: '2026-02-30' }, { end
 const guestAuth = { member: null, authChecked: true, authCheckFailed: false };
 assert.equal(routeAccess('/mypage', guestAuth), 'allowed');
 assert.equal(routeAccess('/my-courses/guest-id', guestAuth), 'allowed');
-for (const route of ['/reservations', '/reservations/7', '/my-posts', '/my-posts/7']) assert.equal(routeAccess(route, guestAuth), 'login');
+for (const route of ['/reservations', '/reservations/7', '/my-posts', '/my-posts/7', '/my-profile', '/my-travel-style']) assert.equal(routeAccess(route, guestAuth), 'login');
 assert.equal(routeAccess('/my-courses', { ...guestAuth, authChecked: false }), 'checking');
 assert.equal(routeAccess('/mypage', { ...guestAuth, authCheckFailed: true }), 'unavailable');
 
@@ -140,3 +140,56 @@ assert.equal(unauthorized.getSnapshot().status, 'login');
 unauthorized.setIdentity(null, true, true);
 await assert.rejects(() => unauthorized.addCourse(input));
 console.log('PASS: 초안 검증, 비회원 접근, 임시 보관, 회원 연결, 실패 재시도, 중복 방지, 계정 분리, 늦은 응답 폐기, 이탈 초기화');
+
+for (const route of ['/mypage', '/my-courses', '/my-courses/7', '/reservations', '/reservations/7', '/my-posts', '/my-posts/7', '/my-profile', '/my-travel-style']) {
+  assert.equal(routeAccess(route, { ...guestAuth, member: { memberId: 7 } }), 'allowed');
+  assert.equal(routeAccess(route, { ...guestAuth, authChecked: false }), 'checking');
+  assert.equal(routeAccess(route, { ...guestAuth, authCheckFailed: true }), 'unavailable');
+}
+
+assert.equal(routeAccess('/my-courses', guestAuth), 'allowed');
+
+const trial = createMyPageSession(fakeApi());
+trial.setIdentity(null, true, false);
+const conditions = { regionName: 'Busan', startDate: '2026-12-10', durationDays: 2, fixedEvents: [
+  { date: '2026-12-11', startTime: '14:00', placeName: 'Beach' },
+] };
+assert.throws(() => trial.saveTrialCourse({ ...conditions, startDate: 'invalid' }));
+assert.equal(trial.getSnapshot().courses.length, 0);
+const trialId = trial.saveTrialCourse(conditions);
+assert.equal(trial.getSnapshot().courses.length, 1);
+assert.equal(trial.getSnapshot().courses[0].id, trialId);
+assert.equal(trial.getSnapshot().courses[0].endDate, '2026-12-11');
+assert.deepEqual(trial.getSnapshot().courses[0].days[0].places, []);
+assert.deepEqual(trial.getSnapshot().courses[0].days[1].places, ['14:00 Beach']);
+trial.setIdentity(null, true, false);
+assert.equal(trial.getSnapshot().courses[0].id, trialId);
+assert.throws(() => trial.saveTrialCourse(conditions));
+assert.equal(trial.getSnapshot().courses.length, 1);
+trial.clear();
+assert.equal(trial.getSnapshot().courses.length, 0);
+trial.setIdentity(null, true, false);
+assert.equal(trial.getSnapshot().courses.length, 0);
+console.log('PASS: one trial course, day mapping, navigation retention, leave cleanup');
+
+for (const flow of ['signup-login', 'existing-login']) {
+  const transferApi = fakeApi();
+  const transfer = createMyPageSession(transferApi);
+  transfer.setIdentity(null, true, false);
+  const clientId = transfer.saveTrialCourse(conditions);
+  transfer.setIdentity(null, true, false);
+  assert.equal(transfer.getSnapshot().courses.length, 1, flow);
+  await transfer.setIdentity(member(42), true, false);
+  assert.equal(transferApi.calls.length, 1, flow);
+  assert.equal(transferApi.calls[0].courses[0].clientId, clientId, flow);
+  assert.equal(transfer.getSnapshot().pendingCount, 0, flow);
+  assert.deepEqual(transfer.getSnapshot().courses[0].days[1].places, ['14:00 Beach'], flow);
+  await transfer.setIdentity(member(42), true, false);
+  assert.equal(transferApi.calls.length, 1, flow);
+  transfer.clear();
+  await transfer.setIdentity(member(42), true, false);
+  assert.equal(transfer.getSnapshot().courses.length, 1, flow);
+  await transfer.setIdentity(member(43), true, false);
+  assert.equal(transfer.getSnapshot().courses.length, 0, flow);
+}
+console.log('PASS: trial transfer after signup/login, persistent member storage, no duplicate, account isolation');

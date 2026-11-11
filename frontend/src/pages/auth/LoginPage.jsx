@@ -6,7 +6,7 @@ import OwnerReviewPage from './OwnerReviewPage';
 import { useAuth } from '../../contexts/AuthContext';
 
 // 로그인 (AUTH) — 처리 로직은 sein/v1 그대로, 화면만 공유 CSS(st-*)로.
-export default function LoginPage({ onLogin }) {
+export default function LoginPage({ onLogin, guestCourseCount = 0 }) {
   const { member: currentMember, login: updateAuth } = useAuth();
   const [loginId, setLoginId] = useState('');
   const [password, setPassword] = useState('');
@@ -71,6 +71,7 @@ export default function LoginPage({ onLogin }) {
             <p className="auth-kicker">WELCOME BACK</p>
             <h1 id="login-title" className="st-h2" ref={titleRef} tabIndex={-1}>다시 만나 반가워요</h1>
             <p>로그인하고 나만의 여행을 이어가세요.</p>
+            {guestCourseCount > 0 && <p className="st-note">보관한 여행 코스 {guestCourseCount}건을 로그인한 계정의 내 여행 코스로 연결합니다. 연결이 끝날 때까지 새로고침하거나 사이트를 떠나지 마세요.</p>}
           </div>
           <form className="auth-form" onSubmit={submit} noValidate aria-busy={busy}>
             <label className={`st-field${errors.loginId ? ' st-field-error' : ''}`}>아이디
