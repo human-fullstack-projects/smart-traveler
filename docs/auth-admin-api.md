@@ -22,7 +22,7 @@
 
 업주는 `role:"OWNER"`와 `businessNumber`, `businessName`, `representativeName`, `businessAddress`, `businessPhone`을 추가합니다. 가입과 동시에 `owner_profiles.review_status_code=PENDING`이 됩니다. 약관 ID는 현재 시행 중인 `terms` 행의 ID를 사용합니다. 필수 약관에 동의하지 않으면 400, 아이디·이메일·사업자번호 중복이면 409입니다. 비밀번호는 현재 임시 규칙으로 영문·숫자를 포함한 8~72자이며 BCrypt로 저장합니다. 닉네임·이메일 필수 여부와 비밀번호 상세 규칙은 팀 정책 확정이 필요합니다.
 
-로컬 시험 계정은 `smarttraveler/src/main/resources/sample-data/auth_test_accounts.sql`을 **`smart_travel_db`에만** 실행해 넣습니다. `team_test` / `123456`은 USER, `m55_admin` / `123456`은 ADMIN입니다. SQL에는 BCrypt 해시만 있습니다. 이 파일은 로컬 테스트 약관 2건도 등록합니다. 실제 서비스 계정으로 사용하지 마세요.
+로컬 시험 계정은 `smarttraveler/src/main/resources/sample-data/auth_test_accounts.sql`을 **`smart_travel_db`에만** 실행해 넣습니다. `team_test` / `123456`은 USER, `admin` / `123456`은 ADMIN입니다(예전 DB의 `m55_admin`은 남아 있을 수 있음). 업주 `owner1`~`owner145`·여행자 `user1`~`user5`(비번 모두 `123456`)는 서버를 켜면 자동으로 들어갑니다 — 전체 목록은 [시험계정.md](시험계정.md). SQL에는 BCrypt 해시만 있습니다. 이 파일은 로컬 테스트 약관 2건도 등록합니다. 실제 서비스 계정으로 사용하지 마세요.
 
 ## 관리자
 
