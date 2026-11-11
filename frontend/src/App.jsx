@@ -29,6 +29,8 @@ import MyCourses from './pages/mypage/pages/MyCourses';
 import MyPosts from './pages/mypage/pages/MyPosts';
 import ProfilePage from './pages/mypage/profile/ProfilePage';
 import TravelStylePage from './pages/mypage/preferences/TravelStylePage';
+import { settingsApi } from './pages/mypage/api/settingsApi';
+import { surveyDone } from './pages/mypage/data/settings';
 import useMyPageStore from './pages/mypage/hooks/useMyPageStore';
 import AccessNotice from './pages/mypage/components/AccessNotice';
 import { routeAccess } from './pages/mypage/data/store';
@@ -83,7 +85,26 @@ export default function App() {
   const humanCourses = useHumanCourses(member);
   const [route, setRoute] = useState(window.location.hash.slice(1) || '/');
   const [notice, setNotice] = useState('');
+  const [survey, setSurvey] = useState({ memberId: null, status: 'idle', data: null });
   const chat = useAiChat();
+
+  useEffect(() => {
+    const memberId = member?.memberId;
+    if (!authChecked || authCheckFailed || member?.roleCode !== 'USER' || !memberId) {
+      setSurvey({ memberId: null, status: 'idle', data: null });
+      return;
+    }
+    let cancelled = false;
+    let skipped = false;
+    try { skipped = sessionStorage.getItem(`st-survey-skip-${memberId}`) === '1'; } catch { /* storage unavailable */ }
+    if (skipped) { setSurvey({ memberId, status: 'skipped', data: null }); return; }
+    setSurvey({ memberId, status: 'loading', data: null });
+    settingsApi.preferences(memberId).then(data => {
+      if (cancelled || data.memberId !== memberId) return;
+      setSurvey({ memberId, status: surveyDone(data.tags) ? 'done' : 'needed', data });
+    }).catch(() => { if (!cancelled) setSurvey({ memberId, status: 'error', data: null }); });
+    return () => { cancelled = true; };
+  }, [authChecked, authCheckFailed, member?.memberId, member?.roleCode, authRevision]);
 
   useEffect(() => {
     if (authCheckFailed) setNotice('로그인 상태를 확인할 서버에 연결하지 못했어요. Spring Boot 실행 상태를 확인해주세요.');
@@ -97,6 +118,7 @@ export default function App() {
 
   function loggedIn(value) {
     const hasGuestCourses = myPageStore.isGuest && myPageStore.courses.length > 0;
+    try { sessionStorage.removeItem(`st-survey-skip-${value?.memberId}`); } catch { /* storage unavailable */ }
     login(value);
     setNotice('');
     window.location.hash = value?.roleCode === 'ADMIN' ? '/admin' : hasGuestCourses ? '/my-courses' : '/';
@@ -105,6 +127,7 @@ export default function App() {
   async function handleLogout() {
     try {
       await logout();
+      try { sessionStorage.removeItem(`st-survey-skip-${member?.memberId}`); } catch { /* storage unavailable */ }
       setNotice('로그아웃했어요.');
       if (window.location.hash.startsWith('#/admin')) window.location.hash = '/';
     } catch (error) {
@@ -185,7 +208,11 @@ export default function App() {
 
   return (
     <MainLayout member={member} loggingOut={loggingOut} onLogout={handleLogout} notice={notice} onDismissNotice={() => setNotice('')}>
-      {content}
+      {authChecked && member?.roleCode === 'USER' && routePath !== '/my-travel-style' && survey.memberId === member.memberId && survey.status === 'needed'
+        ? <TravelStylePage key={`survey-${member.memberId}`} member={member} surveyMode initialData={survey.data}
+            onSkip={() => { try { sessionStorage.setItem(`st-survey-skip-${member.memberId}`, '1'); } catch { /* storage unavailable */ } setSurvey({ memberId: member.memberId, status: 'skipped', data: null }); }}
+            onSaved={() => setSurvey({ memberId: member.memberId, status: 'done', data: null })} />
+        : content}
     </MainLayout>
   );
 }

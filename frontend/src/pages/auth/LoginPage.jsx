@@ -26,6 +26,12 @@ export default function LoginPage({ onLogin }) {
   useEffect(() => { getSocialProviders().then(setProviders).catch(() => {}); }, []);
 
   function socialLogin(provider) {
+    try {
+      for (let i = sessionStorage.length - 1; i >= 0; i -= 1) {
+        const key = sessionStorage.key(i);
+        if (key?.startsWith('st-survey-skip-')) sessionStorage.removeItem(key);
+      }
+    } catch { /* storage unavailable */ }
     const base = import.meta.env.VITE_SOCIAL_AUTH_BASE_URL
       || (import.meta.env.DEV ? `${window.location.protocol}//${window.location.hostname}:8080` : window.location.origin);
     window.location.assign(`${base}/oauth2/authorization/${provider}`);

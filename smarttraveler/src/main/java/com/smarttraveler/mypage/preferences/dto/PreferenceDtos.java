@@ -13,7 +13,12 @@ public final class PreferenceDtos {
     public record Save(@NotNull @Positive Long expectedMemberId,
         @NotNull @Pattern(regexp = "relaxed|normal|packed") String pace,
         @NotNull @Pattern(regexp = "early|normal|late") String wakeUp,
-        @NotNull @Size(max = 80) List<@NotNull @Valid Selection> tags) {}
+        @NotNull @Size(max = 80) List<@NotNull @Valid Selection> tags,
+        Boolean surveyOnly) {
+        public Save(Long expectedMemberId, String pace, String wakeUp, List<Selection> tags) {
+            this(expectedMemberId, pace, wakeUp, tags, false);
+        }
+    }
     public record Preferences(long memberId, String pace, String wakeUp, List<Selection> tags,
         List<TagOption> catalog, boolean saved) {}
 }
