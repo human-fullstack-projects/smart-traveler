@@ -11,21 +11,45 @@ const EMPTY = { loginId: '', password: '', passwordCheck: '', nickname: '', emai
 function check(role, f) {
   const e = {};
   if (!/^[A-Za-z0-9_]{4,50}$/.test(f.loginId)) e.loginId = '영문, 숫자, 밑줄 4~50자로 입력해주세요.';
-  if (f.password.length < 8 || !/[A-Za-z]/.test(f.password) || !/[0-9]/.test(f.password)) e.password = '영문과 숫자를 포함해 8자 이상 입력해주세요.';
+  if (f.password.length < 8 || f.password.length > 72 || !/[A-Za-z]/.test(f.password) || !/[0-9]/.test(f.password)
+    || /[\r\n\u0085\u2028\u2029]/.test(f.password)) e.password = '영문과 숫자를 포함해 8~72자로 입력해주세요.';
   if (f.password !== f.passwordCheck) e.passwordCheck = '비밀번호가 같지 않아요.';
   if (!f.nickname.trim()) e.nickname = '닉네임을 입력해주세요.';
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.email)) e.email = '올바른 이메일을 입력해주세요.';
+  else if (f.nickname.trim().length > 50) e.nickname = '닉네임은 50자 이내로 입력해주세요.';
+  const email = f.email.trim();
+  if (email.length > 255) e.email = '이메일은 255자 이내로 입력해주세요.';
+  else if (!/^[^@\x09-\x0D\x20]+@[^@\x09-\x0D\x20]+\.[^@\x09-\x0D\x20]+$/.test(email)) e.email = '올바른 이메일을 입력해주세요.';
   if (role === 'OWNER') {
-    ['businessNumber', 'businessName', 'representativeName', 'businessAddress', 'businessPhone']
-      .forEach((k) => { if (!f[k].trim()) e[k] = '필수 항목이에요.'; });
+    const maxLengths = { businessNumber: 20, businessName: 100, representativeName: 50, businessAddress: 255, businessPhone: 20 };
+    Object.entries(maxLengths).forEach(([key, max]) => {
+      const value = f[key].trim();
+      if (!value) e[key] = '필수 항목이에요.';
+      else if (value.length > max) e[key] = `${max}자 이내로 입력해주세요.`;
+    });
   }
   return e;
 }
 
+const FIELD_HINTS = {
+  loginId: '영문, 숫자, 밑줄만 사용해 4~50자로 입력해주세요.',
+  password: '영문과 숫자를 포함해 8~72자로 입력해주세요.',
+  passwordCheck: '위 비밀번호와 같게 입력해주세요.',
+  nickname: '공백만 입력할 수 없으며, 50자 이내로 입력해주세요.',
+  email: '이메일 형식으로 255자 이내로 입력해주세요.',
+  businessNumber: '공백만 입력할 수 없으며, 20자 이내로 입력해주세요.',
+  businessName: '공백만 입력할 수 없으며, 100자 이내로 입력해주세요.',
+  representativeName: '공백만 입력할 수 없으며, 50자 이내로 입력해주세요.',
+  businessAddress: '공백만 입력할 수 없으며, 255자 이내로 입력해주세요.',
+  businessPhone: '공백만 입력할 수 없으며, 20자 이내로 입력해주세요.',
+};
+
 function Field({ name, label, form, errors, onChange, type = 'text', placeholder, autoComplete }) {
-  return <label className={`st-field${errors[name] ? ' st-field-error' : ''}`}>{label}
+  const hintId = `signup-${name}-hint`;
+  return <label className={`st-field${errors[name] ? ' st-field-error' : ''}`}><span>{label} <span className="auth-required" aria-hidden="true">*</span></span>
     <input className="st-input" name={name} type={type} value={form[name]} placeholder={placeholder}
-      autoComplete={autoComplete} onChange={(e) => onChange(name, e.target.value)} aria-invalid={Boolean(errors[name])} />
+      autoComplete={autoComplete} onChange={(e) => onChange(name, e.target.value)} aria-invalid={Boolean(errors[name])}
+      aria-required="true" aria-describedby={hintId} />
+    <span id={hintId} className="auth-hint">{FIELD_HINTS[name]}</span>
     {errors[name] && <p className="st-error" role="alert">{errors[name]}</p>}
   </label>;
 }
@@ -96,6 +120,7 @@ export default function SignupPage() {
             <p>가입 유형을 고르고 정보를 입력해주세요.</p>
           </div>
           <form className="auth-form" onSubmit={submit} noValidate aria-busy={busy}>
+            <p className="auth-required-legend"><span className="auth-required" aria-hidden="true">*</span> 표시는 꼭 입력해야 해요</p>
             <div className="auth-roles" role="group" aria-label="가입 유형">
               <button type="button" className="auth-role" aria-pressed={role === 'USER'} onClick={() => setRole('USER')}>
                 <strong>여행자</strong><span>AI 코스 추천과 숙소 예약</span></button>
@@ -104,11 +129,11 @@ export default function SignupPage() {
             </div>
             <p className="auth-section-title">기본 정보</p>
             <div className="auth-row">
-              <Field {...p} name="loginId" label="아이디" placeholder="영문·숫자 4자 이상" autoComplete="username" />
+              <Field {...p} name="loginId" label="아이디" placeholder="영문·숫자·밑줄 4~50자" autoComplete="username" />
               <Field {...p} name="nickname" label="닉네임" placeholder="화면에 보일 이름" autoComplete="nickname" />
             </div>
             <div className="auth-row">
-              <Field {...p} name="password" label="비밀번호" type="password" placeholder="영문+숫자 8자 이상" autoComplete="new-password" />
+              <Field {...p} name="password" label="비밀번호" type="password" placeholder="영문+숫자 8~72자" autoComplete="new-password" />
               <Field {...p} name="passwordCheck" label="비밀번호 확인" type="password" placeholder="한 번 더 입력" autoComplete="new-password" />
             </div>
             <Field {...p} name="email" label="이메일" type="email" placeholder="example@email.com" autoComplete="email" />
@@ -131,8 +156,8 @@ export default function SignupPage() {
                 {terms.map((t) => <div key={t.termsId} className="auth-term">
                   <div className="auth-term-row">
                     <label>
-                      <input type="checkbox" checked={Boolean(agreed[t.termsId])} onChange={() => setAgreed((a) => ({ ...a, [t.termsId]: !a[t.termsId] }))} />
-                      {TERM_NAMES[t.type] || t.type} {t.required ? <span className="auth-req">필수</span> : <span className="st-note">선택</span>}
+                      <input type="checkbox" checked={Boolean(agreed[t.termsId])} aria-required={t.required ? 'true' : undefined} onChange={() => setAgreed((a) => ({ ...a, [t.termsId]: !a[t.termsId] }))} />
+                      {TERM_NAMES[t.type] || t.type} {t.required ? <><span className="auth-required" aria-hidden="true">*</span> <span className="auth-req">필수</span></> : <span className="st-note">선택</span>}
                     </label>
                     <button type="button" className="auth-term-view" onClick={(event) => { setReturnFocus(event.currentTarget); setOpenTerm(t); }}>보기</button>
                   </div>

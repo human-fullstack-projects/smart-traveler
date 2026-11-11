@@ -129,7 +129,7 @@ export default function App() {
       await logout();
       try { sessionStorage.removeItem(`st-survey-skip-${member?.memberId}`); } catch { /* storage unavailable */ }
       setNotice('로그아웃했어요.');
-      if (window.location.hash.startsWith('#/admin')) window.location.hash = '/';
+      if (window.location.hash.startsWith('#/admin') || window.location.hash.startsWith('#/owner')) window.location.hash = '/';
     } catch (error) {
       setNotice(error.message);
     }
