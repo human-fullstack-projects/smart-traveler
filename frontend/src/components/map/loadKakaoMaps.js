@@ -10,15 +10,26 @@ export function loadKakaoMaps() {
   sdkPromise = new Promise((resolve, reject) => {
     const scriptId = 'kakao-maps-sdk';
     let script = document.getElementById(scriptId);
+    let settled = false;
+    let timeoutId;
 
     const onLoad = () => {
+      if (settled) return;
       if (!window.kakao?.maps?.load) {
         onError();
         return;
       }
-      window.kakao.maps.load(() => resolve(window.kakao.maps));
+      window.kakao.maps.load(() => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timeoutId);
+        resolve(window.kakao.maps);
+      });
     };
     const onError = () => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeoutId);
       script?.removeEventListener('load', onLoad);
       script?.removeEventListener('error', onError);
       script?.remove();
@@ -38,6 +49,7 @@ export function loadKakaoMaps() {
       script.addEventListener('load', onLoad, { once: true });
       script.addEventListener('error', onError, { once: true });
     }
+    timeoutId = setTimeout(onError, 12000);
   });
 
   return sdkPromise;

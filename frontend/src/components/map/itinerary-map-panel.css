@@ -1,0 +1,16 @@
+.itinerary-map { color: #203d34; }
+.itinerary-map__intro { margin: 0 0 16px; color: #667f72; font-size: 14px; line-height: 1.55; }
+.itinerary-map__categories, .itinerary-map__days { display: flex; flex-wrap: wrap; gap: 9px; }
+.itinerary-map__categories { margin-bottom: 16px; }
+.itinerary-map__days { margin-bottom: 16px; }
+.itinerary-map .itinerary-map__categories button, .itinerary-map .itinerary-map__days button { display: inline-flex; width: auto; max-width: none; align-items: center; justify-content: center; gap: 0; padding: 9px 16px; border: 1px solid #cddfd4; background: #fff; color: #28654f; font: inherit; font-size: 13px; line-height: 1.3; cursor: pointer; }
+.itinerary-map .itinerary-map__categories button { border-radius: 9px; }
+.itinerary-map .itinerary-map__days button { border-radius: 22px; }
+.itinerary-map .itinerary-map__categories button[aria-pressed="true"], .itinerary-map .itinerary-map__days button[aria-pressed="true"], .itinerary-map .itinerary-map__categories button[aria-pressed="true"]:hover, .itinerary-map .itinerary-map__days button[aria-pressed="true"]:hover { border-color: #237a5c; background: #237a5c; color: #fff; }
+.itinerary-map__frame { overflow: hidden; border: 1px solid #d5e5dc; border-radius: 13px; }
+.itinerary-map__notice { margin: 10px 0 0; color: #667f72; font-size: 13px; }
+.itinerary-map__source { margin: 10px 0 0; color: #779084; font-size: 12px; line-height: 1.5; }
+.itinerary-map__day-list { display: grid; gap: 20px; margin-top: 22px; }
+.itinerary-map__day h3 { margin: 0 0 10px; font-size: 17px; }
+.itinerary-map__day p { color: #667f72; font-size: 13px; }
+.itinerary-map__extras { margin-top: 22px; }

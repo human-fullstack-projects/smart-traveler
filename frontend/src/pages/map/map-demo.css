@@ -1,0 +1,7 @@
+.map-demo { max-width: 960px; margin: 0 auto; padding: 32px 24px 56px; color: #203d34; }
+.map-demo__intro span { color: #248262; font-size: 11px; font-weight: 800; letter-spacing: .13em; }
+.map-demo__intro h1 { margin: 7px 0 5px; font-size: 28px; }
+.map-demo__intro p { margin: 0; color: #667f72; font-size: 14px; }
+.map-demo__switch { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 12px; }
+.map-demo__switch button { padding: 9px 15px; border: 1px solid #cddfd4; border-radius: 9px; background: #fff; color: #28654f; font: inherit; font-size: 13px; cursor: pointer; }
+.map-demo__switch button[aria-pressed="true"] { border-color: #237a5c; background: #237a5c; color: #fff; }
