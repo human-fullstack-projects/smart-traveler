@@ -9,8 +9,15 @@ const navigation = [
   { label: '마이페이지' },
 ];
 
+const ownerNavigation = [
+  { label: '업주센터', href: '#/owner' },
+  { label: '여행 메인', href: '#/' },
+];
+
 export default function SiteHeader({ route, onUnavailable, member, onLogout, loggingOut }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const isOwnerReview = route === '/login' && member?.roleCode === 'OWNER';
+const visibleNavigation = isOwnerReview ? ownerNavigation : navigation;
   const link = (item) => item.href ? (
     <a key={item.label} href={item.href} aria-current={route === item.href.slice(1) ? 'page' : undefined} onClick={() => setMenuOpen(false)}>{item.label}</a>
   ) : (
@@ -24,8 +31,8 @@ export default function SiteHeader({ route, onUnavailable, member, onLogout, log
         </button>
         <a className="brand" href="#/">smart <span>travel</span></a>
       </div>
-      <nav className="desktop-nav" aria-label="주 메뉴">{navigation.map(link)}{member ? <span className="auth-account"><span className="auth-account__name">{member.nickname || member.loginId}님</span><button className="account" type="button" disabled={loggingOut} onClick={() => { setMenuOpen(false); onLogout(); }}>{loggingOut ? '로그아웃 중…' : '로그아웃'}</button></span> : <a className="account" href="#/login" aria-current={route === '/login' ? 'page' : undefined}>로그인</a>}</nav>
+      <nav className="desktop-nav" aria-label="주 메뉴">{visibleNavigation.map(link)}{member ? <span className="auth-account"><span className="auth-account__name">{member.nickname || member.loginId}님</span><button className="account" type="button" disabled={loggingOut} onClick={() => { setMenuOpen(false); onLogout(); }}>{loggingOut ? '로그아웃 중…' : '로그아웃'}</button></span> : <a className="account" href="#/login" aria-current={route === '/login' ? 'page' : undefined}>로그인</a>}</nav>
     </div>
-    {menuOpen && <nav id="mobile-menu" className="menu-panel" aria-label="전체 메뉴">{navigation.map(link)}{member ? <span className="auth-account"><span className="auth-account__name">{member.nickname || member.loginId}님</span><button className="account" type="button" disabled={loggingOut} onClick={() => { setMenuOpen(false); onLogout(); }}>{loggingOut ? '로그아웃 중…' : '로그아웃'}</button></span> : <a className="nav-link" href="#/login" aria-current={route === '/login' ? 'page' : undefined} onClick={() => setMenuOpen(false)}>로그인</a>}</nav>}
+    {menuOpen && <nav id="mobile-menu" className="menu-panel" aria-label="전체 메뉴">{visibleNavigation.map(link)}{member ? <span className="auth-account"><span className="auth-account__name">{member.nickname || member.loginId}님</span><button className="account" type="button" disabled={loggingOut} onClick={() => { setMenuOpen(false); onLogout(); }}>{loggingOut ? '로그아웃 중…' : '로그아웃'}</button></span> : <a className="nav-link" href="#/login" aria-current={route === '/login' ? 'page' : undefined} onClick={() => setMenuOpen(false)}>로그인</a>}</nav>}
   </header>;
 }
