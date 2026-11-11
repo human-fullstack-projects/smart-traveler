@@ -2,6 +2,21 @@ export const PACE_OPTIONS = [['relaxed', '여유'], ['normal', '보통'], ['pack
 export const WAKE_OPTIONS = [['early', '이른'], ['normal', '보통'], ['late', '늦은']];
 export const TAG_GROUPS = [['interest', '관심사'], ['food', '음식'], ['transport', '교통'], ['style', '여행 스타일']];
 export const tagKey = tag => `${tag.type}:${tag.name}`;
+export const SURVEY_REGIONS = ['명동', '홍대', '강남', '잠실', '해운대', '광안리', '송도', '경주', '포항', '속초', '춘천', '여수', '전주', '군산', '제주', '서귀포', '거제', '통영', '담양', '태안'];
+export const SURVEY_MOODS = ['조용한 여행', '활발한 여행'];
+export const isSurveyTag = tag => tag?.type === 'style' && (tag.name?.startsWith('지역:') || tag.name?.startsWith('분위기:'));
+export const normalTags = tags => (tags || []).filter(tag => !isSurveyTag(tag));
+export function surveyDone(tags) {
+  const chosen = (tags || []).filter(tag => isSurveyTag(tag) && tag.polarity === 'like' && tag.weight === 1);
+  return chosen.filter(tag => tag.name.startsWith('지역:')).length === 3
+    && chosen.filter(tag => tag.name.startsWith('분위기:')).length === 1
+    && new Set(chosen.map(tagKey)).size === 4;
+}
+export function surveyError(regions, mood) {
+  if (!Array.isArray(regions) || regions.length !== 3 || new Set(regions).size !== 3 || regions.some(name => !SURVEY_REGIONS.includes(name))) return '가고 싶은 지역을 3곳 골라주세요.';
+  if (!SURVEY_MOODS.includes(mood)) return '여행 분위기를 하나 골라주세요.';
+  return '';
+}
 export const preferenceNotices = [
   '개별 여행에서 선택한 조건이 기본 취향보다 우선합니다.',
   '취향을 바꿔도 기존 예약·확정 조건·코스에는 자동으로 적용되지 않습니다.',

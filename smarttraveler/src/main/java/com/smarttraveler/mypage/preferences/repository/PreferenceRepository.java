@@ -26,14 +26,39 @@ public class PreferenceRepository {
     public boolean lockOwner(long owner) {
         return !jdbc.queryForList("SELECT member_id FROM members WHERE member_id=? AND status='ACTIVE' AND deleted_at IS NULL FOR UPDATE", Long.class, owner).isEmpty();
     }
+    public boolean lockSurveyOwner(long owner) {
+        return !jdbc.queryForList("SELECT member_id FROM members WHERE member_id=? AND status='ACTIVE' AND deleted_at IS NULL AND role_code='USER' FOR UPDATE", Long.class, owner).isEmpty();
+    }
     public void save(long owner, Save settings) {
         jdbc.update("""
             INSERT INTO member_preference(member_no, pace, wake_up, updated_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)
             ON DUPLICATE KEY UPDATE pace=VALUES(pace), wake_up=VALUES(wake_up), updated_at=CURRENT_TIMESTAMP
             """, owner, settings.pace(), settings.wakeUp());
-        jdbc.update("DELETE FROM member_preference_tag WHERE member_no=?", owner);
+        jdbc.update("""
+            DELETE p FROM member_preference_tag p JOIN preference_tag t ON t.id=p.tag_id
+            WHERE p.member_no=? AND NOT (t.tag_type='style' AND (t.name LIKE '지역:%' OR t.name LIKE '분위기:%'))
+            """, owner);
+        insertTags(owner, settings.tags().stream().filter(tag -> !isSurveyTag(tag)).toList());
+    }
+    public void saveSurvey(long owner, List<Selection> tags) {
+        // 이미 저장된 pace/wake_up은 건드리지 않는다.
+        jdbc.update("""
+            INSERT INTO member_preference(member_no, pace, wake_up, updated_at) VALUES (?, 'normal', 'normal', CURRENT_TIMESTAMP)
+            ON DUPLICATE KEY UPDATE member_no=member_no
+            """, owner);
+        jdbc.update("""
+            DELETE p FROM member_preference_tag p JOIN preference_tag t ON t.id=p.tag_id
+            WHERE p.member_no=? AND t.tag_type='style' AND (t.name LIKE '지역:%' OR t.name LIKE '분위기:%')
+            """, owner);
+        insertTags(owner, tags);
+    }
+    private boolean isSurveyTag(Selection tag) {
+        return "style".equals(tag.type()) && tag.name() != null
+            && (tag.name().startsWith("지역:") || tag.name().startsWith("분위기:"));
+    }
+    private void insertTags(long owner, List<Selection> tags) {
         // 전 회원이 같은 순서로 태그 유일키를 잡아 동시 저장 시 잠금 충돌을 줄인다.
-        var ordered = settings.tags().stream().sorted(java.util.Comparator.comparing(Selection::type).thenComparing(Selection::name)).toList();
+        var ordered = tags.stream().sorted(java.util.Comparator.comparing(Selection::type).thenComparing(Selection::name)).toList();
         for (var tag : ordered) {
             jdbc.update("INSERT INTO preference_tag(tag_type, name) VALUES (?, ?) ON DUPLICATE KEY UPDATE name=VALUES(name)", tag.type(), tag.name());
             Long tagId = jdbc.queryForObject("SELECT id FROM preference_tag WHERE tag_type=? AND name=?", Long.class, tag.type(), tag.name());
