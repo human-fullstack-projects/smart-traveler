@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { loadKakaoMaps } from './loadKakaoMaps';
+import MapFallback from './MapFallback';
 import './kakao-map.css';
 
 const DEFAULT_CENTER = { latitude: 37.5665, longitude: 126.9780 };
@@ -13,15 +14,18 @@ function hasCoordinates(place) {
 }
 
 /** places: [{ id, name, latitude, longitude }]. center: { latitude, longitude }. */
-export default function KakaoMap({ places = EMPTY_PLACES, center, level = 3, width = '100%', height = '400px', onMarkerClick, selectedId, paths = EMPTY_PATHS, fitPoints, fitRequest = 0 }) {
+export default function KakaoMap({ places = EMPTY_PLACES, center, level = 3, width = '100%', height = '400px', onMarkerClick, onStatusChange, selectedId, paths = EMPTY_PATHS, fitPoints, fitRequest = 0 }) {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
   const mapsRef = useRef(null);
   const onMarkerClickRef = useRef(onMarkerClick);
+  const onStatusChangeRef = useRef(onStatusChange);
   const [mapReady, setMapReady] = useState(false);
   const [error, setError] = useState('');
+  const [retryKey, setRetryKey] = useState(0);
 
   onMarkerClickRef.current = onMarkerClick;
+  onStatusChangeRef.current = onStatusChange;
   const firstPlace = places.find(hasCoordinates);
   const mapCenter = hasCoordinates(center) ? center : firstPlace || DEFAULT_CENTER;
   const latitude = Number(mapCenter.latitude);
@@ -37,8 +41,12 @@ export default function KakaoMap({ places = EMPTY_PLACES, center, level = 3, wid
         level,
       });
       setMapReady(true);
+      onStatusChangeRef.current?.('ready');
     }).catch((loadError) => {
-      if (!cancelled) setError(loadError.message);
+      if (!cancelled) {
+        setError(loadError.message);
+        onStatusChangeRef.current?.('error');
+      }
     });
 
     return () => {
@@ -48,7 +56,7 @@ export default function KakaoMap({ places = EMPTY_PLACES, center, level = 3, wid
     };
     // A map belongs to its DOM element and is created only once per mount.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [retryKey]);
 
   useEffect(() => {
     if (!mapReady) return;
@@ -127,8 +135,12 @@ export default function KakaoMap({ places = EMPTY_PLACES, center, level = 3, wid
     return () => observer.disconnect();
   }, [mapReady]);
 
-  return <>
-    {error && <p role="alert">{error}</p>}
-    <div ref={containerRef} role="application" aria-label="카카오 지도" style={{ width, height }} />
-  </>;
+  if (error) return <MapFallback
+    onRetry={() => { setError(''); setMapReady(false); onStatusChangeRef.current?.('loading'); setRetryKey((value) => value + 1); }}
+    reason="네트워크 연결을 확인한 뒤 다시 시도해 주세요."
+    width={width}
+    height={height}
+  />;
+
+  return <div ref={containerRef} role="application" aria-label="카카오 지도" style={{ width, height }} />;
 }
