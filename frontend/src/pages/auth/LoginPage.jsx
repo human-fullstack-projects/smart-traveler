@@ -75,7 +75,7 @@ export default function LoginPage({ onLogin }) {
         <div className="st-panel">
           <div className="auth-head">
             <p className="auth-kicker">WELCOME BACK</p>
-            <h1 id="login-title" className="st-h2" ref={titleRef} tabIndex={-1}>다시 만나 반가워요</h1>
+            <h1 id="login-title" className="st-h2" ref={titleRef} tabIndex={-1}>오늘의 여행을 찾아볼까요?</h1>
             <p>로그인하고 나만의 여행을 이어가세요.</p>
           </div>
           <form className="auth-form" onSubmit={submit} noValidate aria-busy={busy}>
