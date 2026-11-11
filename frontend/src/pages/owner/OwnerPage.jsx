@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import '../../css/owner.css';
-import { postJsonWithCsrf, request } from '../../api/auth.js';
+import { postJsonWithCsrf, putJsonWithCsrf, request } from '../../api/auth.js';
 
 const tabs = [
   { id: 'dashboard', label: '대시보드' },
@@ -291,9 +291,10 @@ function Reservations() {
 //   );
 // }
 
-function LodgingDetail({ lodgingId, onBack }) {
+function LodgingDetail({ lodgingId, onBack, onSaved }) {
   const [detail, setDetail] = useState(null);
   const [error, setError] = useState('');
+  const [editing, setEditing] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -309,10 +310,29 @@ function LodgingDetail({ lodgingId, onBack }) {
     return () => controller.abort();
   }, [lodgingId]);
 
+  if (editing && detail) {
+    return (
+      <LodgingForm
+        initialDetail={detail}
+        onCancel={() => setEditing(false)}
+        onSaved={onSaved}
+      />
+    );
+  }
+
   return (
     <div className="owner-view">
       <header className="owner-overview-heading">
         <div><h1>{detail?.name ?? '숙소 상세'}</h1></div>
+        {detail?.status === 'PENDING' && (
+          <button
+            type="button"
+            className="owner-overview-action"
+            onClick={() => setEditing(true)}
+          >
+            숙소 정보 수정
+          </button>
+        )}
         <button type="button" className="owner-overview-action owner-overview-action--line" onClick={onBack}>
           목록으로
         </button>
@@ -331,6 +351,7 @@ function LodgingDetail({ lodgingId, onBack }) {
               <div><dt>체크인</dt><dd>{detail.checkinTime?.slice(0, 5)}</dd></div>
               <div><dt>체크아웃</dt><dd>{detail.checkoutTime?.slice(0, 5)}</dd></div>
             </dl>
+            {detail.status === 'ACTIVE' && <p>운영 중인 숙소는 현재 상세 정보만 확인할 수 있어요.</p>}
             {detail.status === 'REJECTED' && <p>반려 사유 · {detail.rejectReason || '등록된 사유가 없어요.'}</p>}
           </>
         )}
@@ -339,19 +360,29 @@ function LodgingDetail({ lodgingId, onBack }) {
   );
 }
 
-function LodgingManagement({ lodgings, error, onCreated }) {
+function LodgingManagement({ lodgings, error, onCreated, onUpdated }) {
   const [creating, setCreating] = useState(false);
   const [selectedLodgingId, setSelectedLodgingId] = useState(null);
 
   if (selectedLodgingId !== null) {
-    return <LodgingDetail key={selectedLodgingId} lodgingId={selectedLodgingId} onBack={() => setSelectedLodgingId(null)} />;
+    return (
+      <LodgingDetail
+        key={selectedLodgingId}
+        lodgingId={selectedLodgingId}
+        onBack={() => setSelectedLodgingId(null)}
+        onSaved={() => {
+          setSelectedLodgingId(null);
+          onUpdated();
+        }}
+      />
+    );
   }
 
   if (creating) {
     return (
-      <LodgingCreateForm
+      <LodgingForm
         onCancel={() => setCreating(false)}
-        onCreated={() => {
+        onSaved={() => {
           setCreating(false);
           onCreated();
         }}
@@ -403,7 +434,9 @@ function LodgingManagement({ lodgings, error, onCreated }) {
   );
 }
 
-function LodgingCreateForm({ onCreated, onCancel }) {
+function LodgingForm({ initialDetail, onSaved, onCancel }) {
+  const editing = Boolean(initialDetail);
+  const lodgingTypes = ['호텔', '리조트', '펜션', '게스트하우스', '한옥'];
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const inFlight = useRef(false);
@@ -427,7 +460,7 @@ function LodgingCreateForm({ onCreated, onCancel }) {
     setError('');
 
     try {
-      await postJsonWithCsrf('/api/owner/lodgings', {
+      const data = {
         name,
         address,
         lodgingType: fields.get('lodgingType'),
@@ -435,9 +468,16 @@ function LodgingCreateForm({ onCreated, onCancel }) {
         longitude: Number(fields.get('longitude')),
         checkinTime: fields.get('checkinTime'),
         checkoutTime: fields.get('checkoutTime'),
-      });
-      form.reset();
-      onCreated();
+      };
+
+      if (editing) {
+        await putJsonWithCsrf(`/api/owner/lodgings/${initialDetail.lodgingId}`, data);
+      } else {
+        await postJsonWithCsrf('/api/owner/lodgings', data);
+        form.reset();
+      }
+
+      onSaved();
     } catch (error) {
       setError(error.status === 400
         ? '입력값을 확인해 주세요. 좌표는 소수점 7자리까지 입력할 수 있어요.'
@@ -453,8 +493,8 @@ function LodgingCreateForm({ onCreated, onCancel }) {
       <div className="owner-view__title">
         <div>
           <span>PROPERTY</span>
-          <h1>숙소 등록</h1>
-          <p>기본 정보를 제출하면 관리자 승인 대기 상태로 저장돼요.</p>
+          <h1>{editing ? '숙소 정보 수정' : '숙소 등록'}</h1>
+          <p>{editing ? '변경할 정보를 확인하고 저장해 주세요.' : '기본 정보를 제출하면 관리자 승인 대기 상태로 저장돼요.'}</p>
         </div>
       </div>
 
@@ -465,32 +505,44 @@ function LodgingCreateForm({ onCreated, onCancel }) {
             <span className="owner-required">* 필수 입력</span>
           </div>
           <div className="owner-form-grid">
-            <label>숙소명 *<input name="name" maxLength={200} required /></label>
+            <label>숙소명 *
+              <input name="name" maxLength={200} defaultValue={initialDetail?.name} required />
+            </label>
             <label>숙소 유형 *
-              <select name="lodgingType" defaultValue="" required>
+              <select name="lodgingType" defaultValue={initialDetail?.lodgingType ?? ''} required>
                 <option value="">선택해 주세요</option>
-                <option>호텔</option>
-                <option>리조트</option>
-                <option>펜션</option>
-                <option>게스트하우스</option>
-                <option>한옥</option>
+                {initialDetail?.lodgingType && !lodgingTypes.includes(initialDetail.lodgingType) && (
+                  <option>{initialDetail.lodgingType}</option>
+                )}
+                {lodgingTypes.map((type) => <option key={type}>{type}</option>)}
               </select>
             </label>
-            <label className="owner-wide">주소 *<input name="address" maxLength={300} required /></label>
-            <label>위도 *<input name="latitude" type="number" min="-90" max="90" step="0.0000001" required /></label>
-            <label>경도 *<input name="longitude" type="number" min="-180" max="180" step="0.0000001" required /></label>
-            <label>체크인 시간 *<input name="checkinTime" type="time" required /></label>
-            <label>체크아웃 시간 *<input name="checkoutTime" type="time" required /></label>
+            <label className="owner-wide">주소 *
+              <input name="address" maxLength={300} defaultValue={initialDetail?.address} required />
+            </label>
+            <label>위도 *
+              <input name="latitude" type="number" min="-90" max="90" step="0.0000001"
+                defaultValue={initialDetail?.latitude} required />
+            </label>
+            <label>경도 *
+              <input name="longitude" type="number" min="-180" max="180" step="0.0000001"
+                defaultValue={initialDetail?.longitude} required />
+            </label>
+            <label>체크인 시간 *
+              <input name="checkinTime" type="time" step="1" defaultValue={initialDetail?.checkinTime} required />
+            </label>
+            <label>체크아웃 시간 *
+              <input name="checkoutTime" type="time" step="1" defaultValue={initialDetail?.checkoutTime} required />
+            </label>
           </div>
-          <p>주소 검색과 지도 연결 전에는 위도와 경도를 직접 입력해 주세요.</p>
           {error && <p role="alert">{error}</p>}
         </section>
         <div className="owner-form-actions">
           <button type="button" className="owner-secondary" onClick={onCancel} disabled={busy}>
-            목록으로
+            {editing ? '수정 취소' : '목록으로'}
           </button>
           <button type="submit" className="owner-primary" disabled={busy}>
-            {busy ? '등록 중…' : '숙소 등록 신청'}
+            {busy ? '저장 중…' : editing ? '변경사항 저장' : '숙소 등록 신청'}
           </button>
         </div>
       </form>
@@ -550,6 +602,10 @@ export default function OwnerPage({ member, onLogout, loggingOut }) {
         <LodgingManagement
           lodgings={lodgings}
           error={lodgingError}
+          onUpdated={() => {
+            setLodgingRevision((revision) => revision + 1);
+            setToast('숙소 정보를 저장했어요.');
+          }}
           onCreated={() => {
             setLodgingRevision((revision) => revision + 1);
             setToast('숙소 등록 신청이 접수됐어요. 관리자 승인 대기 상태예요.');
