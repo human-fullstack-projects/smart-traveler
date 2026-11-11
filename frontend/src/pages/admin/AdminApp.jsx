@@ -458,11 +458,13 @@ export default function AdminApp({ route, member, onLogout }) {
       {MENU.map((m) => <a key={m.path} href={`#${m.path}`} aria-current={path === m.path ? 'page' : undefined}>{m.label}
         {m.badge && stats?.[m.badge] > 0 && <span className="adm-badge">{stats[m.badge]}</span>}</a>)}
       <div className="adm-side-foot">{member?.nickname || member?.loginId} 님 (관리자)
-        <a href="#/" style={{ padding: '8px 0 0', fontSize: 13 }}>사이트로 가기</a>
-        <button className="st-btn st-btn-line" onClick={onLogout}>로그아웃</button></div>
+      </div>
     </aside>
     <main className="adm-main">
-      <div className="adm-head"><div><h1>{title}</h1><p>{sub}</p></div></div>
+      <div className="adm-head"><div><h1>{title}</h1><p>{sub}</p></div><div className="adm-head-actions">
+        <a className="st-btn st-btn-line" href="#/">메인으로</a>
+        <button className="st-btn st-btn-line" type="button" onClick={onLogout}>로그아웃</button>
+      </div></div>
       {page}
     </main>
   </div>;

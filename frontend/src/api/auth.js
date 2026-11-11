@@ -51,6 +51,19 @@ async function postJsonWithCsrf(path, data) {
   });
 }
 
+export async function putJsonWithCsrf(path, data) {
+  const csrf = await request('/api/auth/csrf');
+  return request(path, {
+    method: 'PUT',
+    headers: {
+      [csrf.headerName]: csrf.token,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+}
+
+
 export async function getTerms() { return request('/api/auth/terms'); }
 
 export async function signup(data) { return postJsonWithCsrf('/api/auth/signup', data); }

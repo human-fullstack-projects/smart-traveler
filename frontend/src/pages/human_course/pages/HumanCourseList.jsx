@@ -12,7 +12,7 @@ export default function HumanCourseList({ courses = previewCourses, execute, ser
   const visible = filterCourses(courses, filters);
   return <div className="human-courses"><div className="page">
     <PageHeading title="다른 여행자의 추천 코스" description="조건을 선택하고, 목록에서 코스를 눌러 상세 내용을 확인합니다."><a className="button button-primary" href="#/human-courses/create">+ 내 코스 작성</a></PageHeading>
-    <div className="layout">
+    <div className="layout human-course-list-layout">
       <aside className="panel"><div className="panel-heading"><h2>검색 / 필터</h2></div><CourseFilters onSearch={setFilters} onReset={() => setFilters({})} /></aside>
       <section className="panel"><div className="panel-heading"><h2>공유 코스 <span className="muted">({visible.length}건)</span></h2><span className="helper">공유된 여행 코스</span></div>
         <div className="course-grid" aria-live="polite">{visible.length ? visible.map((course) => <CourseCard key={course.id} course={course} detailHref={`#/human-courses/${course.id}`} />) : <div className="empty-state">검색 결과가 없습니다. 다른 조건을 선택해 보세요.</div>}</div>

@@ -111,13 +111,14 @@ public class OwnerLodgingService {
         lodging.setOwnerId(ownerId);
         lodging.setSourceProvider("OWNER");
         lodging.setStatus("PENDING");
-        lodging.setName(request.name().trim());
-        lodging.setLodgingType(request.lodgingType().trim());
-        lodging.setAddress(request.address().trim());
-        lodging.setLatitude(request.latitude());
-        lodging.setLongitude(request.longitude());
-        lodging.setCheckinTime(request.checkinTime());
-        lodging.setCheckoutTime(request.checkoutTime());
+        // lodging.setName(request.name().trim());
+        // lodging.setLodgingType(request.lodgingType().trim());
+        // lodging.setAddress(request.address().trim());
+        // lodging.setLatitude(request.latitude());
+        // lodging.setLongitude(request.longitude());
+        // lodging.setCheckinTime(request.checkinTime());
+        // lodging.setCheckoutTime(request.checkoutTime());
+        applyLodgingInfo(lodging, request);
 
         return toSummary(lodgings.save(lodging));
     }
@@ -142,6 +143,37 @@ public class OwnerLodgingService {
                 lodging.getRejectReason()
         );
     }
+
+        @Transactional
+    public OwnerLodgingSummary update(
+            String loginId,
+            Long lodgingId,
+            OwnerLodgingCreateRequest request
+    ) {
+        Long ownerId = requireApprovedOwnerId(loginId);
+        Lodging lodging = lodgings.findForUpdateByLodgingIdAndOwnerId(lodgingId, ownerId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "숙소를 찾을 수 없습니다."));
+
+        if (!"PENDING".equals(lodging.getStatus())) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, "현재 승인 대기 중인 숙소만 수정할 수 있습니다.");
+        }
+
+        applyLodgingInfo(lodging, request);
+        return toSummary(lodgings.save(lodging));
+    }
+
+    private void applyLodgingInfo(Lodging lodging, OwnerLodgingCreateRequest request) {
+        lodging.setName(request.name().trim());
+        lodging.setLodgingType(request.lodgingType().trim());
+        lodging.setAddress(request.address().trim());
+        lodging.setLatitude(request.latitude());
+        lodging.setLongitude(request.longitude());
+        lodging.setCheckinTime(request.checkinTime());
+        lodging.setCheckoutTime(request.checkoutTime());
+    }
+
 
     private Long requireApprovedOwnerId(String loginId) {
         Member member = members.findByLoginId(loginId)
