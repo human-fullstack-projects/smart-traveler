@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import '../../css/Auth.css';
-import { getTerms, signup } from '../../api/auth';
+import { getTerms, signup, login } from '../../api/auth';
 import TermsModal from './TermsModal';
 
 // 회원가입 (AUTH-01 여행자 · AUTH-02 숙박업주 · AUTH-03 약관 동의)
@@ -54,7 +54,7 @@ function Field({ name, label, form, errors, onChange, type = 'text', placeholder
   </label>;
 }
 
-export default function SignupPage() {
+export default function SignupPage({ onLogin, guestCourseCount = 0 }) {
   const [role, setRole] = useState('USER');
   const [form, setForm] = useState(EMPTY);
   const [errors, setErrors] = useState({});
@@ -92,7 +92,17 @@ export default function SignupPage() {
       const body = { role, loginId: form.loginId, password: form.password, nickname: form.nickname.trim(), email: form.email.trim(),
         consents: terms.map((t) => ({ termsId: t.termsId, agreed: Boolean(agreed[t.termsId]) })) };
       if (role === 'OWNER') ['businessNumber', 'businessName', 'representativeName', 'businessAddress', 'businessPhone'].forEach((k) => { body[k] = form[k].trim(); });
-      setDone(await signup(body));
+      const result = await signup(body);
+      if (role === 'USER' && guestCourseCount > 0 && onLogin) {
+        try {
+          const member = await login(form.loginId, form.password);
+          onLogin(member);
+          return;
+        } catch {
+          setNotice('가입은 완료됐지만 자동 로그인하지 못했습니다. 아래 로그인 버튼으로 로그인하면 보관한 코스를 연결합니다.');
+        }
+      }
+      setDone(result);
     } catch (err) {
       setNotice(err.message);
     } finally { inFlight.current = false; setBusy(false); }
@@ -104,6 +114,7 @@ export default function SignupPage() {
       <h1 className="st-h2">가입이 완료됐어요</h1>
       <p className="st-note">{done.role === 'OWNER' ? '숙박업주 가입은 관리자 승인 후 숙소를 등록할 수 있어요. 승인 결과는 로그인 후 확인해주세요.' : '이제 로그인하고 여행을 시작해보세요.'}</p>
       <p className="st-note">이 사이트에서 보관한 임시 코스는 다음 로그인 시 연결됩니다. 연결이 끝날 때까지 새로고침하거나 페이지를 닫지 마세요.</p>
+      {notice && <p className="auth-notice error" role="status">{notice}</p>}
       <a className="st-btn st-btn-lg" href="#/login">로그인하러 가기</a>
     </div></section></div>;
   }
@@ -118,6 +129,7 @@ export default function SignupPage() {
             <p className="auth-kicker">JOIN SMART TRAVEL</p>
             <h1 id="signup-title" className="st-h2">회원가입</h1>
             <p>가입 유형을 고르고 정보를 입력해주세요.</p>
+            {guestCourseCount > 0 && <p className="st-note">보관한 여행 코스 {guestCourseCount}건이 있습니다. 여행자 가입 완료 후 자동 로그인하여 계정에 연결하고, 가입 전에 보던 페이지로 돌아갑니다. 숙박업주는 가입 후 로그인하면 연결됩니다.</p>}
           </div>
           <form className="auth-form" onSubmit={submit} noValidate aria-busy={busy}>
             <p className="auth-required-legend"><span className="auth-required" aria-hidden="true">*</span> 표시는 꼭 입력해야 해요</p>

@@ -2,6 +2,7 @@
 .mypage .mp-profile-avatar { width: 92px; height: 92px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 3px solid #d5eee4; background: #eaf6f0; }
 .mypage .mp-profile-avatar-default { display: inline-flex; align-items: center; justify-content: center; color: #4c9980; }
 .mypage .mp-profile-summary { flex: 1; min-width: 200px; }
+.mypage .mp-profile-auth-actions { margin-top: 0; margin-left: auto; margin-right: 36px; justify-content: flex-end; }
 .mypage .mp-home-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
 .mypage .mp-generation-choice { padding: 20px; margin-top: 20px; border: 1px solid #b7dacc; border-radius: 14px; background: #f3fbf7; }
 .mypage.mp-settings { max-width: 960px; }

@@ -18,5 +18,5 @@ export default function useMyPageStore({ member, authChecked, authCheckFailed, a
   const identity = !authChecked ? 'checking' : authCheckFailed ? 'unavailable' : member?.memberId || 'guest';
   // effect가 실행되기 전의 렌더에서도 이전 회원 자료를 가린다.
   const visible = state.identity === identity ? state : { identity, status: 'checking', error: '', ...emptyData(), pendingCount: 0 };
-  return { ...visible, member, isGuest: identity === 'guest', addCourse: store.addCourse, retry: store.refresh };
+  return { ...visible, member, isGuest: identity === 'guest', addCourse: store.addCourse, saveTrialCourse: store.saveTrialCourse, retry: store.refresh };
 }

@@ -10,11 +10,11 @@ const items = [
 export default function MyPageMenu({ currentPage, isGuest = false }) {
   return (
     <nav className="mypage-menu" aria-label="마이페이지 메뉴">
-      {items.filter(({ page }) => !isGuest || ['mypage', 'my-courses'].includes(page)).map(({ page, label }) => (
+      {items.map(({ page, label }) => (
         <a
           key={page}
           className="nav-link"
-          href={`#/${page}`}
+          href={isGuest && page !== 'mypage' ? '#/login' : `#/${page}`}
           aria-current={currentPage === page ? 'page' : undefined}
         >
           {label}
