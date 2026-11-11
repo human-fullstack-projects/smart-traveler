@@ -15,6 +15,7 @@ const regionCenters = {
 
 function SearchMap({ results, selectedId, onSelect, query, region }) {
   const [fitRequest, setFitRequest] = useState(0);
+  const [mapStatus, setMapStatus] = useState('loading');
   const places = useMemo(() => results.filter((stay) => stay.demoCoordinate).map((stay) => ({
     ...stay.demoCoordinate,
     id: stay.id,
@@ -28,9 +29,9 @@ function SearchMap({ results, selectedId, onSelect, query, region }) {
 
   return (
     <section className="stay-kakao-map" aria-label="숙소 검색 결과 지도">
-      <KakaoMap places={places} center={center} selectedId={selected?.id} fitPoints={places} fitRequest={fitRequest} onMarkerClick={(place) => onSelect(place.id)} height="100%" />
-      <div className="stay-kakao-map__tools"><button type="button" onClick={() => setFitRequest((value) => value + 1)}>전체 보기</button><span>카카오 지도 · 숙소 위치는 시연용 좌표</span></div>
-      {selected && <div className="stay-kakao-map__details" role="status"><strong>{selected.name}</strong><span>{selected.saleable ? `1박 ${formatWon(selected.price)}부터` : '판매 정보 미확인'}</span>{selected.saleable && <a href={`#/stays/booking?${bookingQuery}`}>객실 보기 →</a>}</div>}
+      <KakaoMap places={places} center={center} selectedId={selected?.id} fitPoints={places} fitRequest={fitRequest} onMarkerClick={(place) => onSelect(place.id)} onStatusChange={setMapStatus} height="100%" />
+      {mapStatus === 'ready' && <div className="stay-kakao-map__tools"><button type="button" onClick={() => setFitRequest((value) => value + 1)}>전체 보기</button><span>카카오 지도 · 숙소 위치는 시연용 좌표</span></div>}
+      {mapStatus === 'ready' && selected && <div className="stay-kakao-map__details" role="status"><strong>{selected.name}</strong><span>{selected.saleable ? `1박 ${formatWon(selected.price)}부터` : '판매 정보 미확인'}</span>{selected.saleable && <a href={`#/stays/booking?${bookingQuery}`}>객실 보기 →</a>}</div>}
     </section>
   );
 }

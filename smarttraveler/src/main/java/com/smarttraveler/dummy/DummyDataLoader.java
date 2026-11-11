@@ -1,8 +1,12 @@
 package com.smarttraveler.dummy;
 
 import java.io.InputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalTime;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -24,7 +28,8 @@ import tools.jackson.databind.ObjectMapper;
 @Component
 public class DummyDataLoader implements ApplicationRunner {
     private static final Logger LOG = LoggerFactory.getLogger(DummyDataLoader.class);
-    private static final String PASSWORD = "Demo1234!";
+    private static final String PASSWORD = "123456";
+    private static final Map<String, OwnerName> OWNER_NAMES = readOwnerNames();
     private static final String ROOM_NOTE = "[예시 객실·가격] 실제 예약 상품이 아닙니다";
     private static final Pattern TIME = Pattern.compile("(?:^|[^0-9])([01]?[0-9]|2[0-3])[:시.]?([0-5][0-9])?(?:[^0-9]|$)");
     private final JdbcTemplate jdbc;
@@ -71,8 +76,10 @@ public class DummyDataLoader implements ApplicationRunner {
         for (int i = 1; i <= 5; i++) {
             final int number = i;
             try {
-                Integer added = transactions.execute(status -> member("dummy_user_" + number, "USER",
-                        "여행자 예시 " + number, hash) ? 1 : 0);
+                Integer added = transactions.execute(status -> {
+                    if (!migrateUser(number, hash)) return 0;
+                    return member("user" + number, "USER", "여행자" + number, hash) ? 1 : 0;
+                });
                 userCount += added == null ? 0 : added;
             } catch (RuntimeException e) {
                 LOG.warn("더미 여행자 {} 적재 실패: {}", i, e.getMessage());
@@ -136,10 +143,79 @@ public class DummyDataLoader implements ApplicationRunner {
                 """, login, hash, nickname, login + "@example.test", role, login) == 1;
     }
 
+    record OwnerName(int index, String name) {}
+
+    static Map<String, OwnerName> ownerNames() { return OWNER_NAMES; }
+
+    private static Map<String, OwnerName> readOwnerNames() {
+        Map<String, OwnerName> result = new LinkedHashMap<>();
+        try (InputStream stream = DummyDataLoader.class.getResourceAsStream("/dummy/owner_names.csv")) {
+            if (stream == null) throw new IllegalStateException("owner_names.csv 없음");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
+            if (!"source_content_id,index,name".equals(reader.readLine()))
+                throw new IllegalStateException("owner_names.csv 헤더 오류");
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",", -1);
+                if (parts.length != 3 || result.put(parts[0], new OwnerName(Integer.parseInt(parts[1]), parts[2])) != null)
+                    throw new IllegalStateException("owner_names.csv 중복/형식 오류: " + line);
+            }
+            if (result.size() != 145) throw new IllegalStateException("가상 업주 명단은 145명이어야 함");
+            return Map.copyOf(result);
+        } catch (Exception e) {
+            throw new IllegalStateException("가상 업주 명단 읽기 실패", e);
+        }
+    }
+
+    boolean migrateUser(int number, String hash) {
+        String old = "dummy_user_" + number;
+        String target = "user" + number;
+        Long oldId = id("SELECT member_id FROM members WHERE login_id=? AND email=? AND role_code='USER'",
+                old, old + "@example.test");
+        if (oldId == null) return true;
+        if (id("SELECT member_id FROM members WHERE login_id=? OR email=?", target, target + "@example.test") != null) {
+            LOG.warn("더미 여행자 {} 이행 건너뜀: 목표 계정 사용 중", number);
+            return false;
+        }
+        jdbc.update("UPDATE members SET login_id=?,email=?,password=?,nickname=CASE WHEN nickname=? THEN ? ELSE nickname END,updated_at=NOW() WHERE member_id=? AND login_id=? AND email=? AND role_code='USER'",
+                target, target + "@example.test", hash, "여행자 예시 " + number, "여행자" + number,
+                oldId, old, old + "@example.test");
+        return true;
+    }
+
+    private boolean migrateOwner(String sourceId, OwnerName owner, String hash) {
+        String old = "dummy_owner_" + sourceId;
+        String target = "owner" + owner.index();
+        String business = "DUMMY-" + sourceId;
+        Long oldId = id("""
+                SELECT m.member_id FROM members m JOIN owner_profiles o ON o.member_id=m.member_id
+                WHERE m.login_id=? AND m.email=? AND m.role_code='OWNER' AND o.business_number=?
+                """, old, old + "@example.test", business);
+        if (oldId == null) return true;
+        if (id("SELECT member_id FROM members WHERE login_id=? OR email=?", target, target + "@example.test") != null) {
+            LOG.warn("더미 업주 {} 이행 건너뜀: 목표 계정 사용 중", sourceId);
+            return false;
+        }
+        jdbc.update("""
+                UPDATE members SET login_id=?,email=?,password=?,
+                    nickname=CASE WHEN nickname LIKE '숙소 예시 %' THEN ? ELSE nickname END,updated_at=NOW()
+                WHERE member_id=? AND login_id=? AND email=? AND role_code='OWNER'
+                """, target, target + "@example.test", hash, owner.name(), oldId, old, old + "@example.test");
+        jdbc.update("""
+                UPDATE owner_profiles SET representative_name=?,updated_at=NOW()
+                WHERE member_id=? AND business_number=? AND representative_name='예시 업주'
+                """, owner.name(), oldId, business);
+        return true;
+    }
+
     int[] lodging(JsonNode row, int index, String hash) {
         String sourceId = text(row, "source_content_id");
         if (sourceId == null || sourceId.isBlank()) return new int[]{0, 0};
-        String login = "dummy_owner_" + sourceId;
+        OwnerName owner = OWNER_NAMES.get(sourceId);
+        if (owner == null) throw new IllegalArgumentException("업주 이름 매핑 없음: " + sourceId);
+        index = owner.index();
+        if (!migrateOwner(sourceId, owner, hash)) return new int[]{0, 0};
+        String login = "owner" + index;
         String business = "DUMMY-" + sourceId;
         Long existingId = id("SELECT lodging_id FROM lodging WHERE source_provider='TOURAPI' AND source_content_id=?", sourceId);
         if (existingId != null && id("""
@@ -147,13 +223,12 @@ public class DummyDataLoader implements ApplicationRunner {
                 JOIN owner_profiles o ON o.owner_id=l.owner_id
                 JOIN members m ON m.member_id=o.member_id
                 WHERE l.lodging_id=? AND l.source_provider='TOURAPI' AND m.login_id=?
-                  AND m.email=? AND m.role_code='OWNER'
-                  AND o.business_number=? AND o.representative_name='예시 업주'
+                  AND m.email=? AND m.role_code='OWNER' AND o.business_number=?
                 """, existingId, login, login + "@example.test", business) == null) {
             LOG.warn("더미 숙소 {} 건너뜀: 기존 숙소 소유자가 더미 업주와 일치하지 않음", sourceId);
             return new int[]{0, 0};
         }
-        boolean newMember = member(login, "OWNER", "숙소 예시 " + index, hash);
+        boolean newMember = member(login, "OWNER", owner.name(), hash);
         Long memberId = id("SELECT member_id FROM members WHERE login_id=?", login);
         if (memberId == null) return new int[]{0, 0};
         if (!newMember && dummyOwnerId(memberId, login, business) == null) {
@@ -174,7 +249,7 @@ public class DummyDataLoader implements ApplicationRunner {
                     business_address,business_phone,review_status_code,created_at,updated_at)
                 SELECT ?,?,?,?,? ,?,'APPROVED',NOW(),NOW() FROM DUAL
                 WHERE NOT EXISTS (SELECT 1 FROM owner_profiles WHERE member_id=?)
-                """, memberId, business, limit(name, 100), "예시 업주", limit(address, 255),
+                """, memberId, business, limit(name, 100), owner.name(), limit(address, 255),
                 String.format("000-0000-%04d", index), memberId);
         Long ownerId = dummyOwnerId(memberId, login, business);
         if (ownerId == null) return new int[]{0, 0};
@@ -201,7 +276,7 @@ public class DummyDataLoader implements ApplicationRunner {
                       AND EXISTS (SELECT 1 FROM owner_profiles o JOIN members m ON m.member_id=o.member_id
                                   WHERE o.owner_id=lodging.owner_id AND m.login_id=?
                                     AND m.email=? AND m.role_code='OWNER'
-                                    AND o.business_number=? AND o.representative_name='예시 업주')
+                                     AND o.business_number=?)
                     """, regionId, type, limit(name, 200), limit(address, 300),
                     limit(text(row, "address_detail"), 200), limit(text(row, "zipcode"), 10), lat, lng,
                     limit(text(row, "phone"), 30), limit(text(row, "homepage_url"), 1000),
@@ -255,7 +330,7 @@ public class DummyDataLoader implements ApplicationRunner {
                 SELECT o.owner_id FROM owner_profiles o
                 JOIN members m ON m.member_id=o.member_id
                 WHERE o.member_id=? AND m.login_id=? AND m.email=? AND m.role_code='OWNER'
-                  AND o.business_number=? AND o.representative_name='예시 업주'
+                  AND o.business_number=?
                 """, memberId, login, login + "@example.test", business);
     }
 
