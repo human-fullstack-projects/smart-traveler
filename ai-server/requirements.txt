@@ -5,6 +5,3 @@ langchain-openai==1.7.3
 langgraph==1.2.19
 httpx==0.28.1
 pytest==9.2.0
-chromadb==1.5.9
-python-dotenv==1.2.4
-pymysql==1.1.2
