@@ -4,8 +4,8 @@ import './travel-style-wizard.css';
 
 const steps = [
   { label: '여행 스타일', title: '어떤 여행 스타일이세요?', help: '나와 가장 가까운 하나를 골라 주세요.', options: [
-    ['packed', '빠듯한 여행', '계획표대로 하루를 꽉 채워요', 'pulse', '파워 J에게 추천'],
-    ['normal', '알찬 여행', '계획은 세우되 쉬는 틈도 둬요', 'clock', 'J와 P가 섞인 분께 추천'],
+    ['packed', '알차게 여행', '계획표대로 하루를 꽉 채워요', 'pulse', '파워 J에게 추천'],
+    ['normal', '적당한 여행', '계획은 세우되 쉬는 틈도 둬요', 'clock', 'J와 P가 섞인 분께 추천'],
     ['relaxed', '여유로운 여행', '그날 기분 따라 느긋하게', 'bed', 'P에게 추천'],
   ] },
   { label: '장소 선호', title: '야외와 실내, 어디가 좋으세요?', help: '하나만 골라 주세요.', options: [
@@ -34,7 +34,7 @@ const paths = {
   mountain: 'M2 20l7-13 5 8 4-7 5 12z M7 11l2 3 2-2', sea: 'M2 14q3-4 6 0t6 0t6 0 M2 20q3-4 6 0t6 0t6 0 M19 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0',
 };
 
-export default function TravelStyleWizard({ member, initialData }) {
+export default function TravelStyleWizard({ member, initialData, onSaved }) {
   const tags = initialData?.tags || [];
   const liked = name => tags.some(tag => tag.type === 'style' && tag.name === name && tag.polarity === 'like');
   const placeLiked = name => liked(`장소:${name}`) || liked(name);
@@ -61,6 +61,7 @@ export default function TravelStyleWizard({ member, initialData }) {
         tags: names.map(name => ({ type: 'style', name, polarity: 'like', weight: 1 })), surveyOnly: true,
       });
       setNotice('여행 스타일을 저장했습니다.');
+      onSaved?.();
     } catch (error) { setNotice(error.message || '저장하지 못했습니다. 다시 시도해 주세요.'); }
     finally { setBusy(false); }
   }
@@ -84,7 +85,7 @@ export default function TravelStyleWizard({ member, initialData }) {
         </div>
         </section>)}
         <div className="travel-style-actions">
-          <div className="travel-style-actions-right"><a href="#/mypage" aria-disabled={busy} onClick={event => { if (busy) event.preventDefault(); }}>나중에 하기</a>
+          <div className="travel-style-actions-right">
             <button type="button" className="travel-style-next" disabled={busy || !valid} onClick={save}>{busy ? '저장 중…' : '저장하기'}</button>
           </div>
         </div>

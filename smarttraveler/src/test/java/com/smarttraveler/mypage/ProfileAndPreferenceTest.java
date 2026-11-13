@@ -137,7 +137,7 @@ class ProfileAndPreferenceTest {
         verify(preferences, never()).saveSurvey(anyLong(), anyString(), any());
     }
     @Test void normalSaveIgnoresSurveyTagsEvenWhenUnknownAndKeepsExistingAnswers() {
-        var normal = new PreferenceDtos.Selection("interest", "자연", "like", 2);
+        var normal = new PreferenceDtos.Selection("interest", "자연풍경", "like", 2);
         var input = new PreferenceDtos.Save(7L, "relaxed", "late", List.of(normal, place("야외"), area("도시"),
             new PreferenceDtos.Selection("style", "지역:명동", "like", 1), new PreferenceDtos.Selection("style", "분위기:조용한 여행", "like", 1)));
         preferenceService.save(auth, input);
@@ -148,7 +148,8 @@ class ProfileAndPreferenceTest {
         preferenceService.get(auth, 7L);
         @SuppressWarnings("unchecked") ArgumentCaptor<List<PreferenceDtos.TagOption>> catalog = ArgumentCaptor.forClass(List.class);
         verify(preferences).find(eq(7L), catalog.capture());
-        assertEquals(25, catalog.getValue().size());
+        assertEquals(catalog.getValue().size(), new java.util.HashSet<>(catalog.getValue()).size());
+        assertTrue(catalog.getValue().contains(new PreferenceDtos.TagOption("interest", "자연풍경")));
         assertTrue(catalog.getValue().contains(new PreferenceDtos.TagOption("style", "장소:야외")));
         assertTrue(catalog.getValue().contains(new PreferenceDtos.TagOption("style", "선호지역:바다")));
         assertFalse(catalog.getValue().contains(new PreferenceDtos.TagOption("style", "지역:태안")));

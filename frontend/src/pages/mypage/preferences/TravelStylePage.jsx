@@ -8,8 +8,8 @@ import TravelStyleWizard from './TravelStyleWizard';
 
 const QUESTIONS = [
   { key: 'pace', label: '여행 스타일', title: '어떤 여행 스타일이세요?', sub: '나와 가장 가까운 하나를 골라 주세요.', options: [
-    ['packed', '빠듯한 여행', '계획표대로 하루를 꽉 채워요', 'M3 12h4l3-8 4 16 3-8h4'],
-    ['normal', '알찬 여행', '계획은 세우되 쉬는 틈도 둬요', 'M12 7v5l3 2 M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18'],
+    ['packed', '알차게 여행', '계획표대로 하루를 꽉 채워요', 'M3 12h4l3-8 4 16 3-8h4'],
+    ['normal', '적당한 여행', '계획은 세우되 쉬는 틈도 둬요', 'M12 7v5l3 2 M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18'],
     ['relaxed', '여유로운 여행', '그날 기분 따라 느긋하게', 'M3 18V8M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5M7 9a2 2 0 1 0 0 4a2 2 0 1 0 0-4'],
   ] },
   { key: 'place', label: '장소 선호', title: '야외와 실내, 어디가 좋으세요?', sub: '하나만 골라 주세요.', options: [
@@ -50,7 +50,7 @@ function ChoiceTiles({ question, answers, select, compact, busy }) {
   </div>;
 }
 
-function Questions({ member, data, surveyMode, onSkip, onSaved }) {
+function Questions({ member, data, surveyMode, onSaved }) {
   const [answers, setAnswers] = useState(() => answersFrom(data));
   const [step, setStep] = useState(0);
   const [notice, setNotice] = useState('');
@@ -89,7 +89,7 @@ function Questions({ member, data, surveyMode, onSkip, onSaved }) {
       <p className="st-survey-sub">{question.sub}{question.key === 'areas' && <span> ({answers.areas.length} / 3 고름)</span>}</p>
       <ChoiceTiles question={question} answers={answers} select={select} busy={busy} />
       <div className="st-survey-actions"><button type="button" className="outline" onClick={() => { setStep(step - 1); setNotice(''); }} disabled={busy} style={{ visibility: step ? 'visible' : 'hidden' }}>이전</button>
-        <div><button type="button" className="later" onClick={onSkip} disabled={busy}>나중에 하기</button><button type="button" className="primary" disabled={busy || !ready} onClick={step === 2 ? save : () => { setStep(step + 1); setNotice(''); }}>{step === 2 ? '저장하기' : '다음'}</button></div></div>
+        <div><button type="button" className="primary" disabled={busy || !ready} onClick={step === 2 ? save : () => { setStep(step + 1); setNotice(''); }}>{step === 2 ? '저장하기' : '다음'}</button></div></div>
       {notice && <p className="st-survey-notice" role="alert">{notice}</p>}
     </section>;
   }
@@ -100,10 +100,10 @@ function Questions({ member, data, surveyMode, onSkip, onSaved }) {
       {notice && <span role="status" className={notice === '저장했어요' ? 'saved' : 'error'}>{notice}</span>}</div></form></div>;
 }
 
-export default function TravelStylePage({ surveyMode = false, member, initialData, onSkip, onSaved }) {
+export default function TravelStylePage({ surveyMode = false, member, initialData, onSaved }) {
   const resource = useMemberResource(surveyMode ? null : member?.memberId, settingsApi.preferences);
-  if (surveyMode) return <Questions member={member} data={initialData} surveyMode onSkip={onSkip} onSaved={onSaved} />;
+  if (surveyMode) return <Questions member={member} data={initialData} surveyMode onSaved={onSaved} />;
   if (resource.status === 'loading') return <p role="status">여행 스타일을 불러오고 있습니다.</p>;
   if (resource.error) return <><AccessNotice kind={resource.error.status === 401 ? 'login' : resource.error.status === 403 ? 'denied' : 'unavailable'} onRetry={resource.reload} /><p className="mypage" role="alert">{resource.error.message}</p></>;
-  return <TravelStyleWizard key={member.memberId} member={member} initialData={resource.data} />;
+  return <TravelStyleWizard key={member.memberId} member={member} initialData={resource.data} onSaved={onSaved} />;
 }

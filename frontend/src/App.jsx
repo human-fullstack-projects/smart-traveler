@@ -99,9 +99,6 @@ export default function App() {
       return;
     }
     let cancelled = false;
-    let skipped = false;
-    try { skipped = sessionStorage.getItem(`st-survey-skip-${memberId}`) === '1'; } catch { /* storage unavailable */ }
-    if (skipped) { setSurvey({ memberId, status: 'skipped', data: null }); return; }
     setSurvey({ memberId, status: 'loading', data: null });
     settingsApi.preferences(memberId).then(data => {
       if (cancelled || data.memberId !== memberId) return;
@@ -125,7 +122,6 @@ export default function App() {
   }, []);
 
   function loggedIn(value) {
-    try { sessionStorage.removeItem(`st-survey-skip-${value?.memberId}`); } catch { /* storage unavailable */ }
     login(value);
     setNotice('');
     window.location.hash = returnPage.current.get();
@@ -134,7 +130,6 @@ export default function App() {
   async function handleLogout() {
     try {
       await logout();
-      try { sessionStorage.removeItem(`st-survey-skip-${member?.memberId}`); } catch { /* storage unavailable */ }
       setNotice('로그아웃했어요.');
       if (window.location.hash.startsWith('#/admin') || window.location.hash.startsWith('#/owner')) window.location.hash = '/';
     } catch (error) {
@@ -223,7 +218,6 @@ export default function App() {
     <MainLayout member={member} loggingOut={loggingOut} onLogout={handleLogout} notice={notice} onDismissNotice={() => setNotice('')}>
       {authChecked && member?.roleCode === 'USER' && routePath !== '/my-travel-style' && survey.memberId === member.memberId && survey.status === 'needed'
         ? <TravelStylePage key={`survey-${member.memberId}`} member={member} surveyMode initialData={survey.data}
-            onSkip={() => { try { sessionStorage.setItem(`st-survey-skip-${member.memberId}`, '1'); } catch { /* storage unavailable */ } setSurvey({ memberId: member.memberId, status: 'skipped', data: null }); }}
             onSaved={() => setSurvey({ memberId: member.memberId, status: 'done', data: null })} />
         : content}
     </MainLayout>
