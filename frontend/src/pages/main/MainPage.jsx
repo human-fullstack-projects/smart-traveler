@@ -270,7 +270,7 @@ import '../../css/MainPage.css';
 
 import { useRef, useState } from 'react';
 import './HomeLanding.css';
-
+import HomeReviewCards from './HomeReviewCards';
 // 화면 구성용 더미 데이터입니다.
 const sampleCourses = [
   {
@@ -317,7 +317,7 @@ const quickPrompts = [
   },
 ];
 
-export default function MainPage({ onStart, busy = false }) {
+export default function MainPage({ onStart, busy = false, reviewAccess, reviewKey }) {
   const [message, setMessage] = useState('');
   const [notice, setNotice] = useState('');
   const [selectedCourse, setSelectedCourse] = useState(null);
@@ -427,7 +427,7 @@ export default function MainPage({ onStart, busy = false }) {
         <a className="landing-toss-demo" href="#/payments/demo">토스 1,000원 테스트 결제 →</a>
       </div>
 
-      <section className="landing-recommendations" aria-labelledby="courses-title">
+      {/* <section className="landing-recommendations" aria-labelledby="courses-title">
         <div className="landing-section-heading">
           <h2 id="courses-title">이런 여행은 어때요?</h2>
           <a href="#/human-courses">전체 보기 →</a>
@@ -464,7 +464,14 @@ export default function MainPage({ onStart, busy = false }) {
             </button>
           ))}
         </div>
+      </section> */}
+
+      {/* 기존 추천 코스 카드 구역
+      <section className="landing-recommendations" aria-labelledby="courses-title">
+        기존 코드가 들어 있는 부분
       </section>
+      */}
+            <HomeReviewCards key={reviewKey} access={reviewAccess} />
 
       {selectedCourse && (
         <div
