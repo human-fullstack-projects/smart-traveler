@@ -25,6 +25,11 @@ public class HumanCourseController {
     @GetMapping
     public List<Post> list(Authentication auth) { return service.list(auth); }
 
+        @GetMapping("/home-reviews")
+    public List<Post> homeReviews(Authentication auth) {
+        return service.homeReviews(auth);
+    }
+
     @GetMapping("/eligibility")
     public List<Reservation> eligibility(Authentication auth) { return service.reservations(auth); }
 

@@ -204,7 +204,21 @@ export default function App() {
     content = <AiChatPage {...chat} />;
   } else {
     const SidebarScreen = sidebarPageRoutes[routePath] || HomePage;
-    content = <SidebarScreen key={routePath} onLogin={loggedIn} onStart={chat.startChat} busy={chat.busy} />;
+         content = (
+      <SidebarScreen
+        key={routePath}
+        onLogin={loggedIn}
+        onStart={chat.startChat}
+        busy={chat.busy}
+        reviewAccess={
+          authCheckFailed ? 'error'
+            : !authChecked ? 'checking'
+            : member?.roleCode === 'USER' ? 'traveler'
+            : member ? 'other' : 'guest'
+        }
+        reviewKey={`${member?.memberId ?? 'guest'}-${authRevision}`}
+      />
+    );
   }
 
   return (
