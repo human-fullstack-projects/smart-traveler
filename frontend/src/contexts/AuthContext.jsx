@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { getCurrentMember, logout as logoutRequest } from '../api/auth';
 
-const AuthContext = createContext(null);
+const AuthContext = createContext(null); //전역 공유 저장소 만들기
 
 export function AuthProvider({ children }) {
   const [member, setMember] = useState(null);
@@ -66,6 +66,8 @@ export function AuthProvider({ children }) {
     }
   }
 
+  // AuthContext.Provider-전역 저장소에 연결하는 도구
+  //value : 전역 저장소에 저장되는 데이터
   return (
     <AuthContext.Provider value={{ member, authChecked, authCheckFailed, loggingOut, authRevision, retryAuth, updateMemberProfile, login, logout }}>
       {children}
@@ -73,8 +75,9 @@ export function AuthProvider({ children }) {
   );
 }
 
+//custom hook : AuthContext를 쉽게 사용하기 위한 재사용 모듈 또는 컴포넌트
 export function useAuth() {
-  const ctx = useContext(AuthContext);
+  const ctx = useContext(AuthContext); // 전역저장소 가져오기
   if (!ctx) throw new Error('useAuth must be used within an AuthProvider');
   return ctx;
 }

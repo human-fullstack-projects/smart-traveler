@@ -22,10 +22,22 @@ public class PreferenceService {
     private static final List<String> SURVEY_PLACES = List.of("야외", "실내", "둘 다");
     private static final List<String> SURVEY_AREAS = List.of("도시", "시골", "호수·강", "섬", "산·숲", "바다");
     private static final List<TagOption> DEFAULT_TAGS = Stream.concat(List.of(
-        new TagOption("interest", "자연"), new TagOption("interest", "역사·문화"), new TagOption("interest", "쇼핑"), new TagOption("interest", "액티비티"),
-        new TagOption("food", "한식"), new TagOption("food", "해산물"), new TagOption("food", "채식"), new TagOption("food", "카페·디저트"),
+        new TagOption("interest", "맛집탐방"), new TagOption("interest", "카페투어"), new TagOption("interest", "자연풍경"),
+        new TagOption("interest", "문화예술"), new TagOption("interest", "역사탐방"), new TagOption("interest", "액티비티"),
+        new TagOption("interest", "휴양힐링"), new TagOption("interest", "쇼핑투어"), new TagOption("interest", "공예체험"), new TagOption("interest", "농촌·전원"),
+        new TagOption("interest", "도시투어"), new TagOption("interest", "호캉스"),
+        new TagOption("interest", "사진·감성"), new TagOption("interest", "야경감상"),
+        new TagOption("food", "한식"), new TagOption("food", "중식"), new TagOption("food", "일식"), new TagOption("food", "양식"),
+        new TagOption("food", "동남아음식"), new TagOption("food", "분식"), new TagOption("food", "육류"),
+        new TagOption("food", "해산물"), new TagOption("food", "채식"), new TagOption("food", "디저트"),
         new TagOption("transport", "대중교통"), new TagOption("transport", "자동차"), new TagOption("transport", "도보"), new TagOption("transport", "자전거"),
-        new TagOption("style", "여유로운 휴식"), new TagOption("style", "가성비"), new TagOption("style", "사진 여행"), new TagOption("style", "로컬 체험")
+        new TagOption("style", "휴식파"), new TagOption("style", "탐험파"), new TagOption("style", "저예산"), new TagOption("style", "가성비"),
+        new TagOption("style", "럭셔리"), new TagOption("style", "가이드파"), new TagOption("style", "자유파"),
+        new TagOption("style", "도시"), new TagOption("style", "농촌"), new TagOption("style", "호수·강"),
+        new TagOption("style", "섬"), new TagOption("style", "산·숲"), new TagOption("style", "바다·해변"),
+        new TagOption("style", "혼자"), new TagOption("style", "연인"), new TagOption("style", "부부"),
+        new TagOption("style", "가족(아이동반)"), new TagOption("style", "부모님"), new TagOption("style", "친구"), new TagOption("style", "반려동물"),
+        new TagOption("style", "실내"), new TagOption("style", "야외"), new TagOption("style", "낮"), new TagOption("style", "밤")
     ).stream(), Stream.concat(
         SURVEY_PLACES.stream().map(name -> new TagOption("style", "장소:" + name)),
         SURVEY_AREAS.stream().map(name -> new TagOption("style", "선호지역:" + name))

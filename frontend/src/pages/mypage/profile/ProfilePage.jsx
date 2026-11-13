@@ -8,6 +8,7 @@ import useMemberResource from '../hooks/useMemberResource';
 import { settingsApi } from '../api/settingsApi';
 import { profileError } from '../data/settings';
 import { prepareAvatar } from './avatar';
+import { avatarPresets } from './avatarPresets';
 import '../mypage-settings.css';
 
 const EMPTY = { nickname: '', email: '', avatarData: null, changePassword: false, currentPassword: '', newPassword: '', passwordConfirmation: '' };
@@ -33,6 +34,21 @@ export default function ProfilePage({ member }) {
     catch (error) { if (mounted.current) setNotice(error.message || '이미지를 읽지 못했습니다.'); }
     finally { if (mounted.current) setReading(false); }
   }
+  async function selectPreset(preset) {
+    if (busy || reading) return;
+    setReading(true); setNotice('');
+    try {
+      const response = await fetch(preset.src);
+      if (!response.ok) throw new Error('이미지를 불러오지 못했습니다.');
+      const blob = await response.blob();
+      const avatar = await prepareAvatar(new File([blob], `${preset.id}.png`, { type: blob.type }));
+      if (mounted.current) {
+        update('avatarData', avatar);
+        setNotice(`${preset.label} 이미지를 선택했습니다. 내 정보 저장 버튼을 눌러 반영해 주세요.`);
+      }
+    } catch (error) { if (mounted.current) setNotice(error.message || '이미지를 불러오지 못했습니다.'); }
+    finally { if (mounted.current) setReading(false); }
+  }
   async function submit(event) {
     event.preventDefault();
     if (submitting.current || reading) return;
@@ -52,12 +68,17 @@ export default function ProfilePage({ member }) {
   if (resource.error) return <><AccessNotice kind={resource.error.status === 401 ? 'login' : resource.error.status === 403 ? 'denied' : 'unavailable'} onRetry={resource.reload} /><p className="mypage" role="alert">{resource.error.message}</p></>;
   return <div className="mypage mp-settings"><PageHero eyebrow="MY PROFILE" title="내 정보관리">로그인 계정의 기본 정보를 관리하세요.</PageHero>
     <Card><form onSubmit={submit}><fieldset disabled={busy || reading}>
-      <div className="mp-profile-line"><ProfileAvatar avatarData={form.avatarData} name={form.nickname} /><div><label>프로필 이미지<input type="file" accept="image/png,image/jpeg,image/webp" onChange={photo} /></label><p className="note">1MB 이하 · 저장 시 최대 256픽셀로 조정합니다.</p><button className="secondary" type="button" onClick={() => update('avatarData', null)}>기본 이미지 사용</button></div></div>
+      <div className="mp-profile-line"><ProfileAvatar avatarData={form.avatarData} name={form.nickname} /><div><label>프로필 이미지<input type="file" accept="image/png,image/jpeg,image/webp" onChange={photo} /></label><p className="note">1MB 이하 · 저장 시 최대 256픽셀로 조정합니다.</p>
+        <div className="mp-avatar-options" role="group" aria-label="프로필 이미지 선택">
+          <button className="secondary" type="button" onClick={() => update('avatarData', null)}>기본 이미지 사용</button>
+          {avatarPresets.map(preset => <button key={preset.id} className="mp-avatar-option" type="button" onClick={() => selectPreset(preset)} aria-label={`${preset.label} 프로필 이미지 선택`} title={preset.label}><img src={preset.src} alt="" width="52" height="52" /></button>)}
+        </div>
+      </div></div>
       <label>아이디<input value={resource.data.loginId} readOnly aria-readonly="true" autoComplete="username" /></label><p className="note">아이디는 변경할 수 없습니다.</p>
-      <label>닉네임<input name="nickname" value={form.nickname} maxLength={50} onChange={e => update('nickname', e.target.value)} required autoComplete="nickname" /></label>
-      <label>이메일<input name="email" type="email" value={form.email} maxLength={255} onChange={e => update('email', e.target.value)} required autoComplete="email" /></label>
       <label className="checkline"><input type="checkbox" checked={form.changePassword} onChange={e => setForm(previous => ({ ...previous, changePassword: e.target.checked, currentPassword: '', newPassword: '', passwordConfirmation: '' }))} />비밀번호 변경</label>
       {form.changePassword && <div className="mp-password-fields"><label>현재 비밀번호<input type="password" value={form.currentPassword} autoComplete="current-password" onChange={e => update('currentPassword', e.target.value)} required /></label><label>새 비밀번호<input type="password" value={form.newPassword} autoComplete="new-password" onChange={e => update('newPassword', e.target.value)} required /></label><label>새 비밀번호 확인<input type="password" value={form.passwordConfirmation} autoComplete="new-password" onChange={e => update('passwordConfirmation', e.target.value)} required /></label><p className="note">영문·숫자 포함 8자 이상, UTF-8 기준 72바이트 이하</p></div>}
+      <label>닉네임<input name="nickname" value={form.nickname} maxLength={50} onChange={e => update('nickname', e.target.value)} required autoComplete="nickname" /></label>
+      <label>이메일<input name="email" type="email" value={form.email} maxLength={255} onChange={e => update('email', e.target.value)} required autoComplete="email" /></label>
       <div className="actions"><button className="primary" type="submit">{busy ? '저장 중…' : reading ? '사진 처리 중…' : '내 정보 저장'}</button><a className="secondary" href="#/mypage">마이페이지로</a></div>
     </fieldset></form>{notice && <p role="status">{notice}</p>}</Card>
   </div>;

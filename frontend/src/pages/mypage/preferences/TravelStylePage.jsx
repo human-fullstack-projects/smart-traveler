@@ -4,6 +4,7 @@ import useMemberResource from '../hooks/useMemberResource';
 import { settingsApi } from '../api/settingsApi';
 import { surveyError } from '../data/settings';
 import './survey.css';
+import TravelStyleWizard from './TravelStyleWizard';
 
 const QUESTIONS = [
   { key: 'pace', label: '여행 스타일', title: '어떤 여행 스타일이세요?', sub: '나와 가장 가까운 하나를 골라 주세요.', options: [
@@ -104,5 +105,5 @@ export default function TravelStylePage({ surveyMode = false, member, initialDat
   if (surveyMode) return <Questions member={member} data={initialData} surveyMode onSkip={onSkip} onSaved={onSaved} />;
   if (resource.status === 'loading') return <p role="status">여행 스타일을 불러오고 있습니다.</p>;
   if (resource.error) return <><AccessNotice kind={resource.error.status === 401 ? 'login' : resource.error.status === 403 ? 'denied' : 'unavailable'} onRetry={resource.reload} /><p className="mypage" role="alert">{resource.error.message}</p></>;
-  return <Questions member={member} data={resource.data} onSaved={onSaved} />;
+  return <TravelStyleWizard key={member.memberId} member={member} initialData={resource.data} />;
 }
