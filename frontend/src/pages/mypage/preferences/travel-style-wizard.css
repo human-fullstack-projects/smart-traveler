@@ -1,0 +1,33 @@
+.travel-style-page { --ts-ink: #263252; --ts-teal: #2d7273; --ts-border: #d0cfe1; padding: 26px 24px 70px; background: #e7e6ef; color: var(--ts-ink); min-height: 820px; }
+.travel-style-page .travel-style-page-title { max-width: 1334px; margin: 0 auto 14px; font-size: 24px; color: var(--ts-teal); }
+.travel-style-panel { box-sizing: border-box; max-width: 1334px; min-height: 720px; margin: auto; padding: 60px 36px 70px; border: 1px solid var(--ts-border); border-radius: 23px; background: #faf9ff; box-shadow: 0 8px 24px #2423430a; }
+.travel-style-inner { max-width: 1000px; margin: auto; }
+.travel-style-section + .travel-style-section { margin-top: 36px; padding-top: 32px; border-top: 1px solid var(--ts-border); }
+.travel-style-progress { display: flex; gap: 8px; margin-bottom: 22px; }
+.travel-style-progress span { width: 34px; height: 6px; background: var(--ts-border); border-radius: 10px; }
+.travel-style-progress .complete { background: var(--ts-teal); }
+.travel-style-page .travel-style-step { margin: 0 0 8px; color: var(--ts-teal); font-size: 16px; font-weight: 700; }
+.travel-style-page h2 { margin: 0 0 9px; color: #428f93; font-size: 30px; line-height: 1.4; letter-spacing: -1.3px; font-weight: 800; }
+.travel-style-page .travel-style-help { margin: 0 0 30px; font-size: 16px; color: #43577f; }
+.travel-style-help strong { color: var(--ts-teal); }
+.travel-style-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.travel-style-page .travel-style-option { position: relative; display: flex; flex-direction: column; align-items: flex-start; text-align: left; gap: 0; padding: 22px; min-height: 158px; border: 2px solid var(--ts-border); border-radius: 18px; background: #fff; color: var(--ts-ink); box-shadow: none; cursor: pointer; font-family: inherit; transition: background .15s, border-color .15s; }
+.travel-style-page .travel-style-option[aria-pressed=true] { background: #edf5f4; border-color: var(--ts-teal); }
+.travel-style-page .travel-style-option:disabled { opacity: .4; cursor: default; }
+.travel-style-page .travel-style-option[aria-pressed=true]:disabled { opacity: 1; }
+.travel-style-icon { display: grid; place-items: center; width: 44px; height: 44px; background: #a0cecd; border-radius: 13px; color: var(--ts-teal); margin-bottom: 12px; }
+.travel-style-icon svg { width: 24px; height: 24px; }
+.travel-style-option > strong { font-size: 22px; line-height: 1.4; font-weight: 800; margin-bottom: 5px; }
+.travel-style-badge { padding: 3px 10px; background: #e2efef; color: #237780; border-radius: 20px; font-size: 12px; font-weight: 700; margin-bottom: 6px; }
+.travel-style-description { font-size: 14px; color: #465b83; line-height: 1.5; }
+.travel-style-check { position: absolute; top: 14px; right: 16px; width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%; background: var(--ts-teal); color: white; font-size: 16px; font-weight: 800; }
+.travel-style-actions { display: flex; align-items: center; margin-top: 30px; gap: 12px; }
+.travel-style-actions-right { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+.travel-style-page .travel-style-actions button, .travel-style-page .travel-style-actions a { box-sizing: border-box; display: inline-flex; justify-content: center; align-items: center; border-radius: 30px; padding: 13px 25px; min-height: 50px; font-size: 15px; font-weight: 700; line-height: 1.4; text-decoration: none; font-family: inherit; cursor: pointer; }
+.travel-style-page .travel-style-back { border: 2px solid var(--ts-teal); color: var(--ts-teal); background: transparent; }
+.travel-style-page .travel-style-actions a { border: 2px solid var(--ts-border); color: #43577f; background: transparent; }
+.travel-style-page .travel-style-next { background: var(--ts-teal); color: white; border: 2px solid var(--ts-teal); }
+.travel-style-page .travel-style-next:disabled { opacity: .45; cursor: default; }
+.travel-style-page button:focus-visible, .travel-style-page a:focus-visible { outline: 3px solid #428f93; outline-offset: 4px; }
+.travel-style-notice { color: var(--ts-teal); margin-top: 20px; }
+@media (max-width: 760px) { .travel-style-page { padding: 20px 14px 40px; min-height: auto; } .travel-style-panel { padding: 32px 22px; min-height: 650px; } .travel-style-page h2 { font-size: 24px; } .travel-style-options { grid-template-columns: 1fr; gap: 12px; } .travel-style-page .travel-style-option { min-height: 140px; padding: 18px; } .travel-style-actions { flex-wrap: wrap; } .travel-style-page .travel-style-actions button, .travel-style-page .travel-style-actions a { padding: 11px 18px; } }

@@ -84,6 +84,7 @@ export default function App() {
   const { member, authChecked, authCheckFailed, loggingOut, authRevision, retryAuth, login, logout } = useAuth();
   const myPageStore = useMyPageStore({ member, authChecked, authCheckFailed, authRevision });
   const humanCourses = useHumanCourses(member);
+  //window.location.hash : 현재 url의 해시부분 (예:#/mypage)
   const [route, setRoute] = useState(window.location.hash.slice(1) || '/');
   const returnPage = useRef(null);
   if (!returnPage.current) returnPage.current = createReturnPage(route);
