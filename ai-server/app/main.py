@@ -1,12 +1,7 @@
-import pathlib
-from dotenv import load_dotenv
-load_dotenv(pathlib.Path(__file__).resolve().parent.parent / ".env")  # 실행 위치와 무관하게 ai-server/.env를 읽는다
-
 from fastapi import FastAPI, HTTPException, Query
 from .tour_api import TourApiClient, TourApiError
 from .graph import build_graph
-from .rag import index_places, remove_places
-from .schemas import DialogueRequest, DialogueResponse, PlaceIndexRequest, PlaceRemoveRequest
+from .schemas import DialogueRequest, DialogueResponse
 
 app = FastAPI(title="스마트 트래블 AI 서버")
 graph = build_graph()
@@ -46,19 +41,3 @@ def tour_places(province: str = Query(pattern=r"^[0-9]{1,5}$"), district: str | 
         return tour.places(province, district, page)
     except TourApiError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from None
-
-
-@app.post("/internal/places/index")
-def place_index(request: PlaceIndexRequest):
-    """스프링이 동기화 뒤 보낸 장소를 임베딩해 Chroma에 저장한다. 최대 100개씩."""
-    try:
-        return {"indexed": index_places(request.rows)}
-    except Exception as exc:
-        raise HTTPException(status_code=503, detail="임베딩 서버 설정과 연결을 확인해 주세요.") from exc
-
-
-@app.post("/internal/places/remove")
-def place_remove(request: PlaceRemoveRequest):
-    """is_active=FALSE가 된 장소를 Chroma에서 지운다."""
-    remove_places(request.placeIds)
-    return {"removed": len(request.placeIds)}

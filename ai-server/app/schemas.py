@@ -39,32 +39,3 @@ class SelectedPlace(BaseModel):
 class PlaceRecommendations(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
     places: list[SelectedPlace]
-
-
-class PlaceRow(BaseModel):
-    """Spring이 보내는 임베딩 대상 장소 1건. 좌표가 없는 장소는 보내지 않는다."""
-    model_config = ConfigDict(extra="forbid")
-    placeId: int
-    placeType: str
-    name: str
-    address: str | None = None
-    description: str | None = None
-    mainMenu: str | None = None
-    closedDays: str | None = None
-    isMarket: bool = False
-    sigunguCode: str
-    lat: float
-    lng: float
-    imageUrl: str | None = None
-    hubRank: int | None = Field(default=None, description="place_hub_rank의 순위. 없으면 대체 인기 신호를 쓴다")
-
-
-class PlaceIndexRequest(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    rows: list[PlaceRow] = Field(max_length=100)
-
-
-class PlaceRemoveRequest(BaseModel):
-    """is_active=FALSE가 된 장소를 Chroma에서 지운다."""
-    model_config = ConfigDict(extra="forbid")
-    placeIds: list[int] = Field(max_length=500)

@@ -132,7 +132,8 @@ public class TourSyncService {
             steps.add(syncHub(regionId, baseYm, areaCd, regionCode));
             steps.add(syncRelated(regionId, baseYm, areaCd, regionCode));
         }
-        steps.add(indexPlaces(regionId));
+        // ai-server의 /internal/places/index가 임시 롤백되어 있어 호출을 끔 (복구되면 아래 줄을 되살린다).
+        // steps.add(indexPlaces(regionId));
         return new SyncResult((String) region.get("full_name"), baseYm, steps);
     }
 

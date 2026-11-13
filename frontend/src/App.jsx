@@ -189,7 +189,8 @@ export default function App() {
       {blocked ? <AccessNotice kind={blocked} onRetry={blocked === 'unavailable' ? retryAuth : undefined} /> : needsTravelData && ['checking', 'loading'].includes(myPageStore.status)
         ? <p role="status">내 자료를 불러오고 있습니다.</p>
         : needsTravelData && myPageStore.status === 'error' ? <p role="alert">자료를 불러오지 못했습니다. 위의 다시 불러오기 버튼으로 재시도해 주세요.</p>
-        : <MyPageScreen key={`${member?.memberId || 'guest'}-${routePath}`} {...myPageStore} courseId={myCourseMatch?.[1]} reservationId={reservationMatch?.[1]} postId={myPostMatch?.[1]} />}
+        : <MyPageScreen key={`${member?.memberId || 'guest'}-${routePath}`} {...myPageStore} courseId={myCourseMatch?.[1]} reservationId={reservationMatch?.[1]} postId={myPostMatch?.[1]}
+            onSaved={routePath === '/my-travel-style' ? () => setSurvey({ memberId: member.memberId, status: 'done', data: null }) : undefined} />}
     </>;
   } else if (routePath === '/payments/demo' || new URLSearchParams(window.location.search).has('tossDemo')) {
     content = <TossDemoPage />;

@@ -19,19 +19,16 @@ public class PreferenceService {
     private final MyPageService owners;
     private final PreferenceRepository preferences;
     public PreferenceService(MyPageService owners, PreferenceRepository preferences) { this.owners = owners; this.preferences = preferences; }
-    private static final List<String> SURVEY_REGIONS = List.of(
-        "명동", "홍대", "강남", "잠실", "해운대", "광안리", "송도", "경주", "포항", "속초",
-        "춘천", "여수", "전주", "군산", "제주", "서귀포", "거제", "통영", "담양", "태안"
-    );
-    private static final List<String> SURVEY_MOODS = List.of("조용한 여행", "활발한 여행");
+    private static final List<String> SURVEY_PLACES = List.of("야외", "실내", "둘 다");
+    private static final List<String> SURVEY_AREAS = List.of("도시", "시골", "호수·강", "섬", "산·숲", "바다");
     private static final List<TagOption> DEFAULT_TAGS = Stream.concat(List.of(
         new TagOption("interest", "자연"), new TagOption("interest", "역사·문화"), new TagOption("interest", "쇼핑"), new TagOption("interest", "액티비티"),
         new TagOption("food", "한식"), new TagOption("food", "해산물"), new TagOption("food", "채식"), new TagOption("food", "카페·디저트"),
         new TagOption("transport", "대중교통"), new TagOption("transport", "자동차"), new TagOption("transport", "도보"), new TagOption("transport", "자전거"),
         new TagOption("style", "여유로운 휴식"), new TagOption("style", "가성비"), new TagOption("style", "사진 여행"), new TagOption("style", "로컬 체험")
     ).stream(), Stream.concat(
-        SURVEY_REGIONS.stream().map(name -> new TagOption("style", "지역:" + name)),
-        SURVEY_MOODS.stream().map(name -> new TagOption("style", "분위기:" + name))
+        SURVEY_PLACES.stream().map(name -> new TagOption("style", "장소:" + name)),
+        SURVEY_AREAS.stream().map(name -> new TagOption("style", "선호지역:" + name))
     )).toList();
     public Preferences get(Authentication auth, Long expected) {
         long owner = owners.owner(auth, expected);
@@ -39,18 +36,21 @@ public class PreferenceService {
     }
     private List<TagOption> catalog() {
         var all = new ArrayList<>(DEFAULT_TAGS);
-        for (var option : preferences.tags()) if (!all.contains(option)) all.add(option);
+        for (var option : preferences.tags()) if (!isOldSurveyTag(option) && !all.contains(option)) all.add(option);
         return List.copyOf(all);
+    }
+    private boolean isOldSurveyTag(TagOption option) {
+        return "style".equals(option.type()) && (option.name().startsWith("지역:") || option.name().startsWith("분위기:"));
     }
     @Transactional
     public Preferences save(Authentication auth, Save request) {
         long owner = owners.owner(auth, request.expectedMemberId());
         if (Boolean.TRUE.equals(request.surveyOnly())) {
-            validateSurvey(request.tags());
+            validateSurvey(request.pace(), request.tags());
             if (!preferences.lockSurveyOwner(owner)) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "여행자 회원만 선호도 조사를 저장할 수 있어요.");
             }
-            preferences.saveSurvey(owner, request.tags());
+            preferences.saveSurvey(owner, request.pace(), request.tags());
             return preferences.find(owner, catalog());
         }
         var allowed = new HashSet<>(catalog());
@@ -67,28 +67,29 @@ public class PreferenceService {
         preferences.save(owner, request);
         return preferences.find(owner, catalog());
     }
-    private void validateSurvey(List<Selection> tags) {
-        if (tags == null || tags.size() != 4) throw invalidSurvey();
-        var regions = new HashSet<String>();
-        int moods = 0;
+    private void validateSurvey(String pace, List<Selection> tags) {
+        if (pace == null || !List.of("packed", "normal", "relaxed").contains(pace) || tags == null || tags.size() < 2 || tags.size() > 4) throw invalidSurvey();
+        var areas = new HashSet<String>();
+        int places = 0;
         for (var tag : tags) {
             if (tag == null || !"style".equals(tag.type()) || !"like".equals(tag.polarity())
                 || !Integer.valueOf(1).equals(tag.weight())) throw invalidSurvey();
-            if (tag.name() != null && tag.name().startsWith("지역:")
-                && SURVEY_REGIONS.contains(tag.name().substring("지역:".length()))) {
-                if (!regions.add(tag.name())) throw invalidSurvey();
-            } else if (tag.name() != null && tag.name().startsWith("분위기:")
-                && SURVEY_MOODS.contains(tag.name().substring("분위기:".length()))) {
-                moods++;
+            if (tag.name() != null && tag.name().startsWith("선호지역:")
+                && SURVEY_AREAS.contains(tag.name().substring("선호지역:".length()))) {
+                if (!areas.add(tag.name())) throw invalidSurvey();
+            } else if (tag.name() != null && tag.name().startsWith("장소:")
+                && SURVEY_PLACES.contains(tag.name().substring("장소:".length()))) {
+                places++;
             } else throw invalidSurvey();
         }
-        if (regions.size() != 3 || moods != 1) throw invalidSurvey();
+        if (areas.isEmpty() || areas.size() > 3 || places != 1) throw invalidSurvey();
     }
     private boolean isSurveyTag(Selection tag) {
         return "style".equals(tag.type()) && tag.name() != null
-            && (tag.name().startsWith("지역:") || tag.name().startsWith("분위기:"));
+            && (tag.name().startsWith("지역:") || tag.name().startsWith("분위기:")
+                || tag.name().startsWith("장소:") || tag.name().startsWith("선호지역:"));
     }
     private ResponseStatusException invalidSurvey() {
-        return new ResponseStatusException(HttpStatus.BAD_REQUEST, "지역 3곳과 분위기 1개를 골라 주세요. 각 항목은 좋아요·강도 1이어야 합니다.");
+        return new ResponseStatusException(HttpStatus.BAD_REQUEST, "여행 스타일과 장소 1개, 선호 지역 1~3개를 골라 주세요. 태그는 좋아요·강도 1이어야 합니다.");
     }
 }
