@@ -63,8 +63,37 @@ public class HumanCourseService {
         return jdbc.queryForList("SELECT post_id FROM human_course_post WHERE status='VISIBLE' AND deleted_at IS NULL ORDER BY created_at DESC, post_id DESC")
             .stream().map(row -> post(((Number) row.get("post_id")).longValue(), viewer, false)).toList();
     }
+        @Transactional(readOnly = true)
+    public List<Post> homeReviews(Authentication auth) {
+        long viewerId = viewer(auth);
+        if (viewerId < 0) {
+            return List.of();
+        }
 
-    @Transactional(readOnly = true)
+        List<Long> postIds = jdbc.queryForList("""
+            SELECT p.post_id
+            FROM human_course_post p
+            JOIN (
+                SELECT author_tag.member_no, COUNT(*) AS shared_likes
+                FROM member_preference_tag viewer_tag
+                JOIN member_preference_tag author_tag
+                  ON author_tag.tag_id = viewer_tag.tag_id
+                WHERE viewer_tag.member_no = ?
+                  AND viewer_tag.polarity = 'like'
+                  AND author_tag.polarity = 'like'
+                GROUP BY author_tag.member_no
+            ) preference ON preference.member_no = p.author_id
+            WHERE p.status = 'VISIBLE'
+              AND p.deleted_at IS NULL
+              AND p.author_id <> ?
+            ORDER BY preference.shared_likes DESC, p.created_at DESC, p.post_id DESC
+            LIMIT 3
+            """, Long.class, viewerId, viewerId);
+
+        return postIds.stream()
+            .map(postId -> post(postId, viewerId, false))
+            .toList();
+    }
     public Post detail(long id, Authentication auth) { return post(id, viewer(auth), true); }
 
     private Post post(long id, long viewer, boolean allowBlinded) {
