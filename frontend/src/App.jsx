@@ -91,6 +91,12 @@ export default function App() {
   const [notice, setNotice] = useState('');
   const [survey, setSurvey] = useState({ memberId: null, status: 'idle', data: null });
   const chat = useAiChat();
+  // 로그인·회원가입 화면에 '비로그인 상태로' 들어온 주소. 이 화면 안에서 로그인한 경우(업주 안내 화면 등)는 이동시키지 않는다.
+  const guestAuthRoute = useRef(null);
+  const isAuthRoute = Boolean(topNavPageRoutes[route]);
+  if (isAuthRoute && authChecked && !member) guestAuthRoute.current = route;
+  // 이미 로그인한 상태로 로그인·회원가입 주소에 들어오면 홈으로 보낸다.
+  const redirectLoggedIn = isAuthRoute && authChecked && Boolean(member) && guestAuthRoute.current !== route;
 
   useEffect(() => {
     const memberId = member?.memberId;
@@ -114,12 +120,18 @@ export default function App() {
   useEffect(() => {
     const update = () => {
       const next = window.location.hash.slice(1) || '/';
+      guestAuthRoute.current = null;
       returnPage.current.remember(next);
       setRoute(next); setNotice(''); window.scrollTo(0, 0);
     };
     window.addEventListener('hashchange', update);
     return () => window.removeEventListener('hashchange', update);
   }, []);
+
+  useEffect(() => {
+    // replace: 뒤로가기 때 로그인 주소로 돌아가 다시 이동되는 반복을 막는다.
+    if (redirectLoggedIn) window.location.replace('#/');
+  }, [redirectLoggedIn]);
 
   function loggedIn(value) {
     login(value);
@@ -156,7 +168,9 @@ export default function App() {
     return <div className="app-shell">
       <SiteHeader route={route} member={member} onLogout={handleLogout} loggingOut={loggingOut} onUnavailable={(label) => setNotice(`${label} 페이지는 연결 준비 중입니다.`)} />
       {notice && <div className="navigation-notice" role="status">{notice}<button onClick={() => setNotice('')} aria-label="알림 닫기">×</button></div>}
-      <main className="main-content"><TopNavScreen onLogin={loggedIn} guestCourseCount={myPageStore.isGuest ? myPageStore.courses.length : 0} /></main>
+      <main className="main-content">{!authChecked || redirectLoggedIn
+        ? <p className="auth-checking" role="status">로그인 상태를 확인하고 있어요.</p>
+        : <TopNavScreen onLogin={loggedIn} guestCourseCount={myPageStore.isGuest ? myPageStore.courses.length : 0} />}</main>
       <SiteFooter />
     </div>;
   }
