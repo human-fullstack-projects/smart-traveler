@@ -271,6 +271,7 @@ import '../../css/MainPage.css';
 import { useRef, useState } from 'react';
 import './HomeLanding.css';
 import HomeReviewCards from './HomeReviewCards';
+import BrowserPushTest from './BrowserPushTest';
 // 화면 구성용 더미 데이터입니다.
 const sampleCourses = [
   {
@@ -425,6 +426,7 @@ export default function MainPage({ onStart, busy = false, reviewAccess, reviewKe
           ))}
         </div>
         <a className="landing-toss-demo" href="#/payments/demo">토스 1,000원 테스트 결제 →</a>
+        <BrowserPushTest />
       </div>
 
       {/* <section className="landing-recommendations" aria-labelledby="courses-title">

@@ -1,0 +1,32 @@
+.browser-push-test {
+  max-width: 580px;
+  margin: 16px auto 0;
+  padding: 18px 20px;
+  border: 1px solid var(--st-line, #dce7e2);
+  border-radius: 12px;
+  background: var(--st-surface, #fff);
+  text-align: center;
+}
+.browser-push-test h2 { margin: 0 0 6px; color: var(--st-title, #176855); font-size: 15px; }
+.browser-push-test p { margin: 6px 0 0; font-size: 12px; line-height: 1.6; }
+.browser-push-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.browser-push-actions button {
+  min-height: 40px;
+  padding: 9px 16px;
+  border: 1px solid #176855;
+  border-radius: 8px;
+  color: #176855;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.browser-push-actions button:first-child { color: #fff; background: #176855; }
+.browser-push-actions button:not(:disabled):hover { box-shadow: 0 0 0 2px #17685522; }
+.browser-push-actions button:focus-visible { outline: 3px solid #54a58e; outline-offset: 3px; }
+.home-landing .browser-push-actions button:disabled { opacity: .55; cursor: default; }
+.browser-push-test .browser-push-status { margin-top: 12px; color: #176855; overflow-wrap: anywhere; }
+.browser-push-test .browser-push-status.is-error { color: #b42318; }
+.browser-push-test .browser-push-countdown { font-weight: 700; color: #176855; }
+.browser-push-test .browser-push-help { color: var(--st-muted, #63776e); font-size: 11px; }

@@ -58,6 +58,8 @@ public class AuthSecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/auth/social/signup").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/payments/webhook").permitAll()
                 .requestMatchers("/api/payments/demo/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/push/public-key", "/api/push/tests/*").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/push/tests").permitAll()
                 .requestMatchers("/oauth2/authorization/**", "/login/oauth2/code/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/human-courses/exposed", "/api/human-courses/monthly-picks").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/human-courses", "/api/human-courses/*", "/api/human-courses/photos/*").permitAll()
