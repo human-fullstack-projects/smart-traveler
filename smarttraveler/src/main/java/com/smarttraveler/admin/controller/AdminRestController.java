@@ -35,7 +35,8 @@ public class AdminRestController {
 
     @GetMapping({"", "/dashboard"})
     public Map<String,Object> dashboard() {
-        return Map.of("members", data.members().size(), "orders", data.reservations().size(),
+        // 「전체 회원」은 회원 관리 목록과 같은 기준(여행자·관리자). 업주는 「업주 회원 관리」에서 따로 셈
+        return Map.of("members", data.members().stream().filter(x -> MEMBER_ROLES.contains(x.getRoleCode())).count(), "orders", data.reservations().size(),
             "lodgings", data.lodgings().stream().filter(x -> !"DELETED".equals(x.getStatus())).count(), "humanCourses", data.humanCourses().size(),
             "pendingOwners", data.owners().stream().filter(x -> "PENDING".equals(x.getReviewStatusCode())).count(),
             "openReports", data.humanReports().stream().filter(x -> "PENDING".equals(x.getStatus())).count());
@@ -82,16 +83,19 @@ public class AdminRestController {
     @GetMapping("/lodgings")
     public List<Map<String,Object>> lodgings(@RequestParam(required=false) String status,
         @RequestParam(required=false) Long ownerId, @RequestParam(required=false) String region,
-        @RequestParam(required=false) String query) {
+        @RequestParam(required=false) String query, @RequestParam(required=false) String ownerName) {
+        Map<Long, OwnerProfile> ownerById = ownersById();
+        Map<Long, Member> memberById = membersById();
         return data.lodgings().stream().filter(x -> status != null ? status.equals(x.getStatus()) : !"DELETED".equals(x.getStatus()))
             .filter(x -> ownerId==null || ownerId.equals(x.getOwnerId()))
             .filter(x -> region==null || contains(x.getAddress(),region))
             .filter(x -> query==null || contains(x.getName(),query) || contains(x.getAddress(),query))
-            .map(AdminViews::of).toList();
+            .filter(x -> ownerName==null || ownerName.isBlank() || ownerMatches(ownerById.get(x.getOwnerId()), memberById, ownerName))
+            .map(x -> lodgingView(x, ownerById, memberById)).toList();
     }
     @GetMapping("/lodgings/{id}")
     public Map<String,Object> lodging(@PathVariable Long id) {
-        return Map.of("lodging",AdminViews.of(data.lodging(id)),"rooms",AdminViews.list(data.roomsForLodging(id)),
+        return Map.of("lodging",lodgingView(data.lodging(id), ownersById(), membersById()),"rooms",AdminViews.list(data.roomsForLodging(id)),
             "reservations",AdminViews.list(data.reservationsForLodging(id)));
     }
     @PostMapping("/lodgings/{id}/status")
@@ -113,7 +117,8 @@ public class AdminRestController {
     public List<MemberView> members(@RequestParam(required=false) String role,
         @RequestParam(required=false) String status,@RequestParam(required=false) String query,
         @RequestParam(required=false) LocalDate from,@RequestParam(required=false) LocalDate to) {
-        return data.members().stream().filter(x -> role==null || role.equals(x.getRoleCode()))
+        return data.members().stream().filter(x -> MEMBER_ROLES.contains(x.getRoleCode()))
+            .filter(x -> role==null || role.equals(x.getRoleCode()))
             .filter(x -> status==null || status.equals(x.getStatus()))
             .filter(x -> from==null || x.getCreatedAt()!=null && !x.getCreatedAt().toLocalDate().isBefore(from))
             .filter(x -> to==null || x.getCreatedAt()!=null && !x.getCreatedAt().toLocalDate().isAfter(to))
@@ -145,6 +150,26 @@ public class AdminRestController {
     @GetMapping("/owners/pending")
     public List<Map<String,Object>> pendingOwners() { return data.owners().stream()
         .filter(x -> "PENDING".equals(x.getReviewStatusCode())).map(AdminViews::of).toList(); }
+    @GetMapping("/owners")
+    public List<Map<String,Object>> owners(@RequestParam(required=false) String reviewStatus,
+        @RequestParam(required=false) String status, @RequestParam(required=false) String query) {
+        Map<Long, Member> memberById = membersById();
+        return data.owners().stream().filter(owner -> reviewStatus==null || reviewStatus.equals(owner.getReviewStatusCode()))
+            .filter(owner -> {
+                Member member = memberById.get(owner.getMemberId());
+                return member != null && "OWNER".equals(member.getRoleCode())
+                    && (status==null || status.equals(member.getStatus()))
+                    && (query==null || query.isBlank() || contains(member.getLoginId(), query)
+                        || contains(owner.getRepresentativeName(), query) || contains(owner.getBusinessName(), query));
+            }).map(owner -> {
+                Map<String,Object> view = new LinkedHashMap<>(AdminViews.of(owner));
+                Member member = memberById.get(owner.getMemberId());
+                view.put("loginId", member.getLoginId());
+                view.put("status", member.getStatus());
+                view.put("joinedAt", member.getCreatedAt());
+                return view;
+            }).toList();
+    }
     @PostMapping("/owners/{id}/review")
     public Map<String,Object> ownerReview(@PathVariable Long id,@RequestBody OwnerDecision body,Principal principal) {
         data.reviewOwner(id,body.decision(),body.comment(),principal.getName()); return AdminViews.of(data.owner(id));
@@ -218,11 +243,106 @@ public class AdminRestController {
 
     @GetMapping("/tour-data")
     public Map<String,Object> tourData(@RequestParam(defaultValue="47130") String region) {
-        return Map.of("regions",tour.supportedRegions(),"counts",tour.counts(region),
-            "hubs",tour.hubTop(region,20),"logs",tour.recentLogs());
+        List<Map<String,Object>> hubs = safe(() -> tour.hubTop(region,20), List.of());
+        // 위 숫자 카드는 아래 관광지 목록과 같은 전체 기준 (예전에는 경주만 셈)
+        Map<String,Object> counts = new LinkedHashMap<>(jdbc.queryForMap("""
+            SELECT (SELECT COUNT(*) FROM place) AS places,
+                   (SELECT COUNT(DISTINCT i.place_id) FROM place_image i) AS withImage
+            """));
+        // 중심·연관 관광지 표는 팀 SQL로 만드는 표라 DB에 없을 수 있음 → 없으면 0
+        counts.put("hubRanks", safe(() -> jdbc.queryForObject("SELECT COUNT(*) FROM place_hub_rank", Long.class), 0L));
+        counts.put("related", safe(() -> jdbc.queryForObject("SELECT COUNT(*) FROM related_attraction_rank", Long.class), 0L));
+        Map<String,Object> byType = new LinkedHashMap<>();
+        jdbc.queryForList("SELECT place_type AS type, COUNT(*) AS n FROM place GROUP BY place_type")
+            .forEach(row -> byType.put(String.valueOf(row.get("type")), row.get("n")));
+        Map<String,Object> imageByType = new LinkedHashMap<>();
+        jdbc.queryForList("""
+            SELECT p.place_type AS type, COUNT(DISTINCT p.place_id) AS n
+            FROM place p JOIN place_image i ON i.place_id=p.place_id GROUP BY p.place_type""")
+            .forEach(row -> imageByType.put(String.valueOf(row.get("type")), row.get("n")));
+        counts.put("byType", byType);
+        counts.put("imageByType", imageByType);
+        // 중심·연관 관광지 카드 아래 작은 글씨: 지역별 개수 · 기준 월 · 기준 관광지 수
+        counts.put("hubByRegion", safe(() -> jdbc.queryForList("""
+            SELECT r.full_name AS name, COUNT(*) AS n FROM place_hub_rank h JOIN region r ON r.region_id=h.region_id
+            GROUP BY r.full_name ORDER BY n DESC LIMIT 3"""), List.of()));
+        counts.put("hubMonths", safe(() -> jdbc.queryForList("SELECT DISTINCT base_ym FROM place_hub_rank ORDER BY base_ym DESC LIMIT 3", String.class), List.of()));
+        counts.put("relatedByRegion", safe(() -> jdbc.queryForList("""
+            SELECT r.full_name AS name, COUNT(*) AS n FROM related_attraction_rank x JOIN place p ON p.place_id=x.base_place_id
+            JOIN region r ON r.region_id=p.region_id GROUP BY r.full_name ORDER BY n DESC LIMIT 3"""), List.of()));
+        counts.put("relatedBases", safe(() -> jdbc.queryForObject("SELECT COUNT(DISTINCT base_place_id) FROM related_attraction_rank", Long.class), 0L));
+        return Map.of("regions",safe(tour::supportedRegions, List.of()),"counts",counts,"hubs",hubs,"logs",safe(tour::recentLogs, List.of()));
     }
     @PostMapping("/tour-data/sync")
     public TourSyncService.SyncResult tourSync(@RequestBody TourRun body) { return tour.sync(body.region()); }
+
+    @GetMapping("/regions")
+    public List<Map<String,Object>> regions() {
+        return jdbc.queryForList("""
+            SELECT region_id AS regionId, parent_region_id AS parentRegionId, full_name AS fullName,
+                   region_level AS regionLevel
+            FROM region WHERE region_level IN ('SIDO', 'SIGUNGU')
+            ORDER BY full_name
+            """);
+    }
+
+    @GetMapping("/places")
+    public Map<String,Object> places(@RequestParam(required=false) Long sido,
+        @RequestParam(required=false) Long sigungu, @RequestParam(required=false) String type,
+        @RequestParam(required=false) String query, @RequestParam(defaultValue="1") int page,
+        @RequestParam(defaultValue="10") int size) {
+        if (page < 1 || size < 1 || size > 100) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "페이지 값이 올바르지 않습니다.");
+        if (type != null && !type.isBlank() && !List.of("ATTRACTION", "CULTURE", "LEISURE", "RESTAURANT", "SHOPPING").contains(type))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "유형이 올바르지 않습니다.");
+        String where = " FROM place p JOIN region r ON r.region_id=p.region_id WHERE 1=1";
+        List<Object> params = new java.util.ArrayList<>();
+        if (sido != null) { where += " AND (r.region_id=? OR r.parent_region_id=?)"; params.add(sido); params.add(sido); }
+        if (sigungu != null) { where += " AND r.region_id=?"; params.add(sigungu); }
+        if (type != null && !type.isBlank()) { where += " AND p.place_type=?"; params.add(type); }
+        if (query != null && !query.isBlank()) { where += " AND LOWER(p.name) LIKE ?"; params.add("%" + query.trim().toLowerCase() + "%"); }
+        Long total = jdbc.queryForObject("SELECT COUNT(*)" + where, Long.class, params.toArray());
+        List<Object> pageParams = new java.util.ArrayList<>(params);
+        pageParams.add(size); pageParams.add((page - 1) * size);
+        List<Map<String,Object>> rows = jdbc.queryForList("""
+            SELECT p.place_id AS placeId, p.name, p.place_type AS placeType, r.full_name AS region,
+                   p.address, EXISTS(SELECT 1 FROM place_image i WHERE i.place_id=p.place_id) AS hasImage
+            """ + where + " ORDER BY p.place_id DESC LIMIT ? OFFSET ?", pageParams.toArray());
+        return Map.of("rows", rows, "total", total == null ? 0 : total, "page", page, "size", size);
+    }
+
+    private static final List<String> MEMBER_ROLES = List.of("USER", "ADMIN");
+    private Map<Long, OwnerProfile> ownersById() {
+        Map<Long, OwnerProfile> map = new HashMap<>();
+        data.owners().forEach(owner -> map.put(owner.getOwnerId(), owner));
+        return map;
+    }
+    private Map<Long, Member> membersById() {
+        Map<Long, Member> map = new HashMap<>();
+        data.members().forEach(member -> map.put(member.getMemberId(), member));
+        return map;
+    }
+    /** 표가 없는 DB(예: 새로 복구한 DB)에서도 관광지 데이터 화면 전체가 멈추지 않게, 실패한 숫자만 기본값으로 */
+    private <T> T safe(java.util.function.Supplier<T> query, T fallback) {
+        try { return query.get(); } catch (org.springframework.dao.DataAccessException e) { return fallback; }
+    }
+
+    private Map<String,Object> lodgingView(com.smarttraveler.domain.entity.Lodging lodging,
+        Map<Long, OwnerProfile> ownerById, Map<Long, Member> memberById) {
+        Map<String,Object> view = new LinkedHashMap<>(AdminViews.of(lodging));
+        OwnerProfile owner = ownerById.get(lodging.getOwnerId());
+        Member member = owner == null ? null : memberById.get(owner.getMemberId());
+        String name = owner == null ? null : !blank(owner.getRepresentativeName()) ? owner.getRepresentativeName()
+            : !blank(owner.getBusinessName()) ? owner.getBusinessName() : member == null ? null : member.getNickname();
+        view.put("ownerName", name);
+        return view;
+    }
+    private static boolean ownerMatches(OwnerProfile owner, Map<Long, Member> memberById, String query) {
+        if (owner == null) return false;
+        Member member = memberById.get(owner.getMemberId());
+        return contains(owner.getRepresentativeName(), query) || contains(owner.getBusinessName(), query)
+            || member != null && contains(member.getNickname(), query);
+    }
+    private static boolean blank(String value) { return value == null || value.isBlank(); }
 
     private static boolean contains(String text,String q) { return text!=null && text.toLowerCase().contains(q.toLowerCase()); }
     private static boolean memberMatches(Member member, String q) {
