@@ -18,7 +18,7 @@ public class StoredPlaceCandidates {
                         "WHERE (p.region_id=? OR r.parent_region_id=?) AND p.source_provider IN ('TOURAPI','KTO_TOURAPI') AND p.is_active=TRUE ORDER BY p.name,p.place_id LIMIT 30",
                 (rs, row) -> Map.<String,Object>of("placeId", rs.getLong(1), "name", rs.getString(2), "address", rs.getString(3)), id, id);
     }
-    private Long regionId(ObjectNode conditions) {
+    Long regionId(ObjectNode conditions) {
         var field = conditions.path("regionId");
         if (field.isIntegralNumber() && field.canConvertToLong() && field.asLong() > 0) return field.asLong();
         String name = conditions.path("regionName").asText("").trim();

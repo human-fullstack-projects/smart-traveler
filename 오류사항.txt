@@ -1,0 +1,12 @@
+[smart_traveler_rag_courses_1000_multiaccount.sql 에러 발생]
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION
+  BEGIN
+    ROLLBACK;
+    IF import_lock = 1 THEN
+      DO RELEASE_LOCK(‘smart_travel_db.rag_seed_course_import’);
+    END IF;
+    RESIGNAL;
+  END;
+5190 몇번 줄
+
+에러가 발생해서 첨부 이미지 같은 메시지가 발생한다고 함

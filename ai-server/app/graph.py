@@ -6,6 +6,7 @@ from typing import Any, Callable, TypedDict
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
 from langgraph.graph import END, START, StateGraph
+from .course_rag import recommend_course
 from .schemas import ExtractedConditions, PlaceRecommendations
 
 REGION = "어느 지역으로 여행하시나요? 지역 이름을 알려주세요."
@@ -32,6 +33,7 @@ class DialogueState(TypedDict, total=False):
     question: str
     confirmed: bool
     candidates: list[dict[str, Any]]
+    courseCandidates: list[dict[str, Any]] | None
 
 
 def extract_with_openai(state: DialogueState) -> ExtractedConditions:
@@ -179,7 +181,11 @@ def build_graph(extractor: Callable[[DialogueState], ExtractedConditions] = extr
         return {"question": CHECK}
 
     def recommend(state: DialogueState):
-        return {"question": recommender(state), "confirmed": True}
+        if state.get("courseCandidates") is not None:
+            answer = recommend_course(state)
+        else:
+            answer = recommender(state)
+        return {"question": answer, "confirmed": True}
 
     def clarify(state: DialogueState):
         # 확인으로 해석하기 어려우면 조작 방법을 다시 안내한다.

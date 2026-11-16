@@ -12,6 +12,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.List;
 
@@ -28,7 +29,20 @@ public class PythonAiClient {
     }
     public record Result(String message, boolean confirmed) {}
     public Result process(String message, String previousQuestion, ObjectNode conditions, List<Map<String, Object>> candidates) {
-        String body = mapper.writeValueAsString(Map.of("message", message, "previousQuestion", previousQuestion, "conditions", conditions, "candidates", candidates));
+        return process(message, previousQuestion, conditions, candidates, null);
+    }
+    public Result process(String message, String previousQuestion, ObjectNode conditions,
+                          List<Map<String, Object>> candidates,
+                          List<Map<String, Object>> courseCandidates) {
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("message", message);
+        payload.put("previousQuestion", previousQuestion);
+        payload.put("conditions", conditions);
+        payload.put("candidates", candidates);
+        if (courseCandidates != null) {
+            payload.put("courseCandidates", courseCandidates);
+        }
+        String body = mapper.writeValueAsString(payload);
         HttpRequest request = HttpRequest.newBuilder(endpoint).timeout(Duration.ofSeconds(75))
                 .header("Content-Type", "application/json").POST(HttpRequest.BodyPublishers.ofString(body)).build();
         try {
