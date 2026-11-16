@@ -19,6 +19,9 @@ repositories {
 }
 
 dependencies {
+    implementation('nl.martijndwars:web-push:5.1.2') { transitive = false }
+    implementation 'org.bouncycastle:bcprov-jdk18on:1.83'
+    implementation 'org.bitbucket.b_c:jose4j:0.9.6'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-security'
