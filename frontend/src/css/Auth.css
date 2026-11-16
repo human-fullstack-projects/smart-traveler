@@ -58,3 +58,24 @@
   .auth-password { align-items: flex-end; }
   .owner-auth-page .auth-wrap > .auth-form { padding: 20px; }
 }
+
+/* 휴대폰 본인인증 팝업 (시연용 · IdentityModal) */
+.identity-modal { max-height: none; }
+.identity-body { display: grid; gap: 14px; padding: 14px 0 4px; border-top: 1px solid var(--st-line); }
+.identity-inline { display: flex; gap: 8px; align-items: center; }
+.identity-inline .st-input { flex: 1; min-width: 0; }
+.identity-inline .st-btn { white-space: nowrap; }
+.identity-modal .st-btn-line { background: transparent; border: 2px solid var(--st-teal); color: var(--st-teal); }
+.identity-demo { margin: 0; padding: 10px 12px; border-radius: 10px; background: rgba(0, 150, 160, .08); color: var(--st-ink); font-size: 14px; }
+.identity-timer { min-width: 48px; text-align: right; font-weight: 700; color: var(--st-teal); font-variant-numeric: tabular-nums; }
+.identity-timer.low { color: #d1495b; }
+.identity-foot { margin: 12px 0 0; font-size: 12px; text-align: center; color: var(--st-muted, #6b7a80); }
+.identity-done { margin: 0 0 10px; font-weight: 700; color: var(--st-teal); }
+/* 팝업은 body에 붙어 .st-page 밖이라 입력칸 기본 모양을 여기서 다시 씀 */
+.identity-modal .st-field > span { display: block; }
+.identity-modal .st-input { display: block; width: 100%; min-height: 46px; margin-top: 8px; padding: 10px 14px; border: 1px solid var(--st-line); border-radius: var(--st-radius-s); background: var(--st-surface); color: var(--st-ink); font-family: var(--st-font-body); font-weight: 400; font-size: 16px; }
+.identity-modal .st-input:focus { outline: 0; border-color: var(--st-teal); box-shadow: 0 0 0 3px rgba(163, 206, 202, .6); }
+.identity-modal .st-input:disabled { background: var(--st-line); color: var(--st-ink); opacity: .75; }
+.identity-modal .identity-inline { margin-top: 8px; }
+.identity-modal .identity-inline .st-input { margin-top: 0; }
+.identity-modal .identity-inline .st-btn { min-height: 46px; }
