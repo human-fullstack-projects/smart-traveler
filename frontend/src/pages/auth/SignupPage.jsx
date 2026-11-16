@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import '../../css/Auth.css';
 import { getTerms, signup, login } from '../../api/auth';
 import TermsModal from './TermsModal';
+import IdentityModal from './IdentityModal';
 
 // 회원가입 (AUTH-01 여행자 · AUTH-02 숙박업주 · AUTH-03 약관 동의)
 const TERM_NAMES = { SERVICE: '서비스 이용약관', PRIVACY: '개인정보 수집·이용', LOCATION: '위치정보 이용', MARKETING: '마케팅 정보 수신' };
@@ -66,6 +67,8 @@ export default function SignupPage({ onLogin, guestCourseCount = 0 }) {
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(null);
+  const [verified, setVerified] = useState(null); // 시연용 본인인증 결과(서버로 보내지 않음)
+  const [identityOpen, setIdentityOpen] = useState(false);
   const inFlight = useRef(false);
   const closeTerm = useCallback(() => setOpenTerm(null), []);
   const agreeTerm = useCallback(() => {
@@ -86,6 +89,12 @@ export default function SignupPage({ onLogin, guestCourseCount = 0 }) {
     setErrors(e);
     if (Object.keys(e).length) { setNotice('입력한 내용을 확인해주세요.'); return; }
     if (terms.some((t) => t.required && !agreed[t.termsId])) { setNotice('필수 약관에 동의해주세요.'); return; }
+    if (role === 'USER' && !verified) { setIdentityOpen(true); return; }
+    await register();
+  }
+
+  async function register() {
+    if (inFlight.current) return;
     inFlight.current = true;
     setBusy(true); setNotice('');
     try {
@@ -176,6 +185,7 @@ export default function SignupPage({ onLogin, guestCourseCount = 0 }) {
                 </div>)}
               </>}
             </div>
+            {role === 'USER' && verified && <p className="identity-done" role="status">✓ 본인인증 완료 · {verified.name} · {verified.phone.replace(/-(\d{3,4})-/, '-****-')}</p>}
             <button className="st-btn st-btn-lg auth-submit" type="submit" disabled={busy}>{busy ? '가입 중…' : '가입하기'}</button>
             {notice && <p className="auth-notice error" role="status">{notice}</p>}
           </form>
@@ -184,6 +194,8 @@ export default function SignupPage({ onLogin, guestCourseCount = 0 }) {
       </section>
       {openTerm && <TermsModal term={openTerm} title={TERM_NAMES[openTerm.type] || openTerm.type}
         returnFocus={returnFocus} onClose={closeTerm} onAgree={agreeTerm} />}
+      {identityOpen && <IdentityModal onClose={() => setIdentityOpen(false)}
+        onVerified={(info) => { setVerified(info); setIdentityOpen(false); register(); }} />}
     </div>
   );
 }

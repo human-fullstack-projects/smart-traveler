@@ -40,6 +40,8 @@
 .adm-stat span { color: var(--st-muted); font-weight: 700; font-size: 14px; }
 .adm-stat strong { display: block; margin-top: 4px; color: var(--st-title); font-family: var(--st-font-title); font-weight: 900; font-size: 40px; line-height: 1.1; }
 .adm-stat.alert strong { color: var(--st-danger); }
+.adm-stat-sub { display: flex; flex-wrap: wrap; gap: 2px 10px; margin-top: 6px; }
+.adm-stat .adm-stat-sub span { color: var(--st-muted); font-weight: 500; font-size: 12px; line-height: 1.5; white-space: nowrap; }
 .adm-filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; margin-bottom: 14px; }
 .adm-filters .st-field { min-width: 160px; font-size: 13px; }
 .adm-filters .st-input { min-height: 40px; margin-top: 4px; padding: 6px 10px; font-size: 14px; }
@@ -112,7 +114,9 @@
 .adm .adm-main { width: 100%; max-width: none; }
 .adm .adm-split > *, .adm .adm-card { min-width: 0; }
 .adm .adm-table-wrap { max-width: 100%; }
-.adm .adm-table td { overflow-wrap: anywhere; }
+/* 이름·아이디·상태처럼 짧은 칸은 한 줄로, 긴 주소만 단어 단위로 줄바꿈 (넘치면 표 안에서 가로 스크롤) */
+.adm .adm-table td { overflow-wrap: normal; word-break: keep-all; min-width: 4.5em; }
+.adm .adm-split { grid-template-columns: minmax(0, 1.8fr) minmax(300px, 1fr); }
 @media (min-width: 1600px) {
   .adm .adm-stats { grid-template-columns: repeat(6, minmax(0, 1fr)); }
   .adm .adm-split { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); }

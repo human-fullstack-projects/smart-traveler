@@ -85,6 +85,12 @@ public class DummyDataLoader implements ApplicationRunner {
                 LOG.warn("더미 여행자 {} 적재 실패: {}", i, e.getMessage());
             }
         }
+        // 관리자 시험 계정: 팀원마다 SQL을 따로 실행하지 않아도 로그인되도록 함께 넣음 (이미 있으면 건너뜀)
+        try {
+            if (member("admin", "ADMIN", "관리자 테스트", hash)) LOG.info("관리자 시험 계정 admin 추가");
+        } catch (RuntimeException e) {
+            LOG.warn("관리자 시험 계정 적재 실패: {}", e.getMessage());
+        }
         int number = 0;
         for (JsonNode row : lodgings) {
             number++;
