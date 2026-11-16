@@ -9,6 +9,7 @@ class DialogueRequest(BaseModel):
     previousQuestion: str = Field(default="", max_length=3000)
     conditions: dict[str, Any]
     candidates: list[dict[str, Any]] = Field(default_factory=list, max_length=30)
+    courseCandidates: list[dict[str, Any]] | None = None
 
 
 class ExtractedConditions(BaseModel):
