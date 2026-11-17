@@ -5,6 +5,7 @@ import com.smarttraveler.auth.repository.MemberRepository;
 import com.smarttraveler.human_course.HumanCourseDtos.*;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -100,12 +101,14 @@ public class HumanCourseService {
         var rows = jdbc.queryForList("""
             SELECT p.*, c.destination AS region, c.start_date, c.end_date, c.lock_version,
                    COALESCE(NULLIF(m.nickname,''),m.login_id) AS author,
-                   r.checkin_date, r.checkout_date,
+                   r.checkin_date, r.checkout_date, l.lodging_id, l.name AS stay_name,
+                   l.address AS stay_address, l.latitude AS stay_latitude, l.longitude AS stay_longitude,
                    (SELECT COUNT(*) FROM human_course_like WHERE post_id=p.post_id) AS likes,
                    EXISTS(SELECT 1 FROM human_course_like WHERE post_id=p.post_id AND member_id=?) AS liked,
                    EXISTS(SELECT 1 FROM human_course_report WHERE post_id=p.post_id AND reporter_id=?) AS reported
             FROM human_course_post p JOIN course c ON c.id=p.course_id
             JOIN members m ON m.member_id=p.author_id JOIN room_reservation r ON r.reservation_id=p.reservation_id
+            JOIN room ro ON ro.room_id=r.room_id JOIN lodging l ON l.lodging_id=ro.lodging_id
             WHERE p.post_id=? AND p.deleted_at IS NULL AND p.status IN ('VISIBLE','BLINDED')
             """, viewer, viewer, id);
         if (rows.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "코스를 찾을 수 없습니다.");
@@ -131,7 +134,10 @@ public class HumanCourseService {
             blinded ? List.of() : snapshot.plan(), number(row, "likes"), truthy(row.get("liked")),
             truthy(row.get("reported")), comments, row.get("created_at").toString().substring(0, 10),
             blinded ? "BLINDED" : "PUBLIC", snapshot.version(),
-            row.get("checkin_date") + " ~ " + row.get("checkout_date"), mine, String.valueOf(row.get("reservation_id")));
+            row.get("checkin_date") + " ~ " + row.get("checkout_date"), mine, String.valueOf(row.get("reservation_id")),
+            blinded ? null : mapPlace("stay-" + row.get("lodging_id"), null, string(row, "stay_name"),
+                string(row, "stay_address"), decimal(row.get("stay_latitude")),
+                decimal(row.get("stay_longitude")), "stay"));
     }
 
     @Transactional(readOnly = true)
@@ -139,7 +145,9 @@ public class HumanCourseService {
         long owner = member(auth);
         return jdbc.queryForList("""
             SELECT r.reservation_id, r.status, r.checkin_date, r.checkout_date, r.course_id,
-                   l.name AS stay_name, l.checkout_time, c.destination, c.status AS course_status,
+                   l.lodging_id, l.name AS stay_name, l.address AS stay_address,
+                   l.latitude AS stay_latitude, l.longitude AS stay_longitude,
+                   l.checkout_time, c.destination, c.status AS course_status,
                    c.lock_version, c.member_no, c.is_active, c.deleted_at AS course_deleted,
                    (SELECT post_id FROM human_course_post p WHERE p.reservation_id=r.reservation_id AND p.deleted_at IS NULL LIMIT 1) AS existing_post_id,
                    EXISTS(SELECT 1 FROM human_course_post p WHERE p.reservation_id=r.reservation_id) AS used_post
@@ -167,7 +175,10 @@ public class HumanCourseService {
             string(row, "destination"), row.get("checkin_date") + " ~ " + row.get("checkout_date"),
             string(row, "status"), checkoutAt.toString(), finalCourse,
             courseId == null ? 0 : Math.max(1, (int) number(row, "lock_version")), plan,
-            row.get("existing_post_id") == null ? null : number(row, "existing_post_id"), error);
+            row.get("existing_post_id") == null ? null : number(row, "existing_post_id"), error,
+            mapPlace("stay-" + row.get("lodging_id"), null, string(row, "stay_name"),
+                string(row, "stay_address"), decimal(row.get("stay_latitude")),
+                decimal(row.get("stay_longitude")), "stay"));
     }
 
     static String eligibility(String status, LocalDateTime checkoutAt, boolean finalCourse, boolean used) {
@@ -181,9 +192,20 @@ public class HumanCourseService {
     private List<Day> plan(long courseId) {
         return jdbc.query("SELECT id, day_no FROM course_day WHERE course_id=? ORDER BY day_no", (rs, n) ->
             new Day(rs.getInt("day_no"), jdbc.queryForList("""
-                SELECT CONCAT(TIME_FORMAT(start_time,'%H:%i'),' ',place_name)
+                SELECT place_name
                 FROM activity WHERE course_day_id=? ORDER BY seq
-                """, String.class, rs.getLong("id"))), courseId);
+                """, String.class, rs.getLong("id")), jdbc.query("""
+                SELECT a.id, a.place_id, a.place_name,
+                       COALESCE(a.address_snapshot,p.address) AS address,
+                       COALESCE(a.latitude_snapshot,p.latitude) AS latitude,
+                       COALESCE(a.longitude_snapshot,p.longitude) AS longitude
+                FROM activity a LEFT JOIN place p ON p.place_id=a.place_id
+                WHERE a.course_day_id=? ORDER BY a.seq
+                """, (placeRs, placeRow) -> mapPlace("activity-" + placeRs.getLong("id"),
+                    placeRs.getObject("place_id") == null ? null : placeRs.getLong("place_id"),
+                    placeRs.getString("place_name"), placeRs.getString("address"),
+                    placeRs.getBigDecimal("latitude"), placeRs.getBigDecimal("longitude"), "course"),
+                rs.getLong("id"))), courseId);
     }
 
     @Transactional
@@ -309,15 +331,33 @@ public class HumanCourseService {
     private static LocalDate date(Object value) { return value instanceof LocalDate date ? date
         : value instanceof java.sql.Date date ? date.toLocalDate() : LocalDate.parse(value.toString()); }
     private static String string(Map<String, Object> row, String key) { return row.get(key) == null ? null : row.get(key).toString(); }
+    private static BigDecimal decimal(Object value) { return value == null ? null
+        : value instanceof BigDecimal decimal ? decimal : new BigDecimal(value.toString()); }
+    private static MapPlace mapPlace(String id, Long placeId, String name, String address,
+                                     BigDecimal latitude, BigDecimal longitude, String kind) {
+        return new MapPlace(id, placeId, name, address, latitude, longitude, kind);
+    }
     private Snapshot snapshot(Map<String, Object> row) {
         try {
             Snapshot value = mapper.readValue(string(row, "course_snapshot"), Snapshot.class);
-            if (value != null && value.plan() != null && value.version() > 0) return value;
+            if (value != null && value.plan() != null && value.version() > 0)
+                return withMapData(value, number(row, "course_id"));
         }
         catch (RuntimeException error) { return new Snapshot(string(row, "region"), row.get("start_date").toString(),
             row.get("end_date").toString(), Math.max(1, (int) number(row, "lock_version")), plan(number(row, "course_id"))); }
         return new Snapshot(string(row, "region"), row.get("start_date").toString(),
             row.get("end_date").toString(), Math.max(1, (int) number(row, "lock_version")), plan(number(row, "course_id")));
+    }
+
+    private Snapshot withMapData(Snapshot snapshot, long courseId) {
+        List<Day> live = plan(courseId);
+        List<Day> enriched = new ArrayList<>();
+        for (Day saved : snapshot.plan()) {
+            Day current = live.stream().filter(day -> day.day() == saved.day()).findFirst().orElse(null);
+            enriched.add(new Day(saved.day(), saved.stops() == null ? List.of() : saved.stops(),
+                current == null || current.places() == null ? List.of() : current.places()));
+        }
+        return new Snapshot(snapshot.region(), snapshot.startDate(), snapshot.endDate(), snapshot.version(), enriched);
     }
 
     @Transactional
