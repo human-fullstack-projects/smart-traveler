@@ -92,12 +92,28 @@ public class StoredCourseCandidates {
                 row.put("courseId", course.getId());
                 row.put("title", course.getTitle());
                 row.put("destination", course.getDestination());
+                row.put("regionId", course.getRegionId());
                 row.put("companion", course.getCompanionType());
                 row.put("transport", course.getTransportType());
                 row.put("theme", prefs.path("theme_name").asText());
                 row.put("pace", prefs.path("travel_style").asText());
                 row.put("environment", prefs.path("place_preference").asText());
-                row.put("landscapes", prefs.path("preferred_region").toString());
+                List<String> landscapes = new ArrayList<>();
+                if (prefs.path("preferred_region").isArray()) {
+                    for (JsonNode value : prefs.path("preferred_region")) {
+                        String normalized = switch (value.asText()) {
+                            case "도시" -> "city";
+                            case "시골" -> "countryside";
+                            case "호수·강" -> "water";
+                            case "섬" -> "island";
+                            case "산·숲" -> "forest";
+                            case "바다", "바다·해변" -> "sea";
+                            default -> "";
+                        };
+                        if (!normalized.isEmpty() && !landscapes.contains(normalized)) landscapes.add(normalized);
+                    }
+                }
+                row.put("landscapes", landscapes);
                 row.put("dayNo", day.getDayNo());
                 row.put("dayTheme", day.getTheme());
                 row.put("seq", visit.path("seq").asInt() == i + 1 ? i + 1 : null);

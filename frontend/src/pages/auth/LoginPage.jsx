@@ -4,6 +4,7 @@ import { login } from '../../api/auth';
 import { getSocialProviders } from './socialApi';
 import OwnerReviewPage from './OwnerReviewPage';
 import { useAuth } from '../../contexts/AuthContext';
+import { waitForGuestCourseStorage } from '../../chatApi';
 
 // 로그인 (AUTH) — 처리 로직은 sein/v1 그대로, 화면만 공유 CSS(st-*)로.
 export default function LoginPage({ onLogin, guestCourseCount = 0 }) {
@@ -25,7 +26,9 @@ export default function LoginPage({ onLogin, guestCourseCount = 0 }) {
   useEffect(() => { mounted.current = true; titleRef.current?.focus(); return () => { mounted.current = false; }; }, []);
   useEffect(() => { getSocialProviders().then(setProviders).catch(() => {}); }, []);
 
-  function socialLogin(provider) {
+  async function socialLogin(provider) {
+    try { await waitForGuestCourseStorage(); }
+    catch { setNotice('추천 코스를 보관하지 못했습니다. 채팅에서 다시 저장한 뒤 로그인해 주세요.'); return; }
     const base = import.meta.env.VITE_SOCIAL_AUTH_BASE_URL
       || (import.meta.env.DEV ? `${window.location.protocol}//${window.location.hostname}:8080` : window.location.origin);
     window.location.assign(`${base}/oauth2/authorization/${provider}`);
@@ -71,7 +74,7 @@ export default function LoginPage({ onLogin, guestCourseCount = 0 }) {
             <p className="auth-kicker">WELCOME BACK</p>
             <h1 id="login-title" className="st-h2" ref={titleRef} tabIndex={-1}>오늘의 여행을 찾아볼까요?</h1>
             <p>로그인하고 나만의 여행을 이어가세요.</p>
-            {guestCourseCount > 0 && <p className="st-note">보관한 여행 코스 {guestCourseCount}건을 로그인한 계정의 내 여행 코스로 연결합니다. 연결이 끝날 때까지 새로고침하거나 사이트를 떠나지 마세요.</p>}
+            {guestCourseCount > 0 && <p className="st-note">보관한 여행 코스 {guestCourseCount}건을 로그인한 계정의 내 여행 코스로 연결합니다.</p>}
           </div>
           <form className="auth-form" onSubmit={submit} noValidate aria-busy={busy}>
             <label className={`st-field${errors.loginId ? ' st-field-error' : ''}`}>아이디

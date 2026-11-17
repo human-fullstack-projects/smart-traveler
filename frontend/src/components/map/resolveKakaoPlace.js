@@ -26,7 +26,7 @@ function addressMatches(given, candidate) {
   return b.length >= tailSize && a.slice(-tailSize).join('') === b.slice(-tailSize).join('');
 }
 
-function addressSearch(maps, address) {
+export function addressSearch(maps, address) {
   return new Promise((resolve) => {
     new maps.services.Geocoder().addressSearch(address, (results, status) => {
       resolve(status === maps.services.Status.OK ? results?.[0] || null : null);
@@ -82,4 +82,21 @@ export async function resolveKakaoPlace(maps, place, region = '') {
   }
 
   return { ...place, locationStatus: 'unresolved', addressStatus: address ? 'provided' : 'unavailable' };
+}
+
+/** destination: free-text region/address string (e.g. course.destination). Returns {latitude, longitude} or null. */
+export async function resolveDestinationCenter(maps, destination) {
+  const query = String(destination || '').trim();
+  if (!query) return null;
+
+  const addressResult = await addressSearch(maps, query);
+  if (hasValidCoordinates({ latitude: addressResult?.y, longitude: addressResult?.x })) {
+    return { latitude: Number(addressResult.y), longitude: Number(addressResult.x) };
+  }
+
+  const keywordResults = await keywordSearch(maps, query);
+  const match = keywordResults.find((result) => hasValidCoordinates({ latitude: result.y, longitude: result.x }));
+  if (match) return { latitude: Number(match.y), longitude: Number(match.x) };
+
+  return null;
 }

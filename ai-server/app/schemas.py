@@ -2,14 +2,22 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 
+class SavedPreferences(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    pace: Literal["relaxed", "normal", "packed"] | None = None
+    environment: Literal["indoor", "outdoor"] | None = None
+    landscapes: list[Literal["city", "countryside", "water", "island", "forest", "sea"]] = Field(default_factory=list, max_length=6)
+
+
 class DialogueRequest(BaseModel):
     """스프링 서버에서 전달한 현재 메시지와 기존 조건이다."""
     model_config = ConfigDict(extra="forbid")
     message: str = Field(min_length=1, max_length=4000)
-    previousQuestion: str = Field(default="", max_length=3000)
+    previousQuestion: str = Field(default="", max_length=20000)
     conditions: dict[str, Any]
     candidates: list[dict[str, Any]] = Field(default_factory=list, max_length=30)
     courseCandidates: list[dict[str, Any]] | None = None
+    savedPreferences: SavedPreferences | None = None
 
 
 class ExtractedConditions(BaseModel):
@@ -27,8 +35,9 @@ class ExtractedConditions(BaseModel):
 
 class DialogueResponse(BaseModel):
     changes: dict[str, Any]
-    question: str
+    question: str = Field(min_length=1, max_length=20000)
     confirmed: bool = False
+    recommendedCourseId: int | None = Field(default=None, gt=0)
 
 
 class SelectedPlace(BaseModel):

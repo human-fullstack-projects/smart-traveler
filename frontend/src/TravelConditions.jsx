@@ -60,10 +60,10 @@ export default function TravelConditions({ conditions, confirmed, onChange, onCo
       {conditions.flowType === 'STAY_FIRST' && <><div><dt>숙소·객실</dt><dd>{conditions.lodgingSelection?.lodgingId && conditions.lodgingSelection?.roomId ? `숙소 ${conditions.lodgingSelection.lodgingId} · 객실 ${conditions.lodgingSelection.roomId}` : '선택 필요'}</dd></div><div><dt>숙박 날짜</dt><dd>{conditions.lodgingSelection?.checkIn && conditions.lodgingSelection?.checkOut ? `${conditions.lodgingSelection.checkIn} ~ ${conditions.lodgingSelection.checkOut}` : '선택 필요'}</dd></div></>}
     </dl>
     <button className="conditions-toggle" type="button" aria-expanded={open} aria-controls="travel-condition-form" onClick={() => setOpen(!open)}>{open ? '접기' : '조건 직접 입력'} <span aria-hidden="true">{open ? '−' : '+'}</span></button>
-    <p className="conditions-note">대화에서 찾은 지역은 이름으로 저장됩니다. 실제 지역 연결과 일정 생성은 준비 중이에요.</p>
+    <p className="conditions-note">대화나 지역 선택으로 조건을 채운 뒤 확인해 주세요.</p>
     {open && <form id="travel-condition-form" className="travel-condition-form" onSubmit={confirm} noValidate>
       <label>지역 이름<input value={conditions.regionName ?? ''} maxLength="100" onChange={(event) => { onChange({ ...conditions, regionName: event.target.value, regionId: null }); setErrors([]); }} placeholder="예: 부산" /></label>
-      <p className="conditions-field-note">입력한 지역의 실제 존재 여부와 지역 번호는 이후 연결합니다.</p>
+      <p className="conditions-field-note">‘관광지 찾아보기’에서 지역을 고르면 지역 이름과 번호가 함께 적용됩니다.</p>
       <div className="condition-fields">
         <label>출발 날짜<input type="date" value={conditions.startDate} onChange={(event) => update('startDate', event.target.value)} /></label>
         <label>여행 일수<input type="number" min="1" max="7" step="1" value={conditions.durationDays ?? ''} onChange={(event) => update('durationDays', numberOrNull(event.target.value))} /></label>
@@ -78,7 +78,7 @@ export default function TravelConditions({ conditions, confirmed, onChange, onCo
       <fieldset className="condition-fieldset"><legend>고정 일정 <span className="optional-label">선택</span></legend>{conditions.fixedEvents.map((item, index) => <div className="fixed-event" key={index}><div className="fixed-event-heading"><strong>일정 {index + 1}</strong><button type="button" onClick={() => update('fixedEvents', conditions.fixedEvents.filter((_, eventIndex) => eventIndex !== index))}>삭제</button></div><div className="condition-fields"><label>날짜<input type="date" value={item.date} onChange={(event) => updateEvent(index, 'date', event.target.value)} /></label><label>시간<input type="time" value={item.startTime} onChange={(event) => updateEvent(index, 'startTime', event.target.value)} /></label></div><label>장소<input maxLength="200" value={item.placeName} onChange={(event) => updateEvent(index, 'placeName', event.target.value)} /></label></div>)}<button className="add-event" type="button" onClick={() => update('fixedEvents', [...conditions.fixedEvents, { date: '', startTime: '', placeName: '' }])}>+ 고정 일정 추가</button></fieldset>
       {errors.length > 0 && <div className="conditions-errors" role="alert"><strong>다음 항목을 확인해 주세요.</strong><ul>{errors.map((error) => <li key={error}>{error}</li>)}</ul></div>}
       <button className="primary condition-confirm" type="submit">입력한 조건 확인</button>
-      <p className="conditions-field-note">확인한 조건은 대화에 저장되며, 여행 일정 생성은 아직 연결 전입니다.</p>
+      <p className="conditions-field-note">확인한 조건은 대화에 저장됩니다. 채팅에서 ‘추천해줘’라고 말하면 추천을 시작합니다.</p>
     </form>}
   </aside>;
 }

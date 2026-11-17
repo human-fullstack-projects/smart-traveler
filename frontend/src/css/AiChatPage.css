@@ -33,6 +33,13 @@
 
 .cb-status{text-align:center;color:#758d83;font-size:13px}
 .cb-error{margin:8px 0 0;color:#89543e;font-size:12px}
+.cb-intro{white-space:pre-line;line-height:1.9;color:#253b3c;margin:0}
+.cb-region-picker{width:100%;padding:14px;border:1px solid #dbe6df;border-radius:14px;background:#fff}
+.cb-region-toggle{width:100%;padding:10px;border:0;border-radius:9px;background:#e4f3ee;color:#087b65;font-weight:700;cursor:pointer}
+.cb-region-list{max-height:280px;overflow-y:auto;display:grid;gap:6px;margin-top:10px}
+.cb-region-list button{padding:10px;text-align:left;border:1px solid #e0eae5;border-radius:8px;background:#fff;color:#253b3c;cursor:pointer}
+.cb-region-list button:hover{background:#f0f8f4}
+.cb-region-picker button:disabled{opacity:.5;cursor:default}
 
 @media(max-width:850px){
   .cb-page{grid-template-columns:1fr}
