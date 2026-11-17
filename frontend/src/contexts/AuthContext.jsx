@@ -31,6 +31,42 @@ export function AuthProvider({ children }) {
     return () => { cancelled = true; };
   }, [checkRequest]);
 
+  // 페이지 이동·탭 복귀·API 401 때 서버 로그인 상태를 다시 확인한다.
+  // (처음 한 번만 확인하면 30분 미사용·서버 재시작·다른 탭 로그아웃 뒤에도 메뉴가 「로그아웃」으로 남음)
+  const memberRef = useRef(null);
+  memberRef.current = member;
+  useEffect(() => {
+    if (!authChecked) return undefined;
+    let lastCheck = 0;
+    function recheck() {
+      const now = Date.now();
+      if (logoutInFlight.current || now - lastCheck < 2000) return;
+      lastCheck = now;
+      const version = authVersion.current;
+      getCurrentMember()
+        .then((value) => {
+          if (version !== authVersion.current || logoutInFlight.current) return;
+          const before = memberRef.current;
+          if ((before?.memberId ?? null) === (value?.memberId ?? null)) return;
+          authVersion.current += 1;
+          setMember(value);
+          setAuthRevision(revision => revision + 1);
+        })
+        .catch(() => {}); // 서버 연결 실패는 로그인 상태를 바꾸지 않음
+    }
+    function onVisible() { if (document.visibilityState === 'visible') recheck(); }
+    window.addEventListener('hashchange', recheck);
+    window.addEventListener('focus', recheck);
+    window.addEventListener('auth:unauthorized', recheck);
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      window.removeEventListener('hashchange', recheck);
+      window.removeEventListener('focus', recheck);
+      window.removeEventListener('auth:unauthorized', recheck);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, [authChecked]);
+
   function retryAuth() {
     authVersion.current += 1;
     setAuthChecked(false);
