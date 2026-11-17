@@ -27,18 +27,26 @@ public class PythonAiClient {
         this.mapper = mapper;
         this.endpoint = URI.create(baseUrl.replaceAll("/+$", "") + "/internal/dialogue");
     }
-    public record Result(String message, boolean confirmed) {}
+    public record Result(String message, boolean confirmed, Long recommendedCourseId) {
+        public Result(String message, boolean confirmed) { this(message, confirmed, null); }
+    }
     public Result process(String message, String previousQuestion, ObjectNode conditions, List<Map<String, Object>> candidates) {
         return process(message, previousQuestion, conditions, candidates, null);
     }
     public Result process(String message, String previousQuestion, ObjectNode conditions,
                           List<Map<String, Object>> candidates,
                           List<Map<String, Object>> courseCandidates) {
+        return process(message, previousQuestion, conditions, candidates, courseCandidates, Map.of());
+    }
+    public Result process(String message, String previousQuestion, ObjectNode conditions,
+                          List<Map<String, Object>> candidates, List<Map<String, Object>> courseCandidates,
+                          Map<String, Object> savedPreferences) {
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("message", message);
         payload.put("previousQuestion", previousQuestion);
         payload.put("conditions", conditions);
         payload.put("candidates", candidates);
+        if (!savedPreferences.isEmpty()) payload.put("savedPreferences", savedPreferences);
         if (courseCandidates != null) {
             payload.put("courseCandidates", courseCandidates);
         }
@@ -50,10 +58,18 @@ public class PythonAiClient {
             if (response.statusCode() != 200) throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "AI 서버가 요청을 처리하지 못했습니다.");
             JsonNode parsed = mapper.readTree(response.body());
             JsonNode changes = parsed.path("changes"), question = parsed.path("question");
-            if (!changes.isObject() || !question.isTextual() || question.asText().isBlank() || question.asText().length() > 3000)
+            if (!changes.isObject() || !question.isTextual() || question.asText().isBlank() || question.asText().length() > 20000)
                 throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "AI 서버 응답 형식이 올바르지 않습니다.");
             ConditionMerger.merge(changes, conditions);
-            return new Result(question.asText(), parsed.path("confirmed").asBoolean(false));
+            Long recommended = null;
+            JsonNode courseId = parsed.path("recommendedCourseId");
+            if (!courseId.isMissingNode() && !courseId.isNull()) {
+                if (!courseId.isIntegralNumber() || !courseId.canConvertToLong() || courseId.asLong() <= 0 || courseCandidates == null
+                    || courseCandidates.stream().noneMatch(row -> ((Number) row.get("courseId")).longValue() == courseId.asLong()))
+                    throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "추천 코스가 후보와 일치하지 않습니다.");
+                recommended = courseId.asLong();
+            }
+            return new Result(question.asText(), parsed.path("confirmed").asBoolean(false), recommended);
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "AI 서버 요청이 중단되었습니다.");

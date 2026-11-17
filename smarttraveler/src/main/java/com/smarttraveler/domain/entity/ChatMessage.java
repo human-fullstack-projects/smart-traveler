@@ -40,6 +40,9 @@ public class ChatMessage {
     /** 메시지 내용 */
     private String content;
 
+    @Column(name = "recommendation_json", columnDefinition = "JSON")
+    private String recommendationJson;
+
     @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "created_at", nullable = false)
     /** 생성일시 */

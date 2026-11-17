@@ -50,12 +50,20 @@ public class MyPageRepository {
         return courses(memberId).stream().filter(c -> c.id().equals(id)).findFirst().map(c -> {
             if (!id.startsWith("course-")) return c;
             var days = jdbc.query("""
-                SELECT d.id, d.day_no, d.visit_date FROM course_day d
+                SELECT d.id, d.day_no, d.visit_date, c.condition_meta FROM course_day d
                 JOIN course c ON c.id=d.course_id
                 WHERE c.id=? AND c.member_no=? AND c.deleted_at IS NULL AND c.is_active=TRUE ORDER BY d.day_no
                 """, (rs, n) -> {
                     LocalDate date = rs.getObject("visit_date", LocalDate.class);
                     var places = jdbc.queryForList("SELECT place_name FROM activity WHERE course_day_id=? ORDER BY seq", String.class, rs.getLong("id"));
+                    if (places.isEmpty() && rs.getString("condition_meta") != null) {
+                        places = new ArrayList<>();
+                        for (var day : mapper.readTree(rs.getString("condition_meta")).path("itinerary")) {
+                            if (day.path("day_no").asInt() == rs.getInt("day_no")) {
+                                for (var visit : day.path("visits")) places.add(visit.path("place_name").asText());
+                            }
+                        }
+                    }
                     return new Day(date == null ? c.startDate().plusDays(rs.getInt("day_no") - 1L) : date, places);
                 }, Long.parseLong(id.substring(7)), memberId);
             return new CourseView(c.id(), c.title(), c.region(), c.startDate(), c.endDate(), c.state(), days);

@@ -5,7 +5,7 @@ import AccessNotice from '../components/AccessNotice';
 import { myPageApi } from '../api/myPageApi';
 import '../../../css/mypage.css';
 
-export default function MyCourses({ courses = [], isGuest, member, addCourse, courseId }) {
+export default function MyCourses({ courses = [], isGuest, member, addCourse, courseId, guestRecommendedCourse }) {
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
   const [detail, setDetail] = useState(null);
@@ -37,13 +37,19 @@ export default function MyCourses({ courses = [], isGuest, member, addCourse, co
   if (courseId && detailStatus !== 'ready') return <AccessNotice kind={detailStatus === 'loading' ? 'checking' : detailStatus} />;
   const list = courseId ? [detail] : courses;
   return <div className="mypage">
-    <PageHero eyebrow="MY COURSES" title="내 코스">{isGuest ? '사이트 내 이동 동안 임시로 보관합니다. 새로고침하거나 사이트를 떠나면 삭제됩니다.' : '본인에게 연결된 코스만 표시합니다.'}</PageHero>
+    <PageHero eyebrow="MY COURSES" title="내 코스">{isGuest ? '추천 코스는 현재 브라우저 세션에 보관합니다. 로그인하면 내 코스로 저장됩니다.' : '본인에게 연결된 코스만 표시합니다.'}</PageHero>
     {courseId && <p><a href="#/my-courses">← 내 코스 목록</a></p>}
-    {!list.length && <p className="empty">저장된 코스가 없습니다.</p>}
+    {isGuest && !courseId && guestRecommendedCourse && <Card>
+      <span className="pill">비회원 추천 코스</span>
+      <h2><a href="#/login">{guestRecommendedCourse.title}</a></h2>
+      <p>{guestRecommendedCourse.destination} · {guestRecommendedCourse.startDate}부터 {guestRecommendedCourse.durationDays}일</p>
+      <p><a href="#/login">로그인 후 내 코스에 저장</a> · <a href={`#/stays?destination=${encodeURIComponent(guestRecommendedCourse.destination ?? '')}`}>숙소 찾기</a></p>
+    </Card>}
+    {!list.length && !(isGuest && !courseId && guestRecommendedCourse) && <p className="empty">저장된 코스가 없습니다.</p>}
     <div className="stack">{list.map(course => <Card key={course.id}>
       <span className="pill">{course.state === 'GUEST' ? '비회원 임시 코스' : course.state === 'DRAFT' ? '회원 임시 코스' : '저장된 여행 코스'}</span>
       <h2>{courseId ? course.title : <a href={`#/my-courses/${encodeURIComponent(course.id)}`}>{course.title}</a>}</h2>
-      <p>{course.region} · {course.startDate} ~ {course.endDate}</p>
+      <p>{course.region} · {course.startDate} ~ {course.endDate} · <a href={`#/stays?destination=${encodeURIComponent(course.destination ?? course.region ?? '')}`}>숙소 찾기</a></p>
       {courseId && course.days.map((day, index) => <section key={day.date}><h3>{index + 1}일차 · {day.date}</h3>{day.places.length ? <ol>{day.places.map((p, i) => <li key={`${i}-${p}`}>{p}</li>)}</ol> : <p>등록된 장소가 없습니다.</p>}</section>)}
     </Card>)}</div>
     {!isGuest && !courseId && <Card style={{ marginTop: 24 }}>

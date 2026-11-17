@@ -21,12 +21,23 @@ import java.util.*;
 public class ChatController {
     private final JdbcTemplate jdbc;
     private final ConditionDialogueService dialogue;
+    private final ChatPersonalization personalization;
+    private final CourseRegionController regions;
+    private final RecommendedCourseService recommendations;
+    private final GuestRecommendedCourseService guestCourses;
     private static final String GUEST = ChatController.class.getName() + ".guest";
-    public ChatController(JdbcTemplate jdbc, ConditionDialogueService dialogue) { this.jdbc = jdbc; this.dialogue = dialogue; }
+    public ChatController(JdbcTemplate jdbc, ConditionDialogueService dialogue, ChatPersonalization personalization, CourseRegionController regions, RecommendedCourseService recommendations, GuestRecommendedCourseService guestCourses) {
+        this.jdbc = jdbc; this.dialogue = dialogue; this.personalization = personalization;
+        this.regions = regions;
+        this.recommendations = recommendations;
+        this.guestCourses = guestCourses;
+    }
 
-    record MessageInput(@NotBlank @Size(max = 4000) String content) {}
+    record MessageInput(@NotBlank @Size(max = 4000) String content, @jakarta.validation.constraints.Positive Long regionId) {
+        MessageInput(String content) { this(content, null); }
+    }
     record ConditionsInput(@NotNull @Size(max = 50000) String conditionsJson, boolean confirmed) {}
-    record Message(long id, String role, String content) {}
+    record Message(long id, String role, String content, tools.jackson.databind.JsonNode recommendation) {}
     record Conditions(String conditionsJson, boolean confirmed) {}
     record Chat(long id, List<Message> messages, Conditions conditions) {}
     record Token(String headerName, String token) {}
@@ -36,6 +47,11 @@ public class ChatController {
 
     private String guest(HttpSession session) {
         synchronized (session) {
+            String identity = personalization.ownerKey();
+            if (!identity.equals(session.getAttribute(GUEST + ".identity"))) {
+                session.removeAttribute(GUEST);
+                session.setAttribute(GUEST + ".identity", identity);
+            }
             String token = (String) session.getAttribute(GUEST);
             if (token == null) {
                 token = UUID.randomUUID().toString() + UUID.randomUUID().toString();
@@ -62,25 +78,37 @@ public class ChatController {
         jdbc.update("UPDATE chat_sessions SET updated_at = CURRENT_TIMESTAMP WHERE session_id = ?", id);
         return Objects.requireNonNull(key.getKey()).longValue();
     }
+    private void reply(long id, MessageInput input) {
+        if (input.regionId() != null) {
+            insertMessage(id, "ASSISTANT", dialogue.selectRegion(id, regions.find(input.regionId())));
+            return;
+        }
+        var result = dialogue.processResult(id, input.content(), personalization.savedPreferences());
+        long messageId = insertMessage(id, "ASSISTANT", result.message());
+        if (result.recommendedCourseId() != null)
+            recommendations.record(id, messageId, result.recommendedCourseId());
+    }
     @PostMapping("/sessions") @Transactional
     Chat create(@Valid @RequestBody MessageInput input, HttpSession session) {
         String owner = guest(session);
         var key = new GeneratedKeyHolder();
         jdbc.update(connection -> {
-            var statement = connection.prepareStatement("INSERT INTO chat_sessions (guest_token, session_title) VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
+            var statement = connection.prepareStatement("INSERT INTO chat_sessions (guest_token, session_title, member_id) VALUES (?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
             statement.setString(1, owner);
             String title = input.content().trim(); statement.setString(2, title.substring(0, Math.min(title.length(), 100)));
+            statement.setObject(3, personalization.memberId());
             return statement;
         }, key);
         long id = Objects.requireNonNull(key.getKey()).longValue();
+        insertMessage(id, "ASSISTANT", ConditionQuestions.INTRO);
         insertMessage(id, "USER", input.content());
-        insertMessage(id, "ASSISTANT", dialogue.process(id, input.content()));
+        reply(id, input);
         return load(id, session);
     }
     @GetMapping("/sessions/{id}") @Transactional(readOnly = true)
     Chat load(@PathVariable long id, HttpSession session) {
         checkOwner(id, session);
-        var messages = jdbc.query("SELECT message_id, sender_role, content FROM chat_messages WHERE session_id = ? ORDER BY created_at, message_id", (rs, row) -> new Message(rs.getLong(1), rs.getString(2), rs.getString(3)), id);
+        var messages = jdbc.query("SELECT message_id, sender_role, content, recommendation_json FROM chat_messages WHERE session_id = ? ORDER BY created_at, message_id", (rs, row) -> new Message(rs.getLong(1), rs.getString(2), rs.getString(3), recommendations.read(rs.getString(4))), id);
         var conditions = jdbc.query("SELECT conditions_json, confirmed FROM chat_session_conditions WHERE session_id = ?", (rs, row) -> new Conditions(rs.getString(1), rs.getBoolean(2)), id);
         return new Chat(id, messages, conditions.isEmpty() ? null : conditions.get(0));
     }
@@ -88,8 +116,22 @@ public class ChatController {
     Chat send(@PathVariable long id, @Valid @RequestBody MessageInput input, HttpSession session) {
         lockOwner(id, session);
         insertMessage(id, "USER", input.content());
-        insertMessage(id, "ASSISTANT", dialogue.process(id, input.content()));
+        reply(id, input);
         return load(id, session);
+    }
+    record SavedCourse(long courseId) {}
+    @PostMapping("/sessions/{id}/recommendations/{messageId}/guest")
+    GuestRecommendedCourseService.Preview storeGuestRecommendation(@PathVariable long id, @PathVariable long messageId, HttpSession session) {
+        if (personalization.memberId() != null) throw new ResponseStatusException(HttpStatus.CONFLICT, "회원 코스 저장을 이용해 주세요.");
+        checkOwner(id, session);
+        return guestCourses.store(session, id, messageId);
+    }
+    @PostMapping("/sessions/{id}/recommendations/{messageId}/save") @Transactional
+    SavedCourse saveRecommendation(@PathVariable long id, @PathVariable long messageId, HttpSession session) {
+        Long memberId = personalization.memberId();
+        if (memberId == null) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
+        lockOwner(id, session);
+        return new SavedCourse(recommendations.save(memberId, id, messageId));
     }
     @PutMapping("/sessions/{id}/conditions") @Transactional
     void saveConditions(@PathVariable long id, @Valid @RequestBody ConditionsInput input, HttpSession session) {

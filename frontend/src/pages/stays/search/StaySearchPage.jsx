@@ -1,7 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { StayArtwork, StayFooter, StayHeader, StatusPill } from '../shared/StayShell.jsx';
 import { formatWon, getDefaultStayDates, stays, stayTypes, toDateInputValue } from '../shared/stayData.js';
 import KakaoMap from '../../../components/map/KakaoMap.jsx';
+import { loadKakaoMaps } from '../../../components/map/loadKakaoMaps.js';
+import { resolveDestinationCenter } from '../../../components/map/resolveKakaoPlace.js';
 import '../../../css/stay-search.css';
 import './stay-kakao-map.css';
 
@@ -13,7 +15,16 @@ const regionCenters = {
   제주: { latitude: 33.4996, longitude: 126.5312 },
 };
 
-function SearchMap({ results, selectedId, onSelect, query, region }) {
+function matchDemoRegion(destination) {
+  const text = String(destination || '');
+  return Object.keys(regionCenters).find((region) => text.includes(region)) || '';
+}
+
+function readDestinationQuery() {
+  return new URLSearchParams((window.location.hash.split('?')[1] || '').trim()).get('destination') || '';
+}
+
+function SearchMap({ results, selectedId, onSelect, query, region, destinationCenter }) {
   const [fitRequest, setFitRequest] = useState(0);
   const [mapStatus, setMapStatus] = useState('loading');
   const places = useMemo(() => results.filter((stay) => stay.demoCoordinate).map((stay) => ({
@@ -24,7 +35,7 @@ function SearchMap({ results, selectedId, onSelect, query, region }) {
     markerLabel: stay.saleable ? `${Math.round(stay.price / 10000)}만` : '정보',
   })), [results]);
   const selected = results.find((stay) => stay.id === selectedId) || results[0];
-  const center = selected?.demoCoordinate || regionCenters[region];
+  const center = selected?.demoCoordinate || destinationCenter || regionCenters[region];
   const bookingQuery = selected ? new URLSearchParams({ stay: selected.id, ...query }).toString() : '';
 
   return (
@@ -78,7 +89,9 @@ function StayCard({ stay, selected, query, onSelect }) {
 export default function StaySearchPage() {
   const defaultDates = useMemo(() => getDefaultStayDates(), []);
   const today = useMemo(() => toDateInputValue(new Date()), []);
-  const [search, setSearch] = useState({ region: '부산', ...defaultDates, adults: 2, children: 0 });
+  const destinationQuery = useMemo(() => readDestinationQuery(), []);
+  const initialRegion = useMemo(() => matchDemoRegion(destinationQuery) || '부산', [destinationQuery]);
+  const [search, setSearch] = useState({ region: initialRegion, ...defaultDates, adults: 2, children: 0 });
   const [applied, setApplied] = useState(search);
   const [sort, setSort] = useState('distance');
   const [types, setTypes] = useState([]);
@@ -87,6 +100,25 @@ export default function StaySearchPage() {
   const [bookableOnly, setBookableOnly] = useState(false);
   const [selectedId, setSelectedId] = useState(stays[0].id);
   const [notice, setNotice] = useState('');
+  const [destinationCenter, setDestinationCenter] = useState(null);
+
+  useEffect(() => {
+    if (!destinationQuery) return;
+    let cancelled = false;
+    loadKakaoMaps()
+      .then((maps) => resolveDestinationCenter(maps, destinationQuery))
+      .then((center) => { if (!cancelled && center) setDestinationCenter(center); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [destinationQuery]);
+
+  useEffect(() => {
+    if (destinationQuery && !matchDemoRegion(destinationQuery)) {
+      setNotice(`'${destinationQuery}' 지역은 데모 숙소 데이터가 없어 목록은 기본 지역(${initialRegion}) 결과를 표시합니다. 지도는 해당 위치로 이동합니다.`);
+    }
+    // Only runs once on mount for the initial destination query.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const results = useMemo(() => {
     const filtered = stays.filter((stay) => {
@@ -158,7 +190,7 @@ export default function StaySearchPage() {
             {results.length ? results.map((stay) => <StayCard key={stay.id} stay={stay} selected={selectedId === stay.id} query={query} onSelect={setSelectedId} />) : <div className="stay-results__empty"><strong>조건에 맞는 숙소가 없습니다.</strong><span>가격 범위를 넓히거나 다른 지역·날짜를 선택해 주세요.</span></div>}
           </section>
 
-          <div className="stay-map-column"><SearchMap results={results} selectedId={selectedId} onSelect={setSelectedId} query={query} region={applied.region} /><p>검색 필터와 지도 마커는 같은 숙소 목록을 사용합니다. 표시 좌표는 실제 숙소 위치가 아닙니다.</p></div>
+          <div className="stay-map-column"><SearchMap results={results} selectedId={selectedId} onSelect={setSelectedId} query={query} region={applied.region} destinationCenter={destinationCenter} /><p>검색 필터와 지도 마커는 같은 숙소 목록을 사용합니다. 표시 좌표는 실제 숙소 위치가 아닙니다.</p></div>
         </div>
       </main>
       <StayFooter />
