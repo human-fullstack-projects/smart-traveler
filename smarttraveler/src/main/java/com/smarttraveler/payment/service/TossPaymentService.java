@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.server.ResponseStatusException;
@@ -50,7 +51,6 @@ public class TossPaymentService {
     @Transactional
     public CheckoutResponse prepare(Long reservationId, Authentication auth) {
         RoomReservation reservation = ownedReservation(reservationId, auth);
-        lockReservation(reservationId);
         if (!clientKey.startsWith("test_gck_")) {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "토스 테스트 키를 설정해 주세요.");
         }
@@ -63,19 +63,25 @@ public class TossPaymentService {
         return checkout(reservation, payment);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public CheckoutResponse confirm(String orderId, String paymentKey, int amount, Authentication auth) {
-        RoomPayment payment = payments.findByOrderId(orderId)
+        Long reservationId = jdbc.query("SELECT reservation_id FROM room_payment WHERE order_id=?",
+                (rs, row) -> rs.getLong(1), orderId).stream().findFirst()
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "결제 주문을 찾을 수 없습니다."));
-        RoomReservation reservation = ownedReservation(payment.getReservationId(), auth);
-        lockReservation(reservation.getReservationId());
+        RoomReservation reservation = ownedReservation(reservationId, auth);
+        RoomPayment payment = payments.findByOrderId(orderId).orElseThrow();
         if (amount <= 0 || amount != payment.getAmount() || amount != reservation.getTotalPrice()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "결제 금액이 일치하지 않습니다.");
         }
         if (paymentKey == null || paymentKey.isBlank() || paymentKey.length() > 200) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "결제 키가 올바르지 않습니다.");
         }
-        if ("DONE".equals(payment.getStatus())) return checkout(reservation, payment);
+        if ("DONE".equals(payment.getStatus())) {
+            if (!paymentKey.equals(payment.getPaymentKey())) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "결제 키가 일치하지 않습니다.");
+            }
+            return checkout(reservation, payment);
+        }
         requireHeld(reservation);
         if (payment.getPaymentKey() != null && !paymentKey.equals(payment.getPaymentKey())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "다른 결제 키로 이미 진행 중입니다.");
@@ -98,14 +104,13 @@ public class TossPaymentService {
     @Transactional
     public CheckoutResponse sync(Long reservationId, Authentication auth) {
         RoomReservation reservation = ownedReservation(reservationId, auth);
-        lockReservation(reservationId);
         RoomPayment payment = payments.findFirstByReservationIdOrderByCreatedAtDesc(reservationId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "결제 요청을 찾을 수 없습니다."));
         if (payment.getPaymentKey() != null) applyResult(reservation, payment, toss.get(payment.getPaymentKey()));
         return checkout(reservation, payment);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void webhook(String payload, String transmissionTime, String signature) {
         webhookVerifier.verify(payload, transmissionTime, signature);
         JsonNode event = mapper.readTree(payload);
@@ -114,10 +119,12 @@ public class TossPaymentService {
         String orderId = data.path("orderId").asText();
         String paymentKey = data.path("paymentKey").asText();
         if (orderId.isBlank() || paymentKey.isBlank()) return;
+        Long reservationId = jdbc.query("SELECT reservation_id FROM room_payment WHERE order_id=?",
+                (rs, row) -> rs.getLong(1), orderId).stream().findFirst().orElse(null);
+        if (reservationId == null || !lockReservation(reservationId)) return;
         RoomPayment payment = payments.findByOrderId(orderId).orElse(null);
         if (payment == null || !paymentKey.equals(payment.getPaymentKey())) return;
-        lockReservation(payment.getReservationId());
-        RoomReservation reservation = reservations.findById(payment.getReservationId()).orElseThrow();
+        RoomReservation reservation = reservations.findById(reservationId).orElseThrow();
         applyResult(reservation, payment, toss.get(paymentKey));
     }
 
@@ -135,7 +142,7 @@ public class TossPaymentService {
             String approvedAt = result.path("approvedAt").asText(null);
             if (approvedAt != null) payment.setApprovedAt(OffsetDateTime.parse(approvedAt).toLocalDateTime());
             long nights = ChronoUnit.DAYS.between(reservation.getCheckinDate(), reservation.getCheckoutDate());
-            if ("PENDING_PAYMENT".equals(reservation.getStatus()) && nights > 0 && heldNights(reservation) == nights) {
+            if ("PENDING_PAYMENT".equals(reservation.getStatus()) && nights > 0 && heldNights(reservation, false) == nights) {
                 int updated = jdbc.update("""
                     UPDATE room_inventory i JOIN reservation_inventory a ON a.inventory_id=i.inventory_id
                     SET i.held_quantity=i.held_quantity-a.quantity, i.reserved_quantity=i.reserved_quantity+a.quantity
@@ -150,27 +157,32 @@ public class TossPaymentService {
         payments.save(payment);
     }
 
-    private long heldNights(RoomReservation reservation) {
+    private long heldNights(RoomReservation reservation, boolean requireUnexpired) {
         Long count = jdbc.queryForObject("""
             SELECT COUNT(*) FROM reservation_inventory a JOIN room_inventory i ON i.inventory_id=a.inventory_id
             WHERE a.reservation_id=? AND a.room_id=? AND a.allocation_status='HELD'
-              AND a.hold_expires_at>NOW() AND i.is_on_sale=TRUE AND i.held_quantity>=a.quantity
-            """, Long.class, reservation.getReservationId(), reservation.getRoomId());
+              AND i.stay_date>=? AND i.stay_date<? AND a.quantity=?
+              AND i.held_quantity>=a.quantity
+              AND (?=FALSE OR (a.hold_expires_at>NOW() AND i.is_on_sale=TRUE))
+            """, Long.class, reservation.getReservationId(), reservation.getRoomId(),
+                reservation.getCheckinDate(), reservation.getCheckoutDate(), reservation.getRoomQuantity(), requireUnexpired);
         return count == null ? 0 : count;
     }
 
     private void requireHeld(RoomReservation reservation) {
         long nights = ChronoUnit.DAYS.between(reservation.getCheckinDate(), reservation.getCheckoutDate());
-        if (!"PENDING_PAYMENT".equals(reservation.getStatus()) || nights <= 0 || heldNights(reservation) != nights) {
+        if (!"PENDING_PAYMENT".equals(reservation.getStatus()) || nights <= 0 || heldNights(reservation, true) != nights) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "유효한 결제 대기 객실 점유가 없습니다.");
         }
     }
 
-    private void lockReservation(Long id) {
-        jdbc.queryForObject("SELECT reservation_id FROM room_reservation WHERE reservation_id=? FOR UPDATE", Long.class, id);
+    private boolean lockReservation(Long id) {
+        return !jdbc.queryForList(
+                "SELECT reservation_id FROM room_reservation WHERE reservation_id=? FOR UPDATE", Long.class, id).isEmpty();
     }
 
     private RoomReservation ownedReservation(Long id, Authentication auth) {
+        if (!lockReservation(id)) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         Long memberId = members.findByLoginId(auth.getName())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED)).getMemberId();
         RoomReservation reservation = reservations.findById(id)

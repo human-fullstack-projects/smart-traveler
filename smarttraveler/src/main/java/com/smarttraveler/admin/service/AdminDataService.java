@@ -223,6 +223,7 @@ public class AdminDataService {
 
     @Transactional
     public void setReservationStatus(Long id, String status, String reason, String adminLogin) {
+        jdbc.queryForList("SELECT reservation_id FROM room_reservation WHERE reservation_id=? FOR UPDATE", Long.class, id);
         RoomReservation order = reservation(id);
         String current = order.getStatus();
         if ("CONFIRMED".equals(status)) {
@@ -252,8 +253,9 @@ public class AdminDataService {
             jdbc.update("UPDATE reservation_inventory SET allocation_status='RESERVED', hold_expires_at=NULL, updated_at=NOW() WHERE reservation_id=? AND allocation_status='HELD'", id);
         } else if ("CANCELLED".equals(status)) {
             if (!"PENDING_PAYMENT".equals(current)) throw new IllegalStateException("결제 대기 예약만 이 화면에서 취소할 수 있습니다.");
-            if (paymentsForReservation(id).stream().anyMatch(p -> "DONE".equals(p.getStatus())))
-                throw new IllegalStateException("승인된 결제가 있어 단순 미결제 취소로 처리할 수 없습니다.");
+            if (paymentsForReservation(id).stream().anyMatch(p ->
+                    Set.of("DONE", "IN_PROGRESS", "WAITING_FOR_DEPOSIT").contains(p.getStatus())))
+                throw new IllegalStateException("결제가 승인됐거나 진행 중인 예약은 미결제 취소로 처리할 수 없습니다.");
             jdbc.update("""
                 UPDATE room_inventory i JOIN reservation_inventory a ON a.inventory_id=i.inventory_id
                 SET i.held_quantity=i.held_quantity-a.quantity

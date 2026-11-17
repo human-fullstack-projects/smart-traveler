@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
+import { request } from '../../api/auth.js';
 import { confirmPayment, loadTossSdk, preparePayment, syncPayment } from './tossPayment.js';
 
 export default function TossCheckoutPage({ reservationId, result }) {
   const [checkout, setCheckout] = useState(null);
   const [error, setError] = useState('');
+  const [holdExpiresAt, setHoldExpiresAt] = useState(null);
   const [busy, setBusy] = useState(true);
   const widgets = useRef(null);
-  const resultStarted = useRef(false);
+  const confirmation = useRef(null);
 
   useEffect(() => {
     let active = true;
@@ -17,8 +19,6 @@ export default function TossCheckoutPage({ reservationId, result }) {
       return undefined;
     }
     if (result === 'success') {
-      if (resultStarted.current) return undefined;
-      resultStarted.current = true;
       const query = new URLSearchParams(window.location.hash.split('?')[1] || '');
       const orderId = query.get('orderId');
       const paymentKey = query.get('paymentKey');
@@ -26,15 +26,18 @@ export default function TossCheckoutPage({ reservationId, result }) {
       if (!orderId || !paymentKey || !Number.isSafeInteger(amount)) {
         setError('결제 승인에 필요한 정보가 없습니다.'); setBusy(false); return undefined;
       }
-      confirmPayment({ orderId, paymentKey, amount })
+      confirmation.current ||= confirmPayment({ orderId, paymentKey, amount });
+      confirmation.current
         .then((value) => { if (active) setCheckout(value); })
         .catch((reason) => { if (active) setError(reason.message); })
         .finally(() => { if (active) setBusy(false); });
       return () => { active = false; };
     }
-    preparePayment(reservationId).then(async (value) => {
+    Promise.all([preparePayment(reservationId), request('/api/reservations/' + reservationId)])
+      .then(async ([value, reservation]) => {
       if (!active) return;
       setCheckout(value);
+      setHoldExpiresAt(reservation.holdExpiresAt);
       if (value.status === 'DONE') { setCheckout(value); return; }
       const TossPayments = await loadTossSdk();
       if (!active) return;
@@ -59,8 +62,8 @@ export default function TossCheckoutPage({ reservationId, result }) {
       await widgets.current.requestPayment({
         orderId: checkout.orderId,
         orderName: checkout.orderName,
-        successUrl: `${base}#/payments/${reservationId}/success`,
-        failUrl: `${base}#/payments/${reservationId}/failure`,
+        successUrl: `${base}?stayReservationId=${reservationId}&stayPaymentResult=success`,
+        failUrl: `${base}?stayReservationId=${reservationId}&stayPaymentResult=failure`,
       });
     } catch (reason) { setError(reason.message || '결제창을 열지 못했습니다.'); setBusy(false); }
   }
@@ -76,11 +79,13 @@ export default function TossCheckoutPage({ reservationId, result }) {
     <p><a href={`#/reservations/${reservationId}`}>← 예약 상세</a></p>
     <h1 id="payment-title">토스 테스트 결제</h1>
     <p>테스트 키로만 실행됩니다. 실제 금액은 청구되지 않습니다.</p>
+    {!result && holdExpiresAt && <p>결제 기한 {new Date(holdExpiresAt).toLocaleTimeString('ko-KR')}</p>}
     {checkout && <p>주문번호 {checkout.orderId} · {checkout.amount.toLocaleString('ko-KR')}원</p>}
     {!result && <><div id="toss-payment-methods" /><div id="toss-payment-agreement" /></>}
-    {checkout?.status === 'DONE' && <p role="status">결제 승인 완료 · 예약 {checkout.reservationStatus}{checkout.receiptUrl && <> · <a href={checkout.receiptUrl} target="_blank" rel="noreferrer">테스트 영수증</a></>}</p>}
+    {checkout?.status === 'DONE' && <p role="status">결제 승인 완료 · {checkout.reservationStatus === 'CONFIRMED' ? '예약 확정' : '예약 확인 필요'}{checkout.receiptUrl && <> · <a href={checkout.receiptUrl} target="_blank" rel="noreferrer">테스트 영수증</a></>}</p>}
     {checkout?.status === 'IN_PROGRESS' && <p role="status">결제 결과를 확인 중입니다. 잠시 후 상태를 다시 조회해 주세요.</p>}
     {error && <p role="alert">{error}</p>}
+    {result === 'failure' && <p><a href={'#/payments/' + reservationId}>결제 다시 시도</a></p>}
     {!result && checkout?.status === 'READY' && <button type="button" disabled={busy || !widgets.current} onClick={pay}>토스로 테스트 결제</button>}
     {(result || checkout?.status === 'IN_PROGRESS') && <button type="button" disabled={busy} onClick={refresh}>결제 상태 다시 조회</button>}
     {busy && <p role="status">결제 정보를 확인하고 있습니다.</p>}

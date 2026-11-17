@@ -1,37 +1,120 @@
 package com.smarttraveler.reservation.service;
 
+import com.smarttraveler.admin.repository.RoomRepository;
+import com.smarttraveler.auth.repository.MemberRepository;
 import com.smarttraveler.domain.entity.RoomReservation;
+import com.smarttraveler.reservation.dto.CreateReservationRequest;
 import com.smarttraveler.reservation.dto.ReservationResponse;
 import com.smarttraveler.reservation.repository.ReservationRepository;
+import com.smarttraveler.stay.service.StayInventoryService;
+import com.smarttraveler.stay.service.StayService;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
 public class ReservationService {
-    private final ReservationRepository reservationRepository;
+    private final ReservationRepository reservations;
+    private final MemberRepository members;
+    private final RoomRepository rooms;
+    private final StayService stays;
+    private final StayInventoryService inventory;
+    private final JdbcTemplate jdbc;
 
-    public List<ReservationResponse> listByMember(Long memberId) {
-        return reservationRepository.findByMemberId(memberId).stream()
-                .map(this::toResponse)
+    @Transactional
+    public ReservationResponse create(CreateReservationRequest request, Authentication auth) {
+        Long memberId = memberId(auth);
+        inventory.validateDates(request.checkIn(), request.checkOut());
+        var room = rooms.findById(request.roomId())
+                .filter(item -> Boolean.TRUE.equals(item.getIsActive()))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        stays.get(room.getLodgingId());
+        if (request.guestCount() > room.getMaxCapacity()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "객실 정원을 초과했습니다.");
+        }
+
+        var nights = inventory.nights(room.getRoomId(), request.checkIn(), request.checkOut(), true);
+        if (!inventory.available(nights, request.checkIn(), request.checkOut())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "선택한 날짜에 예약할 수 없습니다.");
+        }
+        int total = inventory.total(nights);
+        if (request.expectedTotalPrice() != total) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "객실 요금이 변경되었습니다.");
+        }
+
+        RoomReservation reservation = new RoomReservation();
+        reservation.setReservationNo("ST-" + UUID.randomUUID());
+        reservation.setMemberId(memberId);
+        reservation.setRoomId(room.getRoomId());
+        reservation.setCheckinDate(request.checkIn());
+        reservation.setCheckoutDate(request.checkOut());
+        reservation.setGuestCount(request.guestCount());
+        reservation.setBookerName(request.bookerName().strip());
+        reservation.setBookerPhone(request.bookerPhone().strip());
+        reservation.setRequestMemo(request.requestMemo());
+        reservation.setRoomQuantity(1);
+        reservation.setStatus("PENDING_PAYMENT");
+        reservation.setTotalPrice(total);
+        reservations.saveAndFlush(reservation);
+
+        LocalDateTime expiresAt = jdbc.queryForObject("SELECT DATE_ADD(NOW(), INTERVAL 10 MINUTE)",
+                (rs, row) -> rs.getObject(1, LocalDateTime.class));
+        for (var night : nights) {
+            jdbc.update("""
+                INSERT INTO reservation_inventory
+                    (reservation_id, inventory_id, room_id, quantity, unit_price, allocation_status, hold_expires_at)
+                VALUES (?, ?, ?, 1, ?, 'HELD', ?)
+                """, reservation.getReservationId(), night.inventoryId(), room.getRoomId(), night.price(), expiresAt);
+            jdbc.update("UPDATE room_inventory SET held_quantity=held_quantity+1 WHERE inventory_id=?",
+                    night.inventoryId());
+        }
+        return toResponse(reservation, holdExpiresAt(reservation.getReservationId()));
+    }
+
+    public List<ReservationResponse> listByMember(Long memberId, Authentication auth) {
+        if (!memberId.equals(memberId(auth))) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        return reservations.findByMemberId(memberId).stream()
+                .map(reservation -> toResponse(reservation, null))
                 .toList();
     }
 
-    public ReservationResponse get(Long reservationId) {
-        RoomReservation reservation = reservationRepository.findById(reservationId).get();
-        return toResponse(reservation);
+    public ReservationResponse get(Long reservationId, Authentication auth) {
+        Long memberId = memberId(auth);
+        var reservation = reservations.findById(reservationId)
+                .filter(item -> memberId.equals(item.getMemberId()))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        return toResponse(reservation, holdExpiresAt(reservationId));
     }
 
-    private ReservationResponse toResponse(RoomReservation reservation) {
-        return new ReservationResponse(
-                reservation.getReservationId(),
-                reservation.getRoomId(),
-                reservation.getCheckinDate(),
-                reservation.getCheckoutDate(),
-                reservation.getGuestCount(),
-                reservation.getTotalPrice(),
-                reservation.getStatus()
-        );
+    private Long memberId(Authentication auth) {
+        return members.findByLoginId(auth.getName())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED)).getMemberId();
+    }
+
+    private OffsetDateTime holdExpiresAt(Long reservationId) {
+        return jdbc.queryForObject("""
+            SELECT TIMESTAMPDIFF(SECOND, '1970-01-01 00:00:00', UTC_TIMESTAMP())
+                   + TIMESTAMPDIFF(SECOND, NOW(), MIN(hold_expires_at)) AS expires_epoch
+            FROM reservation_inventory WHERE reservation_id=? AND allocation_status='HELD'
+            """, (rs, row) -> {
+                Long seconds = rs.getObject(1, Long.class);
+                return seconds == null ? null : java.time.Instant.ofEpochSecond(seconds).atOffset(ZoneOffset.UTC);
+            }, reservationId);
+    }
+
+    private ReservationResponse toResponse(RoomReservation reservation, OffsetDateTime expiresAt) {
+        return new ReservationResponse(reservation.getReservationId(), reservation.getRoomId(),
+                reservation.getCheckinDate(), reservation.getCheckoutDate(), reservation.getGuestCount(),
+                reservation.getTotalPrice(), reservation.getStatus(), reservation.getReservationNo(), expiresAt);
     }
 }

@@ -6,6 +6,8 @@ import com.smarttraveler.stay.repository.StayRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
@@ -18,8 +20,14 @@ public class StayService {
                 .toList();
     }
 
+    public List<StayResponse> listWithInventory() {
+        return stayRepository.findWithInventory().stream().map(this::toResponse).toList();
+    }
+
     public StayResponse get(Long lodgingId) {
-        Lodging lodging = stayRepository.findById(lodgingId).get();
+        Lodging lodging = stayRepository.findById(lodgingId)
+                .filter(stay -> "ACTIVE".equals(stay.getStatus()))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         return toResponse(lodging);
     }
 

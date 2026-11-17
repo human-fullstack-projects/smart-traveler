@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { StayArtwork, StayFooter, StayHeader, StatusPill } from '../shared/StayShell.jsx';
 import { formatWon, getDefaultStayDates, stays, stayTypes, toDateInputValue } from '../shared/stayData.js';
+import { getBookableStays, getRooms } from '../shared/stayApi.js';
 import KakaoMap from '../../../components/map/KakaoMap.jsx';
 import { loadKakaoMaps } from '../../../components/map/loadKakaoMaps.js';
 import { resolveDestinationCenter } from '../../../components/map/resolveKakaoPlace.js';
@@ -32,7 +33,7 @@ function SearchMap({ results, selectedId, onSelect, query, region, destinationCe
     id: stay.id,
     name: stay.name,
     kind: 'stay',
-    markerLabel: stay.saleable ? `${Math.round(stay.price / 10000)}만` : '정보',
+    markerLabel: stay.saleable ? '예약' : '정보',
   })), [results]);
   const selected = results.find((stay) => stay.id === selectedId) || results[0];
   const center = selected?.demoCoordinate || destinationCenter || regionCenters[region];
@@ -41,7 +42,7 @@ function SearchMap({ results, selectedId, onSelect, query, region, destinationCe
   return (
     <section className="stay-kakao-map" aria-label="숙소 검색 결과 지도">
       <KakaoMap places={places} center={center} selectedId={selected?.id} fitPoints={places} fitRequest={fitRequest} onMarkerClick={(place) => onSelect(place.id)} onStatusChange={setMapStatus} height="100%" />
-      {mapStatus === 'ready' && <div className="stay-kakao-map__tools"><button type="button" onClick={() => setFitRequest((value) => value + 1)}>전체 보기</button><span>카카오 지도 · 숙소 위치는 시연용 좌표</span></div>}
+      {mapStatus === 'ready' && <div className="stay-kakao-map__tools"><button type="button" onClick={() => setFitRequest((value) => value + 1)}>전체 보기</button><span>카카오 지도 · 숙소 위치</span></div>}
       {mapStatus === 'ready' && selected && <div className="stay-kakao-map__details" role="status"><strong>{selected.name}</strong><span>{selected.saleable ? `1박 ${formatWon(selected.price)}부터` : '판매 정보 미확인'}</span>{selected.saleable && <a href={`#/stays/booking?${bookingQuery}`}>객실 보기 →</a>}</div>}
     </section>
   );
@@ -58,10 +59,10 @@ function StayCard({ stay, selected, query, onSelect }) {
       <div className="stay-result-card__body">
         <div className="stay-result-card__top">
           <div>
-            <p className="stay-result-card__category">{stay.type} · {stay.area} · 기준 지점 {stay.distanceKm}km</p>
+            <p className="stay-result-card__category">{stay.type} · {stay.area}</p>
             <h2>{stay.name}</h2>
           </div>
-          <span className="stay-result-card__rating">★ {stay.rating} <small>({stay.reviewCount})</small></span>
+          {stay.rating != null && <span className="stay-result-card__rating">★ {stay.rating} <small>({stay.reviewCount})</small></span>}
         </div>
         <p className="stay-result-card__description">{stay.description}</p>
         <div className="stay-result-card__chips">
@@ -74,7 +75,7 @@ function StayCard({ stay, selected, query, onSelect }) {
           </div>
           {stay.saleable ? (
             <div className="stay-result-card__price">
-              <span>1박 최저가</span><strong>{formatWon(stay.price)}</strong>
+              <span>1박 평균 최저가</span><strong>{formatWon(stay.price)}</strong>
               <a href={`#/stays/booking?${bookingQuery}`}>객실 보기</a>
             </div>
           ) : (
@@ -100,6 +101,8 @@ export default function StaySearchPage() {
   const [bookableOnly, setBookableOnly] = useState(false);
   const [selectedId, setSelectedId] = useState(stays[0].id);
   const [notice, setNotice] = useState('');
+  const [liveStays, setLiveStays] = useState([]);
+  const [stayError, setStayError] = useState('');
   const [destinationCenter, setDestinationCenter] = useState(null);
 
   useEffect(() => {
@@ -120,8 +123,32 @@ export default function StaySearchPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    let active = true;
+    setLiveStays([]);
+    setStayError('');
+    getBookableStays()
+      .then((data) => Promise.all(data.filter((stay) => stay.address.startsWith(applied.region)).map(async (stay) => {
+        const rooms = await getRooms(stay.lodgingId, applied.checkIn, applied.checkOut, applied.adults + applied.children);
+        const price = rooms.length
+          ? Math.round(Math.min(...rooms.map((room) => room.totalPrice / room.nights.length)))
+          : 0;
+        return {
+          id: String(stay.lodgingId), name: stay.name, region: applied.region,
+          type: { HOTEL: '호텔', RESORT: '리조트', PENSION: '펜션', GUESTHOUSE: '게스트하우스' }[stay.lodgingType] || stay.lodgingType,
+          area: stay.address, description: '', amenities: [], theme: 'ocean',
+          price, saleable: rooms.length > 0, source: '숙소 정보',
+          demoCoordinate: { latitude: stay.latitude, longitude: stay.longitude },
+        };
+      })))
+      .then((data) => { if (active) setLiveStays(data); })
+      .catch((error) => { if (active) setStayError(error.message); });
+    return () => { active = false; };
+  }, [applied]);
+
   const results = useMemo(() => {
-    const filtered = stays.filter((stay) => {
+    const infoStays = stays.map((stay) => ({ ...stay, saleable: false }));
+    const filtered = [...liveStays, ...infoStays].filter((stay) => {
       if (stay.region !== applied.region) return false;
       if (types.length && !types.includes(stay.type)) return false;
       if (amenities.length && !amenities.every((item) => stay.amenities.includes(item))) return false;
@@ -130,11 +157,11 @@ export default function StaySearchPage() {
       return true;
     });
     return [...filtered].sort((a, b) => {
-      if (sort === 'price') return a.price - b.price;
-      if (sort === 'rating') return b.rating - a.rating;
-      return a.distanceKm - b.distanceKm;
+      if (sort === 'price') return (a.saleable ? a.price : Infinity) - (b.saleable ? b.price : Infinity);
+      if (sort === 'rating') return (b.rating || 0) - (a.rating || 0);
+      return Number(b.saleable) - Number(a.saleable) || (a.distanceKm || 0) - (b.distanceKm || 0);
     });
-  }, [amenities, applied.region, bookableOnly, maxPrice, sort, types]);
+  }, [amenities, applied.region, bookableOnly, liveStays, maxPrice, sort, types]);
 
   function toggleFilter(value, setter) {
     setter((current) => current.includes(value) ? current.filter((item) => item !== value) : [...current, value]);
@@ -147,7 +174,7 @@ export default function StaySearchPage() {
       return;
     }
     setApplied(search);
-    setNotice(`${search.region}의 ${search.checkIn}~${search.checkOut} 판매 가능 객실을 다시 조회했습니다.`);
+    setNotice('');
   }
 
   const query = {
@@ -175,6 +202,7 @@ export default function StaySearchPage() {
           <button type="submit">숙소 검색</button>
         </form>
         {notice && <p className="stay-search-notice" role="status">{notice}</p>}
+        {stayError && <p className="stay-search-notice" role="alert">{stayError}</p>}
 
         <div className="stay-search-layout">
           <aside className="stay-filter" aria-label="숙소 검색 필터">
@@ -190,7 +218,7 @@ export default function StaySearchPage() {
             {results.length ? results.map((stay) => <StayCard key={stay.id} stay={stay} selected={selectedId === stay.id} query={query} onSelect={setSelectedId} />) : <div className="stay-results__empty"><strong>조건에 맞는 숙소가 없습니다.</strong><span>가격 범위를 넓히거나 다른 지역·날짜를 선택해 주세요.</span></div>}
           </section>
 
-          <div className="stay-map-column"><SearchMap results={results} selectedId={selectedId} onSelect={setSelectedId} query={query} region={applied.region} destinationCenter={destinationCenter} /><p>검색 필터와 지도 마커는 같은 숙소 목록을 사용합니다. 표시 좌표는 실제 숙소 위치가 아닙니다.</p></div>
+          <div className="stay-map-column"><SearchMap results={results} selectedId={selectedId} onSelect={setSelectedId} query={query} region={applied.region} destinationCenter={destinationCenter} /><p>검색 필터와 지도 마커는 같은 숙소 목록을 사용합니다. 정보 조회 전용 숙소의 좌표는 시연용입니다.</p></div>
         </div>
       </main>
       <StayFooter />

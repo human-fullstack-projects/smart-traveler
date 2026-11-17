@@ -1,6 +1,7 @@
 package com.smarttraveler.reservation.dto;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 
 public record ReservationResponse(
         Long reservationId,
@@ -9,6 +10,8 @@ public record ReservationResponse(
         LocalDate checkoutDate,
         Integer guestCount,
         Integer totalPrice,
-        String status
+        String status,
+        String reservationNo,
+        OffsetDateTime holdExpiresAt
 ) {
 }

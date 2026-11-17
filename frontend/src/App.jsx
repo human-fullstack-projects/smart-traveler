@@ -114,6 +114,10 @@ export default function App() {
   }, [authChecked, authCheckFailed, member?.memberId, member?.roleCode, authRevision]);
 
   useEffect(() => {
+    if (member && /^\/reservations(?:\/|$)/.test(route.split('?')[0])) myPageStore.retry();
+  }, [member?.memberId, route, myPageStore.retry]);
+
+  useEffect(() => {
     if (authCheckFailed) setNotice('로그인 상태를 확인할 서버에 연결하지 못했어요. Spring Boot 실행 상태를 확인해주세요.');
   }, [authCheckFailed]);
 
@@ -228,7 +232,7 @@ export default function App() {
   } else {
     const SidebarScreen = sidebarPageRoutes[routePath] || HomePage;
          content = (
-      <SidebarScreen
+      <SidebarScreen key={routePath === '/stays/booking' ? route : undefined}
         key={routePath}
         onLogin={loggedIn}
         onStart={chat.startChat}

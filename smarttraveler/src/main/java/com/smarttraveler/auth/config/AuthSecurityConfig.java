@@ -51,6 +51,7 @@ public class AuthSecurityConfig {
         // Keep Spring Security's session CSRF protection and session-fixation protection.
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.GET, "/api/auth/csrf").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/stays", "/api/stays/*", "/api/stays/*/rooms").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/auth/signup").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/auth/terms").permitAll()
