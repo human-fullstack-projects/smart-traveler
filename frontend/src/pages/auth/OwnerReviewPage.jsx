@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { getOwnerReview, reapplyOwner } from '../../api/auth';
+import { useState } from 'react';
+import { reapplyOwner } from '../../api/auth';
 import '../../css/Auth.css';
 
 const label = { PENDING: '승인 대기', APPROVED: '승인', REJECTED: '반려' };
@@ -11,17 +11,13 @@ const OWNER_FIELDS = [
   ['businessPhone', '연락처', 20, false],
 ];
 
-export default function OwnerReviewPage({ onContinue }) {
-  const [review, setReview] = useState(null);
-  const [form, setForm] = useState(null);
+export default function OwnerReviewPage({ initialReview, isReapplyPage, onContinue }) {
+  const [review, setReview] = useState(initialReview);
+  const [form, setForm] = useState(initialReview);
   const [notice, setNotice] = useState('');
   const [errors, setErrors] = useState({});
   const [busy, setBusy] = useState(false);
-
-  useEffect(() => {
-    getOwnerReview().then((data) => { setReview(data); setForm(data); })
-      .catch((error) => setNotice(error.message));
-  }, []);
+    const showReapplyForm = isReapplyPage && review.status === 'REJECTED';
 
   async function submit(event) {
     event.preventDefault();
@@ -37,18 +33,24 @@ export default function OwnerReviewPage({ onContinue }) {
     try {
       const data = await reapplyOwner(form);
       setReview(data); setForm(data); setNotice('재신청을 받았어요. 심사 결과를 기다려주세요.');
+            window.location.replace('#/owner');
     } catch (error) { setNotice(error.message); }
     finally { setBusy(false); }
   }
 
   return <div className="st-page auth-page owner-auth-page"><section className="auth-wrap wide" aria-labelledby="review-title">
     <p className="auth-kicker">OWNER REVIEW</p>
-    <h1 id="review-title" className="st-h2">업주 신청 상태</h1>
+        <h1 id="review-title" className="st-h2">
+      {showReapplyForm ? '업주 재승인 요청' : '업주 신청 상태'}
+    </h1>
     {review && <>
       <p className="auth-notice">현재 상태: <strong>{label[review.status] || review.status}</strong></p>
+      <p>업주 정보 심사에는 보통 1~2일이 걸려요. 신청에 관한 문의는 관리자에게 문의해 주세요.</p>
       {review.status === 'REJECTED' && <p className="auth-notice error">반려 사유: {review.history.find((h) => h.status === 'REJECTED')?.comment || '등록된 사유가 없습니다.'}</p>}
-      {review.status === 'REJECTED' && <form className="auth-form" onSubmit={submit} noValidate>
-        <p className="auth-required-legend"><span className="auth-required" aria-hidden="true">*</span> 표시는 꼭 입력해야 해요</p>
+            {review.status === 'REJECTED' && !isReapplyPage && (
+        <a className="st-btn" href="#/owner/reapply">재승인 요청</a>
+      )}
+      {showReapplyForm && <form className="auth-form" onSubmit={submit} noValidate><p className="auth-required-legend"><span className="auth-required" aria-hidden="true">*</span> 표시는 꼭 입력해야 해요</p>
         <p className="auth-section-title">사업 정보를 수정한 뒤 다시 신청해주세요.</p>
         {OWNER_FIELDS.map(([key, text, max, required]) =>
           <label key={key} className={`st-field${errors[key] ? ' st-field-error' : ''}`}><span>{text} {required && <span className="auth-required" aria-hidden="true">*</span>}</span>
@@ -67,6 +69,11 @@ export default function OwnerReviewPage({ onContinue }) {
       </li>)}</ul>
     </>}
     {notice && <p className="auth-notice" role="status">{notice}</p>}
-    <button className="st-btn st-btn-line" type="button" onClick={onContinue}>여행 화면으로 계속</button>
-  </section></div>;
+        {isReapplyPage ? (
+      <a className="st-btn st-btn-line" href="#/owner">신청 상태로 돌아가기</a>
+    ) : (
+      <button className="st-btn st-btn-line" type="button" onClick={onContinue}>
+        여행 화면으로 계속
+      </button>
+    )} </section></div>;
 }

@@ -16,7 +16,7 @@ function AccessNotice({ title, message, href = '#/', label = '홈으로' }) {
   );
 }
 
-function OwnerApproval({ children }) {
+function OwnerApproval({ children, isReapplyPage }) {
   const [result, setResult] = useState({ loading: true });
 
   useEffect(() => {
@@ -24,7 +24,7 @@ function OwnerApproval({ children }) {
 
     getOwnerReview()
       .then((review) => {
-        if (!cancelled) setResult({ status: review.status });
+        if (!cancelled) setResult({ review });
       })
       .catch(() => {
         if (!cancelled) setResult({ failed: true });
@@ -37,10 +37,45 @@ function OwnerApproval({ children }) {
     return <AccessNotice title="업주 승인 확인" message="심사 상태를 확인하고 있어요." />;
   }
 
-  if (result.status === 'APPROVED') return children;
+  // const { review } = result;
+  // if (review?.status === 'APPROVED') return children;
 
-  if (result.status === 'PENDING' || result.status === 'REJECTED') {
-    return <OwnerReviewPage onContinue={() => { window.location.hash = '/'; }} />;
+  // if (review?.status === 'PENDING' || review?.status === 'REJECTED') {
+  //   return <OwnerReviewPage initialReview={review} onContinue={() => { window.location.hash = '/'; }} />;
+  // }
+
+  // return (
+  //   <AccessNotice
+  //     title="업주센터에 접근할 수 없어요"
+  //     message="승인 상태를 확인하지 못했어요. 잠시 후 다시 들어와 주세요."
+  //   />
+  // );
+
+    const { review } = result;
+
+  if (review?.status === 'APPROVED') {
+    if (isReapplyPage) {
+      return (
+        <AccessNotice
+          title="이미 승인된 업주예요"
+          message="업주센터에서 숙소 정보를 관리할 수 있어요."
+          href="#/owner"
+          label="업주센터로"
+        />
+      );
+    }
+
+    return children;
+  }
+
+  if (review?.status === 'PENDING' || review?.status === 'REJECTED') {
+    return (
+      <OwnerReviewPage
+        initialReview={review}
+        isReapplyPage={isReapplyPage}
+        onContinue={() => { window.location.hash = '/'; }}
+      />
+    );
   }
 
   return (
@@ -51,7 +86,7 @@ function OwnerApproval({ children }) {
   );
 }
 
-export default function OwnerAccess({ children }) {
+export default function OwnerAccess({ children, isReapplyPage }) {
   const { member, authChecked, authCheckFailed } = useAuth();
 
   if (!authChecked) {
@@ -77,5 +112,9 @@ export default function OwnerAccess({ children }) {
     return <AccessNotice title="업주 전용 화면" message="업주 계정으로 이용할 수 있어요." />;
   }
 
-  return <OwnerApproval key={member.memberId}>{children}</OwnerApproval>;
+    return (
+    <OwnerApproval key={member.memberId} isReapplyPage={isReapplyPage}>
+      {children}
+    </OwnerApproval>
+  );
 }

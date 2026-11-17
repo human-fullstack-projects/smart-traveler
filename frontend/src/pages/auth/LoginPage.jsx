@@ -2,13 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import '../../css/Auth.css';
 import { login } from '../../api/auth';
 import { getSocialProviders } from './socialApi';
-import OwnerReviewPage from './OwnerReviewPage';
-import { useAuth } from '../../contexts/AuthContext';
 import { waitForGuestCourseStorage } from '../../chatApi';
 
 // 로그인 (AUTH) — 처리 로직은 sein/v1 그대로, 화면만 공유 CSS(st-*)로.
 export default function LoginPage({ onLogin, guestCourseCount = 0 }) {
-  const { member: currentMember, login: updateAuth } = useAuth();
   const [loginId, setLoginId] = useState('');
   const [password, setPassword] = useState('');
   const [visible, setVisible] = useState(false);
@@ -16,7 +13,6 @@ export default function LoginPage({ onLogin, guestCourseCount = 0 }) {
   const [notice, setNotice] = useState(new URLSearchParams(window.location.search).get('socialError') || '');
   const [providers, setProviders] = useState({ google: false, kakao: false });
   const [busy, setBusy] = useState(false);
-  const [reviewMember, setReviewMember] = useState(null);
   const inFlight = useRef(false);
   const mounted = useRef(true);
   const titleRef = useRef(null);
@@ -48,8 +44,7 @@ export default function LoginPage({ onLogin, guestCourseCount = 0 }) {
     setBusy(true);
     try {
       const member = await login(loginId.trim(), password);
-      if (member.roleCode === 'OWNER') { updateAuth(member); setReviewMember(member); }
-      else onLogin(member);
+      onLogin(member);
     } catch (error) {
       if (mounted.current) setNotice(error.message);
     } finally {
@@ -64,7 +59,6 @@ export default function LoginPage({ onLogin, guestCourseCount = 0 }) {
     setNotice('');
   }
 
-  if (reviewMember && currentMember?.roleCode === 'OWNER') return <OwnerReviewPage onContinue={() => onLogin(reviewMember)} />;
   return (
     <div className="st-page auth-page">
       <section className="auth-wrap" aria-labelledby="login-title">
