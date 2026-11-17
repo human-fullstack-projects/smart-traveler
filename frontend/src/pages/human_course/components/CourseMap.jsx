@@ -11,13 +11,13 @@ const centers = {
 };
 const EMPTY_PLAN = [];
 
-export default function CourseMap({ region, plan = EMPTY_PLAN, showDemoStays = true }) {
+export default function CourseMap({ region, plan = EMPTY_PLAN, stay, showDemoStays = true }) {
   const days = useMemo(() => plan.map((day) => ({
     day: day.day,
     places: [
-      ...(day.stops || []).map((stop, index) => ({
+      ...((day.places?.length ? day.places : day.stops) || []).map((stop, index) => ({
         ...(typeof stop === 'string' ? { name: stop.replace(/^\d{1,2}:\d{2}\s*/, '').trim() } : stop),
-        id: `stop-${day.day}-${index}`, kind: 'course',
+        id: typeof stop === 'string' ? `stop-${day.day}-${index}` : (stop.id || `stop-${day.day}-${index}`), kind: 'course',
       })),
       ...(day.stays || (day.lodging ? [day.lodging] : [])).map((stay, index) => ({
         ...(typeof stay === 'string' ? { name: stay } : stay),
@@ -25,6 +25,7 @@ export default function CourseMap({ region, plan = EMPTY_PLAN, showDemoStays = t
       })),
     ],
   })), [plan]);
+  const stayedPlace = useMemo(() => stay ? [{ ...stay, id: stay.id || 'stayed-lodging', kind: 'stay' }] : [], [stay]);
   const regionStays = useMemo(() => showDemoStays ? stays.filter((stay) => stay.region === region && stay.demoCoordinate).map((stay) => ({
     ...stay.demoCoordinate,
     id: `region-stay-${stay.id}`,
@@ -35,12 +36,12 @@ export default function CourseMap({ region, plan = EMPTY_PLAN, showDemoStays = t
 
   return <ItineraryMapPanel
     days={days}
-    center={centers[region]}
+    center={centers[region] || Object.entries(centers).find(([name]) => String(region || '').includes(name))?.[1]}
     searchRegion={region}
     level={5}
     height="320px"
-    extraPlaces={regionStays}
-    extraTitle="같은 지역 숙소 시연 목록"
+    extraPlaces={[...stayedPlace, ...regionStays]}
+    extraTitle={stay ? "숙박했던 숙소" : "같은 지역 숙소 시연 목록"}
     sourceNote={`온라인 지도 배경: 카카오 지도. 주소와 장소명은 카카오 검색 결과에 따라 실제 일정 장소와 다를 수 있습니다. ${showDemoStays ? '같은 지역 숙소는 시연용 데이터입니다. ' : ''}점선은 방문지 사이의 직선 개요로, 실제 이동 경로가 아닙니다.`}
   />;
 }

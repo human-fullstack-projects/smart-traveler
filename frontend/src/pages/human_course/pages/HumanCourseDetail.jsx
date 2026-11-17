@@ -30,7 +30,7 @@ export default function HumanCourseDetail({ courses = previewCourses, courseId =
           <hr className="divider" /><h3>여행 후기</h3><p className="writing-sample">{course.body}</p>
         </article>
         <section className="panel"><div className="panel-heading"><h2>방문 코스 / 일정</h2></div><CoursePlan plan={course.plan} version={course.courseVersion} /></section>
-        <section className="panel"><div className="panel-heading"><h2>지역 지도</h2></div><CourseMap region={course.region} plan={course.plan} showDemoStays={!serverMode} /></section>
+        <section className="panel"><div className="panel-heading"><h2>지역 지도</h2></div><CourseMap region={course.region} plan={course.plan} stay={course.stay} showDemoStays={!serverMode} /></section>
       </div><aside>
         <CourseActions course={course} execute={execute} />
         {!serverMode && <section className="panel sidebar-hint"><h3>상세 화면에서 확인할 것</h3><ol><li>일정과 후기 표시</li><li>좋아요 누르기 / 취소</li><li>게시글 신고</li><li>댓글 작성 및 삭제</li><li>내 게시글 수정 화면 이동</li></ol></section>}

@@ -8,6 +8,8 @@ async function request(path, options = {}) {
   const isJson = response.headers.get('content-type')?.includes('application/json');
   const body = isJson ? await response.json() : null;
   if (!response.ok) {
+    // 서버 로그인이 끊긴 것을 화면 전체(AuthContext)에 알려 메뉴의 로그인 상태를 다시 맞춘다.
+    if (response.status === 401 && path !== '/api/auth/me') window.dispatchEvent(new Event('auth:unauthorized'));
     const error = new Error(body?.message || (response.status >= 500
       ? '서버에 연결할 수 없어요. Spring Boot 실행 상태를 확인해주세요.'
       : '요청을 처리하지 못했어요. 새로고침 후 다시 시도해주세요.'));

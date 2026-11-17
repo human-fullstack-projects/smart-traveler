@@ -39,12 +39,12 @@ public class Activity {
     /** 순서 */
     private Integer seq;
 
-    @Column(name = "start_time", nullable = false)
-    /** 시작시간 */
+    @Column(name = "start_time")
+    /** 시작시간 (시간 미사용 코스는 NULL) */
     private LocalTime startTime;
 
     @Column(name = "end_time")
-    /** 종료시간 */
+    /** 종료시간 (시간 미사용 코스는 NULL) */
     private LocalTime endTime;
 
     @Column(name = "title", nullable = false, length = 200)
