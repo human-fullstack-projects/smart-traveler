@@ -27,6 +27,9 @@ export default function AiChatPage({
   if (loading) return <p className="cb-status" role="status">대화를 불러오는 중입니다.</p>;
   if (!sessionId) return <ChatStart busy={busy} notice={loadError} onSend={startChat} onSelectRegion={selectRegion} />;
 
+  const lastMessage = messages.at(-1);
+  const awaitingConfirmation = !busy && lastMessage?.role === 'ASSISTANT' && lastMessage.content.includes('조건을 확인해 주세요');
+
   return (
     <section className="cb-page" aria-label="AI 여행 대화">
       <div className="cb-chat">
@@ -35,6 +38,12 @@ export default function AiChatPage({
           <button type="button" className="cb-new" onClick={resetChat} disabled={busy}>+ 새 대화</button>
         </div>
         <ChatMessages messages={messages} busy={busy} />
+        {awaitingConfirmation && (
+          <div className="cb-confirm-buttons">
+            <button type="button" className="cb-confirm-yes" onClick={() => sendMessage('맞다')}>맞다</button>
+            <button type="button" className="cb-confirm-no" onClick={() => sendMessage('아니다')}>아니다</button>
+          </div>
+        )}
         {courseSaveStatus === 'saving' && <p className="cb-status" role="status">1위 추천 코스를 보관하고 있습니다.</p>}
         {courseSaveStatus === 'guest-saved' && <p className="cb-status" role="status">1위 추천 코스를 보관했습니다. <a href="#/login">로그인</a>하거나 <a href="#/signup">회원가입</a> 후 로그인하면 내 코스로 저장됩니다.</p>}
         {courseSaveStatus === 'saved' && <p className="cb-status" role="status">1위 추천 코스를 저장했습니다. <a href="#/my-courses">내 코스 보기</a></p>}

@@ -8,11 +8,7 @@ import java.time.format.DateTimeParseException;
 /** 반드시 필요한 조건 중 첫 번째 빈 항목을 질문한다. */
 @Component
 public class ConditionQuestions {
-    static final String INTRO = "우리 일정을 알차게 짜보려면 몇 가지만 알려주세요:\n"
-        + "어디로, 언제, 며칠 동안 가실 예정인가요?\n"
-        + "누구와 함께 떠나시나요? (혼자, 친구, 연인, 가족?)\n"
-        + "성인 몇명, 아동 몇명인가요?\n"
-        + "이동할 때 대중교통과 자동차중 무엇을 이용하시나요?";
+    static final String INTRO = "여행 일정을 추천해 드리기 위해 몇가지 정보를 요청할게요.";
     static final String REGION = "어느 지역으로 여행하시나요? 지역 이름을 알려주세요.";
     static final String DATE = "출발 날짜를 알려주세요. 예: 2026-12-10";
     static final String DURATION = "여행은 며칠 동안 가시나요? 예: 2박 3일";

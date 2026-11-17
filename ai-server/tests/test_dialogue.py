@@ -1,5 +1,5 @@
 from fastapi.testclient import TestClient
-from app.graph import ADULTS, CHECK, CLARIFY, EDIT, LEGACY_CHECK, DATE, REGION, build_graph, requests_recommendation
+from app.graph import ADULTS, CHECK, CLARIFY, EDIT, GUIDE, INTRO, LEGACY_CHECK, DATE, REGION, build_graph, requests_recommendation
 from app.schemas import ExtractedConditions
 from app import main
 
@@ -188,6 +188,36 @@ def test_수정_요청은_추천하지_않고_수정내용을_묻는다():
     assert result["question"] == EDIT and not result.get("confirmed", False)
     assert not requests_recommendation("추천 말고 수정할게", CHECK)
     assert not requests_recommendation("확인 안 했어", CHECK)
+
+
+def test_맞다_좋다도_확인으로_인식한다():
+    assert requests_recommendation("맞다", CHECK)
+    assert requests_recommendation("좋다", CHECK)
+
+
+def test_아니다는_수정질문으로_안내한다():
+    graph = build_graph(lambda state: extracted(), lambda state: "잘못된 추천")
+    result = graph.invoke({"message": "아니다", "previousQuestion": CHECK, "conditions": complete_conditions()})
+    assert result["question"] == EDIT and not result.get("confirmed", False)
+
+
+def test_첫_메시지에_요소가_하나도_없으면_유도질문을_한다():
+    graph = build_graph(lambda state: extracted())
+    result = graph.invoke({"message": "여행 가고 싶어", "previousQuestion": INTRO, "conditions": {}})
+    assert result["question"] == GUIDE
+
+
+def test_첫_메시지에_일부_요소만_있으면_나머지를_모아서_묻는다():
+    graph = build_graph(lambda state: extracted(regionName="부산", durationDays=2))
+    result = graph.invoke({"message": "부산으로 2일", "previousQuestion": INTRO, "conditions": {}})
+    assert "출발 날짜 정보" in result["question"] and "교통 수단 정보" in result["question"]
+    assert "여행 지역 정보" not in result["question"] and "여행 기간 정보" not in result["question"]
+
+
+def test_첫_메시지에_모든_요소가_있으면_바로_확인질문():
+    graph = build_graph(lambda state: extracted(regionName="부산", startDate="2026-12-10", durationDays=3, adults=2, children=0, companionType="FRIENDS", transportType="CAR"))
+    result = graph.invoke({"message": "부산, 2026-12-10 출발 2박3일, 친구 성인2명, 자동차", "previousQuestion": INTRO, "conditions": {}})
+    assert result["question"] == CHECK
 
 
 def test_API_모호한_답변_후_확인하면_추천한다(monkeypatch):

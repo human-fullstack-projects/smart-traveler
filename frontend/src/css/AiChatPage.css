@@ -31,6 +31,11 @@
 .cb-generate{width:100%;padding:13px;border:0;border-radius:12px;background:#0c806b;color:#fff;font-weight:700}
 .cb-generate:disabled{background:#c9d8d2;cursor:not-allowed}
 
+.cb-confirm-buttons{display:flex;gap:10px;justify-content:center;padding:4px 0}
+.cb-confirm-buttons button{padding:9px 20px;border:0;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer}
+.cb-confirm-yes{background:#0c806b;color:#fff}
+.cb-confirm-no{background:#f0f8f4;color:#426d61;border:1px solid #e0eae5}
+
 .cb-status{text-align:center;color:#758d83;font-size:13px}
 .cb-error{margin:8px 0 0;color:#89543e;font-size:12px}
 .cb-intro{white-space:pre-line;line-height:1.9;color:#253b3c;margin:0}

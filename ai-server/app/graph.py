@@ -9,6 +9,7 @@ from langgraph.graph import END, START, StateGraph
 from .course_rag import recommend_course_result
 from .schemas import ExtractedConditions, PlaceRecommendations
 
+INTRO = "여행 일정을 추천해 드리기 위해 몇가지 정보를 요청할게요."
 REGION = "어느 지역으로 여행하시나요? 지역 이름을 알려주세요."
 DATE = "출발 날짜를 알려주세요. 예: 2026-12-10"
 DURATION = "여행은 며칠 동안 가시나요? 예: 2박 3일"
@@ -20,7 +21,8 @@ STAY = "숙소 먼저 진행하려면 오른쪽에서 숙소와 객실, 숙박 �
 LEGACY_CHECK = "입력된 여행 조건을 확인해 주세요. 수정할 내용은 오른쪽에서 바꿀 수 있어요."
 CHECK = "입력된 여행 조건을 확인해 주세요. 조건이 맞으면 ‘확인했어’ 또는 ‘추천해줘’라고 답해 주세요. 수정할 내용은 말씀하시거나 오른쪽에서 바꿀 수 있어요."
 CLARIFY = "입력된 여행 조건을 확인해 주세요. 그대로 추천받으려면 ‘확인했어’라고 답하고, 바꾸려면 수정할 내용을 알려주세요."
-EDIT = "입력된 여행 조건을 확인하기 전에, 바꾸고 싶은 내용을 말씀해 주세요. 오른쪽에서 직접 수정할 수도 있어요."
+EDIT = "입력된 여행 조건을 확인하기 전에, 바꾸고 싶은 내용을 말씀해 주세요. 여행 지역 정보, 출발 날짜 정보, 여행 기간 정보, 동행 유형 정보, 동행 인원수 정보, 교통 수단 정보 중에서 알려주세요. 오른쪽에서 직접 수정할 수도 있어요."
+GUIDE = "여행 지역 정보, 출발 날짜 정보, 여행 기간 정보, 동행 유형 정보, 동행 인원수 정보, 교통 수단 정보를 한 번에 알려주시면 빠르게 도와드릴 수 있어요."
 CONFIRMATION_PROMPTS = {LEGACY_CHECK, CHECK, CLARIFY, EDIT}
 
 
@@ -111,6 +113,38 @@ def find_question(c: dict[str, Any]) -> str:
     return CHECK
 
 
+def missing_fields(c: dict[str, Any]) -> list[str]:
+    """6개 필수 요소 중 아직 채워지지 않은 항목의 이름을 모두 모은다."""
+    missing = []
+    region_id = c.get("regionId")
+    if not (type(region_id) is int and region_id > 0) and not (isinstance(c.get("regionName"), str) and c["regionName"].strip()):
+        missing.append("여행 지역 정보")
+    try:
+        date.fromisoformat(c.get("startDate") or "")
+    except (ValueError, TypeError):
+        missing.append("출발 날짜 정보")
+    duration = c.get("durationDays")
+    if type(duration) is not int or not 1 <= duration <= 7:
+        missing.append("여행 기간 정보")
+    if c.get("companionType") not in {"SOLO", "COUPLE", "FRIENDS", "FAMILY"}:
+        missing.append("동행 유형 정보")
+    adults, children = c.get("adults"), c.get("children")
+    if type(adults) is not int or not 1 <= adults <= 2**31 - 1 or type(children) is not int or not 0 <= children <= 2**31 - 1:
+        missing.append("동행 인원수 정보")
+    if c.get("transportType") not in {"PUBLIC_TRANSPORT", "CAR"}:
+        missing.append("교통 수단 정보")
+    return missing
+
+
+def first_turn_question(c: dict[str, Any]) -> str:
+    """사용자의 첫 메시지에서는 누락된 요소를 한번에 모아서 질문한다."""
+    missing = missing_fields(c)
+    if not missing:
+        return find_question(c)
+    if len(missing) == 6:
+        return GUIDE
+    return "아직 알려주지 않은 정보가 있어요. 다음 정보를 한 번에 알려주세요: " + ", ".join(missing)
+
 
 def requests_recommendation(message: str, previous_question: str) -> bool:
     """명시적인 추천 요청 또는 조건 확인에 대한 긍정 답변을 구분한다."""
@@ -121,7 +155,7 @@ def requests_recommendation(message: str, previous_question: str) -> bool:
         return True
     if previous_question in CONFIRMATION_PROMPTS:
         # 부정 표현이나 추가 설명이 붙은 모호한 답은 확인으로 간주하지 않는다.
-        return bool(re.fullmatch(r"(?:네|예|응|좋아|좋아요|네좋아요|맞아|맞아요|맞습니다|네맞아요|네확인했어요|확인|확인했어|확인했어요|확인했습니다|확인완료|그대로|그대로할게|그대로해주세요|이대로좋아요|수정할게없어|수정할게없어요|수정할거없어|수정할거없어요|수정할것없어요|수정할거없는데|수정할거없습니다|변경할거없어요|바꿀거없어요)[.!~]*", text))
+        return bool(re.fullmatch(r"(?:네|예|응|좋아|좋다|좋아요|네좋아요|맞아|맞다|맞아요|맞습니다|네맞아요|네확인했어요|확인|확인했어|확인했어요|확인했습니다|확인완료|그대로|그대로할게|그대로해주세요|이대로좋아요|수정할게없어|수정할게없어요|수정할거없어|수정할거없어요|수정할것없어요|수정할거없는데|수정할거없습니다|변경할거없어요|바꿀거없어요)[.!~]*", text))
     return False
 
 
@@ -166,7 +200,8 @@ def build_graph(extractor: Callable[[DialogueState], ExtractedConditions] = extr
         if "regionName" in changes and changes["regionName"] != merged.get("regionName", ""):
             merged["regionId"] = None
         merged.update(changes)
-        return {"merged": merged, "question": find_question(merged)}
+        question = first_turn_question(merged) if state["previousQuestion"] == INTRO else find_question(merged)
+        return {"merged": merged, "question": question}
 
     def route(state: DialogueState):
         if state["question"] != CHECK:
@@ -196,7 +231,7 @@ def build_graph(extractor: Callable[[DialogueState], ExtractedConditions] = extr
     def clarify(state: DialogueState):
         # 확인으로 해석하기 어려우면 조작 방법을 다시 안내한다.
         text = state["message"]
-        if any(word in text for word in ("수정", "변경", "바꾸", "고치")):
+        if any(word in text for word in ("아니", "수정", "변경", "바꾸", "고치")):
             return {"question": EDIT}
         return {"question": CLARIFY}
 

@@ -1,14 +1,8 @@
 from fastapi.testclient import TestClient
 from app import main
-from app.graph import CHECK, build_graph
+from app.graph import CHECK, INTRO, build_graph
 from app.schemas import ExtractedConditions
 from .test_course_rag import conditions, rows, offline, empty_extraction
-
-INTRO = """우리 일정을 알차게 짜보려면 몇 가지만 알려주세요:
-어디로, 언제, 며칠 동안 가실 예정인가요?
-누구와 함께 떠나시나요? (혼자, 친구, 연인, 가족?)
-성인 몇명, 아동 몇명인가요?
-이동할 때 대중교통과 자동차중 무엇을 이용하시나요?"""
 
 
 def test_intro_answer_extracts_all_conditions_then_confirms(monkeypatch):
