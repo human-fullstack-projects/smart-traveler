@@ -18,8 +18,8 @@ function mapsFor({ address = [], reverse = [], keyword = [] } = {}) {
       }
     },
     Places: class {
-      keywordSearch(value, callback) {
-        calls.push(['keyword', value]);
+      keywordSearch(value, callback, options) {
+        calls.push(['keyword', value, options]);
         callback(keyword, keyword.length ? 'OK' : 'ZERO_RESULT');
       }
     },
@@ -32,7 +32,7 @@ test('address resolves to coordinates before keyword search', async () => {
   const result = await resolveKakaoPlace(maps, { name: '덕수궁', address: '서울특별시 중구 세종대로 99' }, '서울');
   assert.equal(result.latitude, 37.5658);
   assert.equal(result.locationStatus, 'ready');
-  assert.deepEqual(calls, [['address', '서울특별시 중구 세종대로 99', 'EXACT']]);
+  assert.deepEqual(calls, [['keyword', '덕수궁', undefined], ['address', '서울특별시 중구 세종대로 99', 'EXACT']]);
 });
 
 test('coordinates resolve a missing address', async () => {
@@ -60,6 +60,15 @@ test('ambiguous names and mismatched addresses remain without markers', async ()
   assert.equal(ambiguous.latitude, undefined);
   const mismatched = await resolveKakaoPlace(maps, { name: '중앙공원', address: '서울 중구 다른로 9' }, '서울');
   assert.equal(mismatched.locationStatus, 'unresolved');
+});
+
+test('a single keyword result is accepted even when its name is not identical', async () => {
+  const { maps } = mapsFor({ keyword: [
+    { place_name: '국립중앙박물관 본관', address_name: '서울 용산구 서빙고로 137', x: '126.9804', y: '37.5239' },
+  ] });
+  const result = await resolveKakaoPlace(maps, { name: '국립중앙박물관' }, '서울');
+  assert.equal(result.locationStatus, 'ready');
+  assert.equal(result.latitude, 37.5239);
 });
 
 test('valid coordinates retain a marker when reverse lookup fails', async () => {
