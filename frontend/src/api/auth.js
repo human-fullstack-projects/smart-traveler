@@ -1,3 +1,5 @@
+import { waitForGuestCourseStorage } from '../chatApi';
+
 async function request(path, options = {}) {
   let response;
   try {
@@ -36,6 +38,7 @@ export async function getCurrentMember() {
 }
 
 export async function login(loginId, password) {
+  await waitForGuestCourseStorage();
   await postWithCsrf('/api/auth/login', new URLSearchParams({ loginId, password }));
   const member = await getCurrentMember();
   if (!member) throw new Error('로그인 상태를 확인하지 못했어요. 다시 시도해주세요.');

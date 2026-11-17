@@ -9,6 +9,11 @@ export default function useMyPageStore({ member, authChecked, authCheckFailed, a
   const state = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot);
   useEffect(() => { store.setIdentity(member, authChecked, authCheckFailed); }, [store, member?.memberId, authChecked, authCheckFailed, authRevision]);
   useEffect(() => {
+    const refresh = () => store.refresh();
+    window.addEventListener('smart-travel-courses-updated', refresh);
+    return () => window.removeEventListener('smart-travel-courses-updated', refresh);
+  }, [store]);
+  useEffect(() => {
     const leave = () => store.clear();
     const returnToSite = event => { if (event.persisted) store.setIdentity(member, authChecked, authCheckFailed); };
     window.addEventListener('pagehide', leave);

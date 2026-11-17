@@ -1,6 +1,7 @@
 import ChatStart from './components/ChatStart';
 import ChatMessages from './components/ChatMessages';
 import ChatComposer from './components/ChatComposer';
+import CourseRegionPicker from './components/CourseRegionPicker';
 import TravelConditions from '../../TravelConditions.jsx';
 import '../../css/AiChatPage.css';
 
@@ -11,18 +12,20 @@ export default function AiChatPage({
   loading,
   loadError,
   saveStatus,
+  courseSaveStatus,
+  retryCourseSave,
   conditions,
   conditionsConfirmed,
   startChat,
+  selectRegion,
   sendMessage,
   resetChat,
   changeConditions,
   confirmConditions,
   retrySave,
-  onSaveTrialCourse,
 }) {
   if (loading) return <p className="cb-status" role="status">대화를 불러오는 중입니다.</p>;
-  if (!sessionId) return <ChatStart busy={busy} notice={loadError} onSend={startChat} />;
+  if (!sessionId) return <ChatStart busy={busy} notice={loadError} onSend={startChat} onSelectRegion={selectRegion} />;
 
   return (
     <section className="cb-page" aria-label="AI 여행 대화">
@@ -32,6 +35,10 @@ export default function AiChatPage({
           <button type="button" className="cb-new" onClick={resetChat} disabled={busy}>+ 새 대화</button>
         </div>
         <ChatMessages messages={messages} busy={busy} />
+        {courseSaveStatus === 'saving' && <p className="cb-status" role="status">1위 추천 코스를 보관하고 있습니다.</p>}
+        {courseSaveStatus === 'guest-saved' && <p className="cb-status" role="status">1위 추천 코스를 보관했습니다. <a href="#/login">로그인</a>하거나 <a href="#/signup">회원가입</a> 후 로그인하면 내 코스로 저장됩니다.</p>}
+        {courseSaveStatus === 'saved' && <p className="cb-status" role="status">1위 추천 코스를 저장했습니다. <a href="#/my-courses">내 코스 보기</a></p>}
+        {courseSaveStatus === 'error' && <p className="cb-error" role="alert">코스를 저장하지 못했습니다. <button type="button" onClick={retryCourseSave}>다시 저장</button></p>}
         <ChatComposer busy={busy} onSend={sendMessage} placeholder="여행에 대해 더 이야기해 주세요." />
         {saveStatus === 'error' && (
           <p className="cb-error" role="alert">
@@ -40,6 +47,7 @@ export default function AiChatPage({
         )}
       </div>
       <aside className="cb-side">
+        <CourseRegionPicker busy={busy || saveStatus === 'saving'} onSelect={selectRegion} />
         <fieldset className="condition-controls" disabled={busy}>
           <TravelConditions
             conditions={conditions}
@@ -48,13 +56,7 @@ export default function AiChatPage({
             onConfirm={confirmConditions}
           />
         </fieldset>
-        {onSaveTrialCourse && <>
-          <button type="button" className="cb-generate" disabled={busy || !conditionsConfirmed || saveStatus !== 'saved'} onClick={onSaveTrialCourse}>확인한 조건을 내 코스에 보관</button>
-          <p className="cb-status">비회원은 1회 보관할 수 있습니다. AI 일정 생성은 준비 중이며, 확인한 조건과 고정 일정만 임시 보관합니다. 사이트를 떠나거나 새로고침하면 삭제됩니다.</p>
-        </>}
-        <button type="button" className="cb-generate" disabled title="코스 생성 기능 연결 준비 중">
-          이 조건으로 코스 만들기
-        </button>
+        <p className="cb-status">조건을 확인한 뒤 채팅에 ‘추천해줘’라고 말해 주세요.</p>
       </aside>
     </section>
   );

@@ -81,7 +81,7 @@ const sidebarPageRoutes = {
 };
 
 export default function App() {
-  const { member, authChecked, authCheckFailed, loggingOut, authRevision, retryAuth, login, logout } = useAuth();
+  const { member, authChecked, authCheckFailed, loggingOut, authRevision, retryAuth, login, logout, guestCourse } = useAuth();
   const myPageStore = useMyPageStore({ member, authChecked, authCheckFailed, authRevision });
   const humanCourses = useHumanCourses(member);
   //window.location.hash : 현재 url의 해시부분 (예:#/mypage)
@@ -90,7 +90,7 @@ export default function App() {
   if (!returnPage.current) returnPage.current = createReturnPage(route);
   const [notice, setNotice] = useState('');
   const [survey, setSurvey] = useState({ memberId: null, status: 'idle', data: null });
-  const chat = useAiChat();
+  const chat = useAiChat({ ownerKey: member?.memberId ? `member:${member.memberId}` : 'guest', ready: authChecked && !authCheckFailed, authRevision });
   // 로그인·회원가입 화면에 '비로그인 상태로' 들어온 주소. 이 화면 안에서 로그인한 경우(업주 안내 화면 등)는 이동시키지 않는다.
   const guestAuthRoute = useRef(null);
   const isAuthRoute = Boolean(topNavPageRoutes[route]);
@@ -177,7 +177,7 @@ export default function App() {
       {notice && <div className="navigation-notice" role="status">{notice}<button onClick={() => setNotice('')} aria-label="알림 닫기">×</button></div>}
       <main className="main-content">{!authChecked || redirectLoggedIn
         ? <p className="auth-checking" role="status">로그인 상태를 확인하고 있어요.</p>
-        : <TopNavScreen onLogin={loggedIn} guestCourseCount={myPageStore.isGuest ? myPageStore.courses.length : 0} />}</main>
+        : <TopNavScreen onLogin={loggedIn} guestCourseCount={myPageStore.isGuest ? myPageStore.courses.length + (guestCourse ? 1 : 0) : 0} />}</main>
       <SiteFooter />
     </div>;
   }
@@ -206,7 +206,7 @@ export default function App() {
       {blocked ? <AccessNotice kind={blocked} onRetry={blocked === 'unavailable' ? retryAuth : undefined} /> : needsTravelData && ['checking', 'loading'].includes(myPageStore.status)
         ? <p role="status">내 자료를 불러오고 있습니다.</p>
         : needsTravelData && myPageStore.status === 'error' ? <p role="alert">자료를 불러오지 못했습니다. 위의 다시 불러오기 버튼으로 재시도해 주세요.</p>
-        : <MyPageScreen key={`${member?.memberId || 'guest'}-${routePath}`} {...myPageStore} courseId={myCourseMatch?.[1]} reservationId={reservationMatch?.[1]} postId={myPostMatch?.[1]}
+        : <MyPageScreen key={`${member?.memberId || 'guest'}-${routePath}`} {...myPageStore} guestRecommendedCourse={guestCourse} courseId={myCourseMatch?.[1]} reservationId={reservationMatch?.[1]} postId={myPostMatch?.[1]}
             onSaved={routePath === '/my-travel-style' ? () => setSurvey({ memberId: member.memberId, status: 'done', data: null }) : undefined} />}
     </>;
   } else if (routePath === '/payments/demo' || new URLSearchParams(window.location.search).has('tossDemo')) {
@@ -224,12 +224,7 @@ export default function App() {
       {HumanCourseScreen ? <HumanCourseScreen key={routePath} {...humanCourses} courseId={courseMatch?.[1]} /> : <div className="human-courses"><section className="panel"><h1>페이지를 찾을 수 없습니다.</h1><a className="button" href="#/human-courses">코스 목록으로</a></section></div>}
     </>;
   } else if (isChat) {
-    content = <AiChatPage {...chat} onSaveTrialCourse={myPageStore.isGuest ? () => {
-      try {
-        myPageStore.saveTrialCourse(chat.conditions);
-        window.location.hash = '/my-courses';
-      } catch (error) { setNotice(error.message); }
-    } : undefined} />;
+    content = <AiChatPage {...chat} />;
   } else {
     const SidebarScreen = sidebarPageRoutes[routePath] || HomePage;
          content = (

@@ -30,13 +30,20 @@ public class ConditionDialogueService {
         this.courseRagEnabled = courseRagEnabled;
     }
     public String process(long sessionId, String message) {
+        return process(sessionId, message, Map.of());
+    }
+    public String process(long sessionId, String message, Map<String, Object> savedPreferences) {
+        return processResult(sessionId, message, savedPreferences).message();
+    }
+    public PythonAiClient.Result processResult(long sessionId, String message, Map<String, Object> savedPreferences) {
         List<String> saved = jdbc.query("SELECT conditions_json FROM chat_session_conditions WHERE session_id = ?", (rs, row) -> rs.getString(1), sessionId);
         ObjectNode conditions = saved.isEmpty() ? emptyConditions() : readConditions(saved.get(0));
         ObjectNode previous = conditions.deepCopy();
         List<String> last = jdbc.query("SELECT content FROM chat_messages WHERE session_id = ? AND sender_role = 'ASSISTANT' ORDER BY message_id DESC LIMIT 1", (rs, row) -> rs.getString(1), sessionId);
         String previousQuestion = last.isEmpty() ? "" : last.get(0);
-        // 조건 수집 대화에서는 관광지 조회를 실행하지 않는다.
-        boolean mayRecommend = message.contains("추천") || previousQuestion.startsWith("입력된 여행 조건을 확인");
+        // Python alone interprets confirmation language. Supply candidates whenever
+        // stored required conditions are complete, including after clarification.
+        boolean mayRecommend = ConditionQuestions.CHECK.equals(new ConditionQuestions().next(conditions));
         List<Map<String, Object>> placeRows = List.of();
         List<Map<String, Object>> courseRows = null;
         if (courseRagEnabled) {
@@ -44,7 +51,9 @@ public class ConditionDialogueService {
         } else if (mayRecommend) {
             placeRows = candidates.find(conditions);
         }
-        var result = ai.process(message, previousQuestion, conditions, placeRows, courseRows);
+        var result = ai.process(message, previousQuestion, conditions, placeRows, courseRows, savedPreferences);
+        if (result.recommendedCourseId() != null && (!result.confirmed() || !conditions.equals(previous)))
+            throw new IllegalStateException("변경된 조건은 재확인 후 추천해야 합니다.");
         // 내용이 달라진 경우에만 확인 상태를 해제한다.
         if (saved.isEmpty() || !conditions.equals(previous)) {
             String json = mapper.writeValueAsString(conditions);
@@ -53,7 +62,14 @@ public class ConditionDialogueService {
         if (result.confirmed() && conditions.equals(previous) && !saved.isEmpty()) {
             jdbc.update("UPDATE chat_session_conditions SET confirmed=TRUE WHERE session_id=?", sessionId);
         }
-        return result.message();
+        return result;
+    }
+    public String selectRegion(long sessionId, CourseRegionController.Region region) {
+        List<String> saved = jdbc.query("SELECT conditions_json FROM chat_session_conditions WHERE session_id = ?", (rs, row) -> rs.getString(1), sessionId);
+        ObjectNode conditions = saved.isEmpty() ? emptyConditions() : readConditions(saved.get(0));
+        conditions.put("regionId", region.regionId()); conditions.put("regionName", region.fullName());
+        jdbc.update("INSERT INTO chat_session_conditions (session_id, conditions_json, confirmed) VALUES (?, ?, FALSE) ON DUPLICATE KEY UPDATE conditions_json=VALUES(conditions_json), confirmed=FALSE", sessionId, mapper.writeValueAsString(conditions));
+        return new ConditionQuestions().next(conditions);
     }
     private ObjectNode readConditions(String json) {
         JsonNode node = mapper.readTree(json);

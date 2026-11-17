@@ -1,11 +1,15 @@
 import ChatComposer from './ChatComposer';
+import CourseRegionPicker from './CourseRegionPicker';
+import { CHAT_INTRO } from '../chatIntro';
 
 const examples = ['친구와 부산 1박 2일', '아이 둘과 강릉 가족여행', '서울 당일치기 카페 투어'];
 
-export default function ChatStart({ busy, notice, onSend }) {
+export default function ChatStart({ busy, notice, onSend, onSelectRegion }) {
   return (
     <section className="cb-start" aria-labelledby="cb-start-title">
       <h1 id="cb-start-title"><span aria-hidden="true">✳</span> 안녕하세요!</h1>
+      <p className="cb-intro">{CHAT_INTRO}</p>
+      <CourseRegionPicker busy={busy} onSelect={onSelectRegion} />
       <ChatComposer
         large
         busy={busy}
