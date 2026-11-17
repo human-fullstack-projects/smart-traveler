@@ -136,7 +136,7 @@ export default function App() {
   function loggedIn(value) {
     login(value);
     setNotice('');
-    window.location.hash = returnPage.current.get();
+    window.location.hash = value.roleCode === 'OWNER' ? '/owner' : returnPage.current.get();
   }
 
   async function handleLogout() {
@@ -154,13 +154,20 @@ export default function App() {
     return <AdminGuard member={member} checking={!authChecked} />;
   }
 
-  if (route === '/owner') {
-  // return <OwnerPage member={member} onLogout={handleLogout} loggingOut={loggingOut} />;
-  return (
-    <OwnerAccess>
-      <OwnerPage member={member} onLogout={handleLogout} loggingOut={loggingOut} />
-    </OwnerAccess>
-  );
+  // if (route === '/owner') {
+  // // return <OwnerPage member={member} onLogout={handleLogout} loggingOut={loggingOut} />;
+  // return (
+  //   <OwnerAccess>
+  //     <OwnerPage member={member} onLogout={handleLogout} loggingOut={loggingOut} />
+  //   </OwnerAccess>
+  // );
+
+    if (route === '/owner' || route === '/owner/reapply') {
+    return (
+      <OwnerAccess isReapplyPage={route === '/owner/reapply'}>
+        <OwnerPage member={member} onLogout={handleLogout} loggingOut={loggingOut} />
+      </OwnerAccess>
+    );
 }
 
   const TopNavScreen = topNavPageRoutes[route];
