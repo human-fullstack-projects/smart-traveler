@@ -3,13 +3,15 @@ import Card from '../components/Card';
 import PageHero from '../components/PageHero';
 import ProfileAvatar from '../components/ProfileAvatar';
 import useMemberResource from '../hooks/useMemberResource';
+import useBookingDate from '../hooks/useBookingDate';
 import { settingsApi } from '../api/settingsApi';
-import { isSavedCourse, isVisibleBooking } from '../data/visibleItems';
+import { isSavedCourse, isVisibleBooking, recommendationTrips } from '../data/visibleItems';
 import '../../../css/mypage.css';
 import '../mypage-settings.css';
 
 export default function MyPage({ bookings = [], courses = [], posts = [], member, isGuest = true, status, retry }) {
   const profile = useMemberResource(member?.memberId, settingsApi.profile);
+  const today = useBookingDate();
   useEffect(() => {
     // 홈 진입 시 갱신한다. 최초 로그인 자료가 로딩 중이면 기존 요청을 기다린다.
     if (member?.memberId && status === 'ready') retry?.();
@@ -17,10 +19,11 @@ export default function MyPage({ bookings = [], courses = [], posts = [], member
   const countsReady = status === 'ready' || (isGuest && !status);
   const name = profile.data?.nickname || member?.nickname || member?.loginId || '여행자';
   const memberLink = page => isGuest ? '#/login' : `#/${page}`;
+  const recommendations = recommendationTrips(bookings, posts, today);
   const summaries = [
     ['my-courses', '저장된 여행', courses.filter(isSavedCourse).length, '예약 없이 저장된 코스'],
       ['reservations', '내 예약', bookings.filter(isVisibleBooking).length, '본인 예약과 결제 상태'],
-      ['my-posts', '내 여행 추천', posts.length, '본인이 등록한 여행 기록'],
+      ['my-posts', '내 여행 추천', recommendations.published.length + recommendations.pending.length, '지난 여행의 추천 글과 작성 상태'],
   ];
   return <div className="mypage mp-home">
     <PageHero eyebrow="MY TRAVEL" title={<>나의 여행, <em>한곳에서.</em></>}>나의 정보와 여행 취향, 여행 일정을 한곳에서 관리하세요.</PageHero>

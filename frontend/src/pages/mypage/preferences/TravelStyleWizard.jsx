@@ -85,10 +85,12 @@ export default function TravelStyleWizard({ member, initialData, onSaved }) {
         </div>
         </section>)}
         <div className="travel-style-actions">
-          <button type="button" className="travel-style-next" disabled={busy || !valid} onClick={save}>{busy ? '저장 중…' : '저장하기'}</button>
+          <div className="travel-style-save">
+            {notice && <p className="travel-style-notice" role="status">{notice}</p>}
+            <button type="button" className="travel-style-next" disabled={busy || !valid} aria-busy={busy} onClick={save}>저장</button>
+          </div>
           <a href="#/mypage">마이페이지 홈</a>
         </div>
-        {notice && <p className="travel-style-notice" role="status">{notice}</p>}
       </div>
     </section>
   </div>;

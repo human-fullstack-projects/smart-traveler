@@ -89,7 +89,7 @@ function Questions({ member, data, surveyMode, onSaved }) {
       <p className="st-survey-sub">{question.sub}{question.key === 'areas' && <span> ({answers.areas.length} / 3 고름)</span>}</p>
       <ChoiceTiles question={question} answers={answers} select={select} busy={busy} />
       <div className="st-survey-actions"><button type="button" className="outline" onClick={() => { setStep(step - 1); setNotice(''); }} disabled={busy} style={{ visibility: step ? 'visible' : 'hidden' }}>이전</button>
-        <div><button type="button" className="primary" disabled={busy || !ready} onClick={step === 2 ? save : () => { setStep(step + 1); setNotice(''); }}>{step === 2 ? '저장하기' : '다음'}</button></div></div>
+        <div><button type="button" className="primary" disabled={busy || !ready} onClick={step === 2 ? save : () => { setStep(step + 1); setNotice(''); }}>{step === 2 ? '저장' : '다음'}</button></div></div>
       {notice && <p className="st-survey-notice" role="alert">{notice}</p>}
     </section>;
   }

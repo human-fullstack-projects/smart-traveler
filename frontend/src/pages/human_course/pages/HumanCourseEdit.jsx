@@ -6,13 +6,13 @@ import PageHeading from '../components/PageHeading';
 import { previewCourses } from '../data/previewData';
 
 export default function HumanCourseEdit({ courses = previewCourses, courseId = 2, execute, serverMode, loadCourse, from, reservations = [] }) {
-  const back = from === 'reservations' ? '#/reservations' : '#/human-courses';
+  const back = ['reservations', 'my-posts'].includes(from) ? `#/${from}` : '#/human-courses';
   const [notice, setNotice] = useState('');
   useEffect(() => { if (serverMode) loadCourse?.(courseId); }, [serverMode, courseId]);
   async function submit(fields) {
     const result = await execute?.({ type: 'edit', id: courseId, fields });
     if (result?.error) setNotice(result.error);
-    else if (result?.id) window.location.hash = `/human-courses/${result.id}`;
+    else if (result?.id) window.location.hash = from === 'my-posts' ? `/my-posts/${result.id}` : `/human-courses/${result.id}`;
     return result;
   }
   const course = courses.find((item) => String(item.id) === String(courseId));
