@@ -18,6 +18,9 @@ import tools.jackson.databind.node.ObjectNode;
 
 @Service
 public class StoredCourseCandidates {
+    private static final Set<String> RAG_SEED_BATCHES = Set.of(
+            "smart-traveler-rag-1000-v1", "smart-traveler-rag-2000-v1");
+
     private final TourCourseRepository courses;
     private final TourCourseDayRepository courseDays;
     private final TourPlaceRepository places;
@@ -52,7 +55,7 @@ public class StoredCourseCandidates {
                 continue;
             }
             JsonNode metadata = mapper.readTree(course.getConditionMeta());
-            if (!"smart-traveler-rag-1000-v1".equals(metadata.path("seed_batch").asText())) {
+            if (!RAG_SEED_BATCHES.contains(metadata.path("seed_batch").asText())) {
                 continue;
             }
             JsonNode itinerary = metadata.path("itinerary");

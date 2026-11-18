@@ -1,5 +1,15 @@
 import { useEffect, useRef } from 'react';
 
+// "**굵게**" 표기를 <strong>으로 바꾸고 줄바꿈은 그대로 둔다.
+function renderContent(content) {
+  return content.split(/(\*\*[^*]+\*\*)/g).map((part, index) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={index}>{part.slice(2, -2)}</strong>;
+    }
+    return part;
+  });
+}
+
 export default function ChatMessages({ messages, busy }) {
   const end = useRef(null);
   // 새 메시지가 오면 맨 아래로 스크롤
@@ -13,7 +23,7 @@ export default function ChatMessages({ messages, busy }) {
       {messages.map((item) => (
         <div key={item.id} className={item.role === 'USER' ? 'cb-msg user' : 'cb-msg bot'}>
           <span className="ac-visually-hidden">{item.role === 'USER' ? '나: ' : '플래너: '}</span>
-          {item.content}
+          {renderContent(item.content)}
         </div>
       ))}
       {busy && <div className="cb-msg bot cb-typing" role="status">답변을 작성하고 있어요…</div>}
