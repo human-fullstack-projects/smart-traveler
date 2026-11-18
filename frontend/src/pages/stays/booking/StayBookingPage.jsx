@@ -135,7 +135,7 @@ export default function StayBookingPage() {
                 <button type="button" className={courseMode === 'before' ? 'is-selected' : ''} onClick={() => setCourseMode('before')}><strong>코스를 먼저 확인할게요</strong><span>체크인·체크아웃을 반영한 후보 일정과 지도를 확인한 뒤 예약합니다.</span></button>
                 <button type="button" className={courseMode === 'after' ? 'is-selected' : ''} onClick={() => setCourseMode('after')}><strong>코스 없이 예약할게요</strong><span>숙소 예약을 먼저 완료하고, 예약 후 코스를 생성합니다.</span></button>
               </div>
-              <p className="booking-course__note">코스 미리보기·선택만으로 내 코스에 저장되지 않으며, 예약 성공 후 확정 버전으로 저장됩니다.</p>
+              <p className="booking-course__note">코스 미리보기·선택만으로 저장된 여행에 저장되지 않으며, 예약 성공 후 확정 버전으로 저장됩니다.</p>
             </section>
 
             <section className="booking-section booking-rules"><div className="booking-section__head"><div><span>POLICY</span><h2>취소·환불 안내</h2></div></div><p>{stay.cancellation}</p><ul><li>실제 환불 금액과 재고 복구 시점은 서버의 예약·결제 결과를 기준으로 합니다.</li><li>결제 실패·취소·임시 점유 만료 시 예약 확정으로 표시하지 않습니다.</li><li>날짜별 확정 요금과 취소 규정은 주문 생성 시점의 내용으로 보관됩니다.</li></ul></section>

@@ -49,7 +49,7 @@ export default function AiChatPage({
           />
         </fieldset>
         {onSaveTrialCourse && <>
-          <button type="button" className="cb-generate" disabled={busy || !conditionsConfirmed || saveStatus !== 'saved'} onClick={onSaveTrialCourse}>확인한 조건을 내 코스에 보관</button>
+          <button type="button" className="cb-generate" disabled={busy || !conditionsConfirmed || saveStatus !== 'saved'} onClick={onSaveTrialCourse}>확인한 조건을 저장된 여행에 보관</button>
           <p className="cb-status">비회원은 1회 보관할 수 있습니다. AI 일정 생성은 준비 중이며, 확인한 조건과 고정 일정만 임시 보관합니다. 사이트를 떠나거나 새로고침하면 삭제됩니다.</p>
         </>}
         <button type="button" className="cb-generate" disabled title="코스 생성 기능 연결 준비 중">

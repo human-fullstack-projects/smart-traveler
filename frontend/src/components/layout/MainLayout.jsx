@@ -6,12 +6,12 @@ const navigation = [
   { label: '코스추천', href: '#/ai-course' },
   { label: '조건검색', href: '#/conditions' },
   { label: '숙소 찾기', href: '#/stays' },
-  { label: '내 여행 일정', href: '#/my-courses' },
+  { label: '저장된 여행', href: '#/my-courses' },
   { label: '휴먼 추천 코스', href: '#/human-courses' },
   { label: '마이페이지', href: '#/mypage' },
 ];
 
-const footerLinks = ['내 여행 일정', '조건검색', '숙소 찾기', '내 휴먼 추천 코스', '마이페이지'];
+const footerLinks = ['저장된 여행', '조건검색', '숙소 찾기', '내 휴먼 추천 코스', '마이페이지'];
 
 export default function MainLayout({ children, member, loggingOut, onLogout, notice, onDismissNotice }) {
   const [globalNotice, setGlobalNotice] = useState('');

@@ -8,6 +8,7 @@ async function put(path, expectedMemberId, data) {
 export const settingsApi = {
   profile(memberId) { return request('/api/mypage/profile', { headers: { 'X-MyPage-Member': String(memberId) } }); },
   saveProfile(memberId, data) { return put('/api/mypage/profile', memberId, data); },
+  changePassword(memberId, data) { return put('/api/mypage/profile/password', memberId, data); },
   preferences(memberId) { return request('/api/mypage/preferences', { headers: { 'X-MyPage-Member': String(memberId) } }); },
   savePreferences(memberId, data) { return put('/api/mypage/preferences', memberId, data); },
 };

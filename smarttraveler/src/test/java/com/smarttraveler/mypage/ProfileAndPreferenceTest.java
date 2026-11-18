@@ -60,6 +60,37 @@ class ProfileAndPreferenceTest {
         assertTrue(result.passwordChanged());
         assertFalse(result.toString().contains("New123456"));
     }
+    @Test void passwordOnlyRejectsWrongCurrentPasswordAndMismatchedConfirmation() {
+        when(encoder.matches("Old12345","stored-hash")).thenReturn(true);
+        for (var request : List.of(
+                new ChangePassword(7L,"Wrong12345","New123456","New123456"),
+                new ChangePassword(7L,"Old12345","New123456","Different123"),
+                new ChangePassword(7L,"Old12345","short1","short1"),
+                new ChangePassword(7L,"Old12345","Old12345","Old12345"))) {
+            var error = assertThrows(ResponseStatusException.class,() -> profileService.changePassword(auth,request));
+            assertEquals(HttpStatus.BAD_REQUEST,error.getStatusCode());
+        }
+        verify(profiles,never()).updatePassword(anyLong(),anyString());
+        verify(profiles,never()).update(anyLong(),anyString(),anyString(),any(),any());
+        verify(encoder,never()).encode(anyString());
+    }
+    @Test void passwordOnlyEncodesAndChangesPasswordWithoutSavingOtherProfileFields() {
+        when(encoder.matches("Old12345","stored-hash")).thenReturn(true);
+        when(encoder.encode("New123456")).thenReturn("new-password-hash");
+        var result = profileService.changePassword(auth,new ChangePassword(7L,"Old12345","New123456","New123456"));
+        assertTrue(result.passwordChanged());
+        verify(profiles).updatePassword(7L,"new-password-hash");
+        verify(profiles,never()).update(anyLong(),anyString(),anyString(),any(),any());
+        verify(profiles,never()).find(anyLong());
+        assertFalse(result.toString().contains("New123456"));
+        assertFalse(result.toString().contains("new-password-hash"));
+    }
+    @Test void passwordOnlyRejectsAnotherAccountBeforeLookingUpPassword() {
+        when(owners.owner(auth,8L)).thenThrow(new ResponseStatusException(HttpStatus.FORBIDDEN));
+        assertThrows(ResponseStatusException.class,() -> profileService.changePassword(auth,
+                new ChangePassword(8L,"Old12345","New123456","New123456")));
+        verifyNoInteractions(profiles,encoder);
+    }
     @Test void unsupportedImageCannotReachDatabaseWrite() {
         var input = new SaveProfile(7L, "여행자", "a@example.invalid", "data:image/svg+xml;base64,AA==", false, null, null, null);
         assertThrows(ResponseStatusException.class, () -> profileService.save(auth, input));

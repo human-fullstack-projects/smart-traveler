@@ -16,6 +16,11 @@ function normalizedName(value) {
   return String(value || '').replace(/\s+/g, '').toLowerCase();
 }
 
+function samePlaceName(a, b) {
+  const first = normalizedName(a), second = normalizedName(b);
+  return first === second || first.replace(/해수욕장$/, '') === second.replace(/해수욕장$/, '');
+}
+
 function addressMatches(given, candidate) {
   const parts = (value) => String(value || '').trim().split(/\s+/).filter(Boolean);
   const a = parts(given);
@@ -70,7 +75,7 @@ export async function resolveKakaoPlace(maps, place, region = '') {
 
   if (name) {
     const results = await keywordSearch(maps, [region, name].filter(Boolean).join(' '));
-    const matches = results.filter((result) => normalizedName(result.place_name) === normalizedName(name))
+    const matches = results.filter((result) => samePlaceName(result.place_name, name))
       .filter((result) => !region || [result.road_address_name, result.address_name].some((value) => String(value || '').includes(region)))
       .filter((result) => !address || [result.road_address_name, result.address_name].some((value) => addressMatches(address, value)))
       .filter((result) => hasValidCoordinates({ latitude: result.y, longitude: result.x }));

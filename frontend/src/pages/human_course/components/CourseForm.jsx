@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const MAX_PHOTOS = 5;
 const MAX_FILE_BYTES = 5 * 1024 * 1024;
@@ -19,7 +19,11 @@ function readImage(file) {
   });
 }
 
-export default function CourseForm({ course = {}, mode = 'create', onSubmit, cancelHref, disabled = false, serverMode = false }) {
+export default function CourseForm({ course = {}, mode = 'create', onSubmit, cancelHref, disabled = false, serverMode = false, previewContext }) {
+  const [submitError, setSubmitError] = useState('');
+  const [pending, setPending] = useState(null);
+  const dialog = useRef(null);
+  useEffect(() => { if (pending && !dialog.current?.open) dialog.current?.showModal(); }, [pending]);
   const editing = mode === 'edit';
   const [preview, setPreview] = useState(() => ({
     title: course.title || '', category: course.category || '', companion: course.companion || '',
@@ -70,8 +74,8 @@ export default function CourseForm({ course = {}, mode = 'create', onSubmit, can
     if (reading || photoError || submitting) return;
     const data = new FormData(event.currentTarget);
     const photos = selectedPhotos ? selectedPhotos.map((photo) => photo.name) : course.photos || [];
-    setSubmitting(true);
-    try { await onSubmit?.({
+    setSubmitError('');
+    setPending({
       title: String(data.get('title') || '').trim(),
       category: String(data.get('category') || ''),
       companion: String(data.get('companion') || ''),
@@ -80,10 +84,10 @@ export default function CourseForm({ course = {}, mode = 'create', onSubmit, can
       photos,
       photoAssets: selectedPhotos || course.photoAssets || [],
       replacePhotos: Boolean(selectedPhotos),
-    }); } finally { setSubmitting(false); }
+    });
   }}>
     <fieldset disabled={disabled}>
-      <legend>{editing ? '기존 코스 정보 수정' : '사진 / 후기 작성'}</legend>
+      <legend>{editing ? '기존 코스 정보 수정' : '후기 작성'}</legend>
       <div className="field"><label>게시글 제목 *<input name="title" type="text" maxLength={80} required defaultValue={course.title || ''} placeholder="예: 부산 맛집과 바다 여행 코스" /></label></div>
       <div className="field-row">
         <div className="field"><label>여행 유형 *<select name="category" required defaultValue={course.category || ''}><option value="">선택</option>{['맛집', '문화', '힐링', '액티비티'].map((value) => <option key={value}>{value}</option>)}</select></label></div>
@@ -97,14 +101,17 @@ export default function CourseForm({ course = {}, mode = 'create', onSubmit, can
       {photoError && <p className="form-error" role="alert">{photoError}</p>}
       {reading && <p role="status">사진을 읽고 있습니다.</p>}
       {submitting && <p role="status">게시글을 저장하고 있습니다.</p>}
-      <details className="course-preview" open><summary>게시글 미리보기</summary>
+      <dialog ref={dialog} className="recommendation-preview" aria-labelledby="recommendation-preview-title" onCancel={(event) => { if (submitting) event.preventDefault(); else setPending(null); }}><h2 id="recommendation-preview-title">게시글 미리보기</h2>
         <h3>{preview.title.trim() || '제목을 입력해주세요'}</h3>
         <p className="course-meta">{[preview.category, preview.companion].filter(Boolean).join(' · ') || '여행 유형 · 동행 유형'}</p>
         <p>{preview.summary.trim() || '한 줄 소개를 입력해주세요'}</p>
         <p className="writing-sample">{preview.body.trim() || '여행 후기를 입력해주세요'}</p>
         <ul className="photo-boxes">{visiblePhotos.length ? visiblePhotos.map((photo, index) => <li key={`${photo.name}-${index}`}>{photo.dataUrl ? <img src={photo.dataUrl} alt={`첨부 사진 미리보기: ${photo.name}`} /> : <span>{photo.name} (기존 파일명)</span>}</li>) : <li>첨부 사진 없음</li>}</ul>
-      </details>
-      <div className="actions"><button className="primary" type="submit" disabled={!onSubmit || reading || submitting || Boolean(photoError)}>{editing ? '수정 저장하기' : '코스 등록하기'}</button><button type="reset" disabled={submitting}>입력 되돌리기</button>{cancelHref && !submitting && <a href={cancelHref} className="button">{editing ? '수정 취소' : '취소'}</a>}</div>
+        {previewContext}
+        {submitError && <p role="alert">{submitError}</p>}
+        <div className="actions recommendation-preview-actions"><button type="button" disabled={submitting} onClick={() => { dialog.current?.close(); setPending(null); }}>수정</button><button className="primary" type="button" disabled={submitting} onClick={async () => { setSubmitting(true); try { const result = await onSubmit?.(pending); if (result?.error) setSubmitError(result.error); else { dialog.current?.close(); setPending(null); } } finally { setSubmitting(false); } }}>{submitting ? '등록 중…' : editing ? '수정 저장' : '등록'}</button></div>
+      </dialog>
+      <div className="actions"><button className="primary" type="submit" disabled={!onSubmit || reading || submitting || Boolean(photoError)}>{editing ? '수정 저장하기' : '등록하기'}</button>{cancelHref && <a href={cancelHref} className="button">목록으로</a>}</div>
     </fieldset>
   </form>;
 }

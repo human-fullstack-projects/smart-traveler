@@ -11,7 +11,7 @@ export default function CourseEditor({ booking, dispatch }) {
     event.preventDefault();
     if (current && !request.trim()) { setNotice('변경할 내용을 입력해주세요.'); return; }
     setProposal({ v: (current?.v || 0) + 1, name: current ? '실내 중심 여행' : '부산 여행 코스', note: request.trim() || '예약 후 최초 코스 생성', time: new Date().toLocaleString('ko-KR'), places: current ? ['부산시립미술관', '실내 전시관', '전포 카페거리'] : ['광안리 해변', '부산시립미술관', '전포 카페거리'] });
-    setNotice('샘플 변경안입니다. 승인해야 내 코스에 반영됩니다.');
+    setNotice('샘플 변경안입니다. 승인해야 저장된 여행에 반영됩니다.');
   }
   return <details><summary>{current ? 'AI 코스 추천 · 변경 요청' : '예약 후 코스 생성'}</summary>
     <form onSubmit={propose}><label>어떤 일정을 바꿀까요?<textarea value={request} onChange={(event) => { setRequest(event.target.value); setProposal(null); }} placeholder="예: 비가 와서 실내 장소로 변경하고 싶어요" /></label>

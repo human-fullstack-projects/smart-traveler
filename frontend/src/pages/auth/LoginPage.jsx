@@ -71,7 +71,7 @@ export default function LoginPage({ onLogin, guestCourseCount = 0 }) {
             <p className="auth-kicker">WELCOME BACK</p>
             <h1 id="login-title" className="st-h2" ref={titleRef} tabIndex={-1}>오늘의 여행을 찾아볼까요?</h1>
             <p>로그인하고 나만의 여행을 이어가세요.</p>
-            {guestCourseCount > 0 && <p className="st-note">보관한 여행 코스 {guestCourseCount}건을 로그인한 계정의 내 여행 코스로 연결합니다. 연결이 끝날 때까지 새로고침하거나 사이트를 떠나지 마세요.</p>}
+            {guestCourseCount > 0 && <p className="st-note">보관한 여행 코스 {guestCourseCount}건을 로그인한 계정의 저장된 여행로 연결합니다. 연결이 끝날 때까지 새로고침하거나 사이트를 떠나지 마세요.</p>}
           </div>
           <form className="auth-form" onSubmit={submit} noValidate aria-busy={busy}>
             <label className={`st-field${errors.loginId ? ' st-field-error' : ''}`}>아이디
