@@ -164,7 +164,7 @@ def test_관광지_추천의_OpenAI_요청_형식(monkeypatch):
 def test_확인_안내에_답변_방법을_표시한다():
     graph = build_graph(lambda state: extracted())
     result = graph.invoke({"message": "조건 다 말했어", "previousQuestion": "", "conditions": complete_conditions()})
-    assert "확인했어" in result["question"] and "추천해줘" in result["question"]
+    assert "맞다" in result["question"] and "아니다" in result["question"]
 
 
 def test_기존_확인_메시지와_여러_긍정_답변을_지원한다():
@@ -179,7 +179,7 @@ def test_모호한_답변에는_확인방법을_안내한다():
     graph = build_graph(lambda state: extracted(), lambda state: "잘못된 추천")
     result = graph.invoke({"message": "잘 모르겠어", "previousQuestion": CHECK, "conditions": complete_conditions()})
     assert result["question"] == CLARIFY and not result.get("confirmed", False)
-    assert "확인했어" in result["question"]
+    assert "맞다" in result["question"]
 
 
 def test_수정_요청은_추천하지_않고_수정내용을_묻는다():
