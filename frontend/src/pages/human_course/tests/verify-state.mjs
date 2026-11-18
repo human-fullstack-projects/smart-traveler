@@ -11,6 +11,7 @@ try {
   function run(action) { const result = transition(state, action); if (!result.error) state = result.state; return result; }
   assert.equal(filterCourses(state.courses).length, 4);
   assert.equal(filterCourses(state.courses, { region: '부산', category: '맛집', companion: '친구', keyword: '바다' }).length, 1);
+  assert.equal(filterCourses(state.courses, { keyword: '  부산 바다  ' }).length, 1, '검색어 앞뒤 공백 무시');
   assert.equal(filterCourses(state.courses, { keyword: '없는 검색어' }).length, 0);
   assert.equal(filterCourses(state.courses, { sort: 'likes' })[0].id, 3);
   const likes = state.courses[0].likes;
@@ -62,13 +63,30 @@ try {
   run({ type: 'edit', id: result.id, fields });
   assert.equal(state.courses.find((c) => c.id === result.id).visibility, 'BLINDED');
   for (const [name, props] of [
-    ['HumanCourseList', {}], ['HumanCourseDetail', { courseId: result.id }],
+    ['HumanCourseList', {}], ['HumanCourseDetail', { courseId: 1 }],
     ['HumanCourseCreate', {}], ['HumanCourseEdit', { courseId: result.id }], ['HumanCourseModeration', {}],
   ]) {
     const { default: Page } = await server.ssrLoadModule(`/src/pages/human_course/pages/${name}.jsx`);
-    assert.ok(renderToStaticMarkup(React.createElement(Page, { ...state, ...props, execute() {} })).includes('<h1>'));
+    const html = renderToStaticMarkup(React.createElement(Page, { ...state, ...props, isAuthenticated: true, execute() {} }));
+    assert.ok(html.includes('<h1>'));
+    if (name === 'HumanCourseList') {
+      assert.ok(html.includes('aria-pressed="true"'), '동행 필터 선택 상태 제공');
+      assert.ok(html.includes('전체 ' + state.courses.length + '건'), '전체/검색 결과 수 제공');
+    }
+    if (name === 'HumanCourseDetail') {
+      assert.ok(html.includes('comment-counter'), '댓글 글자 수 안내 제공');
+      assert.ok(html.includes('aria-busy="false"'), '좋아요 처리 상태 제공');
+    }
     console.log(`${name}: changed state render OK`);
   }
+  const { default: HumanCourseList } = await server.ssrLoadModule('/src/pages/human_course/pages/HumanCourseList.jsx');
+  const guestList = renderToStaticMarkup(React.createElement(HumanCourseList, { ...state, isAuthenticated: false, execute() {} }));
+  assert.ok(!guestList.includes('#/human-courses/create'), '비로그인 목록에서 작성 버튼 숨김');
+  const { default: HumanCourseDetail } = await server.ssrLoadModule('/src/pages/human_course/pages/HumanCourseDetail.jsx');
+  const guestDetail = renderToStaticMarkup(React.createElement(HumanCourseDetail, { ...state, courseId: 1, isAuthenticated: false, execute() {} }));
+  assert.ok(!guestDetail.includes('게시글 기능'), '비로그인 상세에서 게시글 기능 숨김');
+  assert.ok(!guestDetail.includes('comment-form'), '비로그인 상세에서 댓글 작성 숨김');
+  assert.ok(!guestDetail.includes('내 댓글 삭제'), '비로그인 상세에서 댓글 삭제 숨김');
   assert.ok(run({ type: 'delete', id: 1 }).error, '타인 글 삭제 방지');
   assert.equal(run({ type: 'delete', id: result.id }).id, result.id);
   assert.ok(!state.courses.some((c) => c.id === result.id));
