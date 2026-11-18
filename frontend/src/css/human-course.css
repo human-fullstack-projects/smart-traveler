@@ -154,3 +154,6 @@
   .human-courses .comment-list li { flex-wrap: wrap; }
   .human-courses .footer-tools { justify-content: flex-start; }
 }
+.human-courses .recommendation-preview { width: min(760px, calc(100vw - 32px)); max-height: 85vh; overflow-y: auto; border: 1px solid #cfcedc; border-radius: 20px; padding: 28px; color: #2c2c4c; background: #fafafd; box-sizing: border-box; }
+.human-courses .recommendation-preview::backdrop { background: #15172599; }
+.human-courses .recommendation-preview-actions { justify-content: flex-end; position: sticky; bottom: -28px; background: #fafafd; padding: 18px 0; }

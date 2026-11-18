@@ -12,7 +12,7 @@ export function creationError(state, reservation) {
   if (!reservation) return '예약을 먼저 선택해주세요.';
   if (reservation.status !== 'COMPLETED') return `${statusNames[reservation.status] || reservation.status}은 작성할 수 없습니다.`;
   if (!(Date.parse(reservation.checkoutAt) < Date.parse(DEMO_NOW))) return '체크아웃 시각이 지나야 작성할 수 있습니다.';
-  if (!finalCourse(reservation)?.plan?.length) return '최종 확정된 내 코스가 없습니다.';
+  if (!finalCourse(reservation)?.plan?.length) return '최종 확정된 저장된 여행가 없습니다.';
   if (state.deletedReservationIds?.includes(reservation.id)) return '이 예약으로 작성한 글은 삭제 후 다시 작성할 수 없습니다.';
   if (state.courses.some((course) => course.reservationId === reservation.id)) return '이미 작성한 코스가 있습니다. 기존 글을 수정해주세요.';
   return '';

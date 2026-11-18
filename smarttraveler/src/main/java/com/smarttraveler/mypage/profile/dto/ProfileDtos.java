@@ -11,4 +11,8 @@ public final class ProfileDtos {
         @Size(max = 200) String currentPassword, @Size(max = 200) String newPassword,
         @Size(max = 200) String passwordConfirmation) {}
     public record Saved(Profile profile, boolean passwordChanged) {}
+    public record ChangePassword(@NotNull @Positive Long expectedMemberId,
+        @NotBlank @Size(max=200) String currentPassword, @NotBlank @Size(max=200) String newPassword,
+        @NotBlank @Size(max=200) String passwordConfirmation) {}
+    public record PasswordChanged(boolean passwordChanged) {}
 }

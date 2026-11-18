@@ -41,6 +41,15 @@ public class MyPageService {
         return course;
     }
 
+    public PlaceDetails placeDetails(Authentication auth, Long placeId, String name, String region) {
+        owner(auth, null);
+        if ((placeId != null && placeId <= 0) || name.length()>200 || region.length()>100
+                || (placeId==null && name.isBlank())) throw denied(HttpStatus.BAD_REQUEST);
+        var place = data.placeDetails(placeId,name.trim(),region.trim());
+        if (place==null) throw denied(HttpStatus.NOT_FOUND);
+        return place;
+    }
+
     public BookingView booking(Authentication auth, Long expectedMemberId, String bookingId) {
         long id = owner(auth, expectedMemberId);
         return data.bookings(id).stream().filter(b -> b.id().equals(bookingId)).findFirst()

@@ -18,11 +18,9 @@
 .travel-style-icon { display: grid; place-items: center; width: 44px; height: 44px; background: #a0cecd; border-radius: 13px; color: var(--ts-teal); margin-bottom: 12px; }
 .travel-style-icon svg { width: 24px; height: 24px; }
 .travel-style-option > strong { font-size: 22px; line-height: 1.4; font-weight: 800; margin-bottom: 5px; }
-.travel-style-badge { padding: 3px 10px; background: #e2efef; color: #237780; border-radius: 20px; font-size: 12px; font-weight: 700; margin-bottom: 6px; }
 .travel-style-description { font-size: 14px; color: #465b83; line-height: 1.5; }
 .travel-style-check { position: absolute; top: 14px; right: 16px; width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%; background: var(--ts-teal); color: white; font-size: 16px; font-weight: 800; }
 .travel-style-actions { display: flex; align-items: center; margin-top: 30px; gap: 12px; }
-.travel-style-actions-right { display: flex; align-items: center; gap: 12px; margin-left: auto; }
 .travel-style-page .travel-style-actions button, .travel-style-page .travel-style-actions a { box-sizing: border-box; display: inline-flex; justify-content: center; align-items: center; border-radius: 30px; padding: 13px 25px; min-height: 50px; font-size: 15px; font-weight: 700; line-height: 1.4; text-decoration: none; font-family: inherit; cursor: pointer; }
 .travel-style-page .travel-style-back { border: 2px solid var(--ts-teal); color: var(--ts-teal); background: transparent; }
 .travel-style-page .travel-style-actions a { border: 2px solid var(--ts-border); color: #43577f; background: transparent; }

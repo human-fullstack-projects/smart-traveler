@@ -1,7 +1,7 @@
 const items = [
   { page: 'mypage', label: '마이페이지' },
   { page: 'reservations', label: '내 예약' },
-  { page: 'my-courses', label: '내 여행 코스' },
+  { page: 'my-courses', label: '저장된 여행' },
   { page: 'my-posts', label: '내 여행 추천' },
   { page: 'my-profile', label: '내 정보관리' },
   { page: 'my-travel-style', label: '내 여행 스타일 관리' },
