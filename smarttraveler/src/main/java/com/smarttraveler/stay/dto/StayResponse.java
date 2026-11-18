@@ -11,6 +11,7 @@ public record StayResponse(
         BigDecimal latitude,
         BigDecimal longitude,
         LocalTime checkinTime,
-        LocalTime checkoutTime
+        LocalTime checkoutTime,
+        String thumbnailUrl
 ) {
 }

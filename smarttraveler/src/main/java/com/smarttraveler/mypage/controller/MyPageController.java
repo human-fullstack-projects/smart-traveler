@@ -16,6 +16,11 @@ public class MyPageController {
     public Snapshot snapshot(Authentication auth, @RequestHeader(value = "X-MyPage-Member", required = false) Long expected) {
         return service.snapshot(auth, expected);
     }
+    @GetMapping("/places/detail")
+    public PlaceDetails placeDetails(Authentication auth, @RequestParam(required=false) Long placeId,
+            @RequestParam(defaultValue="") String name, @RequestParam(defaultValue="") String region) {
+        return service.placeDetails(auth,placeId,name,region);
+    }
     @GetMapping("/courses/{id}")
     public CourseView course(Authentication auth, @RequestHeader(value = "X-MyPage-Member", required = false) Long expected, @PathVariable String id) {
         return service.course(auth, expected, id);

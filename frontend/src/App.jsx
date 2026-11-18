@@ -225,7 +225,10 @@ export default function App() {
         {humanCourses.serverMode && humanCourses.serverError && <p className="note" role="alert">서버 자료를 다시 불러오지 못했습니다. {humanCourses.serverError} <button type="button" onClick={humanCourses.refresh}>다시 시도</button></p>}
       </div>
       {humanCourses.storageNotice && <div className="human-courses storage-notice"><p className="note" role="alert">{humanCourses.storageNotice}</p>{humanCourses.saveFailed && <button type="button" onClick={humanCourses.retrySave}>브라우저 저장 다시 시도</button>}</div>}
-      {HumanCourseScreen ? <HumanCourseScreen key={routePath} {...humanCourses} courseId={courseMatch?.[1]} /> : <div className="human-courses"><section className="panel"><h1>페이지를 찾을 수 없습니다.</h1><a className="button" href="#/human-courses">코스 목록으로</a></section></div>}
+      {HumanCourseScreen ? <HumanCourseScreen key={route} {...humanCourses} courseId={courseMatch?.[1]}
+        reservationId={new URLSearchParams(route.split('?')[1] || '').get('reservationId') || ''}
+        from={new URLSearchParams(route.split('?')[1] || '').get('from') || ''}
+        execute={async action => { const result = await humanCourses.execute(action); if (!result?.error && ['create', 'edit', 'delete'].includes(action.type)) await myPageStore.retry(); return result; }} /> : <div className="human-courses"><section className="panel"><h1>페이지를 찾을 수 없습니다.</h1><a className="button" href="#/human-courses">코스 목록으로</a></section></div>}
     </>;
   } else if (isChat) {
     content = <AiChatPage {...chat} />;

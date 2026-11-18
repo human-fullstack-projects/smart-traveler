@@ -24,6 +24,9 @@ import java.time.*;
 import java.util.*;
 import jakarta.persistence.EntityManager;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -58,7 +61,24 @@ public class AdminDataService {
     public OwnerProfile ownerByMember(Long id) { return owners.findByMemberId(id).orElse(null); }
     public List<OwnerReviewHistory> reviewHistory(Long ownerId) { return reviews.findByOwnerIdOrderByCreatedAtDesc(ownerId); }
     public List<MemberSuspensionHistory> suspensions(Long memberId) { return suspensions.findByMemberIdOrderByCreatedAtDesc(memberId); }
+    // Kept for the unchanged Thymeleaf AdminController; the REST lodging paths use targeted queries.
     public List<Lodging> lodgings() { return lodgings.findAll(); }
+    @Transactional(readOnly = true)
+    public Page<Lodging> searchLodgings(String status, Long ownerId, Long sidoId, String region,
+        String query, String ownerName, Pageable pageable) {
+        Sort.Order order = pageable.getSort().stream().findFirst().orElse(Sort.Order.desc("lodgingId"));
+        if (pageable.getSort().stream().count() > 1 || !Set.of("lodgingId", "name").contains(order.getProperty()))
+            throw new IllegalArgumentException("숙소 정렬은 lodgingId 또는 name만 지원합니다.");
+        return lodgings.search(emptyToNull(status), ownerId, sidoId, emptyToNull(region),
+            emptyToNull(query), emptyToNull(ownerName), order.getProperty(), order.getDirection().name(),
+            pageable.isPaged() ? org.springframework.data.domain.PageRequest.of(pageable.getPageNumber(),
+                pageable.getPageSize()) : Pageable.unpaged());
+    }
+    public long countActiveLodgings() { return lodgings.countByStatusNot("DELETED"); }
+    public long countPendingLodgings() { return lodgings.countByStatus("PENDING"); }
+    public List<Lodging> lodgingsByOwner(Long ownerId) { return lodgings.findByOwnerIdOrderByLodgingIdDesc(ownerId); }
+    public List<OwnerProfile> ownersByIds(Collection<Long> ids) { return ids.isEmpty() ? List.of() : owners.findAllById(ids); }
+    public List<Member> membersByIds(Collection<Long> ids) { return ids.isEmpty() ? List.of() : members.findAllById(ids); }
     public Lodging lodging(Long id) { return lodgings.findById(id).orElseThrow(() -> missing("숙소")); }
     public List<Room> roomsForLodging(Long id) { return rooms.findByLodgingId(id); }
     public List<RoomReservation> reservationsForLodging(Long id) {
@@ -370,5 +390,6 @@ public class AdminDataService {
         return m;
     }
     private static boolean blank(String s) { return s == null || s.isBlank(); }
+    private static String emptyToNull(String s) { return blank(s) ? null : s; }
     private static IllegalArgumentException missing(String item) { return new IllegalArgumentException(item + " 정보를 찾을 수 없습니다."); }
 }

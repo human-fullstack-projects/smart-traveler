@@ -72,7 +72,7 @@ export function createMyPageSession(api) {
     getSnapshot() { return snapshot; },
     saveTrialCourse(conditions) {
       if (snapshot.identity !== 'guest' || snapshot.status !== 'ready') throw new Error('비회원 상태를 확인한 뒤 다시 시도해 주세요.');
-      if (trialCourseId) throw new Error('비회원 임시 코스는 1회만 보관할 수 있습니다. 내 여행 코스에서 확인해 주세요.');
+      if (trialCourseId) throw new Error('비회원 임시 코스는 1회만 보관할 수 있습니다. 저장된 여행에서 확인해 주세요.');
       if (!Number.isInteger(conditions.durationDays) || conditions.durationDays < 1 || conditions.durationDays > 7) throw new Error('여행 기간을 확인해 주세요.');
       const end = new Date(`${conditions.startDate}T00:00:00Z`);
       if (Number.isNaN(end.getTime())) throw new Error('출발 날짜를 확인해 주세요.');

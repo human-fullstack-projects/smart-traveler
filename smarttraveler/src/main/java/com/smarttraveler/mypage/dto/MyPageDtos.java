@@ -9,8 +9,14 @@ import java.util.List;
 public final class MyPageDtos {
     private MyPageDtos() {}
 
+    public record MapPlace(Long placeId, String name, String address, Double latitude, Double longitude) {}
+    public record PlaceDetails(Long placeId, String name, String address, String description,
+                               String imageUrl, String phone, String openingHours) {}
     public record Day(@NotNull LocalDate date,
-                      @NotNull @Size(max = 30) List<@NotBlank @Size(max = 200) String> places) {}
+                      @NotNull @Size(max = 30) List<@NotBlank @Size(max = 200) String> places,
+                      List<MapPlace> mapPlaces) {
+        public Day(LocalDate date, List<String> places) { this(date, places, List.of()); }
+    }
     public record Draft(@NotBlank @Pattern(regexp = "[a-zA-Z0-9-]{16,64}") String clientId,
                         @NotBlank @Size(max = 200) String title,
                         @NotBlank @Size(max = 100) String region,
@@ -20,9 +26,11 @@ public final class MyPageDtos {
                                 @NotEmpty @Size(max = 20) List<@NotNull @Valid Draft> courses) {}
     public record CourseView(String id, String title, String region, LocalDate startDate,
                              LocalDate endDate, String state, List<Day> days) {}
+    public record StayInfo(Long id, String address, String phone, String description,
+                           String imageUrl, String checkinTime, String checkoutTime, boolean regionMatched) {}
     public record BookingView(String id, String reservationNo, String courseId, String stay,
                               String room, LocalDate date, LocalDate endDate, int guests,
-                              int price, String status) {}
+                              int price, String status, StayInfo stayInfo) {}
     public record PostView(String id, String courseId, String reservationId, String title,
                            String body, String status, String courseSnapshot) {}
     public record Snapshot(long memberId, List<CourseView> courses,

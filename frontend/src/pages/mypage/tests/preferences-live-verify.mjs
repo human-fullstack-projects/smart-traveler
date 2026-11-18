@@ -113,7 +113,7 @@ try {
   await session.login(accounts[0]);
   const updatedRead = await read();
   check(updatedRead, members[0], edited);
-  checkScreen(updatedRead, ['여유로운 여행', '둘 다', '도시', '섬', '산·숲']);
+  checkScreen(updatedRead, ['여유롭게 여행', '둘 다', '도시', '섬', '산·숲']);
   console.log('PASS: edit -> DB save -> logout -> login -> updated selections render correctly');
   assert.equal((await session.request('/api/mypage/preferences', { headers: { 'X-MyPage-Member': String(members[1]) } })).status, 403);
   assert.equal((await session.mutate('/api/mypage/preferences', 'PUT', { ...other, expectedMemberId: members[1] })).status, 403);
@@ -127,7 +127,7 @@ try {
   await session.login(accounts[1]);
   const otherRead = await read();
   check(otherRead, members[1], other);
-  checkScreen(otherRead, ['적당한 여행', '야외', '호수·강']);
+  checkScreen(otherRead, ['균형있게 여행', '야외', '호수·강']);
   await session.logout();
   await session.login(accounts[0]);
   check(await read(), members[0], edited);

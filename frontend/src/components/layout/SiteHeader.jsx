@@ -5,7 +5,7 @@ const navigation = [
   { label: '코스추천', href: '#/ai-course' },
   { label: '조건검색', href: '#/conditions' },
   { label: '숙소 찾기' },
-  { label: '내 여행 일정' },
+  { label: '저장된 여행' },
   { label: '마이페이지' },
 ];
 

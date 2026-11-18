@@ -3,21 +3,21 @@ import { settingsApi } from '../api/settingsApi';
 import './travel-style-wizard.css';
 
 const steps = [
-  { label: '여행 스타일', title: '어떤 여행 스타일이세요?', help: '나와 가장 가까운 하나를 골라 주세요.', options: [
-    ['packed', '알차게 여행', '계획표대로 하루를 꽉 채워요', 'pulse', '파워 J에게 추천'],
-    ['normal', '적당한 여행', '계획은 세우되 쉬는 틈도 둬요', 'clock', 'J와 P가 섞인 분께 추천'],
-    ['relaxed', '여유로운 여행', '그날 기분 따라 느긋하게', 'bed', 'P에게 추천'],
+  { label: '여행 스타일', title: '어떤 여행 스타일이세요?', help: '나와 가장 가까운 스타일을 골라 주세요.', options: [
+    ['packed', '알차게 여행', '하루를 꽉 채워요', 'pulse'],
+    ['normal', '균형있게 여행', '적당한 일정을 세워요', 'clock'],
+    ['relaxed', '여유롭게 여행', '휴식에 가까운 일정을 세워요', 'bed'],
   ] },
-  { label: '장소 선호', title: '야외와 실내, 어디가 좋으세요?', help: '하나만 골라 주세요.', options: [
+  { label: '선호 장소', title: '야외와 실내, 어디가 좋으세요?', help: '가장 자주 가는 장소를 선택해주세요.', options: [
     ['outdoor', '야외', '자연·산책·전망 좋은 곳', 'sun'],
     ['indoor', '실내', '전시·카페·실내 체험', 'home'],
-    ['both', '둘 다', '날씨 따라 골고루', 'arrows'],
+    ['both', '둘 다', '야외와 실내 골고루', 'arrows'],
   ] },
-  { label: '선호 지역', title: '어떤 풍경 속으로 떠나고 싶으세요?', help: '마음에 드는 곳을 1~3개 골라 주세요.', options: [
+  { label: '선호 지역', title: '어떤 지역을 선호하세요?', help: '선호하는 지역을 1~3개 골라 주세요.', options: [
     ['도시', '도시', '맛집·쇼핑·야경이 가까운 곳', 'city'],
     ['농촌', '시골', '한적한 마을과 들판', 'village'],
     ['호수·강', '호수·강', '물가 산책과 잔잔한 풍경', 'lake'],
-    ['섬', '섬', '배 타고 떠나는 특별한 여행', 'island'],
+    ['섬', '섬', '배 타고 떠나는 여행', 'island'],
     ['산·숲', '산·숲', '숲길 걷기와 맑은 공기', 'mountain'],
     ['바다·해변', '바다', '해변과 바닷가 마을', 'sea'],
   ] },
@@ -72,22 +72,21 @@ export default function TravelStyleWizard({ member, initialData, onSaved }) {
         {steps.map((current, step) => <section className="travel-style-section" key={current.label} aria-labelledby={`travel-style-heading-${step}`}>
         <p className="travel-style-step">{step + 1} / 3 · {current.label}</p>
         <h2 id={`travel-style-heading-${step}`}>{current.title}</h2>
-        <p className="travel-style-help">{current.help} {step === 2 && <strong aria-live="polite">({regions.length} / 3 고름)</strong>}</p>
+        <p className="travel-style-help">{current.help} {step === 2 && <strong aria-live="polite">({regions.length} / 3)</strong>}</p>
         <div className="travel-style-options" role="group" aria-label={current.label}>
-          {current.options.map(([value, title, description, icon, badge]) => {
+          {current.options.map(([value, title, description, icon]) => {
             const selected = step === 0 ? pace === value : step === 1 ? place === value : regions.includes(value);
             return <button type="button" key={value} className="travel-style-option" aria-pressed={selected} disabled={busy || (step === 2 && regions.length === 3 && !selected)} onClick={() => choose(step, value)}>
               <span className="travel-style-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={paths[icon]} /></svg></span>
               {selected && <span className="travel-style-check" aria-hidden="true">✓</span>}
-              <strong>{title}</strong>{badge && <span className="travel-style-badge">{badge}</span>}<span className="travel-style-description">{description}</span>
+              <strong>{title}</strong><span className="travel-style-description">{description}</span>
             </button>;
           })}
         </div>
         </section>)}
         <div className="travel-style-actions">
-          <div className="travel-style-actions-right">
-            <button type="button" className="travel-style-next" disabled={busy || !valid} onClick={save}>{busy ? '저장 중…' : '저장하기'}</button>
-          </div>
+          <button type="button" className="travel-style-next" disabled={busy || !valid} onClick={save}>{busy ? '저장 중…' : '저장하기'}</button>
+          <a href="#/mypage">마이페이지 홈</a>
         </div>
         {notice && <p className="travel-style-notice" role="status">{notice}</p>}
       </div>

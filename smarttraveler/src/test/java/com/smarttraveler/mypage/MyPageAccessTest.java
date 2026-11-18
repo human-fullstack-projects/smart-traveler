@@ -124,6 +124,39 @@ class MyPageAccessTest {
         }
         verifyNoInteractions(data);
     }
+    @Test void bookingIncludesMatchedLodgingAndPhotoWithoutChangingReservationTerms() throws Exception {
+        var date = LocalDate.of(2026, 12, 10);
+        var stay = new StayInfo(18L, "부산 부산진구", "051-123-4567", "숙소 소개",
+                "https://example.test/stay.jpg", "15:00:00", "11:00:00", true);
+        when(data.bookings(7)).thenReturn(List.of(new BookingView("9", "TEST-BOOKING-9", "course-10",
+                "부산 숙소", "더블룸", date, date.plusDays(1), 2, 120000, "CONFIRMED", stay)));
+        mvc.perform(get("/api/mypage").with(user("alice"))).andExpect(status().isOk())
+                .andExpect(jsonPath("$.bookings[0].stay").value("부산 숙소"))
+                .andExpect(jsonPath("$.bookings[0].stayInfo.imageUrl").value("https://example.test/stay.jpg"))
+                .andExpect(jsonPath("$.bookings[0].stayInfo.regionMatched").value(true))
+                .andExpect(jsonPath("$.bookings[0].date").value("2026-12-10"))
+                .andExpect(jsonPath("$.bookings[0].price").value(120000));
+    }
+    @Test void placeDetailsRequireLoginAndReturnDatabasePhotoAndDescription() throws Exception {
+        mvc.perform(get("/api/mypage/places/detail").param("placeId","15"))
+                .andExpect(status().isUnauthorized());
+        verifyNoInteractions(data);
+        var place = new PlaceDetails(15L,"경복궁","서울 종로구","DB 장소 설명",
+                "https://example.test/palace.jpg","02-1234-5678","09:00~18:00");
+        when(data.placeDetails(15L,"","서울")).thenReturn(place);
+        mvc.perform(get("/api/mypage/places/detail").with(user("alice"))
+                .param("placeId","15").param("region","서울"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.placeId").value(15))
+                .andExpect(jsonPath("$.description").value("DB 장소 설명"))
+                .andExpect(jsonPath("$.imageUrl").value("https://example.test/palace.jpg"));
+        mvc.perform(get("/api/mypage/places/detail").with(user("alice")))
+                .andExpect(status().isBadRequest());
+        when(data.placeDetails(null,"없는 장소","서울")).thenReturn(null);
+        mvc.perform(get("/api/mypage/places/detail").with(user("alice"))
+                .param("name","없는 장소").param("region","서울"))
+                .andExpect(status().isNotFound());
+    }
     private ImportRequest request(long owner) {
         var date = LocalDate.of(2026, 12, 10);
         return new ImportRequest(owner, List.of(new Draft("test-client-id-0001", "부산 여행", "부산", date, date,

@@ -17,4 +17,8 @@ public class ProfileController {
     }
     @PutMapping
     public Saved save(Authentication auth, @Valid @RequestBody SaveProfile request) { return profiles.save(auth, request); }
+    @PutMapping("/password")
+    public PasswordChanged changePassword(Authentication auth, @Valid @RequestBody ChangePassword request) {
+        return profiles.changePassword(auth, request);
+    }
 }

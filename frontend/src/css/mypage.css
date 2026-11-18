@@ -25,6 +25,9 @@
 .mypage .card h3 { font-size: 17px; margin: 16px 0 8px; }
 .mypage .card p { margin: 8px 0; }
 .mypage .stack { display: grid; gap: 18px; }
+.mypage .mypage-course-map { min-width: 0; margin: 18px 0; }
+.mypage .mypage-course-map > .secondary { width: 100%; cursor: pointer; }
+.mypage .mypage-course-map .itinerary-map { margin-top: 16px; }
 .mypage .row { display: flex; justify-content: space-between; align-items: center; gap: 15px; }
 .mypage .row > div { min-width: 0; }
 .mypage .row > strong { flex-shrink: 0; }

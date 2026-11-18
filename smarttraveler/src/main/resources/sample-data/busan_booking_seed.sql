@@ -4,14 +4,14 @@ SET NAMES utf8mb4;
 START TRANSACTION;
 
 INSERT INTO lodging
-    (source_provider, source_content_id, lodging_type, name, address, latitude, longitude,
+    (source_provider, source_content_id, lodging_type, name, address, region_id, latitude, longitude,
      checkin_time, checkout_time, status)
 VALUES
     ('BOOKING_DEMO', 'BUSAN_SEOMYEON', 'HOTEL', '토요코인호텔 부산서면 (예약 테스트)',
-     '부산광역시 부산진구 서전로 39 (전포동)', 35.1579671, 129.0640538, '15:00', '11:00', 'ACTIVE'),
+     '부산광역시 부산진구 서전로 39 (전포동)', (SELECT r.region_id FROM region r JOIN region p ON p.region_id = r.parent_region_id WHERE p.region_name = '부산광역시' AND r.region_name = '부산진구' LIMIT 1), 35.1579671, 129.0640538, '15:00', '11:00', 'ACTIVE'),
     ('BOOKING_DEMO', 'BUSAN_HAEUNDAE', 'RESORT', '한화리조트 해운대 (예약 테스트)',
-     '부산광역시 해운대구 마린시티3로 52', 35.1544482, 129.1450718, '15:00', '11:00', 'ACTIVE')
-ON DUPLICATE KEY UPDATE lodging_id = lodging_id;
+     '부산광역시 해운대구 마린시티3로 52', (SELECT r.region_id FROM region r JOIN region p ON p.region_id = r.parent_region_id WHERE p.region_name = '부산광역시' AND r.region_name = '해운대구' LIMIT 1), 35.1544482, 129.1450718, '15:00', '11:00', 'ACTIVE')
+ON DUPLICATE KEY UPDATE region_id = COALESCE(region_id, VALUES(region_id));
 
 INSERT INTO room (lodging_id, name, base_capacity, max_capacity, price_off_weekday, price_off_weekend)
 SELECT lodging_id, '스탠다드 (최대 2인)', 2, 2, 79000, 99000 FROM lodging
