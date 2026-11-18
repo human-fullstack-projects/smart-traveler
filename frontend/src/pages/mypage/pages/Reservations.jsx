@@ -11,7 +11,7 @@ import '../../../css/mypage.css';
 import './my-courses.css';
 function StayPhoto({url,name}) {
  const [failed,setFailed]=useState(false);
- return <aside className="reservation-stay-photo"><h3>숙소 사진</h3>{url&&!failed?<img src={url} alt={`${name || '숙소'} 사진`} onError={()=>setFailed(true)}/>:<div className="reservation-stay-photo__empty"><span aria-hidden="true">▧</span><p>등록된 숙소 사진이 없습니다.</p></div>}</aside>;
+ return <aside className="reservation-stay-photo"><h3>숙소 사진</h3>{url&&!failed?<img src={url} referrerPolicy="no-referrer" alt={`${name || '숙소'} 사진`} onError={()=>setFailed(true)}/>:<div className="reservation-stay-photo__empty"><span aria-hidden="true">▧</span><p>등록된 숙소 사진이 없습니다.</p></div>}</aside>;
 }
 function BookingStayInfo({ booking }) {
  const stay = booking.stayInfo;
