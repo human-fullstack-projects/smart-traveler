@@ -23,6 +23,10 @@ public class ProfileRepository {
         return rows.isEmpty() ? null : rows.getFirst();
     }
 
+    public void updatePassword(long owner, String encodedPassword) {
+        jdbc.update("UPDATE members SET password=?, updated_at=CURRENT_TIMESTAMP WHERE member_id=? AND status='ACTIVE' AND deleted_at IS NULL", encodedPassword, owner);
+    }
+
     public void update(long owner, String nickname, String email, String encodedPassword, String avatarData) {
         if (encodedPassword == null) {
             jdbc.update("UPDATE members SET nickname=?, email=?, updated_at=CURRENT_TIMESTAMP WHERE member_id=?", nickname, email, owner);

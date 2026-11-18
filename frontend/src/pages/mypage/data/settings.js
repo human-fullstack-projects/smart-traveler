@@ -39,13 +39,15 @@ export const preferenceNotices = [
 export function profileError(form) {
   if (!form.nickname.trim() || form.nickname.trim().length > 50) return '닉네임은 1~50자로 입력해 주세요.';
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email.trim()) || form.email.trim().length > 255) return '올바른 이메일을 입력해 주세요.';
-  if (form.changePassword) {
-    if (!form.currentPassword) return '현재 비밀번호를 입력해 주세요.';
-    if (form.newPassword.length < 8 || new TextEncoder().encode(form.newPassword).length > 72
-      || !/[A-Za-z]/.test(form.newPassword) || !/[0-9]/.test(form.newPassword)) return '새 비밀번호는 영문·숫자 포함 8자 이상, UTF-8 기준 72바이트 이하로 입력해 주세요.';
-    if (form.newPassword !== form.passwordConfirmation) return '새 비밀번호 확인이 일치하지 않습니다.';
-    if (form.currentPassword === form.newPassword) return '현재 비밀번호와 다른 비밀번호를 입력해 주세요.';
-  }
+  return form.changePassword ? passwordError(form) : '';
+}
+
+export function passwordError(form) {
+  if (!form.currentPassword) return '현재 비밀번호를 입력해 주세요.';
+  if (form.newPassword.length < 8 || new TextEncoder().encode(form.newPassword).length > 72
+    || !/[A-Za-z]/.test(form.newPassword) || !/[0-9]/.test(form.newPassword)) return '새 비밀번호는 영문·숫자 포함 8자 이상, UTF-8 기준 72바이트 이하로 입력해 주세요.';
+  if (form.newPassword !== form.passwordConfirmation) return '새 비밀번호 확인이 일치하지 않습니다.';
+  if (form.currentPassword === form.newPassword) return '현재 비밀번호와 다른 비밀번호를 입력해 주세요.';
   return '';
 }
 

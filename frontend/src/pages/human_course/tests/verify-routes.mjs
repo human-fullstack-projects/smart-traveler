@@ -13,13 +13,13 @@ try {
   const cases = [
     ['/human-courses', '다른 여행자의 추천 코스', '#/human-courses/1'],
     ['/human-courses/1', '부산 바다와 맛집을 하루에', '#/human-courses'],
-    ['/human-courses/2', '강릉 커피와 바다 산책', '#/human-courses'],
-    ['/human-courses/create', '로그인이 필요합니다.', '#/login'],
-    ['/human-courses/2/edit', '로그인이 필요합니다.', '#/login'],
-    ['/human-courses/2/edit/', '로그인이 필요합니다.', '#/login'],
+    ['/human-courses/2', '강릉 커피와 바다 산책', '#/human-courses/2/edit'],
+    ['/human-courses/create', '내 여행 추천하기', '#/human-courses'],
+    ['/human-courses/2/edit', '저장된 여행 수정', '#/human-courses'],
+    ['/human-courses/2/edit/', '저장된 여행 수정', '#/human-courses'],
     ['/human-courses/moderation', '신고·블라인드 상태 시연', '#/human-courses/5'],
     ['/human-courses/999', '코스를 찾을 수 없습니다.', '#/human-courses'],
-    ['/human-courses/1/edit', '로그인이 필요합니다.', '#/login'],
+    ['/human-courses/1/edit', '다른 사람의 코스는 수정할 수 없습니다.', '#/human-courses'],
     ['/human-courses/5', '블라인드 처리된 코스입니다.', '#/human-courses'],
     ['/human-courses/invalid/path/extra', '페이지를 찾을 수 없습니다.', '#/human-courses'],
   ];

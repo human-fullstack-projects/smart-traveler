@@ -1,18 +1,51 @@
-import Card from '../components/Card';
-import PageHero from '../components/PageHero';
+import { useEffect, useState } from 'react';
 import AccessNotice from '../components/AccessNotice';
+import MyCourseMap from '../components/MyCourseMap';
+import { myPageApi } from '../api/myPageApi';
+import { isVisibleBooking } from '../data/visibleItems';
 import { money } from '../utils/format';
+import palace from '../profile/avatars/palace.png';
+import beach from '../profile/avatars/beach.png';
+import village from '../profile/avatars/village.png';
 import '../../../css/mypage.css';
-
-export default function Reservations({ bookings = [], reservationId }) {
-  const list = reservationId ? bookings.filter(b => b.id === reservationId) : bookings;
-  if (reservationId && !list.length) return <AccessNotice />;
-  return <div className="mypage"><PageHero eyebrow="MY RESERVATIONS" title="내 예약">본인 소유의 예약만 표시합니다.</PageHero>
-    {reservationId && <p><a href="#/reservations">← 내 예약 목록</a></p>}
-    {!list.length && <p className="empty">예약 내역이 없습니다.</p>}
-    <div className="stack">{list.map(b => <Card key={b.id}><span className="pill">{b.status}</span>
-      <h2>{b.stay || '숙소 정보 확인 필요'}</h2><p>예약번호: {b.reservationNo}</p><p>{b.date} ~ {b.endDate} · {b.guests}명 · {b.room}</p><strong>{money(b.price)}</strong>
-      <div className="actions">{!reservationId && <a href={`#/reservations/${b.id}`}>예약 상세</a>}{b.status === 'PENDING_PAYMENT' && <a href={`#/payments/${b.id}`}>토스 테스트 결제</a>}{b.courseId && <a href={`#/my-courses/${b.courseId}`}>이 예약의 내 코스</a>}{b.status === 'COMPLETED' && <a href="#/human-courses/create">휴먼 추천 코스 작성·수정</a>}</div>
-      <p className="note">취소·환불 기능은 서버 연결을 준비 중입니다.</p>
-    </Card>)}</div></div>;
+import './my-courses.css';
+function StayPhoto({url,name}) {
+ const [failed,setFailed]=useState(false);
+ return <aside className="reservation-stay-photo"><h3>숙소 사진</h3>{url&&!failed?<img src={url} referrerPolicy="no-referrer" alt={`${name || '숙소'} 사진`} onError={()=>setFailed(true)}/>:<div className="reservation-stay-photo__empty"><span aria-hidden="true">▧</span><p>등록된 숙소 사진이 없습니다.</p></div>}</aside>;
+}
+function BookingStayInfo({ booking }) {
+ const stay = booking.stayInfo;
+ if (!stay) return <p className="note">지역에 맞는 숙소 정보를 찾지 못했습니다.</p>;
+ return <div className="reservation-stay-info">
+  {stay.regionMatched && <p className="note">여행 지역에 맞춘 숙소 데이터입니다. 기존 예약의 일정과 금액은 유지됩니다.</p>}
+  <dl>{stay.address && <><dt>숙소 주소</dt><dd>{stay.address}</dd></>}
+   {stay.phone && <><dt>숙소 연락처</dt><dd>{stay.phone}</dd></>}
+   {stay.checkinTime && <><dt>체크인 / 체크아웃</dt><dd>{stay.checkinTime.slice(0,5)} / {stay.checkoutTime?.slice(0,5) || '미등록'}</dd></>}
+  </dl>
+  {stay.description && <p className="chat-text">{stay.description}</p>}
+ </div>;
+}
+const tabs=[['all','전체 예약'],['upcoming','예약된 여행'],['past','지난 여행']];
+const cover=r=> /부산|제주|울산|포항|여수|인천/.test(r)?beach:/서울|광주|대구/.test(r)?palace:village;
+const labels={COMPLETED:'숙박 완료',CONFIRMED:'예약 확정',PENDING_PAYMENT:'결제 대기',CANCELLED:'예약 취소'};
+export default function Reservations({bookings=[],courses=[],reservationId,member}) {
+ const [cancelNotice,setCancelNotice]=useState('');
+ const [tab,setTab]=useState('all'),[query,setQuery]=useState(''),[latest,setLatest]=useState(null),[status,setStatus]=useState('loading');
+ useEffect(()=>{let cancelled=false;setLatest(null);if(!member?.memberId)return;setStatus('loading');myPageApi.load(member.memberId).then(data=>{if(cancelled)return;if(data.memberId!==member.memberId)throw new Error('Member mismatch');setLatest(data);setStatus('ready');}).catch(()=>{if(!cancelled)setStatus('error');});return()=>{cancelled=true;};},[member?.memberId,tab,reservationId]);
+ const rows=(latest?.bookings??bookings).filter(isVisibleBooking), plans=latest?.courses??courses;
+ const courseFor=b=>plans.find(c=>c.id===b.courseId);
+ const today=new Date().toLocaleDateString('sv-SE');
+ const category=b=>b.courseId?.startsWith('draft-')?'saved':b.endDate<today?'past':'upcoming';
+ const badge=b=>({saved:'저장된 여행',past:'지난 여행',upcoming:'예약된 여행'}[category(b)]);
+ if(reservationId){const b=rows.find(b=>String(b.id)===String(reservationId));if(!b)return status==='loading'?<p role="status">예약을 불러오는 중입니다.</p>:<AccessNotice kind={status==='error'?'unavailable':'denied'}/>;const c=courseFor(b);return <div className="mypage trips-page"><a className="trips-back trips-back-pill" href="#/reservations">← 내 예약 목록</a><header className="trip-detail-hero"><img src={cover(c?.region||b.stay||'')} alt=""/><div><span className="trip-status">{badge(b)}</span><h1>{c?.title||b.stay}</h1><p>{b.date} ~ {b.endDate}</p></div></header><section className="card reservation-detail-layout" style={{marginTop:24}}><div className="reservation-detail-info"><h2>예약 상세</h2><dl><dt>예약번호</dt><dd>{b.reservationNo}</dd><dt>예약 상태</dt><dd>{labels[b.status]||b.status}</dd><dt>숙소</dt><dd>{b.stay || "지역에 맞는 숙소 정보 없음"}</dd><dt>객실</dt><dd>{b.room || "객실 정보 미등록"}</dd><dt>숙박 기간</dt><dd>{b.date} ~ {b.endDate}</dd><dt>인원</dt><dd>{b.guests}명</dd><dt>예약 금액</dt><dd>{money(b.price)}</dd></dl><BookingStayInfo booking={b}/><div className="actions">{b.status==='PENDING_PAYMENT'&&<a className="secondary" href={`#/payments/${b.id}`}>토스 테스트 결제</a>}{category(b)==='upcoming'&&<button type="button" className="reservation-cancel" disabled={b.status==='CANCELLED'} onClick={()=>setCancelNotice('예약 취소 기능은 준비 중입니다. 숙소에 문의해 주세요.')} >{b.status==='CANCELLED'?'취소된 예약':'예약취소'}</button>}{b.status==='COMPLETED'&&<a className="secondary" href={`#/human-courses/create?reservationId=${encodeURIComponent(b.id)}&from=reservations`}>내 여행 추천 작성·수정</a>}</div>{cancelNotice&&<p role="status">{cancelNotice}</p>}</div><StayPhoto key={b.id} url={b.stayInfo?.imageUrl} name={b.stay}/></section>{b.courseId&&<MyCourseMap course={c} courseId={b.courseId} memberId={member?.memberId} expanded title="여행일정" hideMapControls showPlaceDetails/>}<div className="trip-detail-footer"><a className="trips-back trips-back-pill" href="#/reservations">← 내 예약 목록</a></div></div>;}
+ const list=rows.filter(b=>(tab==='all'||category(b)===tab)&&`${courseFor(b)?.title||''} ${courseFor(b)?.region||''} ${b.stay||''} ${b.reservationNo}`.toLowerCase().includes(query.trim().toLowerCase()));
+ if(tab==='all') list.sort((a,b)=>{
+  const aPast=category(a)==='past', bPast=category(b)==='past';
+  if(aPast!==bPast) return aPast?1:-1;
+  const order=aPast
+   ? String(b.endDate||'').localeCompare(String(a.endDate||''))
+   : String(a.date||'').localeCompare(String(b.date||''));
+  return order || String(a.id).localeCompare(String(b.id),undefined,{numeric:true});
+ });
+ return <div className="mypage trips-page"><a className="trips-back trips-back-pill" href="#/mypage">← 마이페이지</a><header className="trips-heading"><div><h1>내 예약</h1><p>여행별 예약을 모아 보고, 숙소와 상세 일정을 확인하세요.</p></div></header><div className="trips-list-toolbar"><nav className="trips-filters" aria-label="예약 분류">{tabs.map(([value,label])=><button type="button" key={value} aria-pressed={tab===value} onClick={()=>setTab(value)}>{label}</button>)}</nav><div className="trips-tools"><label className="trips-search"><span className="trips-sr-only">예약 제목, 지역, 숙소 또는 예약번호 검색</span><span aria-hidden="true">⌕</span><input type="search" placeholder="내 예약 검색" value={query} onChange={e=>setQuery(e.target.value)}/></label></div></div><p className="trips-count" role="status">{list.length}개의 예약</p>{status==='loading'&&<p role="status">최신 예약을 불러오는 중입니다.</p>}{status==='error'&&<p role="alert">최신 예약을 불러오지 못했습니다. 다른 분류를 선택해 다시 시도해 주세요.</p>}{!list.length&&status==='ready'&&<p className="empty">조건에 맞는 예약이 없습니다.</p>}<div className="trips-grid">{list.map(b=>{const c=courseFor(b);return <a key={b.id} className="trip-cover-card" href={`#/reservations/${encodeURIComponent(b.id)}`}><img src={cover(c?.region||b.stay||'')} alt="" loading="lazy"/><span className="trip-status">{badge(b)}</span><div className="trip-card-copy"><span className="trip-region">{c?.region||labels[b.status]||b.status}</span><h2>{c?.title||b.stay||'나의 예약'}</h2><p>{b.date} ~ {b.endDate}<br/>{b.stay}<br/>{b.reservationNo}</p><span className="trip-card-open">예약·일정 자세히 보기 <span aria-hidden="true">↗</span></span></div></a>;})}</div></div>;
 }

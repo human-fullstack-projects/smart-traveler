@@ -1,6 +1,6 @@
 // frontend에서 node src/pages/mypage/tests/settings-verify.mjs (빌드 없음)
 import assert from 'node:assert/strict';
-import { profileError, preferenceError, tagKey, SURVEY_PLACES, SURVEY_AREAS, isSurveyTag, normalTags, surveyDone, surveyError } from '../data/settings.js';
+import { profileError, passwordError, preferenceError, tagKey, SURVEY_PLACES, SURVEY_AREAS, isSurveyTag, normalTags, surveyDone, surveyError } from '../data/settings.js';
 import { routeAccess } from '../data/store.js';
 
 const profile = { nickname: '여행자', email: 'traveler@example.invalid', changePassword: false,
@@ -11,6 +11,9 @@ assert.ok(profileError({ ...profile, nickname: '가'.repeat(51) }));
 assert.ok(profileError({ ...profile, email: 'not-email' }));
 const change = { ...profile, changePassword: true, currentPassword: 'Old12345', newPassword: 'Travel12345', passwordConfirmation: 'Travel12345' };
 assert.equal(profileError(change), '');
+assert.equal(passwordError({ currentPassword: 'Old12345', newPassword: 'Travel12345', passwordConfirmation: 'Travel12345' }), '', '팝업 비밀번호 검증은 닉네임·이메일에 의존하지 않음');
+assert.ok(passwordError({ currentPassword: 'Old12345', newPassword: 'Travel12345', passwordConfirmation: 'Other12345' }));
+assert.ok(passwordError({ currentPassword: '', newPassword: 'Travel12345', passwordConfirmation: 'Travel12345' }));
 for (const invalid of [
   { currentPassword: '' }, { newPassword: 'short1' }, { newPassword: 'passwordonly' },
   { passwordConfirmation: 'different' }, { newPassword: 'Old12345', passwordConfirmation: 'Old12345' },

@@ -137,7 +137,7 @@ export default function KakaoMap({ places = EMPTY_PLACES, center, level = 3, wid
 
   if (error) return <MapFallback
     onRetry={() => { setError(''); setMapReady(false); onStatusChangeRef.current?.('loading'); setRetryKey((value) => value + 1); }}
-    reason="네트워크 연결을 확인한 뒤 다시 시도해 주세요."
+    reason={error}
     width={width}
     height={height}
   />;

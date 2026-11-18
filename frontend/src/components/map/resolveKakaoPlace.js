@@ -16,6 +16,11 @@ function normalizedName(value) {
   return String(value || '').replace(/[^0-9a-z가-힣]/gi, '').toLowerCase();
 }
 
+function samePlaceName(a, b) {
+  const first = normalizedName(a), second = normalizedName(b);
+  return first === second || first.replace(/해수욕장$/, '') === second.replace(/해수욕장$/, '');
+}
+
 function addressMatches(given, candidate) {
   const parts = (value) => String(value || '').trim().split(/\s+/).filter(Boolean);
   const a = parts(given);
@@ -54,6 +59,8 @@ function uniqueCandidate(results, name) {
   const usable = (results || []).filter((result) => hasValidCoordinates({ latitude: result.y, longitude: result.x }));
   const exact = usable.filter((result) => normalizedName(result.place_name) === normalizedName(name));
   if (exact.length === 1) return exact[0];
+  const aliases = usable.filter((result) => samePlaceName(result.place_name, name));
+  if (exact.length === 0 && aliases.length === 1) return aliases[0];
   return usable.length === 1 ? usable[0] : null;
 }
 

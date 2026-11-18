@@ -12,3 +12,12 @@
 .map-place-card.is-unresolved .map-place-card__badge { background: #fde2de; color: #b44642; }
 .map-place-card.is-unresolved .map-place-card__arrow { color: #b44642; font-weight: 800; }
 .map-place-card__text .map-place-card__warning { color: #b44642; }
+.map-place-detail { padding: 20px; margin-top: -8px; border: 1px solid #d9e9e1; border-top: 0; border-radius: 0 0 13px 13px; background: #f8fcfa; animation: place-detail-open .18s ease-out; }
+.map-place-detail__content { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 24px; align-items: start; }
+.map-place-detail__content img { display: block; width: 100%; max-height: 320px; object-fit: cover; border-radius: 10px; }
+.map-place-detail__content h4 { margin: 0 0 10px; font-size: 18px; }
+.map-place-detail__content .map-place-detail__description { white-space: pre-line; line-height: 1.8; color: #315448; }
+.map-place-detail__no-photo { display: grid; min-height: 180px; place-items: center; border-radius: 10px; background: #edf3ef; color: #667f72; }
+@keyframes place-detail-open { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 650px) { .map-place-detail__content { grid-template-columns: 1fr; gap: 16px; } }
+@media (prefers-reduced-motion: reduce) { .map-place-detail { animation: none; } }

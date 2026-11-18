@@ -13,8 +13,8 @@ export default function CourseActions({ course, execute }) {
     setLiking(false);
   }
   return <section className="panel"><div className="panel-heading"><h2>게시글 기능</h2></div>
-    <div className="actions like-action"><button className="primary" type="button" onClick={changeLike} disabled={liking} aria-pressed={course.likedByMe} aria-busy={liking}>{liking ? '처리 중…' : course.likedByMe ? '♥ 좋아요 취소' : '♡ 좋아요'}</button><span className="muted" aria-live="polite">좋아요 {course.likes}개</span></div>
-    {course.mine && <p className="right-action"><a className="button btn-full" href={`#/human-courses/${course.id}/edit`}>내 코스 수정하기 →</a></p>}
+    <div className="actions"><button className="primary" onClick={async () => { const result = await execute?.({ type: 'like', id: course.id }); setNotice(result?.error || '좋아요 상태를 변경했습니다.'); }} aria-pressed={course.likedByMe}>{course.likedByMe ? '좋아요 취소' : '좋아요 누르기'}</button><span className="muted">좋아요 {course.likes}개</span></div>
+    {course.mine && <p className="right-action"><a className="button btn-full" href={`#/human-courses/${course.id}/edit`}>저장된 여행 수정하기 →</a></p>}
     {course.mine && <div className="delete-course"><button type="button" onClick={() => setDeleting(true)}>내 게시글 삭제</button>{deleting && <div className="note" role="group" aria-label="게시글 삭제 확인"><p>게시글과 댓글을 삭제할까요? 삭제 후에는 되돌릴 수 없습니다.</p><div className="actions"><button type="button" onClick={async () => { const result = await execute?.({ type: 'delete', id: course.id }); if (result?.error) setNotice(result.error); else if (result?.id) window.location.hash = '/human-courses'; }}>삭제 확인</button><button type="button" onClick={() => setDeleting(false)}>취소</button></div></div>}</div>}
     <hr className="divider" />
     {!course.mine && !course.reportedByMe && <details><summary>게시글 신고</summary><form onSubmit={async (event) => { event.preventDefault(); const data = new FormData(event.currentTarget); const result = await execute?.({ type: 'report', id: course.id, reason: data.get('reason'), details: data.get('details') }); setNotice(result?.error || '신고를 접수했습니다. 검토 전까지 공개 상태를 유지합니다.'); }}>

@@ -28,6 +28,27 @@ public class ProfileService {
     public Profile get(Authentication auth, Long expected) { return profiles.find(owners.owner(auth, expected)); }
 
     @Transactional
+    public PasswordChanged changePassword(Authentication auth, ChangePassword request) {
+        long owner = owners.owner(auth,request.expectedMemberId());
+        String existing = profiles.lockPassword(owner);
+        if (existing==null) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"다시 로그인해 주세요.");
+        String encoded = encodePassword(existing,request.currentPassword(),request.newPassword(),request.passwordConfirmation());
+        profiles.updatePassword(owner,encoded);
+        return new PasswordChanged(true);
+    }
+
+    private String encodePassword(String existing, String current, String next, String confirmation) {
+        if (current==null || current.getBytes(StandardCharsets.UTF_8).length>72 || !passwords.matches(current,existing))
+            throw bad("현재 비밀번호가 맞지 않습니다.");
+        if (next==null || next.length()<8 || next.getBytes(StandardCharsets.UTF_8).length>72
+                || !next.matches("(?s).*[A-Za-z].*") || !next.matches("(?s).*[0-9].*"))
+            throw bad("새 비밀번호는 영문·숫자를 포함한 8자 이상, UTF-8 기준 72바이트 이하여야 합니다.");
+        if (!next.equals(confirmation)) throw bad("새 비밀번호 확인이 일치하지 않습니다.");
+        if (passwords.matches(next,existing)) throw bad("현재 비밀번호와 다른 비밀번호를 입력해 주세요.");
+        return passwords.encode(next);
+    }
+
+    @Transactional
     public Saved save(Authentication auth, SaveProfile request) {
         long owner = owners.owner(auth, request.expectedMemberId());
         String avatar = normalizeImage(request.avatarData());
@@ -35,18 +56,7 @@ public class ProfileService {
         if (existingPassword == null) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "다시 로그인해 주세요.");
         String encoded = null;
         if (request.changePassword()) {
-            if (request.currentPassword() == null || request.currentPassword().getBytes(StandardCharsets.UTF_8).length > 72
-                || !passwords.matches(request.currentPassword(), existingPassword)) {
-                throw bad("현재 비밀번호가 맞지 않습니다.");
-            }
-            String next = request.newPassword();
-            if (next == null || next.length() < 8 || next.getBytes(StandardCharsets.UTF_8).length > 72
-                || !next.matches("(?s).*[A-Za-z].*") || !next.matches("(?s).*[0-9].*")) {
-                throw bad("새 비밀번호는 영문·숫자를 포함한 8자 이상, UTF-8 기준 72바이트 이하여야 합니다.");
-            }
-            if (!next.equals(request.passwordConfirmation())) throw bad("새 비밀번호 확인이 일치하지 않습니다.");
-            if (passwords.matches(next, existingPassword)) throw bad("현재 비밀번호와 다른 비밀번호를 입력해 주세요.");
-            encoded = passwords.encode(next);
+            encoded = encodePassword(existingPassword,request.currentPassword(),request.newPassword(),request.passwordConfirmation());
         }
         try {
             profiles.update(owner, request.nickname().trim(), request.email().trim(), encoded, avatar);

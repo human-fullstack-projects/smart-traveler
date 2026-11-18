@@ -19,12 +19,19 @@ function unavailable(place) {
  * Visit numbers restart each day. Lodging does not take a visit number.
  */
 export default function ItineraryMapPanel({ days = EMPTY_DAYS, center, searchRegion = '', level = 5, height = '320px', extraPlaces = EMPTY_PLACES,
-  extraTitle = '주변 숙소', previewFailure = false, sourceNote, onPlaceSelect }) {
+  extraTitle = '주변 숙소', previewFailure = false, sourceNote, onPlaceSelect, showIntro = true, showCategories = true, focusPlace, loadPlaceDetails }) {
   const [category, setCategory] = useState('all');
   const [activeDay, setActiveDay] = useState('all');
   const [selectedId, setSelectedId] = useState(null);
   const [mapStatus, setMapStatus] = useState('loading');
   const [resolvedById, setResolvedById] = useState(() => new Map());
+
+  useEffect(() => {
+    if (!focusPlace?.id) return;
+    setCategory('all');
+    setActiveDay('all');
+    setSelectedId(focusPlace.id);
+  }, [focusPlace]);
 
   useEffect(() => {
     let cancelled = false;
@@ -77,16 +84,16 @@ export default function ItineraryMapPanel({ days = EMPTY_DAYS, center, searchReg
   const selected = selectedPosition || visibleDays.flatMap((day) => day.places).find((place) => String(place.id) === String(selectedId));
 
   function selectPlace(place) {
-    setSelectedId(place.id);
+    setSelectedId(current => loadPlaceDetails && current === place.id ? null : place.id);
     onPlaceSelect?.(place);
   }
 
   return <div className="itinerary-map">
-    <p className="itinerary-map__intro">장소를 누르면 지도와 마커가 해당 위치로 이동합니다. 지도가 열리지 않아도 일정 목록을 볼 수 있습니다.</p>
-    <div className="itinerary-map__categories" role="group" aria-label="장소 종류">
+    {showIntro && <p className="itinerary-map__intro">장소를 누르면 지도와 마커가 해당 위치로 이동합니다. 지도가 열리지 않아도 일정 목록을 볼 수 있습니다.</p>}
+    {showCategories && <div className="itinerary-map__categories" role="group" aria-label="장소 종류">
       {['all', 'course', ...(hasStays ? ['stay'] : [])].map((value) => <button key={value} type="button" aria-pressed={category === value}
         onClick={() => { setCategory(value); setSelectedId(null); }}>{{ all: '전체', course: '방문지', stay: '숙소' }[value]}</button>)}
-    </div>
+    </div>}
     {numberedDays.length > 1 && <div className="itinerary-map__days" role="group" aria-label="여행 일자">
       <button type="button" aria-pressed={activeDay === 'all'} onClick={() => { setActiveDay('all'); setSelectedId(null); }}>전체 코스</button>
       {numberedDays.map((day) => <button key={day.day} type="button" aria-pressed={String(activeDay) === String(day.day)}
@@ -101,7 +108,7 @@ export default function ItineraryMapPanel({ days = EMPTY_DAYS, center, searchReg
     {sourceNote && <p className="itinerary-map__source">{sourceNote}</p>}
     <div className="itinerary-map__day-list">{visibleDays.map((day) => <section className="itinerary-map__day" key={day.day}>
       <h3>{day.day}일차</h3>
-      {day.places.length ? <MapPlaceCards places={day.places} selectedId={selectedId} onSelect={selectPlace} /> : <p>표시할 장소가 없습니다.</p>}
+      {day.places.length ? <MapPlaceCards places={day.places} selectedId={selectedId} onSelect={selectPlace} loadDetails={loadPlaceDetails} searchRegion={searchRegion} /> : <p>표시할 장소가 없습니다.</p>}
     </section>)}</div>
     {visibleExtras.length > 0 && <section className="itinerary-map__day itinerary-map__extras">
       <h3>{extraTitle}</h3><MapPlaceCards places={visibleExtras} selectedId={selectedId} onSelect={selectPlace} />

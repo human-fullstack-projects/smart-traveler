@@ -77,3 +77,13 @@ test('valid coordinates retain a marker when reverse lookup fails', async () => 
   assert.equal(result.locationStatus, 'ready');
   assert.equal(result.addressStatus, 'unavailable');
 });
+
+test('a shortened beach name resolves only when unique in the region', async () => {
+  const { maps } = mapsFor({ keyword: [
+    { place_name: '광안리해수욕장', address_name: '부산 수영구 광안해변로 219', x: '129.118', y: '35.153' },
+    { place_name: '광안리 카페', address_name: '부산 수영구 광안해변로 200', x: '129.12', y: '35.15' },
+  ] });
+  const result = await resolveKakaoPlace(maps, { name: '광안리' }, '부산');
+  assert.equal(result.locationStatus, 'ready');
+  assert.equal(result.longitude, 129.118);
+});
