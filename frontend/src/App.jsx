@@ -228,6 +228,7 @@ export default function App() {
       {(routePath === '/human-courses/create' || Boolean(courseMatch?.[2])) && !member
         ? <AccessNotice kind="login" />
         : HumanCourseScreen ? <HumanCourseScreen key={route} {...humanCourses} courseId={courseMatch?.[1]}
+          member={member}
           isAuthenticated={Boolean(member)}
           reservationId={new URLSearchParams(route.split('?')[1] || '').get('reservationId') || ''}
           from={new URLSearchParams(route.split('?')[1] || '').get('from') || ''}

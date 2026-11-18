@@ -20,12 +20,14 @@
 .travel-style-option > strong { font-size: 22px; line-height: 1.4; font-weight: 800; margin-bottom: 5px; }
 .travel-style-description { font-size: 14px; color: #465b83; line-height: 1.5; }
 .travel-style-check { position: absolute; top: 14px; right: 16px; width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%; background: var(--ts-teal); color: white; font-size: 16px; font-weight: 800; }
-.travel-style-actions { display: flex; align-items: center; margin-top: 30px; gap: 12px; }
+.travel-style-actions { display: flex; align-items: center; justify-content: flex-end; margin-top: 30px; gap: 12px; }
 .travel-style-page .travel-style-actions button, .travel-style-page .travel-style-actions a { box-sizing: border-box; display: inline-flex; justify-content: center; align-items: center; border-radius: 30px; padding: 13px 25px; min-height: 50px; font-size: 15px; font-weight: 700; line-height: 1.4; text-decoration: none; font-family: inherit; cursor: pointer; }
 .travel-style-page .travel-style-back { border: 2px solid var(--ts-teal); color: var(--ts-teal); background: transparent; }
 .travel-style-page .travel-style-actions a { border: 2px solid var(--ts-border); color: #43577f; background: transparent; }
 .travel-style-page .travel-style-next { background: var(--ts-teal); color: white; border: 2px solid var(--ts-teal); }
 .travel-style-page .travel-style-next:disabled { opacity: .45; cursor: default; }
 .travel-style-page button:focus-visible, .travel-style-page a:focus-visible { outline: 3px solid #428f93; outline-offset: 4px; }
-.travel-style-notice { color: var(--ts-teal); margin-top: 20px; }
+.travel-style-save { display: flex; align-items: flex-end; gap: 12px; min-width: 0; }
+.travel-style-save > button { flex-shrink: 0; white-space: nowrap; }
+.travel-style-notice { color: var(--ts-teal); margin: 0; overflow-wrap: anywhere; }
 @media (max-width: 760px) { .travel-style-page { padding: 20px 14px 40px; min-height: auto; } .travel-style-panel { padding: 32px 22px; min-height: 650px; } .travel-style-page h2 { font-size: 24px; } .travel-style-options { grid-template-columns: 1fr; gap: 12px; } .travel-style-page .travel-style-option { min-height: 140px; padding: 18px; } .travel-style-actions { flex-wrap: wrap; } .travel-style-page .travel-style-actions button, .travel-style-page .travel-style-actions a { padding: 11px 18px; } }

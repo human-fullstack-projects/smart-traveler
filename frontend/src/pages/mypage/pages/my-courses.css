@@ -1,5 +1,6 @@
 ﻿.mypage.trips-page { padding: 18px 0 60px; }
 .mypage.trips-page { --trips-content-offset: clamp(0px, calc((100vw - 1232px) / 2), 240px); position: relative; left: calc(-1 * var(--trips-content-offset)); }
+html:has(.my-posts-list) { scrollbar-gutter: stable; }
 .trips-back { display: inline-block; color: #59616c; font-size: 14px; margin-bottom: 18px; text-decoration: none; }
 .trips-back-pill { padding: 8px 18px; border: 1px solid #e2e4e8; border-radius: 999px; background: #fff; transition: background .2s, border-color .2s; }
 .trips-back-pill:hover { background: #f5f4f2; border-color: #c6c2ca; }

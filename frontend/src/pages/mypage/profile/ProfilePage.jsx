@@ -80,8 +80,13 @@ export default function ProfilePage({ member }) {
         <div className="mp-password-action"><span>비밀번호</span><button type="button" className="secondary" onClick={() => setPasswordOpen(true)}>비밀번호 변경</button></div>
         <label>이메일<input name="email" type="email" value={form.email} maxLength={255} onChange={e => update('email', e.target.value)} required autoComplete="email" /></label>
       </div>
-      <div className="actions mp-profile-actions"><button className="primary" type="submit">{busy ? '저장 중…' : reading ? '사진 처리 중…' : '내 정보 저장'}</button><a className="secondary" href="#/mypage">마이페이지 홈</a></div>
-    </fieldset></form>{notice && <p role="status">{notice}</p>}</Card>
+      <div className="actions mp-profile-actions">
+        {notice && <p className="mp-profile-notice" role="status">{notice}</p>}
+        <button className="primary" type="submit" aria-busy={busy || reading}>내 정보 저장</button>
+        <a className="secondary" href="#/mypage">마이페이지 홈</a>
+      </div>
+    </fieldset>
+    </form></Card>
     {passwordOpen && <PasswordChangeDialog key={member.memberId} memberId={member.memberId} onClose={() => setPasswordOpen(false)} onChanged={() => setNotice('비밀번호를 변경했습니다. 다음 로그인부터 새 비밀번호를 사용해 주세요.')} />}
   </div>;
 }

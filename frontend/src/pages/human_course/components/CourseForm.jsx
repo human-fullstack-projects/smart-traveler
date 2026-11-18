@@ -19,7 +19,7 @@ function readImage(file) {
   });
 }
 
-export default function CourseForm({ course = {}, mode = 'create', onSubmit, cancelHref, disabled = false, serverMode = false, previewContext }) {
+export default function CourseForm({ course = {}, mode = 'create', onSubmit, onSaveDraft, cancelHref, disabled = false, serverMode = false, previewContext }) {
   const [submitError, setSubmitError] = useState('');
   const [pending, setPending] = useState(null);
   const dialog = useRef(null);
@@ -111,7 +111,9 @@ export default function CourseForm({ course = {}, mode = 'create', onSubmit, can
         {submitError && <p role="alert">{submitError}</p>}
         <div className="actions recommendation-preview-actions"><button type="button" disabled={submitting} onClick={() => { dialog.current?.close(); setPending(null); }}>수정</button><button className="primary" type="button" disabled={submitting} onClick={async () => { setSubmitting(true); try { const result = await onSubmit?.(pending); if (result?.error) setSubmitError(result.error); else { dialog.current?.close(); setPending(null); } } finally { setSubmitting(false); } }}>{submitting ? '등록 중…' : editing ? '수정 저장' : '등록'}</button></div>
       </dialog>
-      <div className="actions"><button className="primary" type="submit" disabled={!onSubmit || reading || submitting || Boolean(photoError)}>{editing ? '수정 저장하기' : '등록하기'}</button>{cancelHref && <a href={cancelHref} className="button">목록으로</a>}</div>
+      <div className="actions"><button className="primary" type="submit" disabled={!onSubmit || reading || submitting || Boolean(photoError)}>{editing ? '수정 저장하기' : '등록하기'}</button>
+        {onSaveDraft && <button type="button" disabled={submitting} onClick={() => onSaveDraft(preview)}>임시 저장</button>}
+        {cancelHref && <a href={cancelHref} className="button">목록으로</a>}</div>
     </fieldset>
   </form>;
 }
