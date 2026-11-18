@@ -5,6 +5,7 @@ import com.smarttraveler.admin.dto.AdminViews;
 import com.smarttraveler.admin.dto.AdminViews.HumanCourseView;
 import com.smarttraveler.admin.dto.AdminViews.HumanReportView;
 import com.smarttraveler.domain.entity.Member;
+import com.smarttraveler.domain.entity.Lodging;
 import com.smarttraveler.domain.entity.MemberSuspensionHistory;
 import com.smarttraveler.domain.entity.OwnerProfile;
 import com.smarttraveler.domain.entity.RecommendationCriteria;
@@ -18,6 +19,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
@@ -37,7 +43,7 @@ public class AdminRestController {
     public Map<String,Object> dashboard() {
         // 「전체 회원」은 회원 관리 목록과 같은 기준(여행자·관리자). 업주는 「업주 회원 관리」에서 따로 셈
         return Map.of("members", data.members().stream().filter(x -> MEMBER_ROLES.contains(x.getRoleCode())).count(), "orders", data.reservations().size(),
-            "lodgings", data.lodgings().stream().filter(x -> !"DELETED".equals(x.getStatus())).count(), "humanCourses", data.humanCourses().size(),
+            "lodgings", data.countActiveLodgings(), "humanCourses", data.humanCourses().size(),
             "pendingOwners", data.owners().stream().filter(x -> "PENDING".equals(x.getReviewStatusCode())).count(),
             "openReports", data.humanReports().stream().filter(x -> "PENDING".equals(x.getStatus())).count());
     }
@@ -63,6 +69,16 @@ public class AdminRestController {
                 || memberMatches(members.get(x.getMemberId()), query))
             .map(AdminViews::of).toList();
     }
+    @GetMapping("/orders/lodgings")
+    public List<Map<String,Object>> orderLodgings() {
+        return jdbc.queryForList("""
+            SELECT l.lodging_id AS lodgingId, l.name, l.status
+            FROM lodging l
+            WHERE EXISTS (SELECT 1 FROM room r JOIN room_reservation rr ON rr.room_id = r.room_id
+                          WHERE r.lodging_id = l.lodging_id)
+            ORDER BY l.name, l.lodging_id
+            """);
+    }
     @GetMapping("/orders/{id}")
     public Map<String,Object> order(@PathVariable Long id) {
         Map<String, Object> result = new LinkedHashMap<>();
@@ -81,21 +97,31 @@ public class AdminRestController {
     }
 
     @GetMapping("/lodgings")
-    public List<Map<String,Object>> lodgings(@RequestParam(required=false) String status,
+    public Object lodgings(@RequestParam(required=false) String status,
         @RequestParam(required=false) Long ownerId, @RequestParam(required=false) String region,
-        @RequestParam(required=false) String query, @RequestParam(required=false) String ownerName) {
-        Map<Long, OwnerProfile> ownerById = ownersById();
-        Map<Long, Member> memberById = membersById();
-        return data.lodgings().stream().filter(x -> status != null ? status.equals(x.getStatus()) : !"DELETED".equals(x.getStatus()))
-            .filter(x -> ownerId==null || ownerId.equals(x.getOwnerId()))
-            .filter(x -> region==null || contains(x.getAddress(),region))
-            .filter(x -> query==null || contains(x.getName(),query) || contains(x.getAddress(),query))
-            .filter(x -> ownerName==null || ownerName.isBlank() || ownerMatches(ownerById.get(x.getOwnerId()), memberById, ownerName))
-            .map(x -> lodgingView(x, ownerById, memberById)).toList();
+        @RequestParam(required=false) String query, @RequestParam(required=false) String ownerName,
+        @RequestParam(required=false) Long sidoId, @RequestParam(required=false) Integer page,
+        @RequestParam(defaultValue="10") int size, @RequestParam(defaultValue="lodgingId") String sort,
+        @RequestParam(defaultValue="DESC") String direction) {
+        if (page != null && page < 0) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "페이지 번호는 0 이상이어야 합니다.");
+        if (size < 1) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "페이지 크기는 1 이상이어야 합니다.");
+        size = Math.min(size, 100);
+        if (!Set.of("lodgingId", "name").contains(sort))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "지원하지 않는 숙소 정렬 기준입니다.");
+        Sort.Direction sortDirection;
+        try { sortDirection = Sort.Direction.fromString(direction); }
+        catch (IllegalArgumentException ex) { throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "지원하지 않는 정렬 방향입니다."); }
+        Pageable pageable = page == null ? Pageable.unpaged() : PageRequest.of(page, size, Sort.by(sortDirection, sort));
+        Page<Lodging> result = data.searchLodgings(status, ownerId, sidoId, region, query, ownerName, pageable);
+        List<Map<String,Object>> content = lodgingViews(result.getContent());
+        if (page == null) return content;
+        return Map.of("content", content, "page", result.getNumber(), "size", result.getSize(),
+            "totalElements", result.getTotalElements(), "totalPages", result.getTotalPages());
     }
     @GetMapping("/lodgings/{id}")
     public Map<String,Object> lodging(@PathVariable Long id) {
-        return Map.of("lodging",lodgingView(data.lodging(id), ownersById(), membersById()),"rooms",AdminViews.list(data.roomsForLodging(id)),
+        Lodging item = data.lodging(id);
+        return Map.of("lodging",lodgingViews(List.of(item)).get(0),"rooms",AdminViews.list(data.roomsForLodging(id)),
             "reservations",AdminViews.list(data.reservationsForLodging(id)));
     }
     @PostMapping("/lodgings/{id}/status")
@@ -133,8 +159,7 @@ public class AdminRestController {
         result.put("ownerProfile",owner == null ? null : AdminViews.of(owner));
         result.put("suspensions",AdminViews.list(data.suspensions(id)));
         result.put("ownerReviews",owner==null?List.of():AdminViews.list(data.reviewHistory(owner.getOwnerId())));
-        result.put("ownerLodgings",owner==null?List.of():data.lodgings().stream()
-            .filter(x -> Objects.equals(owner.getOwnerId(),x.getOwnerId())).map(AdminViews::of).toList());
+        result.put("ownerLodgings",owner==null?List.of():data.lodgingsByOwner(owner.getOwnerId()).stream().map(AdminViews::of).toList());
         return result;
     }
     @PostMapping("/members/{id}/status")
@@ -311,9 +336,18 @@ public class AdminRestController {
     }
 
     private static final List<String> MEMBER_ROLES = List.of("USER", "ADMIN");
-    private Map<Long, OwnerProfile> ownersById() {
+    private List<Map<String,Object>> lodgingViews(List<Lodging> lodgings) {
+        Map<Long, OwnerProfile> ownerById = ownersById(lodgings.stream().map(Lodging::getOwnerId)
+            .filter(Objects::nonNull).collect(java.util.stream.Collectors.toSet()));
+        Map<Long, Member> memberById = new HashMap<>();
+        data.membersByIds(ownerById.values().stream().map(OwnerProfile::getMemberId)
+            .filter(Objects::nonNull).collect(java.util.stream.Collectors.toSet()))
+            .forEach(member -> memberById.put(member.getMemberId(), member));
+        return lodgings.stream().map(item -> lodgingView(item, ownerById, memberById)).toList();
+    }
+    private Map<Long, OwnerProfile> ownersById(Set<Long> ownerIds) {
         Map<Long, OwnerProfile> map = new HashMap<>();
-        data.owners().forEach(owner -> map.put(owner.getOwnerId(), owner));
+        data.ownersByIds(ownerIds).forEach(owner -> map.put(owner.getOwnerId(), owner));
         return map;
     }
     private Map<Long, Member> membersById() {
@@ -335,12 +369,6 @@ public class AdminRestController {
             : !blank(owner.getBusinessName()) ? owner.getBusinessName() : member == null ? null : member.getNickname();
         view.put("ownerName", name);
         return view;
-    }
-    private static boolean ownerMatches(OwnerProfile owner, Map<Long, Member> memberById, String query) {
-        if (owner == null) return false;
-        Member member = memberById.get(owner.getMemberId());
-        return contains(owner.getRepresentativeName(), query) || contains(owner.getBusinessName(), query)
-            || member != null && contains(member.getNickname(), query);
     }
     private static boolean blank(String value) { return value == null || value.isBlank(); }
 
