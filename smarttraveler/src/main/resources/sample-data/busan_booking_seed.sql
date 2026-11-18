@@ -14,12 +14,12 @@ VALUES
 ON DUPLICATE KEY UPDATE lodging_id = lodging_id;
 
 INSERT INTO room (lodging_id, name, base_capacity, max_capacity, price_off_weekday, price_off_weekend)
-SELECT lodging_id, '스탠다드 더블', 2, 2, 79000, 99000 FROM lodging
+SELECT lodging_id, '스탠다드 (최대 2인)', 2, 2, 79000, 99000 FROM lodging
 WHERE source_provider='BOOKING_DEMO' AND source_content_id='BUSAN_SEOMYEON'
 ON DUPLICATE KEY UPDATE room_id = room_id;
 
 INSERT INTO room (lodging_id, name, base_capacity, max_capacity, price_off_weekday, price_off_weekend)
-SELECT lodging_id, '패밀리 트윈', 2, 4, 149000, 189000 FROM lodging
+SELECT lodging_id, '패밀리 (최대 4인)', 2, 4, 149000, 189000 FROM lodging
 WHERE source_provider='BOOKING_DEMO' AND source_content_id='BUSAN_HAEUNDAE'
 ON DUPLICATE KEY UPDATE room_id = room_id;
 
@@ -34,8 +34,8 @@ FROM room r
 JOIN lodging l ON l.lodging_id=r.lodging_id
 CROSS JOIN seq_0_to_89 d
 WHERE l.source_provider='BOOKING_DEMO'
-  AND ((l.source_content_id='BUSAN_SEOMYEON' AND r.name='스탠다드 더블')
-       OR (l.source_content_id='BUSAN_HAEUNDAE' AND r.name='패밀리 트윈'))
+  AND ((l.source_content_id='BUSAN_SEOMYEON' AND r.name='스탠다드 (최대 2인)')
+       OR (l.source_content_id='BUSAN_HAEUNDAE' AND r.name='패밀리 (최대 4인)'))
 ON DUPLICATE KEY UPDATE inventory_id = inventory_id;
 
 COMMIT;
