@@ -74,22 +74,23 @@ function Pager({ page, pages, size, total, onPage, onSize }) {
   </div>;
 }
 
-function Table({ title, rows, columns, rowKey, selected, onSelect, empty = '자료가 없습니다.', pageSize = 5 }) {
+function Table({ title, rows, columns, rowKey, selected, onSelect, empty = '자료가 없습니다.', pageSize = 5, serverPaging }) {
   const [size, setSize] = useState(pageSize);
   const [page, setPage] = useState(1);
-  const total = rows ? rows.length : 0;
-  const pages = Math.max(1, Math.ceil(total / size));
+  const total = serverPaging ? serverPaging.total : rows ? rows.length : 0;
+  const pages = serverPaging ? Math.max(1, serverPaging.pages) : Math.max(1, Math.ceil(total / size));
   useEffect(() => { if (page > pages) setPage(pages); }, [page, pages]);
-  const shown = rows ? rows.slice((page - 1) * size, page * size) : null;
+  const shown = rows ? serverPaging ? rows : rows.slice((page - 1) * size, page * size) : null;
   return <div className="adm-card">
-    {title && <h2 className="adm-card-title">{title} <span className="st-note">{rows ? `${rows.length}건` : ''}</span></h2>}
+    {title && <h2 className="adm-card-title">{title} <span className="st-note">{rows ? `${total}건` : ''}</span></h2>}
     <div className="adm-table-wrap">
       {!rows ? <p className="adm-empty">불러오는 중…</p> : rows.length === 0 ? <p className="adm-empty">{empty}</p> :
         <table className="adm-table"><thead><tr>{columns.map((c) => <th key={c[0]}>{c[0]}</th>)}</tr></thead>
           <tbody>{shown.map((r) => <tr key={r[rowKey]} aria-selected={selected === r[rowKey]} onClick={() => onSelect?.(r[rowKey])}>
             {columns.map((c) => <td key={c[0]}>{c[1](r)}</td>)}</tr>)}</tbody></table>}
     </div>
-    <Pager page={Math.min(page, pages)} pages={pages} size={size} total={total} onPage={setPage} onSize={(n) => { setSize(n); setPage(1); }} />
+    <Pager page={serverPaging?.page ?? Math.min(page, pages)} pages={pages} size={serverPaging?.size ?? size} total={total}
+      onPage={serverPaging?.onPage ?? setPage} onSize={serverPaging?.onSize ?? ((n) => { setSize(n); setPage(1); })} />
   </div>;
 }
 
@@ -110,8 +111,8 @@ function useAction(after) {
 }
 const Msg = ({ msg }) => (msg ? <p className={`adm-msg${msg.ok ? '' : ' error'}`} role="status">{msg.text}</p> : null);
 
-function Filters({ fields, value, onChange }) {
-  return <div className="adm-filters">{fields.map(([name, label, options]) => <label key={name} className="st-field">{label}
+function Filters({ fields, value, onChange, children }) {
+  return <div className="adm-filters">{children}{fields.map(([name, label, options]) => <label key={name} className="st-field">{label}
     {options ? <select className="st-input" value={value[name] || ''} onChange={(e) => onChange({ ...value, [name]: e.target.value })}>
       <option value="">전체</option>{options.map((o) => <option key={o} value={o}>{label === '운영 상태' && o === 'SUSPENDED' ? '운영중지' : o === 'true' ? '신고 있음' : o === 'false' ? '신고 없음' : o === 'NONE' ? '신고 없음' : LABEL[o] || o}</option>)}</select>
       : <input className="st-input" type={name === 'from' || name === 'to' ? 'date' : name === 'postId' ? 'number' : 'text'} value={value[name] || ''} placeholder="검색어" onChange={(e) => onChange({ ...value, [name]: e.target.value })} />}
@@ -160,8 +161,7 @@ const histCols = [['일시', (h) => date(h.createdAt || h.created_at)], ['처리
 function Orders() {
   const [f, setF] = useState({});
   const [list, reload] = useLoad(() => adminGet('/orders', f), [JSON.stringify(f)]);
-  const [lodgings] = useLoad(() => Promise.all([adminGet('/lodgings'), adminGet('/lodgings', { status: 'DELETED' })])
-    .then((groups) => groups.flat()), []);
+  const [lodgings] = useLoad(() => adminGet('/orders/lodgings'), []);
   const [sel, setSel] = useState(null);
   const [detail, reloadDetail] = useLoad(() => (sel ? adminGet(`/orders/${sel}`) : Promise.resolve(null)), [sel]);
   const [reason, setReason] = useState('');
@@ -205,11 +205,19 @@ function Orders() {
 /* ---------- 숙소 (ADM-05~07) ---------- */
 function Lodgings() {
   const [f, setF] = useState({});
-  const [list, reload] = useLoad(() => adminGet('/lodgings', f), [JSON.stringify(f)]);
+  const [page, setPage] = useState(1);
+  const [size, setSize] = useState(10);
+  const [regions] = useLoad(() => adminGet('/regions'), []);
+  const [list, reload] = useLoad(() => adminGet('/lodgings', { ...f, page: page - 1, size }), [JSON.stringify(f), page, size]);
   const [sel, setSel] = useState(null);
   const [detail, reloadDetail] = useLoad(() => (sel ? adminGet(`/lodgings/${sel}`) : Promise.resolve(null)), [sel]);
   const [reason, setReason] = useState('');
   const [msg, run] = useAction(() => { reload(); reloadDetail(); });
+  const setFilter = (next) => { setF(next); setPage(1); };
+  const total = list.data?.totalElements ?? 0;
+  const pages = Math.max(1, list.data?.totalPages ?? 1);
+  useEffect(() => { if (page > pages && list.data) setPage(pages); }, [page, pages, list.data]);
+  const sidoRows = (regions.data || []).filter((r) => r.regionLevel === 'SIDO');
   const l = detail.data?.lodging;
   const act = (status) => run(() => adminPost(`/lodgings/${sel}/status`, { status, reason: reason || null }), `숙소 상태를 「${LABEL[status]}」(으)로 바꿨어요.`);
   const remove = () => {
@@ -217,10 +225,15 @@ function Lodgings() {
     run(() => adminPost(`/lodgings/${sel}/delete`, { reason: reason || null }), (result) => result.message);
   };
   return <>
-    <Filters fields={[['status', '운영 상태', ['PENDING', 'ACTIVE', 'REJECTED', 'SUSPENDED', 'DELETED']], ['query', '숙소 이름'], ['ownerName', '업주 이름']]} value={f} onChange={setF} />
-    <Msg msg={msg || (list.error && { text: list.error })} />
+    <Filters fields={[['status', '운영 상태', ['PENDING', 'ACTIVE', 'REJECTED', 'SUSPENDED', 'DELETED']], ['query', '숙소 이름'], ['ownerName', '업주 이름']]} value={f} onChange={setFilter}>
+      <label className="st-field">시·도<select className="st-input" value={f.sidoId || ''} onChange={(e) => setFilter({ ...f, sidoId: e.target.value })}>
+        <option value="">전체</option>{sidoRows.map((r) => <option key={r.regionId} value={r.regionId}>{r.fullName}</option>)}
+      </select></label>
+    </Filters>
+    <Msg msg={msg || ((list.error || regions.error) && { text: list.error || regions.error })} />
     <div className="adm-split">
-      <Table title="숙소 목록" rows={list.data} rowKey="lodgingId" selected={sel} onSelect={setSel} pageSize={10}
+      <Table title="숙소 목록" rows={list.data?.content} rowKey="lodgingId" selected={sel} onSelect={setSel} pageSize={10}
+        serverPaging={{ page, pages, size, total, onPage: setPage, onSize: (n) => { setSize(n); setPage(1); } }}
         columns={[['숙소', (r) => r.name], ['업주', (r) => show(r.ownerName)], ['유형', (r) => LABEL[r.lodgingType] || show(r.lodgingType)], ['주소', (r) => show(r.address)], ['상태', (r) => <LodgingPill v={r.status} />]]} />
       <Detail title="숙소 상세">{!l ? <Pick /> : <>
         <DL items={[['숙소', l.name], ['상태', <LodgingPill v={l.status} />], ['유형', LABEL[l.lodgingType] || show(l.lodgingType)], ['연락처', show(l.phone)], ['주소', show(l.address)],
