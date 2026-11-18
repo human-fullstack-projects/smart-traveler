@@ -49,11 +49,14 @@ function SearchMap({ results, selectedId, onSelect, query, region, destinationCe
 }
 
 function StayCard({ stay, selected, query, onSelect }) {
+  const [photoFailed, setPhotoFailed] = useState(false);
   const bookingQuery = new URLSearchParams({ stay: stay.id, ...query }).toString();
   return (
     <article className={`stay-result-card${selected ? ' is-selected' : ''}`} onMouseEnter={() => onSelect(stay.id)}>
       <button type="button" className="stay-result-card__image" onClick={() => onSelect(stay.id)} aria-pressed={selected} aria-label={`${stay.name} 지도에서 보기`}>
-        <StayArtwork theme={stay.theme} label={`${stay.name} 이미지 영역`} compact />
+        {stay.photoUrl && !photoFailed
+          ? <img className="stay-result-card__photo" src={stay.photoUrl} alt={`${stay.name} 사진`} loading="lazy" referrerPolicy="no-referrer" onError={() => setPhotoFailed(true)} />
+          : <StayArtwork theme={stay.theme} label={`${stay.name} 이미지 영역`} compact />}
         {stay.saleable && stay.remaining <= 3 && <span className="stay-result-card__remaining">남은 객실 {stay.remaining}</span>}
       </button>
       <div className="stay-result-card__body">
@@ -139,6 +142,7 @@ export default function StaySearchPage() {
           area: stay.address, description: '', amenities: [], theme: 'ocean',
           price, saleable: rooms.length > 0, source: '숙소 정보',
           demoCoordinate: { latitude: stay.latitude, longitude: stay.longitude },
+          photoUrl: stay.thumbnailUrl || null,
         };
       })))
       .then((data) => { if (active) setLiveStays(data); })
