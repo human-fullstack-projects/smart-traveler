@@ -27,9 +27,17 @@ function postFields(input) {
   return fields;
 }
 export function filterCourses(courses, filters = {}) {
-  const keyword = (filters.keyword || '').trim().toLocaleLowerCase();
-  return courses.filter((c) => c.visibility !== 'BLINDED' && (!filters.region || c.region === filters.region) && (!filters.category || c.category === filters.category) && (!filters.companion || c.companion === filters.companion) && (!keyword || `${c.title} ${c.summary} ${c.body}`.toLocaleLowerCase().includes(keyword)))
-    .sort(filters.sort === 'likes' ? (a, b) => b.likes - a.likes || b.id - a.id : (a, b) => b.createdAt.localeCompare(a.createdAt) || b.id - a.id);
+  const normalize = (value) => String(value ?? '').trim().toLocaleLowerCase('ko-KR');
+  const keyword = normalize(filters.keyword);
+  const result = courses.filter((course) => course.visibility !== 'BLINDED'
+    && (!filters.region || course.region === filters.region)
+    && (!filters.category || course.category === filters.category)
+    && (!filters.companion || course.companion === filters.companion)
+    && (!keyword || normalize(`${course.title ?? ''} ${course.summary ?? ''} ${course.body ?? ''}`).includes(keyword)));
+  const byStableId = (a, b) => String(b.id ?? '').localeCompare(String(a.id ?? ''), 'ko', { numeric: true });
+  return result.sort(filters.sort === 'likes'
+    ? (a, b) => Number(b.likes || 0) - Number(a.likes || 0) || byStableId(a, b)
+    : (a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')) || byStableId(a, b));
 }
 
 // UI와 분리된 샘플 상태 전환. 실제 서버 권한 검사가 아닙니다.
