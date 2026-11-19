@@ -19,7 +19,7 @@
 .auth-hint { display: block; margin-top: 5px; color: var(--st-muted); font-size: 12px; font-weight: 400; line-height: 1.5; }
 .auth-social { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
 .auth-social button { min-height: 44px; white-space: nowrap; font-size: 14px; padding-inline: 8px; }
-.auth-notice { margin: 0; padding: 12px 14px; border-radius: var(--st-radius-s); background: rgba(163, 206, 202, .35); color: var(--st-ink); font-size: 14px; }
+.auth-notice { margin: 0; padding: 12px 14px; border-radius: var(--st-radius-s); background: rgba(163,166,206, .35); color: var(--st-ink); font-size: 14px; }
 .auth-notice.error { background: rgba(168, 59, 75, .1); color: var(--st-danger); }
 .auth-foot { margin: 20px 0 0; padding-top: 16px; border-top: 1px solid var(--st-line); color: var(--st-muted); font-size: 14px; text-align: center; }
 .auth-foot a { color: var(--st-teal); font-weight: 700; }
@@ -66,7 +66,7 @@
 .identity-inline .st-input { flex: 1; min-width: 0; }
 .identity-inline .st-btn { white-space: nowrap; }
 .identity-modal .st-btn-line { background: transparent; border: 2px solid var(--st-teal); color: var(--st-teal); }
-.identity-demo { margin: 0; padding: 10px 12px; border-radius: 10px; background: rgba(0, 150, 160, .08); color: var(--st-ink); font-size: 14px; }
+.identity-demo { margin: 0; padding: 10px 12px; border-radius: 10px; background: rgba(13,78,255, .08); color: var(--st-ink); font-size: 14px; }
 .identity-timer { min-width: 48px; text-align: right; font-weight: 700; color: var(--st-teal); font-variant-numeric: tabular-nums; }
 .identity-timer.low { color: #d1495b; }
 .identity-foot { margin: 12px 0 0; font-size: 12px; text-align: center; color: var(--st-muted, #6b7a80); }
@@ -74,7 +74,7 @@
 /* 팝업은 body에 붙어 .st-page 밖이라 입력칸 기본 모양을 여기서 다시 씀 */
 .identity-modal .st-field > span { display: block; }
 .identity-modal .st-input { display: block; width: 100%; min-height: 46px; margin-top: 8px; padding: 10px 14px; border: 1px solid var(--st-line); border-radius: var(--st-radius-s); background: var(--st-surface); color: var(--st-ink); font-family: var(--st-font-body); font-weight: 400; font-size: 16px; }
-.identity-modal .st-input:focus { outline: 0; border-color: var(--st-teal); box-shadow: 0 0 0 3px rgba(163, 206, 202, .6); }
+.identity-modal .st-input:focus { outline: 0; border-color: var(--st-teal); box-shadow: 0 0 0 3px rgba(163,166,206, .6); }
 .identity-modal .st-input:disabled { background: var(--st-line); color: var(--st-ink); opacity: .75; }
 .identity-modal .identity-inline { margin-top: 8px; }
 .identity-modal .identity-inline .st-input { margin-top: 0; }

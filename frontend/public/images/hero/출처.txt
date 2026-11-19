@@ -1,0 +1,6 @@
+메인 첫 화면 이미지 출처 (2026-11-19)
+- busan.jpg  사진: 부산광역시 (공공누리 제1유형)
+- jeju.jpg   사진: 제주영상문화산업진흥원 (공공누리 제1유형)
+- gyeongju.jpg 사진: 문화재청 (공공누리 제1유형)
+- seoul.jpg  사진: 국가유산청 궁능유적본부 (공공누리 제1유형)
+- hotel_3d.png, round_pushpin_3d.png: Microsoft Fluent Emoji 3D (MIT License) https://github.com/microsoft/fluentui-emoji

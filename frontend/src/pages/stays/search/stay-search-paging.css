@@ -10,15 +10,15 @@
 .stay-results__loading { color: #85918d; font-size: 12px; }
 
 .stay-pagination { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; margin: 18px 0 6px; }
-.stay-pagination button { min-width: 36px; height: 36px; padding: 0 10px; border: 1px solid var(--stay-line); border-radius: 9px; background: #fff; color: #445750; font-size: 13px; font-weight: 800; cursor: pointer; }
+.stay-pagination button { min-width: 36px; height: 36px; padding: 0 10px; border: 1px solid var(--stay-line); border-radius: 9px; background: #fff; color: #2357E7; font-size: 13px; font-weight: 800; cursor: pointer; }
 .stay-pagination button.is-current { border-color: var(--stay-green); background: var(--stay-green); color: #fff; }
 .stay-pagination button:disabled { opacity: .4; cursor: default; }
 .stay-pagination span { margin-left: 6px; color: #7a8984; font-size: 12px; }
 
 .stay-kakao-map .kakao-map-marker { border: 0; cursor: pointer; font-family: inherit; }
-.stay-kakao-map .kakao-map-marker--stay { min-width: 22px; height: 22px; padding: 0 5px; border: 2px solid #fff; border-radius: 11px; background: #17735a; color: #fff; font-size: 12px; font-weight: 900; box-shadow: 0 2px 8px #173b3355; }
-.stay-kakao-map .kakao-map-marker--stay.is-selected { background: #f4ae35; color: #24342f; transform: scale(1.25); }
-.stay-kakao-map .kakao-map-marker--cluster { min-width: 38px; height: 38px; padding: 0 8px; border: 3px solid #ffffffd9; border-radius: 19px; background: #17735ae6; color: #fff; font-size: 13px; font-weight: 900; box-shadow: 0 3px 12px #173b3366; transform: translateY(50%); }
-.stay-kakao-map .kakao-map-marker--cluster:hover { background: #0f5c48; }
+.stay-kakao-map .kakao-map-marker--stay { min-width: 22px; height: 22px; padding: 0 5px; border: 2px solid #fff; border-radius: 11px; background: #2349B0; color: #fff; font-size: 12px; font-weight: 900; box-shadow: 0 2px 8px #20409855; }
+.stay-kakao-map .kakao-map-marker--stay.is-selected { background: #f4ae35; color: #21419A; transform: scale(1.25); }
+.stay-kakao-map .kakao-map-marker--cluster { min-width: 38px; height: 38px; padding: 0 8px; border: 3px solid #ffffffd9; border-radius: 19px; background: #2349B0e6; color: #fff; font-size: 13px; font-weight: 900; box-shadow: 0 3px 12px #20409866; transform: translateY(50%); }
+.stay-kakao-map .kakao-map-marker--cluster:hover { background: #1C41A9; }
 
 @media (max-width: 1180px) { .stay-search-bar.stay-search-bar--regions { grid-template-columns: repeat(3, 1fr); } }
