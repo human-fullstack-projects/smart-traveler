@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -190,6 +191,19 @@ public class HumanCourseService {
     }
 
     private List<Day> plan(long courseId) {
+        Map<Long, List<String>> imagesByPlace = new HashMap<>();
+        jdbc.query("""
+            SELECT image.place_id, image.image_url
+            FROM place_image image
+            WHERE image.place_id IN (
+                SELECT a.place_id FROM activity a JOIN course_day d ON d.id=a.course_day_id
+                WHERE d.course_id=?
+            ) AND image.image_url IS NOT NULL AND TRIM(image.image_url) <> ''
+            ORDER BY image.sort_order, image.place_image_id
+            """, row -> {
+                imagesByPlace.computeIfAbsent(row.getLong("place_id"), id -> new ArrayList<>())
+                    .add(row.getString("image_url"));
+            }, courseId);
         return jdbc.query("SELECT id, day_no FROM course_day WHERE course_id=? ORDER BY day_no", (rs, n) ->
             new Day(rs.getInt("day_no"), jdbc.queryForList("""
                 SELECT place_name
@@ -201,10 +215,13 @@ public class HumanCourseService {
                        COALESCE(a.longitude_snapshot,p.longitude) AS longitude
                 FROM activity a LEFT JOIN place p ON p.place_id=a.place_id
                 WHERE a.course_day_id=? ORDER BY a.seq
-                """, (placeRs, placeRow) -> mapPlace("activity-" + placeRs.getLong("id"),
-                    placeRs.getObject("place_id") == null ? null : placeRs.getLong("place_id"),
-                    placeRs.getString("place_name"), placeRs.getString("address"),
-                    placeRs.getBigDecimal("latitude"), placeRs.getBigDecimal("longitude"), "course"),
+                """, (placeRs, placeRow) -> {
+                    Long placeId = placeRs.getObject("place_id", Long.class);
+                    return new MapPlace("activity-" + placeRs.getLong("id"), placeId,
+                        placeRs.getString("place_name"), placeRs.getString("address"),
+                        placeRs.getBigDecimal("latitude"), placeRs.getBigDecimal("longitude"), "course",
+                        imagesByPlace.getOrDefault(placeId, List.of()));
+                },
                 rs.getLong("id"))), courseId);
     }
 
@@ -335,7 +352,7 @@ public class HumanCourseService {
         : value instanceof BigDecimal decimal ? decimal : new BigDecimal(value.toString()); }
     private static MapPlace mapPlace(String id, Long placeId, String name, String address,
                                      BigDecimal latitude, BigDecimal longitude, String kind) {
-        return new MapPlace(id, placeId, name, address, latitude, longitude, kind);
+        return new MapPlace(id, placeId, name, address, latitude, longitude, kind, List.of());
     }
     private Snapshot snapshot(Map<String, Object> row) {
         try {

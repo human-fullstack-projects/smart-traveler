@@ -39,14 +39,18 @@ export default function Reservations({bookings=[],courses=[],reservationId,membe
  const badge=b=>categoryLabels[category(b)];
  if(reservationId){const b=rows.find(b=>String(b.id)===String(reservationId));if(!b)return status==='loading'?<p role="status">예약을 불러오는 중입니다.</p>:<AccessNotice kind={status==='error'?'unavailable':'denied'}/>;const c=courseFor(b);return <div className="mypage trips-page"><a className="trips-back trips-back-pill" href="#/reservations">← 내 예약 목록</a><header className="trip-detail-hero"><img src={cover(c?.region||b.stay||'')} alt=""/><div><span className="trip-status">{badge(b)}</span><h1>{c?.title||b.stay}</h1><p>{b.date} ~ {b.endDate}</p></div></header><section className="card reservation-detail-layout" style={{marginTop:24}}><div className="reservation-detail-info"><h2>예약 상세</h2><dl><dt>예약번호</dt><dd>{b.reservationNo}</dd><dt>예약 상태</dt><dd>{labels[b.status]||b.status}</dd><dt>숙소</dt><dd>{b.stay || "지역에 맞는 숙소 정보 없음"}</dd><dt>객실</dt><dd>{b.room || "객실 정보 미등록"}</dd><dt>숙박 기간</dt><dd>{b.date} ~ {b.endDate}</dd><dt>인원</dt><dd>{b.guests}명</dd><dt>예약 금액</dt><dd>{money(b.price)}</dd></dl><BookingStayInfo booking={b}/><div className="actions">{b.status==='PENDING_PAYMENT'&&<a className="secondary" href={`#/payments/${b.id}`}>토스 테스트 결제</a>}{category(b)==='upcoming'&&<button type="button" className="reservation-cancel" disabled={b.status==='CANCELLED'} onClick={()=>setCancelNotice('예약 취소 기능은 준비 중입니다. 숙소에 문의해 주세요.')} >{b.status==='CANCELLED'?'취소된 예약':'예약취소'}</button>}{b.status==='COMPLETED'&&<a className="secondary" href={`#/human-courses/create?reservationId=${encodeURIComponent(b.id)}&from=reservations`}>내 여행 추천 작성·수정</a>}</div>{cancelNotice&&<p role="status">{cancelNotice}</p>}</div><StayPhoto key={b.id} url={b.stayInfo?.imageUrl} name={b.stay}/></section>{b.courseId&&<MyCourseMap course={c} courseId={b.courseId} memberId={member?.memberId} expanded title="여행일정" hideMapControls showPlaceDetails/>}<div className="trip-detail-footer"><a className="trips-back trips-back-pill" href="#/reservations">← 내 예약 목록</a></div></div>;}
  const list=rows.filter(b=>(tab==='all'||category(b)===tab)&&`${courseFor(b)?.title||''} ${courseFor(b)?.region||''} ${b.stay||''} ${b.reservationNo}`.toLowerCase().includes(query.trim().toLowerCase()));
- if(tab==='all') list.sort((a,b)=>{
-  const aCategory=category(a), bCategory=category(b);
-  const priority=categoryOrder[aCategory]-categoryOrder[bCategory];
-  if(priority) return priority;
-  const order=aCategory==='past'
-   ? String(b.endDate||'').localeCompare(String(a.endDate||''))
-   : String(a.date||'').localeCompare(String(b.date||''));
-  return order || String(a.id).localeCompare(String(b.id),undefined,{numeric:true});
+ list.sort((a, b) => {
+  const firstCategory = category(a);
+  const groupOrder = categoryOrder[firstCategory] - categoryOrder[category(b)];
+  if (groupOrder !== 0) return groupOrder;
+
+  // 시작일이 없는 여행은 각 그룹의 맨 뒤에 표시한다.
+  if (!a.date && b.date) return 1;
+  if (a.date && !b.date) return -1;
+
+  const dateOrder = (a.date || '').localeCompare(b.date || '');
+  if (dateOrder !== 0) return firstCategory === 'upcoming' ? dateOrder : -dateOrder;
+  return String(a.id).localeCompare(String(b.id), undefined, { numeric: true });
  });
  return <div className="mypage trips-page"><a className="trips-back trips-back-pill" href="#/mypage">← 마이페이지</a><header className="trips-heading"><div><h1>내 예약</h1><p>여행별 예약을 모아 보고, 숙소와 상세 일정을 확인하세요.</p></div></header><div className="trips-list-toolbar"><nav className="trips-filters" aria-label="예약 분류">{tabs.map(([value,label])=><button type="button" key={value} aria-pressed={tab===value} onClick={()=>setTab(value)}>{label}</button>)}</nav><div className="trips-tools"><label className="trips-search"><span className="trips-sr-only">예약 제목, 지역, 숙소 또는 예약번호 검색</span><span aria-hidden="true">⌕</span><input type="search" placeholder="내 예약 검색" value={query} onChange={e=>setQuery(e.target.value)}/></label></div></div><p className="trips-count" role="status">{list.length}개의 예약</p>{status==='loading'&&<p role="status">최신 예약을 불러오는 중입니다.</p>}{status==='error'&&<p role="alert">최신 예약을 불러오지 못했습니다. 다른 분류를 선택해 다시 시도해 주세요.</p>}{!list.length&&status==='ready'&&<p className="empty">조건에 맞는 예약이 없습니다.</p>}<div className="trips-grid">{list.map(b=>{const c=courseFor(b);return <a key={b.id} className="trip-cover-card" href={`#/reservations/${encodeURIComponent(b.id)}`}><img src={cover(c?.region||b.stay||'')} alt="" loading="lazy"/><span className="trip-status">{badge(b)}</span><div className="trip-card-copy"><span className="trip-region">{c?.region||labels[b.status]||b.status}</span><h2>{c?.title||b.stay||'나의 예약'}</h2><p>{b.date} ~ {b.endDate}<br/>{b.stay}<br/>{b.reservationNo}</p><span className="trip-card-open">예약·일정 자세히 보기 <span aria-hidden="true">↗</span></span></div></a>;})}</div></div>;
 }

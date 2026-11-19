@@ -19,7 +19,7 @@ function unavailable(place) {
  * Visit numbers restart each day. Lodging does not take a visit number.
  */
 export default function ItineraryMapPanel({ days = EMPTY_DAYS, center, searchRegion = '', level = 5, height = '320px', extraPlaces = EMPTY_PLACES,
-  extraTitle = '주변 숙소', previewFailure = false, sourceNote, onPlaceSelect, showIntro = true, showCategories = true, focusPlace, loadPlaceDetails }) {
+  extraTitle = '주변 숙소', previewFailure = false, sourceNote, onPlaceSelect, showIntro = true, showCategories = true, showPlaceList = true, allDaysLabel = '전체 코스', focusPlace, loadPlaceDetails }) {
   const [category, setCategory] = useState('all');
   const [activeDay, setActiveDay] = useState('all');
   const [selectedId, setSelectedId] = useState(null);
@@ -95,7 +95,7 @@ export default function ItineraryMapPanel({ days = EMPTY_DAYS, center, searchReg
         onClick={() => { setCategory(value); setSelectedId(null); }}>{{ all: '전체', course: '방문지', stay: '숙소' }[value]}</button>)}
     </div>}
     {numberedDays.length > 1 && <div className="itinerary-map__days" role="group" aria-label="여행 일자">
-      <button type="button" aria-pressed={activeDay === 'all'} onClick={() => { setActiveDay('all'); setSelectedId(null); }}>전체 코스</button>
+      <button type="button" aria-pressed={activeDay === 'all'} onClick={() => { setActiveDay('all'); setSelectedId(null); }}>{allDaysLabel}</button>
       {numberedDays.map((day) => <button key={day.day} type="button" aria-pressed={String(activeDay) === String(day.day)}
         onClick={() => { setActiveDay(day.day); setSelectedId(null); }}>{day.day}일차</button>)}
     </div>}
@@ -106,10 +106,10 @@ export default function ItineraryMapPanel({ days = EMPTY_DAYS, center, searchReg
         onMarkerClick={selectPlace} onStatusChange={setMapStatus} />}
     </div>
     {sourceNote && <p className="itinerary-map__source">{sourceNote}</p>}
-    <div className="itinerary-map__day-list">{visibleDays.map((day) => <section className="itinerary-map__day" key={day.day}>
+    {showPlaceList && <div className="itinerary-map__day-list">{visibleDays.map((day) => <section className="itinerary-map__day" key={day.day}>
       <h3>{day.day}일차</h3>
       {day.places.length ? <MapPlaceCards places={day.places} selectedId={selectedId} onSelect={selectPlace} loadDetails={loadPlaceDetails} searchRegion={searchRegion} /> : <p>표시할 장소가 없습니다.</p>}
-    </section>)}</div>
+    </section>)}</div>}
     {visibleExtras.length > 0 && <section className="itinerary-map__day itinerary-map__extras">
       <h3>{extraTitle}</h3><MapPlaceCards places={visibleExtras} selectedId={selectedId} onSelect={selectPlace} />
     </section>}

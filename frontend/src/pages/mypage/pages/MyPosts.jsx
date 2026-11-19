@@ -69,6 +69,11 @@ export default function MyPosts({ posts = [], bookings = [], courses = [], postI
     (tab === 'all' || item.status === tab)
     && [item.title, item.region, item.booking?.stay, item.booking?.reservationNo].join(' ').toLowerCase().includes(search)
   );
+  list.sort((first, second) => {
+    const firstDate = first.booking?.date || '';
+    const secondDate = second.booking?.date || '';
+    return secondDate.localeCompare(firstDate);
+  });
 
   return <div className="mypage trips-page my-posts-list">
     <a className="trips-back trips-back-pill" href="#/mypage">← 마이페이지</a>
