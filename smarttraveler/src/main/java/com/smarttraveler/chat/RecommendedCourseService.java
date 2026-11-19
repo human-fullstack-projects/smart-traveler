@@ -2,6 +2,7 @@ package com.smarttraveler.chat;
 
 import java.sql.Statement;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
 import org.springframework.http.HttpStatus;
@@ -107,10 +108,33 @@ public class RecommendedCourseService {
         long courseId = Objects.requireNonNull(key.getKey()).longValue();
         for (JsonNode day : snapshot.path("itinerary")) {
             int dayNo = day.path("day_no").asInt();
-            jdbc.update("INSERT INTO course_day(course_id,day_no,theme,visit_date) VALUES (?,?,?,?)", courseId, dayNo,
-                day.path("theme").asText(), start.plusDays(dayNo - 1L));
+            var dayKey = new GeneratedKeyHolder();
+            jdbc.update(connection -> {
+                var statement = connection.prepareStatement(
+                    "INSERT INTO course_day(course_id,day_no,theme,visit_date) VALUES (?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+                statement.setLong(1, courseId); statement.setInt(2, dayNo);
+                statement.setString(3, day.path("theme").asText()); statement.setObject(4, start.plusDays(dayNo - 1L));
+                return statement;
+            }, dayKey);
+            long courseDayId = Objects.requireNonNull(dayKey.getKey()).longValue();
+            for (JsonNode visit : day.path("visits")) insertActivity(courseDayId, visit);
         }
         return courseId;
+    }
+
+    /** 추천 방문지를 activity 행으로도 저장해 마이페이지 상세·지도가 장소 좌표를 쓸 수 있게 한다. 시간은 10시부터 2시간 간격의 기본값이다. */
+    private void insertActivity(long courseDayId, JsonNode visit) {
+        int seq = visit.path("seq").asInt();
+        long placeId = visit.path("place_id").asLong();
+        String name = visit.path("place_name").asText();
+        LocalTime startTime = LocalTime.of(Math.min(10 + (seq - 1) * 2, 22), 0);
+        jdbc.update("""
+            INSERT INTO activity(course_day_id,seq,start_time,title,category_id,place_name,place_id,
+              address_snapshot,latitude_snapshot,longitude_snapshot)
+            SELECT ?,?,?,?,CASE p.place_type WHEN 'CULTURE' THEN 2 WHEN 'LEISURE' THEN 3 WHEN 'SHOPPING' THEN 4
+                     WHEN 'RESTAURANT' THEN 5 ELSE 1 END,?,p.place_id,p.address,p.latitude,p.longitude
+            FROM (SELECT 1) one LEFT JOIN place p ON p.place_id=?
+            """, courseDayId, seq, startTime, name, name, placeId);
     }
 
     public JsonNode read(String json) { return json == null ? null : mapper.readTree(json); }

@@ -55,6 +55,7 @@ class GuestRecommendedCourseDatabaseTest {
         for (long chat : chats) {
             var saved = jdbc.queryForList("SELECT id FROM course WHERE JSON_EXTRACT(condition_meta,'$.chat_message_id') IN (SELECT message_id FROM chat_messages WHERE session_id=?)", Long.class, chat);
             for (long course : saved) {
+                jdbc.update("DELETE FROM activity WHERE course_day_id IN (SELECT id FROM course_day WHERE course_id=?)", course);
                 jdbc.update("DELETE FROM course_day WHERE course_id=?", course);
                 jdbc.update("DELETE FROM course WHERE id=?", course);
             }
@@ -123,7 +124,12 @@ class GuestRecommendedCourseDatabaseTest {
         mvc.perform(post("/api/chat/guest-course/claim").session(trip.browser()).with(csrf())).andExpect(status().isOk()).andExpect(jsonPath("$.courseId").value(course));
         assertEquals(1, jdbc.queryForObject("SELECT COUNT(*) FROM course WHERE member_no=?", Integer.class, member));
         assertNull(trip.browser().getAttribute(GuestRecommendedCourseService.PENDING));
-        mvc.perform(get("/api/mypage/courses/course-" + course).session(trip.browser())).andExpect(status().isOk()).andExpect(jsonPath("$.days[0].places").isNotEmpty());
+        mvc.perform(get("/api/mypage/courses/course-" + course).session(trip.browser())).andExpect(status().isOk()).andExpect(jsonPath("$.days[0].places").isNotEmpty())
+            .andExpect(jsonPath("$.days[0].mapPlaces").isNotEmpty());
+        // 저장된 추천 코스는 방문지마다 activity 행(좌표 포함)을 가진다.
+        assertEquals(0, jdbc.queryForObject("""
+            SELECT COUNT(*) FROM course_day d LEFT JOIN activity a ON a.course_day_id=d.id
+            WHERE d.course_id=? AND (a.id IS NULL OR a.latitude_snapshot IS NULL)""", Integer.class, course));
         mvc.perform(get("/api/chat/sessions/" + trip.sessionId()).session(trip.browser())).andExpect(status().isNotFound());
         mvc.perform(post("/api/auth/logout").session(trip.browser()).with(csrf())).andExpect(status().isNoContent());
         assertTrue(trip.browser().isInvalid());

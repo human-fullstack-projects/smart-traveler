@@ -44,6 +44,30 @@ class CourseDialogueServiceTest {
         }
     }
     @Test @SuppressWarnings("unchecked")
+    void noStoredCourseFallsBackToPlaceCandidates() {
+        var mapper = JsonMapper.builder().build();
+        var jdbc = mock(JdbcTemplate.class);
+        var ai = mock(PythonAiClient.class);
+        var places = mock(StoredPlaceCandidates.class);
+        var courses = mock(StoredCourseCandidates.class);
+        var service = new ConditionDialogueService(jdbc, mapper, ai, places, courses, true);
+        var conditions = mapper.createObjectNode();
+        conditions.put("regionName", "부산"); conditions.put("durationDays", 5);
+        conditions.put("startDate", "2026-12-10"); conditions.put("adults", 2); conditions.put("children", 0);
+        conditions.put("companionType", "FRIENDS"); conditions.put("transportType", "CAR");
+        var placeRows = List.of(Map.<String, Object>of("placeId", 7L));
+        when(courses.find(any())).thenReturn(List.of());
+        when(places.find(any())).thenReturn(placeRows);
+        when(ai.process(anyString(), anyString(), any(), anyList(), nullable(List.class), anyMap()))
+            .thenReturn(new PythonAiClient.Result("관광지 추천", true));
+        when(jdbc.query(contains("conditions_json"), any(RowMapper.class), eq(1L)))
+            .thenReturn(List.of(mapper.writeValueAsString(conditions)));
+        when(jdbc.query(contains("SELECT content"), any(RowMapper.class), eq(1L))).thenReturn(List.of("입력된 여행 조건을 확인해 주세요."));
+        assertEquals("관광지 추천", service.process(1, "네", Map.of()));
+        // 코스 후보가 없으면 courseCandidates=null(관광지 경로)과 관광지 후보를 함께 넘긴다.
+        verify(ai).process(eq("네"), anyString(), any(ObjectNode.class), eq(placeRows), isNull(), eq(Map.of()));
+    }
+    @Test @SuppressWarnings("unchecked")
     void incompleteConditionsDoNotQueryCandidates() {
         var jdbc = mock(JdbcTemplate.class);
         var ai = mock(PythonAiClient.class);
