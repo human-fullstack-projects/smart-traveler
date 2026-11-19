@@ -23,7 +23,7 @@ export default function Header({ route, onUnavailable, member, onLogout, logging
         <button className="menu-toggle" type="button" aria-label={menuOpen ? '메뉴 닫기' : '메뉴 열기'} aria-expanded={menuOpen} aria-controls="mobile-menu" onClick={() => setMenuOpen(!menuOpen)}>
           <span></span><span></span><span></span>
         </button>
-        <a className="brand" href="#/">smart <span>travel</span></a>
+        <a className="brand brand-mark" href="#/" aria-label="AI TRIP 홈"><img className="brand-logo" src="/images/brand/ait_pin.svg" alt="" /><span className="brand-word"><b>AI</b> TRIP</span></a>
       </div>
       <nav className="desktop-nav" aria-label="주 메뉴">{navigation.map(link)}{member ? <span className="auth-account"><span className="auth-account__name">{member.nickname || member.loginId}님</span><button className="account" type="button" disabled={loggingOut} onClick={() => { setMenuOpen(false); onLogout(); }}>{loggingOut ? '로그아웃 중…' : '로그아웃'}</button></span> : <a className="account" href="#/login" aria-current={route === '/login' ? 'page' : undefined}>로그인</a>}</nav>
     </div>

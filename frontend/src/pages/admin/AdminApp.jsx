@@ -504,7 +504,7 @@ export default function AdminApp({ route, member, onLogout }) {
     '/admin/ai-courses': <AiCourses />, '/admin/tour-data': <TourData /> }[path];
   return <div className="st-page adm">
     <aside className="adm-side" aria-label="관리자 메뉴">
-      <a className="adm-logo" href="#/admin">smart travel<small>ADMIN</small></a>
+      <a className="adm-logo brand-mark is-small on-dark" href="#/admin" aria-label="AI TRIP 관리자"><img className="brand-logo" src="/images/brand/ait_pin.svg" alt="" /><span className="brand-word"><b>AI</b> TRIP</span><small>ADMIN</small></a>
       {MENU.map((m) => <a key={m.path} href={`#${m.path}`} aria-current={path === m.path ? 'page' : undefined}>{m.label}
         {m.badge && stats?.[m.badge] > 0 && <span className="adm-badge">{stats[m.badge]}</span>}</a>)}
       <div className="adm-side-foot">{member?.nickname || member?.loginId} 님 (관리자)

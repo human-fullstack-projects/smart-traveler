@@ -568,7 +568,6 @@
 .home-hero .landing-composer{display:flex;align-items:center;gap:12px;width:min(820px,100%);margin:clamp(14px,2.6vh,28px) 0 0;padding:10px 10px 10px 24px;background:#fff;border:1.5px solid #E3DCF3;border-radius:20px;box-shadow:0 14px 34px #4b3c8a17;min-height:0}
 .home-hero .landing-composer:focus-within{border-color:#9A8CFF;box-shadow:0 0 0 4px #9a8cff2e,0 14px 34px #4b3c8a17}
 .home-hero .landing-composer textarea{flex:1;min-height:0;height:auto;padding:12px 0;border:0;resize:none;background:none;font-size:clamp(15px,1vw,18px);line-height:1.5;color:#29243B;overflow:hidden;white-space:nowrap}
-.home-hero .landing-condition-link{flex:none;color:#3466F2;font-weight:700;font-size:15px;white-space:nowrap}
 .home-hero .landing-start{flex:none;display:inline-flex;align-items:center;gap:6px;background:#3466F2;color:#fff;border:0;border-radius:13px;padding:13px 22px;font-weight:800;font-size:16px;cursor:pointer}
 .home-hero .landing-start:hover:not(:disabled){background:#2552D6}
 .home-hero .landing-error{margin:8px 0 0;color:#B8325A;font-size:14px}

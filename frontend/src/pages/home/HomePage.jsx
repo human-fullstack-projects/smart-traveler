@@ -49,7 +49,7 @@ export default function HomePage() {
         {step === 'compose' ? (
           <>
             <div className="greeting">
-              <span className="greeting-label">SMART TRAVEL</span>
+              <span className="greeting-label">AI TRIP</span>
               <h2 id="greeting-title">안녕하세요!<br />어떤 여행을 계획하고 있나요?</h2>
               <p>정해진 게 없어도 괜찮아요.<br />생각나는 것부터 이야기해 주세요.</p>
             </div>
