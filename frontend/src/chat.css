@@ -1,29 +1,29 @@
 /* 입력한 여행 조건을 보여주는 패널. 대화 화면 레이아웃은 AiChatPage.css에서 다룬다. */
-.travel-conditions { min-width: 0; padding: 24px; background: #fff; border: 1px solid #e0eae5; border-radius: 22px; box-shadow: 0 20px 60px rgba(30,75,57,.05); }
+.travel-conditions { min-width: 0; padding: 24px; background: #fff; border: 1px solid #E0E1EA; border-radius: 22px; box-shadow: 0 20px 60px rgba(34,68,161,.05); }
 .travel-conditions-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
 .travel-conditions-heading h2 { margin: 6px 0 0; font-size: 20px; letter-spacing: -.5px; }
-.condition-status { padding: 5px 9px; border-radius: 7px; background: #f1f5f3; color: #73857d; font-size: 11px; white-space: nowrap; }
-.condition-status.confirmed { background: #e6f5ee; color: #087a63; }
+.condition-status { padding: 5px 9px; border-radius: 7px; background: #F2F1F5; color: #73857d; font-size: 11px; white-space: nowrap; }
+.condition-status.confirmed { background: #EAE6F5; color: #0D3DC3; }
 .travel-conditions-description { margin: 12px 0 18px; color: #8a9b94; font-size: 12px; line-height: 1.6; }
-.travel-condition-summary { display: grid; gap: 0; margin: 0; padding: 5px 0; border-top: 1px solid #edf2ef; border-bottom: 1px solid #edf2ef; }
+.travel-condition-summary { display: grid; gap: 0; margin: 0; padding: 5px 0; border-top: 1px solid #EEEDF2; border-bottom: 1px solid #EEEDF2; }
 .travel-condition-summary div { display: grid; grid-template-columns: 70px minmax(0, 1fr); gap: 8px; padding: 8px 0; font-size: 12px; line-height: 1.55; }
 .travel-condition-summary dt { color: #8a9b94; }
-.travel-condition-summary dd { margin: 0; color: #344d45; overflow-wrap: anywhere; }
+.travel-condition-summary dd { margin: 0; color: #2448AB; overflow-wrap: anywhere; }
 .condition-summary-line { display: block; }
-.conditions-toggle { display: flex; justify-content: space-between; width: 100%; margin-top: 16px; padding: 10px 12px; border: 1px solid #d9e8e1; border-radius: 9px; background: #fff; color: #087b65; font-size: 13px; font-weight: 700; }
+.conditions-toggle { display: flex; justify-content: space-between; width: 100%; margin-top: 16px; padding: 10px 12px; border: 1px solid #D9DAE8; border-radius: 9px; background: #fff; color: #0D3DC4; font-size: 13px; font-weight: 700; }
 .conditions-note,.conditions-field-note { margin: 11px 0 0; color: #8a9b94; font-size: 11px; line-height: 1.65; }
-.travel-condition-form { display: grid; gap: 14px; margin-top: 18px; padding-top: 18px; border-top: 1px solid #edf2ef; }
-.travel-condition-form label { display: block; min-width: 0; color: #425b52; font-size: 12px; font-weight: 700; }
-.travel-condition-form input,.travel-condition-form select { display: block; width: 100%; min-width: 0; height: 39px; margin-top: 6px; padding: 0 9px; border: 1px solid #dbe6df; border-radius: 8px; background: #fff; color: #344d45; font-size: 13px; }
+.travel-condition-form { display: grid; gap: 14px; margin-top: 18px; padding-top: 18px; border-top: 1px solid #EEEDF2; }
+.travel-condition-form label { display: block; min-width: 0; color: #2458E7; font-size: 12px; font-weight: 700; }
+.travel-condition-form input,.travel-condition-form select { display: block; width: 100%; min-width: 0; height: 39px; margin-top: 6px; padding: 0 9px; border: 1px solid #DBDCE6; border-radius: 8px; background: #fff; color: #2448AB; font-size: 13px; }
 .travel-condition-form > .conditions-field-note { margin-top: -9px; }
 .condition-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 10px; }
-.condition-fieldset { min-width: 0; margin: 0; padding: 12px; border: 1px solid #e5eee9; border-radius: 10px; }
-.condition-fieldset legend { padding: 0 4px; color: #425b52; font-size: 12px; font-weight: 700; }
+.condition-fieldset { min-width: 0; margin: 0; padding: 12px; border: 1px solid #E7E5EE; border-radius: 10px; }
+.condition-fieldset legend { padding: 0 4px; color: #2458E7; font-size: 12px; font-weight: 700; }
 .condition-fieldset .conditions-field-note { margin: 0 0 10px; }
-.optional-label { color: #9aa9a2; font-size: 11px; font-weight: 400; }
-.fixed-event { display: grid; gap: 10px; padding: 10px 0; border-bottom: 1px solid #edf2ef; }
-.fixed-event-heading { display: flex; justify-content: space-between; align-items: center; color: #5b7268; font-size: 12px; }
-.fixed-event-heading button,.add-event { padding: 3px 0; border: 0; background: transparent; color: #087b65; font-size: 12px; }
+.optional-label { color: #9A9BA9; font-size: 11px; font-weight: 400; }
+.fixed-event { display: grid; gap: 10px; padding: 10px 0; border-bottom: 1px solid #EEEDF2; }
+.fixed-event-heading { display: flex; justify-content: space-between; align-items: center; color: #3565E9; font-size: 12px; }
+.fixed-event-heading button,.add-event { padding: 3px 0; border: 0; background: transparent; color: #0D3DC4; font-size: 12px; }
 .add-event { margin-top: 9px; font-weight: 700; }
 .condition-confirm { width: 100%; }
 .conditions-errors { padding: 10px 12px; border-radius: 8px; background: #fff5ef; color: #89543e; font-size: 12px; line-height: 1.6; }
@@ -32,25 +32,25 @@
 .condition-controls { min-width: 0; margin: 0; padding: 0; border: 0; }
 
 /* 기존 여행 조건 카드와 어울리는 관광지 조회 영역이다. */
-.tour-search { margin-top: 16px; padding: 24px; background: #fff; border: 1px solid #e0eae5; border-radius: 22px; box-shadow: 0 20px 60px rgba(30,75,57,.05); }
+.tour-search { margin-top: 16px; padding: 24px; background: #fff; border: 1px solid #E0E1EA; border-radius: 22px; box-shadow: 0 20px 60px rgba(34,68,161,.05); }
 .tour-search h2 { margin: 6px 0 0; font-size: 18px; letter-spacing: -.5px; }
-.tour-search p { margin: 10px 0 0; color: #758d83; font-size: 12px; line-height: 1.6; }
+.tour-search p { margin: 10px 0 0; color: #4874EB; font-size: 12px; line-height: 1.6; }
 .tour-search-body { display: grid; gap: 12px; margin-top: 18px; }
-.tour-search-body label { color: #425b52; font-size: 12px; font-weight: 700; }
-.tour-search-body select { display: block; width: 100%; height: 39px; margin-top: 6px; padding: 0 9px; border: 1px solid #dbe6df; border-radius: 8px; background: #fff; color: #344d45; }
+.tour-search-body label { color: #2458E7; font-size: 12px; font-weight: 700; }
+.tour-search-body select { display: block; width: 100%; height: 39px; margin-top: 6px; padding: 0 9px; border: 1px solid #DBDCE6; border-radius: 8px; background: #fff; color: #2448AB; }
 .tour-search-actions { display: grid; gap: 8px; }
 .tour-search-actions button:disabled, .tour-pages button:disabled { opacity: .45; cursor: default; }
-.tour-apply { padding: 10px; border: 1px solid #d9e8e1; border-radius: 9px; background: #fff; color: #087b65; font-size: 12px; font-weight: 700; }
+.tour-apply { padding: 10px; border: 1px solid #D9DAE8; border-radius: 9px; background: #fff; color: #0D3DC4; font-size: 12px; font-weight: 700; }
 .tour-results { display: grid; gap: 0; padding: 0; margin: 8px 0 0; list-style: none; }
-.tour-results li { display: grid; gap: 3px; padding: 10px 0; border-top: 1px solid #edf2ef; color: #344d45; font-size: 12px; }
-.tour-results span { color: #83968d; font-size: 11px; line-height: 1.5; }
-.tour-results button { width: fit-content; padding: 0; border: 0; background: none; color: #344d45; font: inherit; font-weight: 700; text-align: left; cursor: pointer; }
-.tour-results button[aria-pressed="true"] { color: #087b65; text-decoration: underline; }
+.tour-results li { display: grid; gap: 3px; padding: 10px 0; border-top: 1px solid #EEEDF2; color: #2448AB; font-size: 12px; }
+.tour-results span { color: #517AEC; font-size: 11px; line-height: 1.5; }
+.tour-results button { width: fit-content; padding: 0; border: 0; background: none; color: #2448AB; font: inherit; font-weight: 700; text-align: left; cursor: pointer; }
+.tour-results button[aria-pressed="true"] { color: #0D3DC4; text-decoration: underline; }
 .tour-results button:disabled { color: #86948e; cursor: default; }
-.tour-map { overflow: hidden; margin-top: 12px; border: 1px solid #dbe6df; border-radius: 10px; }
+.tour-map { overflow: hidden; margin-top: 12px; border: 1px solid #DBDCE6; border-radius: 10px; }
 .tour-map__head { display: flex; justify-content: space-between; gap: 10px; align-items: center; padding: 9px 12px; font-size: 12px; }
-.tour-map__head button { padding: 4px 8px; border: 1px solid #dbe6df; border-radius: 6px; background: #fff; color: #087b65; cursor: pointer; }
+.tour-map__head button { padding: 4px 8px; border: 1px solid #DBDCE6; border-radius: 6px; background: #fff; color: #0D3DC4; cursor: pointer; }
 .tour-map > p { margin: 7px 12px; }
-.tour-pages { display: flex; align-items: center; justify-content: space-between; color: #758d83; font-size: 12px; }
-.tour-pages button, .tour-retry { border: 0; background: transparent; color: #087b65; padding: 6px; }
+.tour-pages { display: flex; align-items: center; justify-content: space-between; color: #4874EB; font-size: 12px; }
+.tour-pages button, .tour-retry { border: 0; background: transparent; color: #0D3DC4; padding: 6px; }
 .tour-search .tour-source { font-size: 11px; }

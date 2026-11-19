@@ -7,7 +7,7 @@ function SlidersIcon() {
       <line x1="10" y1="8" x2="50" y2="8" stroke="#1c2b33" strokeWidth="2.2" strokeLinecap="round" />
       <circle cx="24" cy="8" r="4.2" fill="#fff" stroke="#1c2b33" strokeWidth="2.2" />
       <line x1="10" y1="24" x2="50" y2="24" stroke="#1c2b33" strokeWidth="2.2" strokeLinecap="round" />
-      <circle cx="33" cy="24" r="4.6" fill="#0c806b" />
+      <circle cx="33" cy="24" r="4.6" fill="#1241C3" />
       <line x1="10" y1="40" x2="50" y2="40" stroke="#1c2b33" strokeWidth="2.2" strokeLinecap="round" />
       <circle cx="24" cy="40" r="4.2" fill="#fff" stroke="#1c2b33" strokeWidth="2.2" />
     </svg>
@@ -25,8 +25,8 @@ function ChevronIcon() {
 function BulbIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-      <circle cx="10" cy="10" r="8" stroke="#0c806b" strokeWidth="1.4" strokeDasharray="2 3" />
-      <path d="M10 6v3M10 2v1M10 17v1M14.5 10l1-.3M4.5 10.3l1 .3" stroke="#0c806b" strokeWidth="1.4" strokeLinecap="round" />
+      <circle cx="10" cy="10" r="8" stroke="#1241C3" strokeWidth="1.4" strokeDasharray="2 3" />
+      <path d="M10 6v3M10 2v1M10 17v1M14.5 10l1-.3M4.5 10.3l1 .3" stroke="#1241C3" strokeWidth="1.4" strokeLinecap="round" />
     </svg>
   );
 }

@@ -1,4 +1,4 @@
-.travel-style-page { --ts-ink: #263252; --ts-teal: #2d7273; --ts-border: #d0cfe1; padding: 26px 24px 70px; background: #e7e6ef; color: var(--ts-ink); min-height: 820px; }
+.travel-style-page { --ts-ink: #263252; --ts-teal: #2559E7; --ts-border: #d0cfe1; padding: 26px 24px 70px; background: #e7e6ef; color: var(--ts-ink); min-height: 820px; }
 .travel-style-page .travel-style-page-title { max-width: 1334px; margin: 0 auto 14px; font-size: 24px; color: var(--ts-teal); }
 .travel-style-panel { box-sizing: border-box; max-width: 1334px; min-height: 720px; margin: auto; padding: 60px 36px 70px; border: 1px solid var(--ts-border); border-radius: 23px; background: #faf9ff; box-shadow: 0 8px 24px #2423430a; }
 .travel-style-inner { max-width: 1000px; margin: auto; }
@@ -7,15 +7,15 @@
 .travel-style-progress span { width: 34px; height: 6px; background: var(--ts-border); border-radius: 10px; }
 .travel-style-progress .complete { background: var(--ts-teal); }
 .travel-style-page .travel-style-step { margin: 0 0 8px; color: var(--ts-teal); font-size: 16px; font-weight: 700; }
-.travel-style-page h2 { margin: 0 0 9px; color: #428f93; font-size: 30px; line-height: 1.4; letter-spacing: -1.3px; font-weight: 800; }
+.travel-style-page h2 { margin: 0 0 9px; color: #3867E9; font-size: 30px; line-height: 1.4; letter-spacing: -1.3px; font-weight: 800; }
 .travel-style-page .travel-style-help { margin: 0 0 30px; font-size: 16px; color: #43577f; }
 .travel-style-help strong { color: var(--ts-teal); }
 .travel-style-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
 .travel-style-page .travel-style-option { position: relative; display: flex; flex-direction: column; align-items: flex-start; text-align: left; gap: 0; padding: 22px; min-height: 158px; border: 2px solid var(--ts-border); border-radius: 18px; background: #fff; color: var(--ts-ink); box-shadow: none; cursor: pointer; font-family: inherit; transition: background .15s, border-color .15s; }
-.travel-style-page .travel-style-option[aria-pressed=true] { background: #edf5f4; border-color: var(--ts-teal); }
+.travel-style-page .travel-style-option[aria-pressed=true] { background: #EFEDF5; border-color: var(--ts-teal); }
 .travel-style-page .travel-style-option:disabled { opacity: .4; cursor: default; }
 .travel-style-page .travel-style-option[aria-pressed=true]:disabled { opacity: 1; }
-.travel-style-icon { display: grid; place-items: center; width: 44px; height: 44px; background: #a0cecd; border-radius: 13px; color: var(--ts-teal); margin-bottom: 12px; }
+.travel-style-icon { display: grid; place-items: center; width: 44px; height: 44px; background: #A0A3CE; border-radius: 13px; color: var(--ts-teal); margin-bottom: 12px; }
 .travel-style-icon svg { width: 24px; height: 24px; }
 .travel-style-option > strong { font-size: 22px; line-height: 1.4; font-weight: 800; margin-bottom: 5px; }
 .travel-style-description { font-size: 14px; color: #465b83; line-height: 1.5; }
@@ -26,7 +26,7 @@
 .travel-style-page .travel-style-actions a { border: 2px solid var(--ts-border); color: #43577f; background: transparent; }
 .travel-style-page .travel-style-next { background: var(--ts-teal); color: white; border: 2px solid var(--ts-teal); }
 .travel-style-page .travel-style-next:disabled { opacity: .45; cursor: default; }
-.travel-style-page button:focus-visible, .travel-style-page a:focus-visible { outline: 3px solid #428f93; outline-offset: 4px; }
+.travel-style-page button:focus-visible, .travel-style-page a:focus-visible { outline: 3px solid #3867E9; outline-offset: 4px; }
 .travel-style-save { display: flex; align-items: flex-end; gap: 12px; min-width: 0; }
 .travel-style-save > button { flex-shrink: 0; white-space: nowrap; }
 .travel-style-notice { color: var(--ts-teal); margin: 0; overflow-wrap: anywhere; }
