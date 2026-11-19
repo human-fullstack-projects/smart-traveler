@@ -3,6 +3,9 @@ import { chatApi } from '../../../chatApi.js';
 import { createEmptyConditions } from '../../../travelConditions.js';
 
 const STORAGE_KEY = 'smart-travel-chat-session';
+// 챗봇 화면 주소. 이 주소에서 다른 주소로 가면 대화를 저장한다.
+const CHAT_PATHS = ['/chat', '/ai-course'];
+const chatPath = (hash) => CHAT_PATHS.includes((hash.replace(/^#/, '').split('?')[0].replace(/\/$/, '')) || '/');
 
 function parse(chat) {
   return {
@@ -36,6 +39,23 @@ export default function useAiChat({ ownerKey = 'guest', ready = true, authRevisi
   const saveVersion = useRef(0);
   const saveFailed = useRef(false);
   const currentConditions = useRef({ conditions: createEmptyConditions(), confirmed: false });
+  const sessionRef = useRef(null);
+  sessionRef.current = loadedScope === scope && ready ? sessionId : null;
+
+  // 대화 저장 시점: 다른 페이지로 갈 때 · 창/탭을 닫을 때 (새 대화는 resetChat에서).
+  // 서버가 메시지를 모아 두었다가 이때 DB에 한 번에 쓴다. 인터넷이 끊기면 저장되지 않을 수 있다.
+  useEffect(() => {
+    let wasChat = chatPath(window.location.hash);
+    const onRoute = () => {
+      const isChat = chatPath(window.location.hash);
+      if (wasChat && !isChat && sessionRef.current) chatApi.flush(sessionRef.current).catch(() => {});
+      wasChat = isChat;
+    };
+    const onExit = () => { if (sessionRef.current) chatApi.flushOnExit(sessionRef.current); };
+    window.addEventListener('hashchange', onRoute);
+    window.addEventListener('pagehide', onExit);
+    return () => { window.removeEventListener('hashchange', onRoute); window.removeEventListener('pagehide', onExit); };
+  }, []);
 
   function apply(chat) {
     const next = parse(chat);
@@ -182,6 +202,8 @@ export default function useAiChat({ ownerKey = 'guest', ready = true, authRevisi
 
   // 새 대화: 저장된 세션 id만 지우고 시작 화면으로 돌아간다. 서버 기록은 남는다.
   function resetChat() {
+    // 대화 종료: 지금 대화를 DB에 저장한 뒤 새 대화로.
+    if (sessionRef.current) chatApi.flush(sessionRef.current).catch(() => {});
     generation.current++;
     saveVersion.current++;
     saveFailed.current = false;

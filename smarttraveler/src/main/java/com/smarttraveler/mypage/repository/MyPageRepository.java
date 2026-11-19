@@ -38,8 +38,12 @@ public class MyPageRepository {
                 rs.getString("region"), rs.getObject("start_date", LocalDate.class),
                 rs.getObject("end_date", LocalDate.class), "DRAFT", readDays(rs.getString("days_json"))), memberId));
         result.addAll(jdbc.query("""
-            SELECT id, COALESCE(title, destination) AS title, destination, start_date, end_date, status
-            FROM course WHERE member_no=? AND deleted_at IS NULL AND is_active=TRUE ORDER BY id DESC
+            SELECT c.id, COALESCE(c.title, c.destination) AS title, c.destination, c.start_date, c.end_date,
+                   -- 챗봇이 저장한 추천 코스(chat_message_id)는 예약 전까지 「저장된 여행」(DRAFT)으로 보인다.
+                   CASE WHEN JSON_EXTRACT(c.condition_meta, '$.chat_message_id') IS NOT NULL
+                         AND NOT EXISTS (SELECT 1 FROM room_reservation r WHERE r.course_id = c.id)
+                        THEN 'DRAFT' ELSE c.status END AS status
+            FROM course c WHERE c.member_no=? AND c.deleted_at IS NULL AND c.is_active=TRUE ORDER BY c.id DESC
             """, (rs, n) -> new CourseView("course-" + rs.getLong("id"), rs.getString("title"),
                 rs.getString("destination"), rs.getObject("start_date", LocalDate.class),
                 rs.getObject("end_date", LocalDate.class), rs.getString("status"), List.of()), memberId));

@@ -18,7 +18,8 @@ public class ConditionDialogueService {
     private final StoredPlaceCandidates candidates;
     private final StoredCourseCandidates courses;
     private final boolean courseRagEnabled;
-    public ConditionDialogueService(JdbcTemplate jdbc, ObjectMapper mapper,
+    private final ChatMessageBuffer buffer;
+    public ConditionDialogueService(JdbcTemplate jdbc, ObjectMapper mapper, ChatMessageBuffer buffer,
                                     PythonAiClient ai, StoredPlaceCandidates candidates,
                                     StoredCourseCandidates courses,
                                     @Value("${COURSE_RAG_ENABLED:true}") boolean courseRagEnabled) {
@@ -28,6 +29,7 @@ public class ConditionDialogueService {
         this.candidates = candidates;
         this.courses = courses;
         this.courseRagEnabled = courseRagEnabled;
+        this.buffer = buffer;
     }
     public String process(long sessionId, String message) {
         return process(sessionId, message, Map.of());
@@ -39,8 +41,8 @@ public class ConditionDialogueService {
         List<String> saved = jdbc.query("SELECT conditions_json FROM chat_session_conditions WHERE session_id = ?", (rs, row) -> rs.getString(1), sessionId);
         ObjectNode conditions = saved.isEmpty() ? emptyConditions() : readConditions(saved.get(0));
         ObjectNode previous = conditions.deepCopy();
-        List<String> last = jdbc.query("SELECT content FROM chat_messages WHERE session_id = ? AND sender_role = 'ASSISTANT' ORDER BY message_id DESC LIMIT 1", (rs, row) -> rs.getString(1), sessionId);
-        String previousQuestion = last.isEmpty() ? "" : last.get(0);
+        // 저장 전 메시지까지 포함한 챗봇의 마지막 질문
+        String previousQuestion = buffer.lastAssistant(sessionId);
         // Python alone interprets confirmation language. Supply candidates whenever
         // stored required conditions are complete, including after clarification.
         boolean mayRecommend = ConditionQuestions.CHECK.equals(new ConditionQuestions().next(conditions));
