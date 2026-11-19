@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import Card from '../components/Card';
-import PageHero from '../components/PageHero';
 import ProfileAvatar from '../components/ProfileAvatar';
 import useMemberResource from '../hooks/useMemberResource';
 import useBookingDate from '../hooks/useBookingDate';
@@ -21,12 +20,15 @@ export default function MyPage({ bookings = [], courses = [], posts = [], member
   const memberLink = page => isGuest ? '#/login' : `#/${page}`;
   const recommendations = recommendationTrips(bookings, posts, today);
   const summaries = [
-    ['my-courses', 'Saved Trips', '저장된 여행', courses.filter(isSavedCourse).length, '예약 없이 저장된 코스'],
-    ['reservations', 'My Bookings', '내 예약', bookings.filter(isVisibleBooking).length, '본인 예약과 결제 상태'],
-    ['my-posts', 'My Trips Post', '내 여행 추천', recommendations.published.length + recommendations.pending.length, '지난 여행의 추천 글과 작성 상태'],
+    ['my-courses', 'Saved Trips', '저장된 여행', courses.filter(isSavedCourse).length, '예약 없이 저장된 여행'],
+    ['reservations', 'My Bookings', '내 예약', bookings.filter(isVisibleBooking).length, '내 예약과 결제 상태'],
+    ['my-posts', 'My Trips Post', '내 여행 추천', recommendations.published.length + recommendations.pending.length, '내 지난 여행 추천'],
   ];
   return <div className="mypage mp-home">
-    <PageHero eyebrow="MY TRAVEL" title={<>나의 여행, <em>한곳에서.</em></>}>나의 정보와 여행 취향, 여행 일정을 한곳에서 관리하세요.</PageHero>
+    <div className="hero">
+      <span className="eyebrow">MY TRIP PAGE</span>
+      <h1 className="mp-home-title">나의 여행 관리</h1>
+    </div>
     <Card>
       <div className="mp-profile-line"><ProfileAvatar avatarData={isGuest ? null : profile.data?.avatarData} name={name} />
         <div className="mp-profile-summary"><span className="pill">{isGuest ? '비회원' : '회원'}</span>
@@ -39,8 +41,17 @@ export default function MyPage({ bookings = [], courses = [], posts = [], member
       </div>
       <div className="mp-home-actions"><a className="secondary" href={memberLink('my-profile')}>내 정보관리</a><a className="secondary" href={memberLink('my-travel-style')}>내 여행 스타일 관리</a></div>
     </Card>
-    <div className="grid three mp-home-summaries" style={{ marginTop: 23 }}>{summaries.map(([page, englishTitle, title, count, description]) => <Card key={page}>
-      <span className="pill">{englishTitle}</span><h2><a className="card-title-link" href={memberLink(page)}>{title}</a></h2><p className="stats">{countsReady ? count : '—'}<span className="note"> 건</span></p><p className="muted">{description}</p><a className="text-button" href={memberLink(page)}>{title} 보기 →</a>
-    </Card>)}</div>
+    <div className="grid three mp-home-summaries" style={{ marginTop: 23 }}>
+      {/* 카드 전체를 하나의 링크로 만들어 여백을 눌러도 같은 페이지로 이동한다. */}
+      {summaries.map(([page, englishTitle, title, count, description]) => (
+        <a key={page} className="card mp-summary-link" href={memberLink(page)} aria-labelledby={`mp-summary-${page}`}>
+          <span className="pill">{englishTitle}</span>
+          <h2 id={`mp-summary-${page}`}>{title}</h2>
+          <p className="stats">{countsReady ? count : '—'}<span className="note"> 건</span></p>
+          <p className="muted">{description}</p>
+          <span className="text-button">{title} 보기 →</span>
+        </a>
+      ))}
+    </div>
   </div>;
 }

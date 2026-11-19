@@ -3,7 +3,10 @@ package com.smarttraveler.mypage.repository;
 import com.smarttraveler.mypage.dto.MyPageDtos.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import tools.jackson.databind.ObjectMapper;
@@ -31,22 +34,37 @@ public class MyPageRepository {
     }
 
     public List<CourseView> courses(long memberId) {
+        Map<String, Optional<String>> regionalPhotos = new HashMap<>();
         List<CourseView> result = new ArrayList<>(jdbc.query("""
             SELECT id, title, region, start_date, end_date, days_json
             FROM mypage_course_draft WHERE member_id=? ORDER BY id DESC
-            """, (rs, n) -> new CourseView("draft-" + rs.getLong("id"), rs.getString("title"),
-                rs.getString("region"), rs.getObject("start_date", LocalDate.class),
-                rs.getObject("end_date", LocalDate.class), "DRAFT", readDays(rs.getString("days_json"))), memberId));
+            """, (rs, n) -> {
+                String region = rs.getString("region");
+                List<Day> days = readDays(rs.getString("days_json"));
+                String photo = draftPhoto(days, region);
+                return new CourseView("draft-" + rs.getLong("id"), rs.getString("title"), region,
+                    rs.getObject("start_date", LocalDate.class), rs.getObject("end_date", LocalDate.class),
+                    "DRAFT", days, photo != null ? photo : regionalPhoto(region, regionalPhotos));
+            }, memberId));
         result.addAll(jdbc.query("""
             SELECT c.id, COALESCE(c.title, c.destination) AS title, c.destination, c.start_date, c.end_date,
                    -- 챗봇이 저장한 추천 코스(chat_message_id)는 예약 전까지 「저장된 여행」(DRAFT)으로 보인다.
                    CASE WHEN JSON_EXTRACT(c.condition_meta, '$.chat_message_id') IS NOT NULL
                          AND NOT EXISTS (SELECT 1 FROM room_reservation r WHERE r.course_id = c.id)
-                        THEN 'DRAFT' ELSE c.status END AS status
+                        THEN 'DRAFT' ELSE c.status END AS status,
+                   (SELECT image.image_url FROM course_day d
+                    JOIN activity a ON a.course_day_id=d.id
+                    JOIN place_image image ON image.place_id=a.place_id
+                    WHERE d.course_id=c.id AND NULLIF(TRIM(image.image_url),'') IS NOT NULL
+                    ORDER BY d.day_no, a.seq, a.id, image.sort_order, image.place_image_id LIMIT 1) AS itinerary_photo
             FROM course c WHERE c.member_no=? AND c.deleted_at IS NULL AND c.is_active=TRUE ORDER BY c.id DESC
-            """, (rs, n) -> new CourseView("course-" + rs.getLong("id"), rs.getString("title"),
-                rs.getString("destination"), rs.getObject("start_date", LocalDate.class),
-                rs.getObject("end_date", LocalDate.class), rs.getString("status"), List.of()), memberId));
+            """, (rs, n) -> {
+                String region = rs.getString("destination");
+                String photo = rs.getString("itinerary_photo");
+                return new CourseView("course-" + rs.getLong("id"), rs.getString("title"), region,
+                    rs.getObject("start_date", LocalDate.class), rs.getObject("end_date", LocalDate.class),
+                    rs.getString("status"), List.of(), photo != null ? photo : regionalPhoto(region, regionalPhotos));
+            }, memberId));
         return result;
     }
 
@@ -80,11 +98,12 @@ public class MyPageRepository {
                             point.getObject("longitude", Double.class)), rs.getLong("id"));
                     return new Day(date == null ? c.startDate().plusDays(rs.getInt("day_no") - 1L) : date, places, mapPlaces);
                 }, Long.parseLong(id.substring(7)), memberId);
-            return new CourseView(c.id(), c.title(), c.region(), c.startDate(), c.endDate(), c.state(), days);
+            return new CourseView(c.id(), c.title(), c.region(), c.startDate(), c.endDate(), c.state(), days, c.coverImageUrl());
         }).orElse(null);
     }
 
     public List<BookingView> bookings(long memberId) {
+        Map<String, Optional<String>> regionalPhotos = new HashMap<>();
         return jdbc.query("""
             WITH owned_reservations AS (
             SELECT r.*, ro.name AS booked_room_name, l.lodging_id AS booked_lodging_id,
@@ -121,6 +140,7 @@ public class MyPageRepository {
                 FROM owned_reservations owned
             )
             SELECT matched.*, display_stay.name AS stay_name, display_stay.address AS stay_address,
+                   COALESCE(match_region, stay_region.sigungu_name, stay_region.region_name) AS cover_region,
                    display_stay.phone AS stay_phone, display_stay.description AS stay_description,
                    display_stay.checkin_time AS stay_checkin_time, display_stay.checkout_time AS stay_checkout_time,
                    CASE WHEN display_lodging_id=booked_lodging_id THEN booked_room_name
@@ -132,6 +152,7 @@ public class MyPageRepository {
                     AND COALESCE(NULLIF(photo.image_url,''),NULLIF(photo.thumbnail_url,'')) IS NOT NULL
                     ORDER BY photo.sort_order,photo.photo_id LIMIT 1) AS stay_image_url
             FROM lodging_matches matched LEFT JOIN lodging display_stay ON display_stay.lodging_id=display_lodging_id
+            LEFT JOIN region stay_region ON stay_region.region_id=display_stay.region_id
             ORDER BY matched.created_at DESC, matched.reservation_id DESC
             """, (rs, n) -> new BookingView(String.valueOf(rs.getLong("reservation_id")), rs.getString("reservation_no"),
                 rs.getString("owned_course_id"),
@@ -140,16 +161,71 @@ public class MyPageRepository {
                 rs.getString("status"), rs.getObject("display_lodging_id") == null ? null : new StayInfo(
                     rs.getLong("display_lodging_id"), rs.getString("stay_address"), rs.getString("stay_phone"),
                     rs.getString("stay_description"), rs.getString("stay_image_url"), rs.getString("stay_checkin_time"),
-                    rs.getString("stay_checkout_time"), rs.getLong("display_lodging_id") != rs.getLong("booked_lodging_id"))), memberId, memberId);
+                    rs.getString("stay_checkout_time"), rs.getLong("display_lodging_id") != rs.getLong("booked_lodging_id")),
+                rs.getString("owned_course_id") == null ? regionalPhoto(rs.getString("cover_region"), regionalPhotos) : null), memberId, memberId);
+    }
+
+    private String draftPhoto(List<Day> days, String region) {
+        // 임시 일정은 방문 순서대로 장소명을 확인하고, 저장된 장소 ID가 있으면 우선 사용한다.
+        for (Day day : days) {
+            for (String name : day.places()) {
+                Long placeId = null;
+                if (day.mapPlaces() != null) {
+                    for (MapPlace place : day.mapPlaces()) {
+                        if (name.equals(place.name()) && place.placeId() != null) {
+                            placeId = place.placeId();
+                            break;
+                        }
+                    }
+                }
+                PlaceDetails place = placeDetails(placeId, name, region == null ? "" : region.trim());
+                if (place != null && place.imageUrl() != null) return place.imageUrl();
+            }
+        }
+        return null;
+    }
+
+    private String regionalPhoto(String region, Map<String, Optional<String>> photos) {
+        if (region == null || region.isBlank()) return null;
+        // 같은 지역의 여행이 여러 건이면 대표 장소 사진을 한 번만 조회한다.
+        return photos.computeIfAbsent(region.trim(), name -> jdbc.query("""
+            WITH target AS (SELECT ? AS name)
+            SELECT image.image_url FROM place p
+            JOIN region area ON area.region_id=p.region_id
+            JOIN place_image image ON image.place_id=p.place_id
+            CROSS JOIN target
+            WHERE p.is_active=TRUE AND NULLIF(TRIM(image.image_url),'') IS NOT NULL
+              AND (area.region_name=target.name OR area.sigungu_name=target.name
+                   OR LOCATE(target.name,area.sido_name)=1
+                   OR LOCATE(CONCAT(target.name,' '),p.address)=1
+                   OR LOCATE(CONCAT(' ',target.name,' '),p.address)>0
+                   OR LOCATE(CONCAT(' ',target.name,'시 '),p.address)>0
+                   OR LOCATE(CONCAT(' ',target.name,'군 '),p.address)>0
+                   OR (target.name IN ('광주','광주광역시') AND p.address REGEXP
+                       '^전남광주통합특별시 (동구|서구|남구|북구|광산구) '))
+            ORDER BY CASE WHEN p.place_type='ATTRACTION' THEN 0 ELSE 1 END,
+                     p.place_id, image.sort_order, image.place_image_id LIMIT 1
+            """, (rs, n) -> rs.getString("image_url"), name).stream().findFirst()).orElse(null);
     }
 
     public List<PostView> posts(long memberId) {
+        // 등록 사진이 없으면 일차와 방문 순서대로 사진이 있는 첫 여행지를 찾는다.
         return jdbc.query("""
-            SELECT post_id, course_id, reservation_id, title, content, status, course_snapshot
-            FROM human_course_post WHERE author_id=? AND deleted_at IS NULL ORDER BY created_at DESC
+            SELECT p.post_id, p.course_id, p.reservation_id, p.title, p.content, p.status, p.course_snapshot,
+                   COALESCE(
+                       (SELECT photo.image_url FROM human_course_photo photo
+                        WHERE photo.post_id=p.post_id AND NULLIF(TRIM(photo.image_url),'') IS NOT NULL
+                        ORDER BY photo.sort_order, photo.photo_id LIMIT 1),
+                       (SELECT image.image_url FROM course_day d
+                        JOIN activity a ON a.course_day_id=d.id
+                        JOIN place_image image ON image.place_id=a.place_id
+                        WHERE d.course_id=p.course_id AND NULLIF(TRIM(image.image_url),'') IS NOT NULL
+                        ORDER BY d.day_no, a.seq, a.id, image.sort_order, image.place_image_id LIMIT 1)
+                   ) AS cover_image_url
+            FROM human_course_post p WHERE p.author_id=? AND p.deleted_at IS NULL ORDER BY p.created_at DESC
             """, (rs, n) -> new PostView(String.valueOf(rs.getLong("post_id")), "course-" + rs.getLong("course_id"),
                 String.valueOf(rs.getLong("reservation_id")), rs.getString("title"), rs.getString("content"),
-                rs.getString("status"), rs.getString("course_snapshot")), memberId);
+                rs.getString("status"), rs.getString("course_snapshot"), rs.getString("cover_image_url")), memberId);
     }
 
     public PlaceDetails placeDetails(Long placeId, String name, String region) {

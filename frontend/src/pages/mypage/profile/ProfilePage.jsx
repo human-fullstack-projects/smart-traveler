@@ -66,7 +66,7 @@ export default function ProfilePage({ member }) {
   }
   if (resource.status === 'loading') return <p role="status">내 정보를 불러오고 있습니다.</p>;
   if (resource.error) return <><AccessNotice kind={resource.error.status === 401 ? 'login' : resource.error.status === 403 ? 'denied' : 'unavailable'} onRetry={resource.reload} /><p className="mypage" role="alert">{resource.error.message}</p></>;
-  return <div className="mypage mp-settings mp-profile-settings"><PageHero eyebrow="MY PROFILE" title="내 정보관리">로그인 계정의 기본 정보를 관리하세요.</PageHero>
+  return <div className="mypage mp-settings mp-profile-settings"><PageHero eyebrow="MY PROFILE" title="내 정보관리" />
     <Card><form onSubmit={submit}><fieldset disabled={busy || reading}>
       <div className="mp-profile-line"><label className="mp-profile-image-label" htmlFor="mp-profile-image-upload"><span>프로필 이미지</span></label><ProfileAvatar avatarData={form.avatarData} name={form.nickname} /><div><input id="mp-profile-image-upload" type="file" accept="image/png,image/jpeg,image/webp" onChange={photo} /><p className="note">1MB 이하 · 저장 시 최대 256픽셀로 조정합니다.</p>
         <div className="mp-avatar-options" role="group" aria-label="프로필 이미지 선택">
@@ -83,7 +83,7 @@ export default function ProfilePage({ member }) {
       <div className="actions mp-profile-actions">
         {notice && <p className="mp-profile-notice" role="status">{notice}</p>}
         <button className="primary" type="submit" aria-busy={busy || reading}>내 정보 저장</button>
-        <a className="secondary" href="#/mypage">마이페이지 홈</a>
+        <a className="secondary" href="#/mypage">마이트립페이지</a>
       </div>
     </fieldset>
     </form></Card>

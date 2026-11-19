@@ -23,7 +23,6 @@ import TossDemoPage from './pages/payment/TossDemoPage.jsx';
 import OwnerPage from './pages/owner/OwnerPage.jsx';
 import OwnerAccess from './pages/owner/OwnerAccess.jsx';
 
-import MyPageMenu from './pages/mypage/components/MyPageMenu';
 import MyPage from './pages/mypage/pages/MyPage';
 import Reservations from './pages/mypage/pages/Reservations';
 import MyCourses from './pages/mypage/pages/MyCourses';
@@ -203,7 +202,7 @@ export default function App() {
     const needsTravelData = !['/mypage', '/my-profile', '/my-travel-style'].includes(routePath);
     const blocked = access !== 'allowed' ? access : needsTravelData && ['login', 'denied', 'unavailable'].includes(myPageStore.status) ? myPageStore.status : null;
     content = <>
-      <div className="mypage"><MyPageMenu currentPage={myCourseMatch ? 'my-courses' : routePath.slice(1)} isGuest={!member} />
+      <div className="mypage">
         {member && myPageStore.pendingCount > 0 && <p role="status">회원 연결을 기다리는 임시 코스가 {myPageStore.pendingCount}개 있습니다. 이 페이지를 새로고침하지 말고 다시 시도해 주세요.</p>}
         {member && myPageStore.error && <p className="warning" role="alert">{myPageStore.error} <button type="button" onClick={myPageStore.retry}>다시 불러오기·연결</button></p>}
       </div>

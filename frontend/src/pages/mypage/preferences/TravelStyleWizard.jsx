@@ -3,7 +3,7 @@ import { settingsApi } from '../api/settingsApi';
 import './travel-style-wizard.css';
 
 const steps = [
-  { label: '여행 스타일', title: '어떤 여행 스타일이세요?', help: '나와 가장 가까운 스타일을 골라 주세요.', options: [
+  { label: '여행 스타일', title: '어떤 일정의 여행을 하시나요?', help: '나와 가장 가까운 스타일을 골라 주세요.', options: [
     ['packed', '알차게 여행', '하루를 꽉 채워요', 'pulse'],
     ['normal', '균형있게 여행', '적당한 일정을 세워요', 'clock'],
     ['relaxed', '여유롭게 여행', '휴식에 가까운 일정을 세워요', 'bed'],
@@ -13,7 +13,7 @@ const steps = [
     ['indoor', '실내', '전시·카페·실내 체험', 'home'],
     ['both', '둘 다', '야외와 실내 골고루', 'arrows'],
   ] },
-  { label: '선호 지역', title: '어떤 지역을 선호하세요?', help: '선호하는 지역을 1~3개 골라 주세요.', options: [
+  { label: '선호 지역', title: '어떤 곳을 선호하세요?', help: '선호하는 장소를 1~3개 골라 주세요.', options: [
     ['도시', '도시', '맛집·쇼핑·야경이 가까운 곳', 'city'],
     ['농촌', '시골', '한적한 마을과 들판', 'village'],
     ['호수·강', '호수·강', '물가 산책과 잔잔한 풍경', 'lake'],
@@ -66,7 +66,10 @@ export default function TravelStyleWizard({ member, initialData, onSaved }) {
     finally { setBusy(false); }
   }
   return <div className="travel-style-page">
-    <h1 className="travel-style-page-title">내 여행 스타일 관리</h1>
+    <header className="travel-style-page-heading">
+      <p className="travel-style-page-eyebrow">MY TRIP STYLE</p>
+      <h1 className="travel-style-page-title">내 여행 스타일 관리</h1>
+    </header>
     <section className="travel-style-panel" aria-label="여행 선호도 3질문" aria-busy={busy}>
       <div className="travel-style-inner">
         {steps.map((current, step) => <section className="travel-style-section" key={current.label} aria-labelledby={`travel-style-heading-${step}`}>
@@ -89,7 +92,7 @@ export default function TravelStyleWizard({ member, initialData, onSaved }) {
             {notice && <p className="travel-style-notice" role="status">{notice}</p>}
             <button type="button" className="travel-style-next" disabled={busy || !valid} aria-busy={busy} onClick={save}>저장</button>
           </div>
-          <a href="#/mypage">마이페이지 홈</a>
+          <a href="#/mypage">마이트립페이지</a>
         </div>
       </div>
     </section>

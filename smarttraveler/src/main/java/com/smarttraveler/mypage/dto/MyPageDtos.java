@@ -25,14 +25,19 @@ public final class MyPageDtos {
     public record ImportRequest(@NotNull @Positive Long expectedMemberId,
                                 @NotEmpty @Size(max = 20) List<@NotNull @Valid Draft> courses) {}
     public record CourseView(String id, String title, String region, LocalDate startDate,
-                             LocalDate endDate, String state, List<Day> days) {}
+                             LocalDate endDate, String state, List<Day> days, String coverImageUrl) {}
     public record StayInfo(Long id, String address, String phone, String description,
                            String imageUrl, String checkinTime, String checkoutTime, boolean regionMatched) {}
     public record BookingView(String id, String reservationNo, String courseId, String stay,
                               String room, LocalDate date, LocalDate endDate, int guests,
-                              int price, String status, StayInfo stayInfo) {}
+                              int price, String status, StayInfo stayInfo, String coverImageUrl) {
+        public BookingView(String id, String reservationNo, String courseId, String stay, String room,
+                           LocalDate date, LocalDate endDate, int guests, int price, String status, StayInfo stayInfo) {
+            this(id, reservationNo, courseId, stay, room, date, endDate, guests, price, status, stayInfo, null);
+        }
+    }
     public record PostView(String id, String courseId, String reservationId, String title,
-                           String body, String status, String courseSnapshot) {}
+                           String body, String status, String courseSnapshot, String coverImageUrl) {}
     public record Snapshot(long memberId, List<CourseView> courses,
                            List<BookingView> bookings, List<PostView> posts) {}
     public record ImportResult(List<String> importedClientIds) {}
