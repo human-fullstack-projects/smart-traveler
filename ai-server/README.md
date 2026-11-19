@@ -1,6 +1,6 @@
 # 스마트 트래블 Python AI 서버
 
-Python 서버는 LangChain의 `ChatOpenAI`로 대화에서 조건을 추출하고, LangGraph로 조건 검증과 다음 질문을 처리한다. 대화·조건 저장은 Spring Boot와 MariaDB가 담당한다. 기본 경로는 저장 관광지 중 최대 세 곳을 추천한다. Spring에서 `COURSE_RAG_ENABLED=true`를 지정하면 저장 코스의 임베딩 검색과 취향 리랭킹을 사용하고, 요청한 출발일부터 일차별 방문지를 표시한다.
+Python 서버는 LangChain의 `ChatOpenAI`로 대화에서 조건을 추출하고, LangGraph로 조건 검증과 다음 질문을 처리한다. 대화·조건 저장은 Spring Boot와 MariaDB가 담당한다. 기본 경로는 저장 코스의 임베딩 검색과 취향 리랭킹(`COURSE_RAG_ENABLED` 기본 `true`)을 사용하고, 요청한 출발일부터 일차별 방문지를 표시한다.
 
 ## 실행 방법 (Windows PowerShell)
 
@@ -45,7 +45,7 @@ $env:OPENAI_API_KEY = Read-Host "OpenAI API 키를 입력하세요"
 
 ## 개인화 코스 RAG
 
-- Spring 실행 환경에 `COURSE_RAG_ENABLED=true`를 설정한다. 기본값은 `false`이며 Python에 전달하는 `courseCandidates`의 유무로 경로를 구분한다.
+- 기본값은 `true`(코스 RAG 사용 · 추천 코스가 회원의 내 코스로 저장됨)이다. 예전 관광지 3곳 추천 경로로 돌리려면 Spring 실행 환경에 `COURSE_RAG_ENABLED=false`를 설정한다. Python에 전달하는 `courseCandidates`의 유무로 경로를 구분한다.
 - `smart-traveler-rag-1000-v1` 배치의 활성·완료·미삭제 코스 중 지정 지역 또는 직계 하위 지역, 정확히 1~4일인 후보만 사용한다. 일차 누락, 비활성 장소, 잘못된 방문 순서는 추천에서 제외한다.
 - 인증된 활성 회원의 실제 저장 취향만 `savedPreferences`로 전달한다. 회원 ID는 전달하지 않고 대화 조건에도 저장하지 않는다. 대화의 명시 취향이 저장 취향보다 우선하며, 실내·야외, 일정 밀도, 풍경의 명시적 제외를 먼저 적용한다. 정보가 부족한 후보는 제외 충족으로 간주하지 않는다.
 - 임베딩 관련도 상위 20개를 `0.50R + 0.20T + 0.15I + 0.15L`로 리랭킹한다. 미설정 항목의 가중치를 제외하고 재정규화하며, 후보의 미분류 값은 0.5로 처리한다. 정형 취향이 없으면 기존처럼 1개, 있으면 최대 3개를 반환한다.

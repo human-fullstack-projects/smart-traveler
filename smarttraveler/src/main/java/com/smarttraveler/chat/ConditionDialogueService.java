@@ -21,7 +21,7 @@ public class ConditionDialogueService {
     public ConditionDialogueService(JdbcTemplate jdbc, ObjectMapper mapper,
                                     PythonAiClient ai, StoredPlaceCandidates candidates,
                                     StoredCourseCandidates courses,
-                                    @Value("${COURSE_RAG_ENABLED:false}") boolean courseRagEnabled) {
+                                    @Value("${COURSE_RAG_ENABLED:true}") boolean courseRagEnabled) {
         this.jdbc = jdbc;
         this.mapper = mapper;
         this.ai = ai;
@@ -48,7 +48,10 @@ public class ConditionDialogueService {
         List<Map<String, Object>> courseRows = null;
         if (courseRagEnabled) {
             courseRows = mayRecommend ? courses.find(conditions) : List.of();
-        } else if (mayRecommend) {
+        }
+        // 준비된 코스가 없는 지역·일수(예: 5일 이상)는 예전처럼 저장 관광지 추천으로 넘긴다.
+        if (mayRecommend && (courseRows == null || courseRows.isEmpty())) {
+            courseRows = null;
             placeRows = candidates.find(conditions);
         }
         var result = ai.process(message, previousQuestion, conditions, placeRows, courseRows, savedPreferences);
