@@ -3,6 +3,7 @@ import ChatMessages from './components/ChatMessages';
 import ChatComposer from './components/ChatComposer';
 import CourseRegionPicker from './components/CourseRegionPicker';
 import TravelConditions from '../../TravelConditions.jsx';
+import { CHAT_INTRO } from './chatIntro';
 import '../../css/AiChatPage.css';
 
 export default function AiChatPage({
@@ -29,6 +30,10 @@ export default function AiChatPage({
 
   const lastMessage = messages.at(-1);
   const awaitingConfirmation = !busy && lastMessage?.role === 'ASSISTANT' && lastMessage.content.includes('조건을 확인해 주세요');
+  // 세션 생성 시 저장되는 첫 INTRO 인사말은 시작 화면에서 이미 보여줬으므로 대화창에서는 생략한다.
+  const displayMessages = messages[0]?.role === 'ASSISTANT' && messages[0].content === CHAT_INTRO
+    ? messages.slice(1)
+    : messages;
 
   return (
     <section className="cb-page" aria-label="AI 여행 대화">
@@ -37,7 +42,7 @@ export default function AiChatPage({
           <strong>여행 플래너</strong>
           <button type="button" className="cb-new" onClick={resetChat} disabled={busy}>+ 새 대화</button>
         </div>
-        <ChatMessages messages={messages} busy={busy} />
+        <ChatMessages messages={displayMessages} busy={busy} />
         {awaitingConfirmation && (
           <div className="cb-confirm-buttons">
             <button type="button" className="cb-confirm-yes" onClick={() => sendMessage('맞다')}>맞다</button>
