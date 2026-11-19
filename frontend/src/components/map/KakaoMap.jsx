@@ -13,19 +13,23 @@ function hasCoordinates(place) {
     && place.latitude !== '' && place.longitude !== '';
 }
 
-/** places: [{ id, name, latitude, longitude }]. center: { latitude, longitude }. */
-export default function KakaoMap({ places = EMPTY_PLACES, center, level = 3, width = '100%', height = '400px', onMarkerClick, onStatusChange, selectedId, paths = EMPTY_PATHS, fitPoints, fitRequest = 0 }) {
+/** places: [{ id, name, latitude, longitude, kind?, markerLabel? }]. center: { latitude, longitude }.
+ * onIdle(view): 지도가 멈출 때 보이는 범위 { swLat, swLng, neLat, neLng, level } (숙소 찾기 지도가 범위 안 숙소만 불러옴).
+ * focus: { latitude, longitude, level, key } — key가 바뀔 때 그 위치·확대로 이동(묶음 핀 클릭). */
+export default function KakaoMap({ places = EMPTY_PLACES, center, level = 3, width = '100%', height = '400px', onMarkerClick, onStatusChange, selectedId, paths = EMPTY_PATHS, fitPoints, fitRequest = 0, onIdle, focus }) {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
   const mapsRef = useRef(null);
   const onMarkerClickRef = useRef(onMarkerClick);
   const onStatusChangeRef = useRef(onStatusChange);
+  const onIdleRef = useRef(onIdle);
   const [mapReady, setMapReady] = useState(false);
   const [error, setError] = useState('');
   const [retryKey, setRetryKey] = useState(0);
 
   onMarkerClickRef.current = onMarkerClick;
   onStatusChangeRef.current = onStatusChange;
+  onIdleRef.current = onIdle;
   const firstPlace = places.find(hasCoordinates);
   const mapCenter = hasCoordinates(center) ? center : firstPlace || DEFAULT_CENTER;
   const latitude = Number(mapCenter.latitude);
@@ -76,7 +80,8 @@ export default function KakaoMap({ places = EMPTY_PLACES, center, level = 3, wid
       if (place.markerLabel != null) {
         const button = document.createElement('button');
         button.type = 'button';
-        button.className = `kakao-map-marker kakao-map-marker--${place.kind === 'stay' ? 'stay' : 'course'}${String(place.id) === String(selectedId) ? ' is-selected' : ''}`;
+        const kind = place.kind === 'stay' || place.kind === 'cluster' ? place.kind : 'course';
+        button.className = `kakao-map-marker kakao-map-marker--${kind}${String(place.id) === String(selectedId) ? ' is-selected' : ''}`;
         button.textContent = String(place.markerLabel);
         button.setAttribute('aria-label', place.name || String(place.markerLabel));
         button.addEventListener('click', handleClick);
@@ -127,6 +132,30 @@ export default function KakaoMap({ places = EMPTY_PLACES, center, level = 3, wid
     points.forEach((point) => bounds.extend(new mapsRef.current.LatLng(Number(point.latitude), Number(point.longitude))));
     mapRef.current.setBounds(bounds, 40, 40, 40, 40);
   }, [mapReady, fitPoints, fitRequest]);
+
+  useEffect(() => {
+    if (!mapReady) return undefined;
+    const maps = mapsRef.current;
+    const map = mapRef.current;
+    const report = () => {
+      if (!onIdleRef.current) return;
+      const bounds = map.getBounds();
+      const sw = bounds.getSouthWest();
+      const ne = bounds.getNorthEast();
+      onIdleRef.current({ swLat: sw.getLat(), swLng: sw.getLng(), neLat: ne.getLat(), neLng: ne.getLng(), level: map.getLevel() });
+    };
+    maps.event.addListener(map, 'idle', report);
+    report();
+    return () => maps.event.removeListener(map, 'idle', report);
+  }, [mapReady]);
+
+  useEffect(() => {
+    if (!mapReady || !focus || !hasCoordinates(focus)) return;
+    if (focus.level) mapRef.current.setLevel(focus.level);
+    mapRef.current.setCenter(new mapsRef.current.LatLng(Number(focus.latitude), Number(focus.longitude)));
+    // 같은 위치를 다시 눌러도 이동하도록 key가 바뀔 때만 실행한다.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mapReady, focus?.key]);
 
   useEffect(() => {
     if (!mapReady || !containerRef.current || !window.ResizeObserver) return undefined;
