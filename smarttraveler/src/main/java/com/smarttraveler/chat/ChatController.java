@@ -25,12 +25,14 @@ public class ChatController {
     private final CourseRegionController regions;
     private final RecommendedCourseService recommendations;
     private final GuestRecommendedCourseService guestCourses;
+    private final ChatMessageBuffer buffer;
     private static final String GUEST = ChatController.class.getName() + ".guest";
-    public ChatController(JdbcTemplate jdbc, ConditionDialogueService dialogue, ChatPersonalization personalization, CourseRegionController regions, RecommendedCourseService recommendations, GuestRecommendedCourseService guestCourses) {
+    public ChatController(JdbcTemplate jdbc, ConditionDialogueService dialogue, ChatPersonalization personalization, CourseRegionController regions, RecommendedCourseService recommendations, GuestRecommendedCourseService guestCourses, ChatMessageBuffer buffer) {
         this.jdbc = jdbc; this.dialogue = dialogue; this.personalization = personalization;
         this.regions = regions;
         this.recommendations = recommendations;
         this.guestCourses = guestCourses;
+        this.buffer = buffer;
     }
 
     record MessageInput(@NotBlank @Size(max = 4000) String content, @jakarta.validation.constraints.Positive Long regionId) {
@@ -69,14 +71,19 @@ public class ChatController {
         var ids = jdbc.query("SELECT session_id FROM chat_sessions WHERE session_id = ? AND guest_token = ? FOR UPDATE", (rs, row) -> rs.getLong(1), id, guest(session));
         if (ids.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "대화를 찾을 수 없습니다.");
     }
+    // 메시지는 바로 DB에 쓰지 않고 보관함에 모았다가 대화 종료·페이지 이동·창 닫기 때 저장한다(ChatMessageBuffer).
     private long insertMessage(long id, String role, String text) {
-        var key = new GeneratedKeyHolder();
-        jdbc.update(connection -> {
-            var statement = connection.prepareStatement("INSERT INTO chat_messages (session_id, sender_role, content) VALUES (?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
-            statement.setLong(1, id); statement.setString(2, role); statement.setString(3, text.trim()); return statement;
-        }, key);
-        jdbc.update("UPDATE chat_sessions SET updated_at = CURRENT_TIMESTAMP WHERE session_id = ?", id);
-        return Objects.requireNonNull(key.getKey()).longValue();
+        return buffer.add(id, role, text);
+    }
+    /** 요청이 실패하면 이번 요청에서 보관함에 넣은 메시지도 되돌린다. */
+    private void replyOrRollback(long id, MessageInput input, int before, boolean withUserMessage) {
+        try {
+            if (withUserMessage) insertMessage(id, "USER", input.content());
+            reply(id, input);
+        } catch (RuntimeException error) {
+            buffer.rollbackTo(id, before);
+            throw error;
+        }
     }
     private void reply(long id, MessageInput input) {
         if (input.regionId() != null) {
@@ -101,22 +108,28 @@ public class ChatController {
         }, key);
         long id = Objects.requireNonNull(key.getKey()).longValue();
         insertMessage(id, "ASSISTANT", ConditionQuestions.INTRO);
-        insertMessage(id, "USER", input.content());
-        reply(id, input);
+        replyOrRollback(id, input, 0, true);
         return load(id, session);
     }
     @GetMapping("/sessions/{id}") @Transactional(readOnly = true)
     Chat load(@PathVariable long id, HttpSession session) {
         checkOwner(id, session);
-        var messages = jdbc.query("SELECT message_id, sender_role, content, recommendation_json FROM chat_messages WHERE session_id = ? ORDER BY created_at, message_id", (rs, row) -> new Message(rs.getLong(1), rs.getString(2), rs.getString(3), recommendations.read(rs.getString(4))), id);
+        var messages = buffer.messages(id).stream()
+            .map(m -> new Message(m.id(), m.role(), m.content(), recommendations.read(m.recommendationJson()))).toList();
         var conditions = jdbc.query("SELECT conditions_json, confirmed FROM chat_session_conditions WHERE session_id = ?", (rs, row) -> new Conditions(rs.getString(1), rs.getBoolean(2)), id);
         return new Chat(id, messages, conditions.isEmpty() ? null : conditions.get(0));
     }
     @PostMapping("/sessions/{id}/messages") @Transactional
     Chat send(@PathVariable long id, @Valid @RequestBody MessageInput input, HttpSession session) {
         lockOwner(id, session);
-        insertMessage(id, "USER", input.content());
-        reply(id, input);
+        replyOrRollback(id, input, buffer.pendingCount(id), true);
+        return load(id, session);
+    }
+    /** 대화 종료(새 대화)·다른 페이지 이동·창 닫기 때 화면이 부른다. 모아 둔 메시지를 DB에 저장한다. */
+    @PostMapping("/sessions/{id}/flush")
+    Chat flush(@PathVariable long id, HttpSession session) {
+        checkOwner(id, session);
+        buffer.flush(id);
         return load(id, session);
     }
     record SavedCourse(long courseId) {}

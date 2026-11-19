@@ -37,6 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(properties = {"COURSE_RAG_ENABLED=true", "spring.jpa.hibernate.ddl-auto=validate"})
 class GuestRecommendedCourseDatabaseTest {
     @Autowired JdbcTemplate jdbc;
+    @Autowired ChatMessageBuffer buffer;
     @Autowired ObjectMapper mapper;
     @Autowired StoredCourseCandidates candidates;
     @Autowired WebApplicationContext context;
@@ -53,6 +54,7 @@ class GuestRecommendedCourseDatabaseTest {
     @AfterEach void cleanup() {
         SecurityContextHolder.clearContext();
         for (long chat : chats) {
+            buffer.flush(chat); // 보관함에 남은 메시지도 DB에 써야 아래에서 함께 지운다
             var saved = jdbc.queryForList("SELECT id FROM course WHERE JSON_EXTRACT(condition_meta,'$.chat_message_id') IN (SELECT message_id FROM chat_messages WHERE session_id=?)", Long.class, chat);
             for (long course : saved) {
                 jdbc.update("DELETE FROM activity WHERE course_day_id IN (SELECT id FROM course_day WHERE course_id=?)", course);
@@ -130,6 +132,13 @@ class GuestRecommendedCourseDatabaseTest {
         assertEquals(0, jdbc.queryForObject("""
             SELECT COUNT(*) FROM course_day d LEFT JOIN activity a ON a.course_day_id=d.id
             WHERE d.course_id=? AND (a.id IS NULL OR a.latitude_snapshot IS NULL)""", Integer.class, course));
+        // 저장 전(보관함) 메시지로 만든 코스는 대화를 DB에 쓸 때 메시지 번호가 실제 번호로 바뀐다.
+        assertTrue(trip.messageId() < 0);
+        buffer.flush(trip.sessionId());
+        long realMessage = buffer.resolve(trip.sessionId(), trip.messageId());
+        assertTrue(realMessage > 0);
+        assertEquals(realMessage, jdbc.queryForObject("SELECT JSON_EXTRACT(condition_meta,'$.chat_message_id') FROM course WHERE id=?", Long.class, course));
+        assertEquals(course, jdbc.queryForObject("SELECT JSON_EXTRACT(recommendation_json,'$.savedCourseId') FROM chat_messages WHERE message_id=?", Long.class, realMessage));
         mvc.perform(get("/api/chat/sessions/" + trip.sessionId()).session(trip.browser())).andExpect(status().isNotFound());
         mvc.perform(post("/api/auth/logout").session(trip.browser()).with(csrf())).andExpect(status().isNoContent());
         assertTrue(trip.browser().isInvalid());
@@ -140,16 +149,19 @@ class GuestRecommendedCourseDatabaseTest {
         String first = signup(trip.browser());
         String second = signup(trip.browser());
         long firstId = members.findByLoginId(first).orElseThrow().getMemberId();
-        String json = jdbc.queryForObject("SELECT recommendation_json FROM chat_messages WHERE message_id=?", String.class, trip.messageId());
+        // 이 시험은 DB에 저장된 메시지 경로: 먼저 대화를 저장하고, 화면이 들고 있던 임시 번호로 이전한다.
+        buffer.flush(trip.sessionId());
+        long realMessage = buffer.resolve(trip.sessionId(), trip.messageId());
+        String json = jdbc.queryForObject("SELECT recommendation_json FROM chat_messages WHERE message_id=?", String.class, realMessage);
         ObjectNode broken = (ObjectNode) mapper.readTree(json);
         ((ObjectNode) broken.path("itinerary").get(1)).put("day_no", 1);
-        jdbc.update("UPDATE chat_messages SET recommendation_json=? WHERE message_id=?", mapper.writeValueAsString(broken), trip.messageId());
+        jdbc.update("UPDATE chat_messages SET recommendation_json=? WHERE message_id=?", mapper.writeValueAsString(broken), realMessage);
         assertThrows(Exception.class, () -> mvc.perform(post("/api/chat/guest-course/claim").session(trip.browser()).with(user(first)).with(csrf())));
         assertEquals(0, jdbc.queryForObject("SELECT COUNT(*) FROM course WHERE member_no=?", Integer.class, firstId));
         assertNotNull(trip.browser().getAttribute(GuestRecommendedCourseService.PENDING));
         assertNull(jdbc.queryForObject("SELECT member_id FROM chat_sessions WHERE session_id=?", Long.class, trip.sessionId()));
         mvc.perform(post("/api/chat/guest-course/claim").session(trip.browser()).with(user(second)).with(csrf())).andExpect(status().isConflict());
-        jdbc.update("UPDATE chat_messages SET recommendation_json=? WHERE message_id=?", json, trip.messageId());
+        jdbc.update("UPDATE chat_messages SET recommendation_json=? WHERE message_id=?", json, realMessage);
         mvc.perform(post("/api/chat/guest-course/claim").session(trip.browser()).with(user(first)).with(csrf())).andExpect(status().isOk());
         assertNull(trip.browser().getAttribute(GuestRecommendedCourseService.PENDING));
     }

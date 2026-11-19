@@ -20,7 +20,7 @@ class CourseDialogueServiceTest {
             var ai = mock(PythonAiClient.class);
             var places = mock(StoredPlaceCandidates.class);
             var courses = mock(StoredCourseCandidates.class);
-            var service = new ConditionDialogueService(jdbc, mapper, ai, places, courses, enabled);
+            var service = new ConditionDialogueService(jdbc, mapper, new ChatMessageBuffer(jdbc, mock(org.springframework.transaction.PlatformTransactionManager.class)), ai, places, courses, enabled);
             var conditions = mapper.createObjectNode();
             conditions.put("regionName", "부산"); conditions.put("durationDays", 3);
             conditions.put("startDate", "2026-12-10"); conditions.put("adults", 2); conditions.put("children", 0);
@@ -50,7 +50,7 @@ class CourseDialogueServiceTest {
         var ai = mock(PythonAiClient.class);
         var places = mock(StoredPlaceCandidates.class);
         var courses = mock(StoredCourseCandidates.class);
-        var service = new ConditionDialogueService(jdbc, mapper, ai, places, courses, true);
+        var service = new ConditionDialogueService(jdbc, mapper, new ChatMessageBuffer(jdbc, mock(org.springframework.transaction.PlatformTransactionManager.class)), ai, places, courses, true);
         var conditions = mapper.createObjectNode();
         conditions.put("regionName", "부산"); conditions.put("durationDays", 5);
         conditions.put("startDate", "2026-12-10"); conditions.put("adults", 2); conditions.put("children", 0);
@@ -76,7 +76,7 @@ class CourseDialogueServiceTest {
         when(jdbc.query(anyString(), any(RowMapper.class), eq(1L))).thenReturn(List.of());
         when(ai.process(anyString(), anyString(), any(), anyList(), anyList(), anyMap()))
             .thenReturn(new PythonAiClient.Result("지역을 알려주세요", false));
-        new ConditionDialogueService(jdbc, JsonMapper.builder().build(), ai, places, courses, true).process(1, "추천해줘");
+        new ConditionDialogueService(jdbc, JsonMapper.builder().build(), new ChatMessageBuffer(jdbc, mock(org.springframework.transaction.PlatformTransactionManager.class)), ai, places, courses, true).process(1, "추천해줘");
         verifyNoInteractions(courses, places);
     }
 }

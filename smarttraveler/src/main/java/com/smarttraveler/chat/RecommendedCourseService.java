@@ -20,9 +20,10 @@ public class RecommendedCourseService {
     private final JdbcTemplate jdbc;
     private final ObjectMapper mapper;
     private final StoredCourseCandidates candidates;
+    private final ChatMessageBuffer buffer;
 
-    public RecommendedCourseService(JdbcTemplate jdbc, ObjectMapper mapper, StoredCourseCandidates candidates) {
-        this.jdbc = jdbc; this.mapper = mapper; this.candidates = candidates;
+    public RecommendedCourseService(JdbcTemplate jdbc, ObjectMapper mapper, StoredCourseCandidates candidates, ChatMessageBuffer buffer) {
+        this.jdbc = jdbc; this.mapper = mapper; this.candidates = candidates; this.buffer = buffer;
     }
 
     /** 추천 코스가 메시지로 출력되는 즉시, 로그인 상태라면 "내 코스"에도 바로 저장한다. */
@@ -61,12 +62,30 @@ public class RecommendedCourseService {
         // 이 세션의 소유자가 이미 로그인 회원이면(member_id 보유) 추천 출력과 같은 트랜잭션에서 바로 영구 저장한다.
         Long memberId = jdbc.query("SELECT member_id FROM chat_sessions WHERE session_id=?",
             (rs, row) -> rs.getObject(1, Long.class), sessionId).getFirst();
-        if (memberId != null) snapshot.put("savedCourseId", persist(memberId, snapshot, messageId));
-        jdbc.update("UPDATE chat_messages SET recommendation_json=? WHERE message_id=? AND session_id=?", mapper.writeValueAsString(snapshot), messageId, sessionId);
+        if (memberId != null) {
+            // 같은 대화에서 같은 코스·같은 조건이 다시 추천되면 새로 저장하지 않고 이미 저장한 코스를 쓴다.
+            Long already = alreadySaved(sessionId, sourceId, conditions);
+            snapshot.put("savedCourseId", already != null ? already : persist(memberId, snapshot, messageId));
+        }
+        buffer.setRecommendation(sessionId, messageId, mapper.writeValueAsString(snapshot));
     }
 
     @Transactional
     public long save(long memberId, long sessionId, long messageId) {
+        // 아직 저장 전(보관함) 메시지: 대화 주인이 이 회원인지 확인하고 메모리의 추천 정보를 쓴다.
+        if (buffer.isPending(sessionId, messageId)) {
+            var owner = jdbc.query("SELECT member_id FROM chat_sessions WHERE session_id=? FOR UPDATE", (rs, row) -> rs.getObject(1, Long.class), sessionId);
+            String pending = buffer.pendingRecommendation(sessionId, messageId).orElse(null);
+            if (owner.isEmpty() || !Long.valueOf(memberId).equals(owner.getFirst()) || pending == null)
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "저장할 추천 코스가 없습니다.");
+            ObjectNode snapshot = (ObjectNode) mapper.readTree(pending);
+            if (snapshot.hasNonNull("savedCourseId")) return snapshot.path("savedCourseId").asLong();
+            long courseId = persist(memberId, snapshot, messageId);
+            snapshot.put("savedCourseId", courseId);
+            buffer.setRecommendation(sessionId, messageId, mapper.writeValueAsString(snapshot));
+            return courseId;
+        }
+        messageId = buffer.resolve(sessionId, messageId);
         var rows = jdbc.query("""
             SELECT m.recommendation_json FROM chat_messages m JOIN chat_sessions s ON s.session_id=m.session_id
             WHERE m.message_id=? AND m.session_id=? AND s.member_id=? AND m.sender_role='ASSISTANT'
@@ -135,6 +154,22 @@ public class RecommendedCourseService {
                      WHEN 'RESTAURANT' THEN 5 ELSE 1 END,?,p.place_id,p.address,p.latitude,p.longitude
             FROM (SELECT 1) one LEFT JOIN place p ON p.place_id=?
             """, courseDayId, seq, startTime, name, name, placeId);
+    }
+
+    /** 이 대화의 이전 추천 중 같은 원본 코스·같은 여행 조건으로 이미 「내 코스」에 저장된 코스 번호. 없으면 null. */
+    private Long alreadySaved(long sessionId, long sourceId, ObjectNode conditions) {
+        for (var message : buffer.messages(sessionId)) {
+            if (message.recommendationJson() == null) continue;
+            JsonNode previous = mapper.readTree(message.recommendationJson());
+            if (previous.path("sourceCourseId").asLong() == sourceId && previous.hasNonNull("savedCourseId")
+                && previous.path("conditions").equals(conditions)) {
+                long courseId = previous.path("savedCourseId").asLong();
+                // 회원이 그 코스를 지웠으면 새로 저장한다.
+                Integer exists = jdbc.queryForObject("SELECT COUNT(*) FROM course WHERE id=?", Integer.class, courseId);
+                if (exists != null && exists > 0) return courseId;
+            }
+        }
+        return null;
     }
 
     public JsonNode read(String json) { return json == null ? null : mapper.readTree(json); }

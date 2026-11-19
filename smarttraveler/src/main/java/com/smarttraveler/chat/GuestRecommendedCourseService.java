@@ -2,6 +2,7 @@ package com.smarttraveler.chat;
 
 import jakarta.servlet.http.HttpSession;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Objects;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -18,26 +19,34 @@ public class GuestRecommendedCourseService {
     private final JdbcTemplate jdbc;
     private final RecommendedCourseService courses;
     private final TransactionTemplate transactions;
+    private final ChatMessageBuffer buffer;
 
     record Pending(long sessionId, long messageId, String snapshot, Long memberId) implements Serializable {}
     record Saved(long memberId, long courseId) implements Serializable {}
     public record Preview(long messageId, String title, String destination, String startDate, int durationDays) {}
 
-    public GuestRecommendedCourseService(JdbcTemplate jdbc, RecommendedCourseService courses, PlatformTransactionManager manager) {
-        this.jdbc = jdbc; this.courses = courses; this.transactions = new TransactionTemplate(manager);
+    public GuestRecommendedCourseService(JdbcTemplate jdbc, RecommendedCourseService courses, PlatformTransactionManager manager, ChatMessageBuffer buffer) {
+        this.jdbc = jdbc; this.courses = courses; this.transactions = new TransactionTemplate(manager); this.buffer = buffer;
     }
 
     public Preview store(HttpSession session, long sessionId, long messageId) {
         synchronized (session) {
             Pending current = (Pending) session.getAttribute(PENDING);
             if (current != null && current.memberId() != null) throw conflict();
-            var rows = jdbc.query("""
-                SELECT m.recommendation_json FROM chat_messages m JOIN chat_sessions s ON s.session_id=m.session_id
-                WHERE m.message_id=? AND m.session_id=? AND m.sender_role='ASSISTANT' AND s.member_id IS NULL
-                  AND m.recommendation_json IS NOT NULL
-                """, (rs, row) -> rs.getString(1), messageId, sessionId);
+            List<String> rows;
+            if (buffer.isPending(sessionId, messageId)) {
+                // 아직 저장 전(보관함) 메시지
+                var guestChat = jdbc.query("SELECT session_id FROM chat_sessions WHERE session_id=? AND member_id IS NULL", (rs, row) -> rs.getLong(1), sessionId);
+                rows = guestChat.isEmpty() ? List.of() : buffer.pendingRecommendation(sessionId, messageId).stream().toList();
+            } else {
+                rows = jdbc.query("""
+                    SELECT m.recommendation_json FROM chat_messages m JOIN chat_sessions s ON s.session_id=m.session_id
+                    WHERE m.message_id=? AND m.session_id=? AND m.sender_role='ASSISTANT' AND s.member_id IS NULL
+                      AND m.recommendation_json IS NOT NULL
+                    """, (rs, row) -> rs.getString(1), buffer.resolve(sessionId, messageId), sessionId);
+            }
             if (rows.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "보관할 추천 코스가 없습니다.");
-            if (current == null || current.messageId() < messageId) {
+            if (current == null || newer(messageId, current.messageId())) {
                 current = new Pending(sessionId, messageId, rows.getFirst(), null);
                 session.setAttribute(PENDING, current);
             }
@@ -92,6 +101,11 @@ public class GuestRecommendedCourseService {
         JsonNode snapshot = courses.read(pending.snapshot());
         return new Preview(pending.messageId(), snapshot.path("title").asText(), snapshot.path("destination").asText(),
             snapshot.path("conditions").path("startDate").asText(), snapshot.path("conditions").path("durationDays").asInt());
+    }
+    /** 보관함(음수 임시 번호) 메시지는 DB에 저장된 메시지보다 항상 나중 메시지다. */
+    private static boolean newer(long candidate, long current) {
+        if (ChatMessageBuffer.isTemp(candidate) != ChatMessageBuffer.isTemp(current)) return ChatMessageBuffer.isTemp(candidate);
+        return current < candidate;
     }
     private ResponseStatusException conflict() {
         return new ResponseStatusException(HttpStatus.CONFLICT, "보관한 코스는 처음 이전을 시도한 계정으로만 저장할 수 있습니다.");
