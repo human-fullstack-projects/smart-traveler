@@ -31,8 +31,8 @@ export default function MainLayout({ children, member, loggingOut, onLogout, not
           >
             <span /><span /><span />
           </button>
-          <a className="mp-brand st-brand" href="#/main">
-            SMART TRAVEL
+          <a className="mp-brand st-brand brand-mark" href="#/main" aria-label="AI TRIP 홈">
+            <img className="brand-logo" src="/images/brand/ait_pin.svg" alt="" /><span className="brand-word"><b>AI</b> TRIP</span>
           </a>
         </div>
 
@@ -90,7 +90,7 @@ export default function MainLayout({ children, member, loggingOut, onLogout, not
                 </span>
               ))}
             </nav>
-            <p className="mp-footer-fine">smart travel</p>
+            <p className="mp-footer-fine">AI TRIP</p>
           </footer>
         </div>
       </div>

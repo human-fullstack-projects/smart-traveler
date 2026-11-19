@@ -30,7 +30,7 @@ function OwnerHeader({ propertyName, member, onLogout, loggingOut }) {
     <header className="owner-topbar">
       <div className="owner-topbar__inner">
         {/* 기존 로고 <a className="owner-brand" href="#/">smart <span>travel</span><small>partner</small></a> */}
-        <a className="owner-brand" href="#/">SMART TRAVEL</a>
+        <a className="owner-brand brand-mark" href="#/" aria-label="AI TRIP 홈"><img className="brand-logo" src="/images/brand/ait_pin.svg" alt="" /><span className="brand-word"><b>AI</b> TRIP</span></a>
         <div className="owner-topbar__right">
           <span className="owner-property-name">{propertyName}</span>
           {/* <a href="#/stays">사용자 숙소 화면</a> */}

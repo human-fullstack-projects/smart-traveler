@@ -4,7 +4,7 @@ export function StayHeader({ active = 'search' }) {
   return (
     <header className="stay-header">
       <div className="stay-header__inner">
-        <a className="stay-brand" href="#/">smart <span>travel</span></a>
+        <a className="stay-brand brand-mark is-small" href="#/" aria-label="AI TRIP 홈"><img className="brand-logo" src="/images/brand/ait_pin.svg" alt="" /><span className="brand-word"><b>AI</b> TRIP</span></a>
         <nav className="stay-nav" aria-label="숙소 메뉴">
           <a href="#/stays" aria-current={active === 'search' ? 'page' : undefined}>숙소 검색</a>
           <a href="#/stays/booking" aria-current={active === 'booking' ? 'page' : undefined}>예약</a>
@@ -17,7 +17,7 @@ export function StayHeader({ active = 'search' }) {
 export function StayFooter() {
   return (
     <footer className="stay-footer">
-      <a href="#/">smart <strong>travel</strong></a>
+      <a href="#/"><strong>AI TRIP</strong></a>
       <span>판매 가능 여부와 최종 금액은 예약 요청 시 다시 확인합니다.</span>
     </footer>
   );

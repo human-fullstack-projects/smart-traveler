@@ -416,7 +416,6 @@ export default function MainPage({ onStart, busy = false, reviewAccess, reviewKe
               }
             }}
           />
-          <a className="landing-condition-link" href="#/search">+ 조건 선택</a>
           <button className="landing-start" type="submit" disabled={busy}>
             {busy ? '시작하는 중…' : '시작하기'}
             <span aria-hidden="true">→</span>
