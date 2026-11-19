@@ -18,8 +18,8 @@ export function creationError(state, reservation) {
   return '';
 }
 function postFields(input) {
-  const fields = { title: String(input.title || '').trim(), summary: String(input.summary || '').trim(), body: String(input.body || '').trim(), category: input.category, companion: input.companion, photos: input.photos || [], photoAssets: input.photoAssets || [] };
-  if (!fields.title || fields.title.length > 80 || !fields.summary || fields.summary.length > 150 || !fields.body || fields.body.length > 2000) return null;
+  const fields = { title: String(input.title || '').trim(), body: String(input.body || '').trim(), category: input.category, companion: input.companion, photos: input.photos || [], photoAssets: input.photoAssets || [] };
+  if (!fields.title || fields.title.length > 80 || !fields.body || fields.body.length > 2000) return null;
   if (!['맛집', '문화', '힐링', '액티비티'].includes(fields.category) || !['혼자', '친구', '연인', '가족'].includes(fields.companion)) return null;
   if (!Array.isArray(fields.photos) || fields.photos.length > 5 || fields.photos.some((name) => typeof name !== 'string')) return null;
   if (!Array.isArray(fields.photoAssets) || fields.photoAssets.length > 5 || fields.photoAssets.some((photo) => !photo || typeof photo.name !== 'string' || typeof photo.dataUrl !== 'string' || !/^data:image\/(?:png|jpeg|webp|gif);base64,/.test(photo.dataUrl))) return null;
@@ -33,7 +33,7 @@ export function filterCourses(courses, filters = {}) {
     && (!filters.region || course.region === filters.region)
     && (!filters.category || course.category === filters.category)
     && (!filters.companion || course.companion === filters.companion)
-    && (!keyword || normalize(`${course.title ?? ''} ${course.summary ?? ''} ${course.body ?? ''}`).includes(keyword)));
+    && (!keyword || normalize(course.title).includes(keyword) || normalize(course.body).includes(keyword)));
   const byStableId = (a, b) => String(b.id ?? '').localeCompare(String(a.id ?? ''), 'ko', { numeric: true });
   return result.sort(filters.sort === 'likes'
     ? (a, b) => Number(b.likes || 0) - Number(a.likes || 0) || byStableId(a, b)
@@ -77,7 +77,7 @@ export function transition(current, action) {
     state.courses = state.courses.filter((item) => item.id !== course.id);
     return { state, id: course.id };
   }
-  if (course.visibility === 'BLINDED') return fail('블라인드 처리된 코스입니다.');
+  if (course.visibility === 'BLINDED') return fail('블라인드 처리된 여행입니다.');
   if (action.type === 'like') { course.likedByMe = !course.likedByMe; course.likes = Math.max(0, course.likes + (course.likedByMe ? 1 : -1)); }
   else if (action.type === 'comment') {
     const text = String(action.text || '').trim();

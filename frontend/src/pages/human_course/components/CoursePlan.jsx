@@ -1,9 +1,9 @@
 import { useState } from 'react';
 
-function PlacePhoto({ name, imageUrls }) {
+export function PlacePhoto({ name, imageUrls = [], emptyMessage }) {
   const [failedUrls, setFailedUrls] = useState([]);
   const photo = imageUrls.find(url => !failedUrls.includes(url));
-  if (!photo) return null;
+  if (!photo) return emptyMessage ? <p>{emptyMessage}</p> : null;
 
   return <img className="plan-place-photo" src={photo} alt={`${name} 사진`} loading="lazy"
     onError={() => setFailedUrls(urls => [...urls, photo])} />;

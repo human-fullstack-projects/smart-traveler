@@ -13,6 +13,8 @@ try {
   assert.equal(filterCourses(state.courses, { region: '부산', category: '맛집', companion: '친구', keyword: '바다' }).length, 1);
   assert.equal(filterCourses(state.courses, { keyword: '  부산 바다  ' }).length, 1, '검색어 앞뒤 공백 무시');
   assert.equal(filterCourses(state.courses, { keyword: '없는 검색어' }).length, 0);
+  assert.equal(filterCourses(state.courses, { keyword: '편한 신발' }).length, 1, '여행 후기 검색');
+  assert.equal(filterCourses(state.courses, { keyword: '지역 맛집도 들렀던' }).length, 0, '기존 한 줄 소개는 검색에서 제외');
   assert.equal(filterCourses(state.courses, { sort: 'likes' })[0].id, 3);
   const likes = state.courses[0].likes;
   run({ type: 'like', id: 1 }); assert.equal(state.courses[0].likes, likes + 1);
@@ -35,13 +37,13 @@ try {
   assert.equal(run({ type: 'batch' }).count, 1);
   assert.equal(run({ type: 'batch' }).count, 0, '배치 재실행 중복 방지');
   assert.equal(creationError(state, state.reservations.find((r) => r.id === 'R106')), '');
-  const fields = { title: '부산 여행', category: '맛집', companion: '친구', summary: '한 줄 소개', body: '여행 후기', photos: ['사진.jpg'] };
+  const fields = { title: '부산 여행', category: '맛집', companion: '친구', body: '여행 후기', photos: ['사진.jpg'] };
   for (const invalid of [
-    { title: ' ' }, { title: '가'.repeat(81) }, { summary: ' ' }, { summary: '가'.repeat(151) },
+    { title: ' ' }, { title: '가'.repeat(81) },
     { body: ' ' }, { body: '가'.repeat(2001) }, { category: '잘못된 유형' }, { companion: '' },
     { photos: Array(6).fill('photo.jpg') },
   ]) assert.ok(run({ type: 'create', reservationId: 'R101', fields: { ...fields, ...invalid } }).error, '잘못된 입력 차단');
-  const maxFields = { ...fields, title: '가'.repeat(80), summary: '가'.repeat(150), body: '가'.repeat(2000), photos: Array(5).fill('photo.jpg') };
+  const maxFields = { ...fields, title: '가'.repeat(80), body: '가'.repeat(2000), photos: Array(5).fill('photo.jpg') };
   assert.ok(!transition(state, { type: 'create', reservationId: 'R101', fields: maxFields }).error, '허용 최대 길이 입력');
   assert.ok(run({ type: 'comment', id: 1, text: '가'.repeat(301) }).error);
   assert.ok(run({ type: 'create', reservationId: 'R101', fields: { ...fields, title: ' ' } }).error);
@@ -70,13 +72,16 @@ try {
     const html = renderToStaticMarkup(React.createElement(Page, { ...state, ...props, isAuthenticated: true, execute() {} }));
     assert.ok(html.includes('<h1>'));
     if (name === 'HumanCourseList') {
-      assert.ok(html.includes('aria-pressed="true"'), '동행 필터 선택 상태 제공');
+      assert.match(html, /<select id="human-course-companion"[^>]*><option value="" selected="">전체 동행 유형<\/option>/, '동행 필터 기본 선택 상태 제공');
       assert.ok(html.includes('전체 ' + state.courses.length + '건'), '전체/검색 결과 수 제공');
+      assert.ok(!html.includes(state.courses[0].summary), '목록은 기존 한 줄 소개 숨김');
     }
     if (name === 'HumanCourseDetail') {
       assert.ok(html.includes('comment-counter'), '댓글 글자 수 안내 제공');
       assert.ok(html.includes('aria-busy="false"'), '좋아요 처리 상태 제공');
+      assert.ok(html.includes(state.courses[0].body) && !html.includes(state.courses[0].summary), '상세는 제목과 후기 표시');
     }
+    if (name === 'HumanCourseCreate' || name === 'HumanCourseEdit') assert.ok(!html.includes('name="summary"'), '한 줄 소개 입력 제거');
     console.log(`${name}: changed state render OK`);
   }
   const { default: HumanCourseList } = await server.ssrLoadModule('/src/pages/human_course/pages/HumanCourseList.jsx');

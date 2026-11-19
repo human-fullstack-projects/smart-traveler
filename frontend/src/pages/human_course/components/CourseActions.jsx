@@ -9,7 +9,7 @@ export default function CourseActions({ course, execute }) {
     setLiking(true);
     setNotice('');
     const result = await execute?.({ type: 'like', id: course.id });
-    setNotice(result?.error || (course.likedByMe ? '좋아요를 취소했습니다.' : '이 코스를 좋아요에 추가했습니다.'));
+    setNotice(result?.error || (course.likedByMe ? '좋아요를 취소했습니다.' : '이 여행을 좋아요에 추가했습니다.'));
     setLiking(false);
   }
   return <section className="panel"><div className="panel-heading"><h2>게시글 기능</h2></div>

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import ItineraryMapPanel from '../../../components/map/ItineraryMapPanel';
-import { stays } from '../../stays/shared/stayData';
+import { PlacePhoto } from './CoursePlan';
 
 const centers = {
   부산: { latitude: 35.1796, longitude: 129.0756 },
@@ -11,29 +11,36 @@ const centers = {
 };
 const EMPTY_PLAN = [];
 
-export default function CourseMap({ region, plan = EMPTY_PLAN, stay, showDemoStays = true, preview = false, allDaysLabel }) {
-  const days = useMemo(() => plan.map((day) => ({
-    day: day.day,
-    places: [
-      ...((day.places?.length ? day.places : day.stops) || []).map((stop, index) => ({
-        ...(typeof stop === 'string' ? { name: stop.replace(/^\d{1,2}:\d{2}\s*/, '').trim() } : stop),
-        id: typeof stop === 'string' ? `stop-${day.day}-${index}` : (stop.id || `stop-${day.day}-${index}`), kind: 'course',
-      })),
-      ...(day.stays || (day.lodging ? [day.lodging] : [])).map((stay, index) => ({
-        ...(typeof stay === 'string' ? { name: stay } : stay),
-        id: `stay-${day.day}-${index}`, kind: 'stay',
-      })),
-    ],
-  })), [plan]);
-  const stayedPlace = useMemo(() => stay ? [{ ...stay, id: stay.id || 'stayed-lodging', kind: 'stay' }] : [], [stay]);
-  const regionStays = useMemo(() => showDemoStays ? stays.filter((stay) => stay.region === region && stay.demoCoordinate).map((stay) => ({
-    ...stay.demoCoordinate,
-    id: `region-stay-${stay.id}`,
-    name: stay.name,
-    address: stay.address,
-    kind: 'stay',
-  })) : [], [region, showDemoStays]);
-  const extraPlaces = useMemo(() => [...stayedPlace, ...regionStays], [stayedPlace, regionStays]);
+function renderPlacePhoto(place) {
+  return <PlacePhoto key={place.id} name={place.name} imageUrls={place.imageUrls || []} emptyMessage="등록된 장소 사진이 없습니다." />;
+}
+
+export default function CourseMap({ region, plan = EMPTY_PLAN, stay, travelDates, preview = false, allDaysLabel }) {
+  const days = useMemo(() => {
+    const [checkIn, checkOut] = (travelDates || '').split('~').map((value) => Date.parse(value.trim()));
+    return plan.map((day) => {
+      const visits = [];
+      const lodgings = [];
+      const stops = day.places?.length ? day.places : day.stops || [];
+      stops.forEach((stop, index) => {
+        const place = typeof stop === 'string' ? { name: stop.replace(/^\d{1,2}:\d{2}\s*/, '').trim() } : stop;
+        if (place.kind === 'stay') lodgings.push(place);
+        else visits.push({ ...place, id: place.id || `stop-${day.day}-${index}`, kind: 'course' });
+      });
+      const savedStays = day.stays || (day.lodging ? [day.lodging] : []);
+      lodgings.push(...savedStays.map((item) => typeof item === 'string' ? { name: item } : item));
+
+      const visitDate = day.visitDate ? Date.parse(day.visitDate) : checkIn + (day.day - 1) * 86400000;
+      if (stay && visitDate >= checkIn && visitDate < checkOut) {
+        const bookedIndex = lodgings.findIndex((item) => (stay.id != null && item.id === stay.id) || item.name === stay.name);
+        if (bookedIndex === -1) lodgings.push(stay);
+        else lodgings[bookedIndex] = { ...stay, ...lodgings[bookedIndex], imageUrls: stay.imageUrls?.length ? stay.imageUrls : lodgings[bookedIndex].imageUrls };
+      }
+      return { day: day.day, places: [...visits, ...lodgings.map((item, index) => ({
+        ...item, id: `stay-${day.day}-${index}`, kind: 'stay',
+      }))] };
+    });
+  }, [plan, stay, travelDates]);
 
   return <ItineraryMapPanel
     days={days}
@@ -41,14 +48,11 @@ export default function CourseMap({ region, plan = EMPTY_PLAN, stay, showDemoSta
     searchRegion={region}
     level={5}
     height="320px"
-    extraPlaces={extraPlaces}
     showIntro={!preview}
-    showCategories={!preview}
+    showCategories={false}
     showPlaceList={!preview}
+    renderPlaceDetails={preview ? undefined : renderPlacePhoto}
     allDaysLabel={allDaysLabel}
-    extraTitle={stay ? "숙박했던 숙소" : "같은 지역 숙소 시연 목록"}
-    sourceNote={preview
-      ? '주소와 장소명은 실제 장소와 다를 수 있습니다. 점선은 방문지 사이의 직선 개요로, 실제 이동 경로가 아닙니다.'
-      : `온라인 지도 배경: 카카오 지도. 주소와 장소명은 카카오 검색 결과에 따라 실제 일정 장소와 다를 수 있습니다. ${showDemoStays ? '같은 지역 숙소는 시연용 데이터입니다. ' : ''}점선은 방문지 사이의 직선 개요로, 실제 이동 경로가 아닙니다.`}
+    sourceNote="카카오 지도 · 주소와 장소명은 실제 장소와 다를 수 있습니다. 점선은 방문지 사이를 직선으로 잇습니다."
   />;
 }
