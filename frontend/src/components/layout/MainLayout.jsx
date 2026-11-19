@@ -11,14 +11,14 @@ const navigation = [
 
 const footerLinks = ['저장된 여행', '숙소 찾기', '내 휴먼 추천 코스', '마이페이지'];
 
-export default function MainLayout({ children, member, loggingOut, onLogout, notice, onDismissNotice }) {
+export default function MainLayout({ children, member, loggingOut, onLogout, notice, onDismissNotice, isHome = false }) {
   const [globalNotice, setGlobalNotice] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
 
   const banner = notice || globalNotice;
 
   return (
-    <div className="main-page">
+    <div className={`main-page${isHome ? ' is-home' : ''}`}>
       <header className="mp-topbar">
         <div className="mp-topbar-left">
           <button

@@ -113,7 +113,7 @@ export default function KakaoMap({ places = EMPTY_PLACES, center, level = 3, wid
       map: mapRef.current,
       path: path.points.filter(hasCoordinates).map((point) => new maps.LatLng(Number(point.latitude), Number(point.longitude))),
       strokeWeight: 3,
-      strokeColor: path.color || '#247e67',
+      strokeColor: path.color || '#2659E7',
       strokeOpacity: 0.8,
       strokeStyle: path.dashed ? 'dashed' : 'solid',
     }));

@@ -13,7 +13,7 @@ import '../../css/MainPage.css';
 //     <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true">
 //       <path
 //         d="M10 2v5M10 13v5M2 10h5M13 10h5M4.5 4.5l3 3M12.5 12.5l3 3M15.5 4.5l-3 3M7.5 12.5l-3 3"
-//         stroke="#07836a"
+//         stroke="#0B3DC9"
 //         strokeWidth="1.6"
 //         strokeLinecap="round"
 //       />
@@ -268,7 +268,7 @@ import '../../css/MainPage.css';
 //   );
 // }
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import './HomeLanding.css';
 import HomeReviewCards from './HomeReviewCards';
 import BrowserPushTest from './BrowserPushTest';
@@ -303,6 +303,14 @@ const sampleCourses = [
   },
 ];
 
+// 메인 첫 화면 배경 사진 (public/images/hero/출처.txt)
+const HERO_PHOTOS = [
+  { src: '/images/hero/busan.jpg', place: '부산 · 해운대해수욕장', credit: '사진: 부산광역시 (공공누리 제1유형)' },
+  { src: '/images/hero/jeju.jpg', place: '제주 · 우도', credit: '사진: 제주영상문화산업진흥원 (공공누리 제1유형)' },
+  { src: '/images/hero/gyeongju.jpg', place: '경주 · 불국사', credit: '사진: 문화재청 (공공누리 제1유형)' },
+  { src: '/images/hero/seoul.jpg', place: '서울 · 경복궁 경회루', credit: '사진: 국가유산청 궁능유적본부 (공공누리 제1유형)' },
+];
+
 const quickPrompts = [
   {
     label: '주말 여행',
@@ -322,6 +330,12 @@ export default function MainPage({ onStart, busy = false, reviewAccess, reviewKe
   const [message, setMessage] = useState('');
   const [notice, setNotice] = useState('');
   const [selectedCourse, setSelectedCourse] = useState(null);
+
+  const [photoIndex, setPhotoIndex] = useState(0);
+  useEffect(() => {
+    const timer = setInterval(() => setPhotoIndex((index) => (index + 1) % HERO_PHOTOS.length), 6000);
+    return () => clearInterval(timer);
+  }, []);
 
   const inputRef = useRef(null);
   const inFlight = useRef(false);
@@ -358,122 +372,91 @@ export default function MainPage({ onStart, busy = false, reviewAccess, reviewKe
   }
 
   return (
-    <div className="home-landing">
+    <div className="home-landing home-hero">
+      {/* 배경: 여행지 사진이 6초마다 바뀜 + 왼쪽·아래 파스텔 막 */}
+      <div className="hero-bg" aria-hidden="true">
+        {HERO_PHOTOS.map((photo, index) => (
+          <div key={photo.src} className={`hero-slide${index === photoIndex ? ' is-on' : ''}`} style={{ backgroundImage: `url("${photo.src}")` }} />
+        ))}
+        <div className="hero-veil" />
+      </div>
+
       <header className="landing-hero">
-        <p className="landing-eyebrow">계획은 짧게. 여행은 길게.</p>
+        <p className="landing-eyebrow">계획은 짧게, 여행은 길게.</p>
         <h1>
-          다음 여행,<br />
+          <span className="hero-line1">다음 <span className="hero-accent">여행,</span><img className="hero-hotel" src="/images/hero/hotel_3d.png" alt="" /></span>
+          <br />
           여기서 시작해요.
         </h1>
         <p className="landing-description">
           좋아하는 것을 말해 주세요. 코스는 저희가 짤게요.
         </p>
-      </header>
 
-      <form className="landing-composer" onSubmit={submit}>
-        <label className="landing-sr-only" htmlFor="landing-story">
-          원하는 여행 이야기
-        </label>
-
-        <textarea
-          ref={inputRef}
-          id="landing-story"
-          value={message}
-          disabled={busy}
-          placeholder="친구들과 부산에서 주말 여행, 맛집이랑 바다 풍경이 좋아요..."
-          aria-invalid={Boolean(notice)}
-          aria-describedby={notice ? 'landing-error' : undefined}
-          onChange={(event) => {
-            setMessage(event.target.value);
-            setNotice('');
-          }}
-        />
-
-        <div className="landing-composer-bottom">
-          <a className="landing-condition-link" href="#/search">
-            + 조건 선택
-          </a>
-          <button
-            className="landing-start"
-            type="submit"
+        <form className="landing-composer" onSubmit={submit}>
+          <label className="landing-sr-only" htmlFor="landing-story">
+            원하는 여행 이야기
+          </label>
+          <textarea
+            ref={inputRef}
+            id="landing-story"
+            rows={1}
+            value={message}
             disabled={busy}
-          >
+            placeholder="친구들과 부산에서 주말 여행, 맛집이랑 바다 풍경이 좋아요..."
+            aria-invalid={Boolean(notice)}
+            aria-describedby={notice ? 'landing-error' : undefined}
+            onChange={(event) => {
+              setMessage(event.target.value);
+              setNotice('');
+            }}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
+                event.preventDefault();
+                event.currentTarget.form?.requestSubmit();
+              }
+            }}
+          />
+          <a className="landing-condition-link" href="#/search">+ 조건 선택</a>
+          <button className="landing-start" type="submit" disabled={busy}>
             {busy ? '시작하는 중…' : '시작하기'}
             <span aria-hidden="true">→</span>
           </button>
-        </div>
-
+        </form>
         {notice && (
           <p id="landing-error" className="landing-error" role="alert">
             {notice}
           </p>
         )}
-      </form>
 
-      <div className="landing-shortcuts">
-        <p>대화로 시작하고, 원할 때 조건 선택으로 바꿀 수 있어요.</p>
         <div className="landing-quick-actions" aria-label="여행 이야기 예시">
-          {quickPrompts.map((prompt, index) => (
-            <button
-              key={prompt.label}
-              type="button"
-              className={index === 1 ? 'is-featured' : ''}
-              disabled={busy}
-              onClick={() => fillMessage(prompt.text)}
-            >
+          {quickPrompts.map((prompt) => (
+            <button key={prompt.label} type="button" disabled={busy} onClick={() => fillMessage(prompt.text)}>
               {prompt.label}
             </button>
           ))}
         </div>
-        <a className="landing-toss-demo" href="#/payments/demo">토스 1,000원 테스트 결제 →</a>
-        <BrowserPushTest />
+      </header>
+
+      <p className="hero-credit">
+        <span className="hero-place"><img src="/images/hero/round_pushpin_3d.png" alt="" />{HERO_PHOTOS[photoIndex].place}</span>
+        <small>{HERO_PHOTOS[photoIndex].credit}</small>
+      </p>
+
+      {/* 휴먼 추천 코스 3개: 사진 안쪽 아래 */}
+      <div className="hero-courses">
+        <HomeReviewCards key={reviewKey} access={reviewAccess} />
       </div>
 
-      {/* <section className="landing-recommendations" aria-labelledby="courses-title">
-        <div className="landing-section-heading">
-          <h2 id="courses-title">이런 여행은 어때요?</h2>
-          <a href="#/human-courses">전체 보기 →</a>
-        </div>
+      <div className="hero-dots" aria-hidden="true">
+        {HERO_PHOTOS.map((photo, index) => <i key={photo.src} className={index === photoIndex ? 'is-on' : ''} />)}
+      </div>
 
-        <div className="landing-course-grid">
-          {sampleCourses.map((course) => (
-            <button
-              key={course.id}
-              type="button"
-              className="landing-course"
-              onClick={() => setSelectedCourse(course)}
-            >
-              <div className={`landing-course-image ${course.background}`}>
-                <span className="landing-region">{course.region}</span>
-                <img
-                  src={course.image}
-                  alt=""
-                  loading="lazy"
-                  onError={(event) => {
-                    event.currentTarget.style.display = 'none';
-                  }}
-                />
-                <span className="landing-example">예시 코스</span>
-              </div>
-
-              <div className="landing-course-body">
-                <span className="landing-course-tag">
-                  {course.region} · {course.season} · 당일치기
-                </span>
-                <h3>{course.title}</h3>
-                <p>{course.route}</p>
-              </div>
-            </button>
-          ))}
-        </div>
-      </section> */}
-
-      {/* 기존 추천 코스 카드 구역
-      <section className="landing-recommendations" aria-labelledby="courses-title">
-        기존 코드가 들어 있는 부분
-      </section>
-      */}
-            <HomeReviewCards key={reviewKey} access={reviewAccess} />
+      {/* 개발용 시험 도구(토스 결제·브라우저 알림)는 한 화면을 가리지 않게 오른쪽 아래 버튼 안으로 */}
+      <details className="hero-devtools">
+        <summary>시험 도구</summary>
+        <a className="landing-toss-demo" href="#/payments/demo">토스 1,000원 테스트 결제 →</a>
+        <BrowserPushTest />
+      </details>
 
       {selectedCourse && (
         <div
