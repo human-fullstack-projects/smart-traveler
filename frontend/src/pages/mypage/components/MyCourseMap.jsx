@@ -32,7 +32,7 @@ function CourseMapContent({ course, courseId, memberId, snapshot, hideMapControl
     : <p role="status">지도에 표시할 일정을 불러오는 중입니다.</p>;
   if (!days.some(day => day.places.length)) return <p className="muted">지도에 표시할 방문 장소가 없습니다.</p>;
   return <ItineraryMapPanel days={days} searchRegion={value?.region || course?.region || ''} height="var(--mypage-map-height, 360px)" showIntro={!hideMapControls} showCategories={!hideMapControls} focusPlace={focusPlace} loadPlaceDetails={showPlaceDetails ? myPageApi.placeDetails : undefined}
-    sourceNote="카카오 지도 · 번호는 일차별 방문 순서입니다. 점선은 방문지 사이의 직선이며 실제 도로 경로가 아닙니다." />;
+    sourceNote="번호는 일차별 방문 순서입니다. 점선은 방문지 사이의 직선이며 실제 도로 경로가 아닙니다." />;
 }
 
 export default function MyCourseMap({ expanded = false, title = '지도로 보는 여행 일정', ...props }) {

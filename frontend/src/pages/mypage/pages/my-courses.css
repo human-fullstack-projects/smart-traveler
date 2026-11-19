@@ -1,5 +1,7 @@
 ﻿.mypage.trips-page { padding: 18px 0 60px; }
 .mypage.trips-page { --trips-content-offset: clamp(0px, calc((100vw - 1232px) / 2), 240px); position: relative; left: calc(-1 * var(--trips-content-offset)); }
+/* 상세 화면은 목록의 왼쪽 이동값을 해제하고 본문을 가운데에 배치한다. */
+.mypage.trips-page.trip-detail-page { left: auto; max-width: 1040px; margin-inline: auto; }
 html:has(.my-posts-list) { scrollbar-gutter: stable; }
 .trips-back { display: inline-block; color: #59616c; font-size: 14px; margin-bottom: 18px; text-decoration: none; }
 .trips-back-pill { padding: 8px 18px; border: 1px solid #e2e4e8; border-radius: 999px; background: #fff; transition: background .2s, border-color .2s; }
@@ -49,11 +51,21 @@ html:has(.my-posts-list) { scrollbar-gutter: stable; }
 .trip-detail-hero p { margin: 0; }
 .trip-detail-summary { display: flex; flex-wrap: wrap; gap: 14px 28px; padding: 24px 0; border-bottom: 1px solid #e6e7eb; color: #687382; }
 .trip-detail-summary strong { color: #302035; }
-.trips-page .mypage-course-map { --mypage-map-height: clamp(520px, 72vh, 760px); }
-.trips-page .mypage-course-map .itinerary-map__frame { margin-inline: clamp(32px, 7vw, 100px); }
+/* 상세 화면 본문은 가운데에 두고 대표 사진 안의 글은 왼쪽에서 시작한다. */
+.trip-detail-page .trip-detail-hero { justify-content: flex-start; text-align: left; }
+.saved-trip-detail .trip-detail-summary { justify-content: flex-start; }
+.trip-detail-page .mypage-course-map { --mypage-map-height: clamp(420px, 60vh, 640px); }
+.trip-detail-page .mypage-course-map > h2 { text-align: center; }
+/* 저장된 여행에서는 요약과 지도 제목을 대표 사진의 왼쪽 선에 맞춘다. */
+.trip-detail-page.saved-trip-detail .mypage-course-map > h2 { text-align: left; }
+/* 안내 문구와 지도에 같은 너비와 좌우 여백을 적용한다. */
+.trip-detail-page .mypage-course-map .itinerary-map__frame,
+.trip-detail-page .mypage-course-map .itinerary-map__source { max-width: 840px; margin-inline: auto; }
+.trip-detail-page .mypage-course-map .itinerary-map__source { text-align: left; }
 @media (max-width: 750px) {
-  .trips-page .mypage-course-map { --mypage-map-height: 480px; }
-  .trips-page .mypage-course-map .itinerary-map__frame { margin-inline: 24px; }
+  .trip-detail-page .mypage-course-map { --mypage-map-height: 390px; }
+  .trip-detail-page .mypage-course-map .itinerary-map__frame,
+  .trip-detail-page .mypage-course-map .itinerary-map__source { margin-inline: 12px; }
 }
 .trip-itinerary { max-width: 850px; margin: 32px auto 0; }
 .trip-itinerary > h2 { font-size: 23px; margin-bottom: 24px; }

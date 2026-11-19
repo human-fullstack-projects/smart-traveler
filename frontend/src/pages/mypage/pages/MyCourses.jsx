@@ -17,7 +17,15 @@ const stateLabel = course => {
   if (!isDraft(course) && course.endDate && course.endDate >= today) return '예정된 여행';
   return course.state === 'GUEST' ? '비회원 저장된 여행' : '저장된 여행';
 };
-const cover = course => /제주|부산|바다|해변/.test(`${course.region} ${course.title}`) ? beach : /서울|경주|문화|궁/.test(`${course.region} ${course.title}`) ? palace : /산|자연|숲/.test(`${course.region} ${course.title}`) ? mountain : village;
+// 일정 또는 지역 사진을 목록과 상세 화면에 똑같이 표시한다.
+const cover = course => {
+  if (course.coverImageUrl) return course.coverImageUrl;
+  const description = `${course.region} ${course.title}`;
+  if (/제주|부산|바다|해변/.test(description)) return beach;
+  if (/서울|경주|문화|궁/.test(description)) return palace;
+  if (/산|자연|숲/.test(description)) return mountain;
+  return village;
+};
 const period = course => `${course.startDate || '날짜 미정'} ~ ${course.endDate || '날짜 미정'}`;
 
 export default function MyCourses({ courses = [], isGuest, member, courseId, guestRecommendedCourse }) {
@@ -55,11 +63,11 @@ export default function MyCourses({ courses = [], isGuest, member, courseId, gue
   }, [courseId, member?.memberId, isGuest, courses]);
 
   if (courseId && detailStatus !== 'ready') return <AccessNotice kind={detailStatus === 'loading' ? 'checking' : detailStatus} />;
-  if (courseId) return <div className="mypage trips-page">
+  if (courseId) return <div className="mypage trips-page trip-detail-page saved-trip-detail">
     <a className="trips-back trips-back-pill" href="#/my-courses">← 저장된 여행 목록</a>
     <header className="trip-detail-hero">
       <img src={cover(detail)} alt="" />
-      <div><span className="trip-status">{stateLabel(detail)}</span><h1>{detail.title}</h1><p>{detail.region} · {period(detail)}</p></div>
+      <div><span className="trip-status">{stateLabel(detail)}</span><h1>{detail.title}</h1></div>
     </header>
     <div className="trip-detail-summary"><strong>{detail.region || '여행 지역 미정'}</strong><span>{period(detail)}</span><span>총 {(detail.days || []).length}일 일정</span><span>방문 장소 {(detail.days || []).reduce((sum, day) => sum + (day.places || []).length, 0)}곳</span></div>
     <MyCourseMap key={detail.id} course={detail} expanded title="여행 일정" hideMapControls showPlaceDetails />

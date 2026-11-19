@@ -16,12 +16,16 @@
 .mypage.mp-home .mp-profile-auth-actions { margin-right: 6px; }
 .mypage.mp-home .mp-profile-auth-actions > a { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; width: 84px; min-height: 46px; padding: 11px 8px; font: inherit; text-align: center; }
 .mypage .mp-profile-actions { display: inline-grid; grid-template-columns: repeat(2, 1fr); max-width: 100%; }
-.mypage.mp-profile-settings .mp-profile-actions { display: flex; justify-content: flex-end; width: 100%; max-width: 748px; margin-top: 64px; margin-left: 0; }
-.mypage.mp-profile-settings .mp-profile-notice { align-self: flex-end; margin: 0; flex-grow: 0; text-align: left; }
+.mypage.mp-profile-settings .mp-profile-actions { display: flex; justify-content: flex-end; width: 100%; max-width: 748px; margin-top: 38px; }
+/* 작은 화면에서도 버튼이 빈 공간을 채우지 않고 오른쪽에 모이도록 한다. */
+.mypage.mp-profile-settings .mp-profile-actions > .primary,
+.mypage.mp-profile-settings .mp-profile-actions > .secondary { flex-grow: 0; }
+.mypage.mp-profile-settings .mp-profile-notice { flex: 0 0 100%; margin: 0; text-align: center; }
 .mypage .mp-profile-actions > .primary,
 .mypage .mp-profile-actions > .secondary { display: inline-flex; align-items: center; justify-content: center; min-width: 0; padding: 11px 17px; font: inherit; text-align: center; }
 .mypage .mp-home-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
 .mypage.mp-home { max-width: 840px; margin-inline: auto; }
+.mp-home-title { color: #000; }
 .mypage.mp-home .mp-home-summaries { width: 100%; max-width: none; margin-inline: auto; gap: 24px; }
 @media (min-width: 901px) {
   .mypage.mp-home > .card { box-sizing: border-box; width: 100%; max-width: 774px; margin-inline: auto; }
@@ -29,14 +33,22 @@
 }
 .mp-home-summaries .stats, .mp-home-summaries .muted { text-align: right; }
 .mp-home-summaries .text-button { display: block; text-align: right; }
+.mypage .mp-summary-link { color: inherit; text-decoration: none; }
+.mypage .mp-summary-link:hover h2 { color: var(--green); text-decoration: underline; text-underline-offset: 4px; }
+.mypage .mp-summary-link:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
 .mypage .mp-generation-choice { padding: 20px; margin-top: 20px; border: 1px solid #b7dacc; border-radius: 14px; background: #f3fbf7; }
 .mypage.mp-settings { max-width: 960px; }
-.mypage.mp-profile-settings > .card { background: transparent; border-color: transparent; border-radius: 0; box-shadow: none; }
+/* MY PROFILE 아래에 제목과 입력 폼이 가깝게 이어지도록 한다. */
+.mypage.mp-profile-settings > .hero { margin-bottom: 8px; }
+.mypage.mp-profile-settings > .hero > h1 { margin-block: 4px 0; }
+.mypage.mp-profile-settings > .card { background: transparent; border-color: transparent; border-radius: 0; box-shadow: none; padding-top: 0; }
 .mypage.mp-profile-settings > .card > form { width: 100%; max-width: 748px; margin-inline: auto; }
 .mypage.mp-profile-settings .mp-profile-line {
   box-sizing: border-box;
   width: 100%;
-  max-width: 748px;
+  /* 프로필 이미지 박스만 좁히고 입력 폼 가운데에 배치한다. */
+  max-width: 550px;
+  margin-inline: auto;
   padding: 24px;
   border: 1px solid var(--line);
   border-radius: 17px;
@@ -52,10 +64,19 @@
 .mypage.mp-settings form > fieldset > label { margin-top: 18px; }
 .mypage.mp-settings input[readonly] { background: #f2f4f5; color: #61707b; }
 .mypage.mp-profile-settings input[readonly]:disabled { cursor: default; pointer-events: none; opacity: 1; }
-.mypage.mp-profile-settings input:not([type=checkbox]):not([type=radio]):not([type=file]) { width: 100%; max-width: 360px; box-sizing: border-box; }
+.mypage.mp-profile-settings input:not([type=checkbox]):not([type=radio]):not([type=file]) { width: 100%; max-width: var(--mp-profile-input-max-width, 360px); box-sizing: border-box; }
 .mypage.mp-profile-settings input[type=file] { width: auto; max-width: 100%; box-sizing: border-box; margin-inline: auto; }
 .mypage.mp-profile-settings .mp-profile-line > div { min-width: 0; max-width: 100%; }
-.mypage.mp-profile-settings .mp-profile-fields-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 360px)); align-items: start; gap: 18px 28px; margin-top: 24px; }
+.mypage.mp-profile-settings .mp-profile-fields-grid {
+  --mp-profile-input-max-width: 280px;
+  display: grid;
+  /* 입력란 너비에 맞춘 두 열을 프로필 이미지 아래 가운데에 배치한다. */
+  grid-template-columns: repeat(2, minmax(0, var(--mp-profile-input-max-width)));
+  justify-content: center;
+  align-items: start;
+  gap: 18px 28px;
+  margin-top: 16px;
+}
 .mp-profile-fields-grid > *, .mp-profile-fields-grid label { min-width: 0; margin: 0; }
 .mp-password-action > span { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600; color: #364553; }
 .mp-password-action > button { display: inline-flex; align-items: center; justify-content: center; min-height: 42px; padding: 10px 20px; cursor: pointer; }
@@ -70,8 +91,7 @@
 .mp-password-error { color: #b42318; font-size: 14px; }
 @media (max-width: 650px) {
   .mypage.mp-profile-settings > .card > form { max-width: 360px; }
-  .mypage.mp-profile-settings .mp-profile-line { max-width: 360px; }
-  .mypage.mp-profile-settings .mp-profile-fields-grid { grid-template-columns: minmax(0, 360px); }
+  .mypage.mp-profile-settings .mp-profile-fields-grid { grid-template-columns: minmax(0, var(--mp-profile-input-max-width)); }
   .mypage.mp-profile-settings .mp-profile-actions { max-width: 360px; }
 }
 .mypage.mp-settings .checkline { align-items: center; margin: 18px 0; }

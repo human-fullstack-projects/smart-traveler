@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { getCourse } from '../../human_course/api/humanCourses';
 import { readRecommendationDraft } from '../../human_course/data/recommendationDraft';
 import AccessNotice from '../components/AccessNotice';
 import Card from '../components/Card';
@@ -14,6 +15,29 @@ const tabs = [
 ];
 const labels = Object.fromEntries(tabs);
 
+function PostCover({ post, fallback, loading }) {
+  const [loadedCover, setLoadedCover] = useState('');
+  const { id, coverImageUrl } = post;
+
+  useEffect(() => {
+    // 마이페이지 응답에 대표 사진이 없으면 기존 추천 글 상세 API에서 사진을 확인한다.
+    if (coverImageUrl) return;
+    let active = true;
+    getCourse(id).then(detail => {
+      if (!active) return;
+      const uploadedPhoto = detail.photoAssets?.find(photo => photo?.dataUrl)?.dataUrl;
+      const places = (detail.plan || []).flatMap(day => day.places || []);
+      const placePhoto = places.flatMap(place => place.imageUrls || []).find(Boolean);
+      setLoadedCover(uploadedPhoto || placePhoto || '');
+    }).catch(() => {
+      if (active) setLoadedCover('');
+    });
+    return () => { active = false; };
+  }, [id, coverImageUrl]);
+
+  return <img src={coverImageUrl || loadedCover || fallback} alt="" loading={loading} />;
+}
+
 export default function MyPosts({ posts = [], bookings = [], courses = [], postId, member }) {
   const [tab, setTab] = useState('all');
   const [query, setQuery] = useState('');
@@ -27,10 +51,10 @@ export default function MyPosts({ posts = [], bookings = [], courses = [], postI
     const booking = bookingsById.get(String(post.reservationId));
     const course = coursesById.get(post.courseId);
     const id = encodeURIComponent(post.id);
-    return <div className="mypage trips-page">
+    return <div className="mypage trips-page trip-detail-page">
       <a className="trips-back trips-back-pill" href="#/my-posts">← 내 여행 추천 목록</a>
       <header className="trip-detail-hero">
-        <img src={tripCover(course?.region || booking?.stay || post.title)} alt="" />
+        <PostCover key={post.id} post={post} fallback={tripCover(course?.region || booking?.stay || post.title)} />
         <div><span className="trip-status">{labels.complete}</span><h1>{post.title}</h1>
           {booking && <p>{booking.date} ~ {booking.endDate}</p>}
         </div>
@@ -51,6 +75,7 @@ export default function MyPosts({ posts = [], bookings = [], courses = [], postI
 
   const published = eligiblePosts.map(post => ({
     key: `post-${post.id}`, status: 'complete', title: post.title,
+    post,
     region: coursesById.get(post.courseId)?.region, booking: bookingsById.get(String(post.reservationId)),
     href: `#/my-posts/${encodeURIComponent(post.id)}`, action: '추천 글 자세히 보기',
   }));
@@ -96,16 +121,20 @@ export default function MyPosts({ posts = [], bookings = [], courses = [], postI
     <p className="trips-count" role="status">{list.length}개의 여행</p>
     {!list.length && <p className="empty">조건에 맞는 여행이 없습니다.</p>}
     <div className="trips-grid">
-      {list.map(({ key, status, title, region, booking, href, action }) => <a key={key} className="trip-cover-card" href={href}>
-        <img src={tripCover(region || booking?.stay || title)} alt="" loading="lazy" />
-        <span className="trip-status">{labels[status]}</span>
-        <div className="trip-card-copy">
-          <span className="trip-region">{region}</span>
-          <h2>{title}</h2>
-          {booking && <p>{booking.date} ~ {booking.endDate}<br />{booking.stay}<br />{booking.reservationNo}</p>}
-          <span className="trip-card-open">{action} <span aria-hidden="true">↗</span></span>
-        </div>
-      </a>)}
+      {list.map(({ key, status, title, region, booking, href, action, post }) => {
+        const fallback = tripCover(region || booking?.stay || title);
+        return <a key={key} className="trip-cover-card" href={href}>
+          {/* 작성 완료 카드도 상세 화면과 같은 순서로 대표 사진을 고른다. */}
+          {post ? <PostCover post={post} fallback={fallback} loading="lazy" /> : <img src={fallback} alt="" loading="lazy" />}
+          <span className="trip-status">{labels[status]}</span>
+          <div className="trip-card-copy">
+            <span className="trip-region">{region}</span>
+            <h2>{title}</h2>
+            {booking && <p>{booking.date} ~ {booking.endDate}<br />{booking.stay}<br />{booking.reservationNo}</p>}
+            <span className="trip-card-open">{action} <span aria-hidden="true">↗</span></span>
+          </div>
+        </a>;
+      })}
     </div>
   </div>;
 }

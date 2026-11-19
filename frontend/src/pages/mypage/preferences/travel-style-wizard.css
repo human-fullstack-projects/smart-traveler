@@ -1,5 +1,8 @@
 .travel-style-page { --ts-ink: #263252; --ts-teal: #2d7273; --ts-border: #d0cfe1; padding: 26px 24px 70px; background: #e7e6ef; color: var(--ts-ink); min-height: 820px; }
-.travel-style-page .travel-style-page-title { max-width: 1334px; margin: 0 auto 14px; font-size: 24px; color: var(--ts-teal); }
+/* 제목 영역을 아래 설문 패널과 같은 너비로 맞춘다. */
+.travel-style-page-heading { max-width: 1334px; margin: 0 auto 14px; }
+.travel-style-page-heading .travel-style-page-eyebrow { margin: 0 0 4px; color: #626973; font-size: 13px; letter-spacing: 1px; }
+.travel-style-page-heading .travel-style-page-title { margin: 0; color: #000; font-size: clamp(28px, 3.6vw, 40px); }
 .travel-style-panel { box-sizing: border-box; max-width: 1334px; min-height: 720px; margin: auto; padding: 60px 36px 70px; border: 1px solid var(--ts-border); border-radius: 23px; background: #faf9ff; box-shadow: 0 8px 24px #2423430a; }
 .travel-style-inner { max-width: 1000px; margin: auto; }
 .travel-style-section + .travel-style-section { margin-top: 36px; padding-top: 32px; border-top: 1px solid var(--ts-border); }
