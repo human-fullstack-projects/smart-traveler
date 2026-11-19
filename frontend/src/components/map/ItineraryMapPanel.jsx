@@ -19,7 +19,7 @@ function unavailable(place) {
  * Visit numbers restart each day. Lodging does not take a visit number.
  */
 export default function ItineraryMapPanel({ days = EMPTY_DAYS, center, searchRegion = '', level = 5, height = '320px', extraPlaces = EMPTY_PLACES,
-  extraTitle = '주변 숙소', previewFailure = false, sourceNote, onPlaceSelect, showIntro = true, showCategories = true, showPlaceList = true, allDaysLabel = '전체 코스', focusPlace, loadPlaceDetails }) {
+  extraTitle = '주변 숙소', previewFailure = false, sourceNote, onPlaceSelect, showIntro = true, showCategories = true, showPlaceList = true, allDaysLabel = '전체 코스', focusPlace, loadPlaceDetails, renderPlaceDetails }) {
   const [category, setCategory] = useState('all');
   const [activeDay, setActiveDay] = useState('all');
   const [selectedId, setSelectedId] = useState(null);
@@ -89,7 +89,8 @@ export default function ItineraryMapPanel({ days = EMPTY_DAYS, center, searchReg
   }
 
   return <div className="itinerary-map">
-    {showIntro && <p className="itinerary-map__intro">장소를 누르면 지도와 마커가 해당 위치로 이동합니다. 지도가 열리지 않아도 일정 목록을 볼 수 있습니다.</p>}
+    {showIntro && <p className="itinerary-map__intro">{renderPlaceDetails ? '장소를 누르면 지도에서 위치를 확인하고 사진을 펼쳐 볼 수 있습니다.'
+      : '장소를 누르면 지도와 마커가 해당 위치로 이동합니다. 지도가 열리지 않아도 일정 목록을 볼 수 있습니다.'}</p>}
     {showCategories && <div className="itinerary-map__categories" role="group" aria-label="장소 종류">
       {['all', 'course', ...(hasStays ? ['stay'] : [])].map((value) => <button key={value} type="button" aria-pressed={category === value}
         onClick={() => { setCategory(value); setSelectedId(null); }}>{{ all: '전체', course: '방문지', stay: '숙소' }[value]}</button>)}
@@ -108,7 +109,8 @@ export default function ItineraryMapPanel({ days = EMPTY_DAYS, center, searchReg
     {sourceNote && <p className="itinerary-map__source">{sourceNote}</p>}
     {showPlaceList && <div className="itinerary-map__day-list">{visibleDays.map((day) => <section className="itinerary-map__day" key={day.day}>
       <h3>{day.day}일차</h3>
-      {day.places.length ? <MapPlaceCards places={day.places} selectedId={selectedId} onSelect={selectPlace} loadDetails={loadPlaceDetails} searchRegion={searchRegion} /> : <p>표시할 장소가 없습니다.</p>}
+      {day.places.length ? <MapPlaceCards places={day.places} selectedId={selectedId} onSelect={selectPlace}
+        loadDetails={loadPlaceDetails} renderDetails={renderPlaceDetails} searchRegion={searchRegion} /> : <p>표시할 장소가 없습니다.</p>}
     </section>)}</div>}
     {visibleExtras.length > 0 && <section className="itinerary-map__day itinerary-map__extras">
       <h3>{extraTitle}</h3><MapPlaceCards places={visibleExtras} selectedId={selectedId} onSelect={selectPlace} />

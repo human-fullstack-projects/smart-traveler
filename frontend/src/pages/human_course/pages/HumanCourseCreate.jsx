@@ -46,7 +46,7 @@ export default function HumanCourseCreate({ reservations = [], courses = [], exe
   return result;
  }
  const itineraryMap = final?.plan?.length > 0
-  ? <CourseMap key={selectedId} region={selected.region} plan={final.plan} showDemoStays={false} preview allDaysLabel="전체일정" />
+  ? <CourseMap key={selectedId} region={selected.region} plan={final.plan} preview allDaysLabel="전체일정" />
   : null;
  const renderItinerary = (showMap = false) => <>
   {showMap && itineraryMap && <div className="preview-itinerary-map">{itineraryMap}</div>}

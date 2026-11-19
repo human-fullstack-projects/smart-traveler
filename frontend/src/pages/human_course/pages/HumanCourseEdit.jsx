@@ -18,7 +18,7 @@ export default function HumanCourseEdit({ courses = previewCourses, courseId = 2
   const course = courses.find((item) => String(item.id) === String(courseId));
   const reservation = reservations.find(item => String(item.id) === String(course?.reservationId));
   return <div className="human-courses"><div className="page">
-    <PageHeading breadcrumb="작성 코스 수정" title="저장된 여행 수정" description="게시글의 설명과 후기만 수정합니다. 원래 여행 일정은 수정되지 않습니다."><a className="button" href={back}>← {course ? '상세로 돌아가기' : '목록으로'}</a></PageHeading>
+    <PageHeading breadcrumb="작성 코스 수정" title="저장된 여행 수정" description="제목, 여행 후기, 첨부 사진 등 게시글 정보를 수정할 수 있습니다."><a className="button" href={back}>← {course ? '상세로 돌아가기' : '목록으로'}</a></PageHeading>
     {notice && <p className="status" role="status">{notice}</p>}
     {!course?.mine ? <section className="panel"><h2>수정할 수 없습니다</h2><p>{course ? '다른 사람의 코스는 수정할 수 없습니다.' : '해당 코스를 찾지 못했습니다.'}</p></section> : <div className="layout wide-left">
       <section className="panel"><div className="panel-heading"><h2>기존 코스 정보 수정</h2><span className="badge">내 게시글</span></div><p className="note">게시글 ID: {course.id} | 연결 예약: {course.reservationId || '없음(샘플)'} | 최종 코스 v{course.courseVersion}</p>{course.visibility === 'BLINDED' && <p className="note">블라인드 상태: 수정해도 자동 공개되지 않습니다.</p>}<CourseForm key={course.id} course={course} mode="edit" onSubmit={submit} cancelHref={back} serverMode={serverMode} /></section>

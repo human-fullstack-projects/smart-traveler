@@ -4,7 +4,7 @@ export function readRecommendationDraft(memberId, reservationId) {
   if (!memberId || !reservationId) return null;
   try {
     const draft = JSON.parse(window.localStorage.getItem(draftKey(memberId, reservationId)));
-    return draft && ['title', 'category', 'companion', 'summary', 'body'].every(field => typeof draft[field] === 'string')
+    return draft && ['title', 'category', 'companion', 'body'].every(field => typeof draft[field] === 'string')
       ? draft : null;
   } catch {
     return null;

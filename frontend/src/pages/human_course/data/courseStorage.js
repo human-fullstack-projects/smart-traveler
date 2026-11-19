@@ -15,7 +15,8 @@ export function validState(state) {
   const reservationsValid = state.reservations.every((r) => r && ['id', 'name', 'region', 'dates', 'status', 'checkoutAt'].every((key) => text(r[key]))
     && Number.isFinite(Date.parse(r.checkoutAt)) && typeof r.itineraryFinal === 'boolean' && positive(r.courseVersion) && validPlan(r.plan)
     && (r.versions === undefined || (Array.isArray(r.versions) && r.versions.every((v) => v && positive(v.version) && validPlan(v.plan)) && unique(r.versions, 'version'))));
-  const coursesValid = state.courses.every((c) => c && positive(c.id) && ['title', 'region', 'category', 'companion', 'summary', 'body', 'author', 'createdAt'].every((key) => text(c[key]))
+  const coursesValid = state.courses.every((c) => c && positive(c.id) && ['title', 'region', 'category', 'companion', 'body', 'author', 'createdAt'].every((key) => text(c[key]))
+    && (c.summary === undefined || text(c.summary))
     && (c.travelDates === undefined || text(c.travelDates))
     && Number.isFinite(Date.parse(c.createdAt)) && typeof c.mine === 'boolean'
     && (c.reservationId === null || text(c.reservationId)) && ['PUBLIC', 'BLINDED'].includes(c.visibility)

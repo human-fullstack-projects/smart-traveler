@@ -53,7 +53,7 @@ class HumanCourseServiceTest {
         when(auth.getName()).thenReturn("owner");
         var service = new HumanCourseService(jdbc, mock(ObjectMapper.class), members,
             mock(HumanCoursePhotoStore.class), mock(HumanManagementService.class));
-        var input = new PostInput("제목", "문화", "친구", "소개", "후기", List.of(), false);
+        var input = new PostInput("제목", "문화", "친구", null, "후기", List.of(), false);
         assertEquals(HttpStatus.NOT_FOUND, assertThrows(ResponseStatusException.class,
             () -> service.create(auth, 3, input)).getStatusCode());
         verify(jdbc).queryForList(contains("member_id=? FOR UPDATE"), eq(3L), eq(7L));

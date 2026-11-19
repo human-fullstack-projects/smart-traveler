@@ -48,7 +48,7 @@ export default function CourseForm({ course = {}, mode = 'create', onSubmit, onS
   }, [editing]);
   const [preview, setPreview] = useState(() => ({
     title: course.title || '', category: course.category || '', companion: course.companion || '',
-    summary: course.summary || '', body: course.body || '',
+    body: course.body || '',
   }));
   const [selectedPhotos, setSelectedPhotos] = useState(null);
   const photoInputId = useId();
@@ -100,13 +100,13 @@ export default function CourseForm({ course = {}, mode = 'create', onSubmit, onS
   return <form onReset={() => {
     photoRequest.current += 1;
     setReading(false);
-    setPreview({ title: course.title || '', category: course.category || '', companion: course.companion || '', summary: course.summary || '', body: course.body || '' });
+    setPreview({ title: course.title || '', category: course.category || '', companion: course.companion || '', body: course.body || '' });
     setSelectedPhotos(null);
     setPhotoError('');
   }} onChange={(event) => {
     if (event.target.type === 'file') return;
     const data = new FormData(event.currentTarget);
-    setPreview({ title: String(data.get('title') || ''), category: String(data.get('category') || ''), companion: String(data.get('companion') || ''), summary: String(data.get('summary') || ''), body: String(data.get('body') || '') });
+    setPreview({ title: String(data.get('title') || ''), category: String(data.get('category') || ''), companion: String(data.get('companion') || ''), body: String(data.get('body') || '') });
   }} onSubmit={async (event) => {
     event.preventDefault();
     if (reading || (editing && photoError) || submitting) return;
@@ -118,7 +118,6 @@ export default function CourseForm({ course = {}, mode = 'create', onSubmit, onS
       title: String(data.get('title') || '').trim(),
       category: String(data.get('category') || ''),
       companion: String(data.get('companion') || ''),
-      summary: editing ? String(data.get('summary') || '').trim() : body.replace(/\s+/g, ' ').slice(0, 150).trim(),
       body,
       photos,
       photoAssets: selectedPhotos?.map(({ name, dataUrl }) => ({ name, dataUrl })) || course.photoAssets || [],
@@ -132,7 +131,6 @@ export default function CourseForm({ course = {}, mode = 'create', onSubmit, onS
         <div className="field"><label>여행 유형 *<select name="category" required defaultValue={course.category || ''}><option value="">선택</option>{['맛집', '문화', '힐링', '액티비티'].map((value) => <option key={value}>{value}</option>)}</select></label></div>
         <div className="field"><label>동행 유형 *<select name="companion" required defaultValue={course.companion || ''}><option value="">선택</option>{['혼자', '친구', '연인', '가족'].map((value) => <option key={value}>{value}</option>)}</select></label></div>
       </div>
-      {editing && <div className="field"><label>한 줄 소개 *<input name="summary" type="text" maxLength={150} required defaultValue={course.summary || ''} /></label></div>}
       <div className="field"><label>여행 후기 *<textarea name="body" rows={editing ? 6 : 20} maxLength={2000} required defaultValue={course.body || ''}
         ref={editing ? null : reviewInput} className={editing ? undefined : 'review-input'}
         onInput={editing ? undefined : event => resizeReview(event.currentTarget)} /></label></div>
@@ -164,7 +162,6 @@ export default function CourseForm({ course = {}, mode = 'create', onSubmit, onS
       <dialog ref={dialog} className="recommendation-preview" aria-labelledby="recommendation-preview-title" onCancel={(event) => { if (submitting) event.preventDefault(); else setPending(null); }}><h2 id="recommendation-preview-title">게시글 미리보기</h2>
         <h3>{preview.title.trim() || '제목을 입력해주세요'}</h3>
         <p className="course-meta">{[preview.category, preview.companion].filter(Boolean).join(' · ') || '여행 유형 · 동행 유형'}</p>
-        {editing && <p>{preview.summary.trim() || '한 줄 소개를 입력해주세요'}</p>}
         <ul className="photo-boxes">{visiblePhotos.length ? visiblePhotos.map((photo, index) => <li key={`${photo.name}-${index}`}>{photo.dataUrl ? <img src={photo.dataUrl} alt={`첨부 사진 미리보기: ${photo.name}`} /> : <span>{photo.name} (기존 파일명)</span>}</li>) : <li>첨부 사진 없음</li>}</ul>
         <p className="writing-sample">{preview.body.trim() || '여행 후기를 입력해주세요'}</p>
         {pending && previewContext}

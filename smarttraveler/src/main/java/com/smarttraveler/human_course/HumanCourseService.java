@@ -104,6 +104,10 @@ public class HumanCourseService {
                    COALESCE(NULLIF(m.nickname,''),m.login_id) AS author,
                    r.checkin_date, r.checkout_date, l.lodging_id, l.name AS stay_name,
                    l.address AS stay_address, l.latitude AS stay_latitude, l.longitude AS stay_longitude,
+                   (SELECT COALESCE(NULLIF(TRIM(ph.image_url),''),NULLIF(TRIM(ph.thumbnail_url),''))
+                    FROM lodging_photo ph WHERE ph.lodging_id=l.lodging_id
+                      AND COALESCE(NULLIF(TRIM(ph.image_url),''),NULLIF(TRIM(ph.thumbnail_url),'')) IS NOT NULL
+                    ORDER BY ph.sort_order, ph.photo_id LIMIT 1) AS stay_image_url,
                    (SELECT COUNT(*) FROM human_course_like WHERE post_id=p.post_id) AS likes,
                    EXISTS(SELECT 1 FROM human_course_like WHERE post_id=p.post_id AND member_id=?) AS liked,
                    EXISTS(SELECT 1 FROM human_course_report WHERE post_id=p.post_id AND reporter_id=?) AS reported
@@ -112,7 +116,7 @@ public class HumanCourseService {
             JOIN room ro ON ro.room_id=r.room_id JOIN lodging l ON l.lodging_id=ro.lodging_id
             WHERE p.post_id=? AND p.deleted_at IS NULL AND p.status IN ('VISIBLE','BLINDED')
             """, viewer, viewer, id);
-        if (rows.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "코스를 찾을 수 없습니다.");
+        if (rows.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "여행을 찾을 수 없습니다.");
         Map<String, Object> row = rows.getFirst();
         boolean mine = number(row, "author_id") == viewer;
         boolean blinded = "BLINDED".equals(row.get("status"));
@@ -128,6 +132,7 @@ public class HumanCourseService {
             """, (rs, n) -> new Comment(String.valueOf(rs.getLong("comment_id")), rs.getString("author"),
                 rs.getString("content"), rs.getLong("author_id") == viewer), id);
         String body = blinded ? "" : string(row, "content");
+        String stayImageUrl = string(row, "stay_image_url");
         return new Post(id, string(row, "title"), string(row, "author"), string(row, "region"),
             string(row, "category") == null ? "미분류" : string(row, "category"), string(row, "companion_type"),
             string(row, "summary") == null ? body.substring(0, Math.min(150, body.length())) : string(row, "summary"),
@@ -136,9 +141,9 @@ public class HumanCourseService {
             truthy(row.get("reported")), comments, row.get("created_at").toString().substring(0, 10),
             blinded ? "BLINDED" : "PUBLIC", snapshot.version(),
             row.get("checkin_date") + " ~ " + row.get("checkout_date"), mine, String.valueOf(row.get("reservation_id")),
-            blinded ? null : mapPlace("stay-" + row.get("lodging_id"), null, string(row, "stay_name"),
+            blinded ? null : new MapPlace("stay-" + row.get("lodging_id"), null, string(row, "stay_name"),
                 string(row, "stay_address"), decimal(row.get("stay_latitude")),
-                decimal(row.get("stay_longitude")), "stay"));
+                decimal(row.get("stay_longitude")), "stay", stayImageUrl == null ? List.of() : List.of(stayImageUrl)));
     }
 
     @Transactional(readOnly = true)
@@ -204,7 +209,7 @@ public class HumanCourseService {
                 imagesByPlace.computeIfAbsent(row.getLong("place_id"), id -> new ArrayList<>())
                     .add(row.getString("image_url"));
             }, courseId);
-        return jdbc.query("SELECT id, day_no FROM course_day WHERE course_id=? ORDER BY day_no", (rs, n) ->
+        return jdbc.query("SELECT id, day_no, visit_date FROM course_day WHERE course_id=? ORDER BY day_no", (rs, n) ->
             new Day(rs.getInt("day_no"), jdbc.queryForList("""
                 SELECT place_name
                 FROM activity WHERE course_day_id=? ORDER BY seq
@@ -222,7 +227,7 @@ public class HumanCourseService {
                         placeRs.getBigDecimal("latitude"), placeRs.getBigDecimal("longitude"), "course",
                         imagesByPlace.getOrDefault(placeId, List.of()));
                 },
-                rs.getLong("id"))), courseId);
+                rs.getLong("id")), rs.getString("visit_date")), courseId);
     }
 
     @Transactional
@@ -246,7 +251,7 @@ public class HumanCourseService {
                 """, Statement.RETURN_GENERATED_KEYS);
             statement.setLong(1, reservationId); statement.setLong(2, owner); statement.setLong(3, courseId);
             statement.setString(4, input.title().trim()); statement.setString(5, input.category());
-            statement.setString(6, input.summary().trim()); statement.setString(7, input.companion());
+            statement.setString(6, input.summary() == null ? null : input.summary().trim()); statement.setString(7, input.companion());
             statement.setString(8, input.body().trim()); statement.setString(9, mapper.writeValueAsString(snapshot));
             return statement;
         }, key);
@@ -262,8 +267,9 @@ public class HumanCourseService {
         var rows = jdbc.queryForList("SELECT author_id,status FROM human_course_post WHERE post_id=? AND deleted_at IS NULL FOR UPDATE", id);
         if (rows.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         if (number(rows.getFirst(), "author_id") != owner) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-        jdbc.update("UPDATE human_course_post SET title=?,category=?,summary=?,companion_type=?,content=?,updated_at=NOW() WHERE post_id=?",
-            input.title().trim(), input.category(), input.summary().trim(), input.companion(), input.body().trim(), id);
+        jdbc.update("UPDATE human_course_post SET title=?,category=?,summary=COALESCE(?,summary),companion_type=?,content=?,updated_at=NOW() WHERE post_id=?",
+            input.title().trim(), input.category(), input.summary() == null ? null : input.summary().trim(),
+            input.companion(), input.body().trim(), id);
         if (input.replacePhotos()) {
             jdbc.update("DELETE FROM human_course_photo WHERE post_id=?", id);
             savePhotos(id, input.photoAssets());
@@ -332,11 +338,12 @@ public class HumanCourseService {
 
     private void requireVisible(long id) {
         if (jdbc.queryForList("SELECT post_id FROM human_course_post WHERE post_id=? AND status='VISIBLE' AND deleted_at IS NULL", id).isEmpty())
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "공개된 코스를 찾을 수 없습니다.");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "공개된 여행을 찾을 수 없습니다.");
     }
 
     private static void validate(PostInput input) {
-        if (input == null || blank(input.title(), 100) || blank(input.summary(), 150) || blank(input.body(), 2000)
+        if (input == null || blank(input.title(), 100) || blank(input.body(), 2000)
+            || (input.summary() != null && blank(input.summary(), 150))
             || !CATEGORIES.contains(input.category()) || !COMPANIONS.contains(input.companion())
             || input.photoAssets() == null || input.photoAssets().size() > 5)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "제목·동행·여행 이야기·사진 입력을 확인해주세요.");
@@ -372,7 +379,8 @@ public class HumanCourseService {
         for (Day saved : snapshot.plan()) {
             Day current = live.stream().filter(day -> day.day() == saved.day()).findFirst().orElse(null);
             enriched.add(new Day(saved.day(), saved.stops() == null ? List.of() : saved.stops(),
-                current == null || current.places() == null ? List.of() : current.places()));
+                current == null || current.places() == null ? List.of() : current.places(),
+                saved.visitDate() != null ? saved.visitDate() : current == null ? null : current.visitDate()));
         }
         return new Snapshot(snapshot.region(), snapshot.startDate(), snapshot.endDate(), snapshot.version(), enriched);
     }

@@ -15,7 +15,7 @@ try {
   assert.ok(validState(freshState()), '샘플 구조 유효');
   let state = loadCourses(getStorage).state;
   const photoAssets = [{ name: '여행.jpg', dataUrl: 'data:image/jpeg;base64,YQ==' }];
-  const fields = { title: '저장할 코스', category: '문화', companion: '친구', summary: '소개', body: '후기', photos: ['여행.jpg'], photoAssets };
+  const fields = { title: '저장할 코스', category: '문화', companion: '친구', body: '후기', photos: ['여행.jpg'], photoAssets };
   for (const action of [
     { type: 'like', id: 1 },
     { type: 'comment', id: 1, commentId: 'saved-comment', text: '저장 댓글' },
@@ -44,7 +44,7 @@ try {
   const renderApp = () => renderToStaticMarkup(React.createElement(AuthProvider, null, React.createElement(App)));
   globalThis.window = { location: { hash: '#/human-courses/6' }, localStorage: storage };
   const html = renderApp();
-  assert.ok(html.includes('수정한 코스') && html.includes('여행.jpg'), '복원 데이터 상세 렌더링');
+  assert.ok(html.includes('수정한 코스') && html.includes('사진 1 크게 보기'), '복원 데이터 상세 렌더링');
   assert.ok(html.includes('data:image/jpeg;base64,YQ=='), '저장 사진 렌더링');
   for (const bad of [
     'broken JSON', JSON.stringify({ version: 999, state }),
