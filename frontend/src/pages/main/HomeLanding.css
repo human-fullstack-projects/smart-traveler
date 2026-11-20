@@ -574,11 +574,6 @@
 .home-hero .landing-quick-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:clamp(10px,1.6vh,16px);justify-content:flex-start}
 .home-hero .landing-quick-actions button{background:#ffffffd9;border:1px solid #E3DCF3;border-radius:999px;padding:7px 16px;font-size:14px;font-weight:700;color:#4A4560;cursor:pointer}
 .home-hero .landing-quick-actions button:hover:not(:disabled){border-color:#9A8CFF;color:#3466F2}
-/* 사진 출처: 오른쪽 · 카드 제목 줄 위 */
-.home-hero .hero-credit{position:absolute;right:var(--hero-x);bottom:calc(var(--cards-h) + clamp(40px,8vh,96px) + 64px);z-index:2;margin:0;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
-.home-hero .hero-place{display:inline-flex;align-items:center;gap:8px;background:#fff;border-radius:999px;padding:7px 16px 7px 10px;font-weight:800;font-size:clamp(13px,.95vw,18px);color:#29243B;box-shadow:0 8px 22px #0002}
-.home-hero .hero-place img{width:24px}
-.home-hero .hero-credit small{font-size:11px;color:#fff;background:#29243b8c;border-radius:6px;padding:2px 8px}
 /* 휴먼 추천 코스 3개: 화면 아래 기준 */
 .home-hero .hero-courses{position:absolute;left:var(--hero-x);right:var(--hero-x);bottom:clamp(40px,8vh,96px);z-index:2}
 .home-hero .landing-recommendations{margin:0;padding:0;max-width:none}
@@ -598,9 +593,6 @@
 .home-hero .landing-course-tag{align-self:flex-start;background:#EEF1FF;color:#3466F2;border-radius:999px;padding:3px 10px;font-weight:800;font-size:12px}
 .home-hero .landing-course-body h3{margin:8px 0 0;font-family:SUIT,Pretendard,sans-serif;font-weight:900;font-size:clamp(15px,1.05vw,20px);line-height:1.3;letter-spacing:-.025em;word-break:keep-all;color:#29243B}
 .home-hero .landing-course-body p{margin:6px 0 0;color:#655F76;font-size:clamp(12px,.75vw,14px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.home-hero .hero-dots{position:absolute;left:var(--hero-x);bottom:clamp(16px,3vh,40px);z-index:2;display:flex;gap:8px}
-.home-hero .hero-dots i{width:30px;height:5px;border-radius:9px;background:#29243B26}
-.home-hero .hero-dots i.is-on{background:#3466F2}
 /* 시험 도구: 오른쪽 아래 작은 버튼 (펼치면 토스 결제·알림 시험) */
 .home-hero .hero-devtools{position:absolute;right:16px;bottom:12px;z-index:5;font-size:12px;color:#655F76}
 .home-hero .hero-devtools summary{cursor:pointer;list-style:none;background:#ffffffcc;border:1px solid #E3DCF3;border-radius:999px;padding:4px 12px}
@@ -608,5 +600,4 @@
 .home-hero .hero-devtools[open] summary{margin-bottom:8px}
 @media(max-width:900px){
   .home-hero .landing-course-grid{grid-template-columns:1fr}
-  .home-hero .hero-credit{display:none}
 }

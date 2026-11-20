@@ -85,9 +85,18 @@ try {
     console.log(`${name}: changed state render OK`);
   }
   const { default: HumanCourseList } = await server.ssrLoadModule('/src/pages/human_course/pages/HumanCourseList.jsx');
+  const { default: CourseCard } = await server.ssrLoadModule('/src/pages/human_course/components/CourseCard.jsx');
+  const coverOnly = { ...state.courses[0], photoAssets: [], photos: [], coverPhotoUrl: 'https://example.test/tourapi.jpg' };
+  const coverHtml = renderToStaticMarkup(React.createElement(CourseCard, { course: coverOnly, detailHref: '#/human-courses/1' }));
+  assert.ok(coverHtml.includes('tourapi.jpg') && !coverHtml.includes('등록 사진 0장'), '업로드 사진이 없으면 장소 사진을 표지로 사용');
+  const uploadedFirst = { ...coverOnly, photoAssets: [{ name: '올린 사진', dataUrl: '/api/human-courses/photos/first.jpg' }], coverPhotoUrl: '/api/human-courses/photos/first.jpg' };
+  const uploadedHtml = renderToStaticMarkup(React.createElement(CourseCard, { course: uploadedFirst }));
+  assert.ok(uploadedHtml.includes('/api/human-courses/photos/first.jpg'), '업로드 사진 표지 우선');
   const guestList = renderToStaticMarkup(React.createElement(HumanCourseList, { ...state, isAuthenticated: false, execute() {} }));
   assert.ok(!guestList.includes('#/human-courses/create'), '비로그인 목록에서 작성 버튼 숨김');
   const { default: HumanCourseDetail } = await server.ssrLoadModule('/src/pages/human_course/pages/HumanCourseDetail.jsx');
+  const detailWithoutUploads = renderToStaticMarkup(React.createElement(HumanCourseDetail, { courses: [coverOnly], courseId: coverOnly.id, isAuthenticated: false, execute() {} }));
+  assert.ok(!detailWithoutUploads.includes('tourapi.jpg'), '상세 등록 사진에는 장소 표지를 섞지 않음');
   const guestDetail = renderToStaticMarkup(React.createElement(HumanCourseDetail, { ...state, courseId: 1, isAuthenticated: false, execute() {} }));
   assert.ok(!guestDetail.includes('게시글 기능'), '비로그인 상세에서 게시글 기능 숨김');
   assert.ok(!guestDetail.includes('comment-form'), '비로그인 상세에서 댓글 작성 숨김');

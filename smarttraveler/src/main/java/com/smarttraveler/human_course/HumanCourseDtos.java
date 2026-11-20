@@ -24,6 +24,6 @@ public final class HumanCourseDtos {
                        List<Photo> photoAssets, List<Day> plan, long likes, boolean likedByMe,
                        boolean reportedByMe, List<Comment> comments, String createdAt,
                        String visibility, int courseVersion, String travelDates, boolean mine,
-                       String reservationId, MapPlace stay) {}
+                       String reservationId, MapPlace stay, String coverPhotoUrl) {}
     public record IdResult(Long id) {}
 }

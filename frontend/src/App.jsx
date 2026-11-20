@@ -244,12 +244,6 @@ export default function App() {
         onLogin={loggedIn}
         onStart={chat.startChat}
         busy={chat.busy}
-        reviewAccess={
-          authCheckFailed ? 'error'
-            : !authChecked ? 'checking'
-            : member?.roleCode === 'USER' ? 'traveler'
-            : member ? 'other' : 'guest'
-        }
         reviewKey={`${member?.memberId ?? 'guest'}-${authRevision}`}
       />
     );
