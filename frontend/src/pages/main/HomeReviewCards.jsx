@@ -25,7 +25,7 @@ const mockReviews = [
   },
 ];
 
-export default function HomeReviewCards({ access }) {
+export default function HomeReviewCards() {
   const showMock =
     import.meta.env.DEV &&
     new URLSearchParams(window.location.search).get('mockReviews') === '1';
@@ -34,7 +34,7 @@ export default function HomeReviewCards({ access }) {
   const [status, setStatus] = useState('loading');
 
   useEffect(() => {
-      if (showMock || access !== 'traveler') return;
+    if (showMock) return;
 
     const controller = new AbortController();
 
@@ -49,7 +49,7 @@ export default function HomeReviewCards({ access }) {
       });
 
     return () => controller.abort();
-  }, [showMock, access]);
+  }, [showMock]);
 
   const cards = showMock ? mockReviews : reviews;
 
@@ -60,28 +60,19 @@ export default function HomeReviewCards({ access }) {
         <a href="#/human-courses">전체 보기 →</a>
       </div>
 
-         {!showMock && access === 'checking' && (
-     <p role="status">로그인 상태를 확인하는 중이에요.</p>
-   )}
-   {!showMock && access === 'guest' && (
-     <p><a href="#/login">로그인</a>하면 비슷한 취향의 여행 후기를 볼 수 있어요.</p>
-   )}
-   {!showMock && access === 'other' && (
-     <p>여행자 계정으로 로그인하면 맞춤 후기를 볼 수 있어요.</p>
-   )}
-   {!showMock && (access === 'error' || (access === 'traveler' && status === 'error')) && (
+   {!showMock && status === 'error' && (
      <p role="alert">후기를 불러오지 못했어요. 새로고침 후 다시 시도해 주세요.</p>
    )}
-   {!showMock && access === 'traveler' && status === 'loading' && (
+   {!showMock && status === 'loading' && (
      <p role="status">여행 후기를 불러오는 중이에요.</p>
    )}
-   {!showMock && access === 'traveler' && status === 'ready' && cards.length === 0 && (
-     <p>아직 추천할 후기가 없어요. 여행 취향을 설정하고 다시 확인해 보세요.</p>
+   {!showMock && status === 'ready' && cards.length === 0 && (
+     <p>아직 추천할 후기가 없어요.</p>
    )}
 
       <div className="landing-course-grid">
         {cards.map((review) => {
-          const photo = review.photoAssets?.[0]?.dataUrl;
+          const photo = 'coverPhotoUrl' in review ? review.coverPhotoUrl : review.photoAssets?.[0]?.dataUrl;
           const body = (
             <>
               <div className="landing-course-image hanok">

@@ -1,16 +1,17 @@
 package com.smarttraveler.human_course;
 
 import com.smarttraveler.human_course.HumanCourseDtos.Photo;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Base64;
 import java.util.Locale;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -19,8 +20,10 @@ public class HumanCoursePhotoStore {
     private static final int MAX_FILE_BYTES = 5 * 1024 * 1024;
     private static final int MAX_DATA_URL_LENGTH = 100 + 4 * ((MAX_FILE_BYTES + 2) / 3);
     private final Path root;
+    private final JdbcTemplate jdbc;
 
-    public HumanCoursePhotoStore(@Value("${human-course.upload-dir:}") String directory) {
+    public HumanCoursePhotoStore(@Value("${human-course.upload-dir:}") String directory, JdbcTemplate jdbc) {
+        this.jdbc = jdbc;
         root = (directory.isBlank() ? Path.of(System.getProperty("user.home"), ".smart-traveler", "human-course-photos")
             : Path.of(directory)).toAbsolutePath().normalize();
     }
@@ -39,20 +42,39 @@ public class HumanCoursePhotoStore {
         String extension = extension(bytes);
         if (extension == null) throw badPhoto();
         String name = UUID.randomUUID() + extension;
-        try {
-            Files.createDirectories(root);
-            Files.write(root.resolve(name), bytes);
-        } catch (IOException error) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "사진을 저장하지 못했습니다.");
-        }
+        jdbc.update("INSERT INTO human_course_photo_file(file_name,content_type,image_bytes,created_at) VALUES (?,?,?,NOW())",
+            name, contentType(extension), bytes);
         return "/api/human-courses/photos/" + name;
     }
 
     public Resource get(String name) {
         if (!name.matches("[0-9a-f-]{36}\\.(jpg|png|webp|gif)")) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        var stored = jdbc.query("SELECT image_bytes FROM human_course_photo_file WHERE file_name=?",
+            (rs, row) -> rs.getBytes("image_bytes"), name);
+        if (!stored.isEmpty()) return new ByteArrayResource(stored.getFirst());
         Path file = root.resolve(name).normalize();
         if (!file.startsWith(root) || !Files.isRegularFile(file)) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         return new FileSystemResource(file);
+    }
+
+    /** 표지로 쓸 수 있는지: DB에 있거나 이 서버 폴더에 파일이 있는 사진만 true (옛 사진은 올린 PC에만 있음). */
+    public boolean exists(String url) {
+        if (url == null || !url.startsWith("/api/human-courses/photos/")) return url != null && !url.isBlank();
+        String name = url.substring("/api/human-courses/photos/".length());
+        if (!name.matches("[0-9a-f-]{36}\\.(jpg|png|webp|gif)")) return false;
+        Integer count = jdbc.queryForObject("SELECT COUNT(*) FROM human_course_photo_file WHERE file_name=?", Integer.class, name);
+        if (count != null && count > 0) return true;
+        Path file = root.resolve(name).normalize();
+        return file.startsWith(root) && Files.isRegularFile(file);
+    }
+
+    private static String contentType(String extension) {
+        return switch (extension) {
+            case ".png" -> "image/png";
+            case ".gif" -> "image/gif";
+            case ".webp" -> "image/webp";
+            default -> "image/jpeg";
+        };
     }
 
     private static String extension(byte[] bytes) {
