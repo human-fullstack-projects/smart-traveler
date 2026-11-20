@@ -648,3 +648,17 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+/* 피드백 반영: 숙소 등록 객실 입력 · 객실 목록 숙소 이름 · 날짜별 판매 수량 */
+.owner-room-inputs{display:grid;gap:12px}
+.owner-room-input{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;align-items:end;padding:12px;border:1px solid #E3DCF3;border-radius:12px}
+.owner-room-input label{display:grid;gap:4px;font-size:13px;font-weight:700;color:#4A4560}
+.owner-room-input input,.owner-room-input select{padding:8px 10px;border:1px solid #D9D4EA;border-radius:8px;font:inherit}
+.owner-room-lodging{display:inline-block;margin-bottom:4px;padding:2px 10px;border-radius:999px;background:#EEF1FF;color:#3466F2;font-size:12px;font-weight:800}
+.owner-inventory-table{overflow-x:auto;margin-top:12px}
+.owner-inventory-table table{width:100%;border-collapse:collapse;font-size:14px}
+.owner-inventory-table th,.owner-inventory-table td{padding:8px 10px;border-top:1px solid #EEE9F7;text-align:left}
+.owner-inventory-table td strong{color:#B4532A}
+/* 실제 객실 목록: 사진 칸 없이 글 + 상태 */
+.owner-rooms-view .owner-room-list article{grid-template-columns:minmax(0,1fr) auto;align-items:center}
+.owner-rooms-view .owner-room-list article .owner-badge{justify-self:end;white-space:nowrap}
+.owner-room-input input,.owner-room-input select{width:100%;min-width:0;box-sizing:border-box}

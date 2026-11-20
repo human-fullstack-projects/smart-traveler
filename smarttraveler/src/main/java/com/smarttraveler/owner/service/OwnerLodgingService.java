@@ -79,15 +79,18 @@ public class OwnerLodgingService {
     private final MemberRepository members;
     private final SignupOwnerRepository owners;
     private final OwnerLodgingRepository lodgings;
+    private final OwnerRoomWriter rooms;
 
     public OwnerLodgingService(
             MemberRepository members,
             SignupOwnerRepository owners,
-            OwnerLodgingRepository lodgings
+            OwnerLodgingRepository lodgings,
+            OwnerRoomWriter rooms
     ) {
         this.members = members;
         this.owners = owners;
         this.lodgings = lodgings;
+        this.rooms = rooms;
     }
 
     @Transactional(readOnly = true)
@@ -120,7 +123,10 @@ public class OwnerLodgingService {
         // lodging.setCheckoutTime(request.checkoutTime());
         applyLodgingInfo(lodging, request);
 
-        return toSummary(lodgings.save(lodging));
+        Lodging saved = lodgings.save(lodging);
+        // 피드백: 숙소 등록 때 객실 정보도 함께 넣는다 (객실 + 90일 판매 칸)
+        rooms.insertRooms(saved.getLodgingId(), request.rooms());
+        return toSummary(saved);
     }
 
     @Transactional(readOnly = true)
@@ -174,6 +180,11 @@ public class OwnerLodgingService {
         lodging.setCheckoutTime(request.checkoutTime());
     }
 
+
+    /** 승인된 업주의 owner_id (객실·예약 화면도 같은 확인을 쓴다). */
+    public long ownerIdOf(String loginId) {
+        return requireApprovedOwnerId(loginId);
+    }
 
     private Long requireApprovedOwnerId(String loginId) {
         Member member = members.findByLoginId(loginId)

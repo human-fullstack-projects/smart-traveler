@@ -19,7 +19,7 @@ const LABEL = {
   ACTIVE: '정상', SUSPENDED: '정지', WITHDRAWN: '탈퇴', DELETED: '삭제',
   USER: '여행자', OWNER: '업주', ADMIN: '관리자',
   PENDING: '승인대기', APPROVED: '승인', REJECTED: '반려', INACTIVE: '운영중지', CLOSED: '폐업',
-  PENDING_PAYMENT: '결제대기', CONFIRMED: '예약확정', COMPLETED: '숙박완료', CANCELLED: '취소', CANCELED: '취소', REFUNDED: '환불', NO_SHOW: '노쇼', EXPIRED: '만료',
+  PENDING_PAYMENT: '결제대기', CONFIRMED: '예약', COMPLETED: '숙박완료', CANCELLED: '취소', CANCELED: '취소', REFUNDED: '환불', NO_SHOW: '노쇼', EXPIRED: '만료',
   REFUNDING: '환불 처리 중', REFUND_FAILED: '환불 실패',
   VISIBLE: '게시 중', PUBLISHED: '게시', BLINDED: '블라인드', HIDDEN: '숨김', RESOLVED: '처리완료', DISMISSED: '기각', OPEN: '신고 접수', RECEIVED: '신고 접수',
   READY: '결제 준비', DONE: '결제 완료', ABORTED: '결제 실패', SKIPPED: '건너뜀',
@@ -193,7 +193,7 @@ function Orders() {
         <MiniList title="처리 이력" rows={detail.data.history || detail.data.actions} empty="처리 이력 없음" columns={histCols} />
         <div className="adm-actions">
           <input className="st-input" placeholder="처리 사유 (취소·환불 시 필수)" value={reason} onChange={(e) => setReason(e.target.value)} />
-          <button className="st-btn" onClick={() => act('CONFIRMED')}>예약 확정</button>
+          <button className="st-btn" onClick={() => act('CONFIRMED')}>예약으로 변경</button>
           <button className="st-btn st-btn-line" onClick={() => act('COMPLETED')}>숙박 완료</button>
           <button className="st-btn st-btn-line" onClick={() => act('CANCELLED')}>예약 취소</button>
         </div>

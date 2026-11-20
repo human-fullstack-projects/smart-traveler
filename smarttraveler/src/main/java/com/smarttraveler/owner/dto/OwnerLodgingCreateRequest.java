@@ -7,7 +7,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import jakarta.validation.Valid;
 import java.math.BigDecimal;
+import java.util.List;
 import java.time.LocalTime;
 
 public record OwnerLodgingCreateRequest(
@@ -19,7 +21,9 @@ public record OwnerLodgingCreateRequest(
         @NotNull @DecimalMin("-180") @DecimalMax("180")
         @Digits(integer = 3, fraction = 7) BigDecimal longitude,
         @NotNull LocalTime checkinTime,
-        @NotNull LocalTime checkoutTime
+        @NotNull LocalTime checkoutTime,
+        // 숙소 등록 때 함께 넣는 객실 (수정 때는 쓰지 않음 · 없으면 null)
+        @Valid @Size(max = 20) List<OwnerRoomDtos.RoomInput> rooms
 ) {}
 
 //숙소 등록 화면에서 서버로 보낼 값과 입력 제한을 정하는 클래스(참고용)

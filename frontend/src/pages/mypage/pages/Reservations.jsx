@@ -27,7 +27,7 @@ function BookingStayInfo({ booking }) {
 const tabs=[['all','전체 예약'],['upcoming','예약된 여행'],['past','지난 여행'],['cancelled','취소된 여행']];
 const categoryLabels=Object.fromEntries(tabs);
 const categoryOrder={upcoming:0,cancelled:1,past:2};
-const labels={COMPLETED:'숙박 완료',CONFIRMED:'예약 확정',PENDING_PAYMENT:'결제 대기',CANCELLED:'예약 취소'};
+const labels={COMPLETED:'숙박 완료',CONFIRMED:'예약',PENDING_PAYMENT:'결제 대기',CANCELLED:'예약 취소'};
 export default function Reservations({bookings=[],courses=[],reservationId,member}) {
  const [cancelNotice,setCancelNotice]=useState('');
  const [tab,setTab]=useState('all'),[query,setQuery]=useState(''),[latest,setLatest]=useState(null),[status,setStatus]=useState('loading');

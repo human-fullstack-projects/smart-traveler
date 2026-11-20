@@ -26,12 +26,16 @@ public class RecommendedCourseService {
         this.jdbc = jdbc; this.mapper = mapper; this.candidates = candidates; this.buffer = buffer;
     }
 
-    /** 추천 코스가 메시지로 출력되는 즉시, 로그인 상태라면 "내 코스"에도 바로 저장한다. */
+    /** 추천 코스를 메시지에 붙여 둔다. 저장은 화면의 [저장하기]를 눌렀을 때만 한다(피드백: 저장하기 Y/N). */
     public void record(long sessionId, long messageId, long sourceId) {
         String json = jdbc.queryForObject("SELECT conditions_json FROM chat_session_conditions WHERE session_id=?", String.class, sessionId);
-        ObjectNode conditions = (ObjectNode) mapper.readTree(json);
-        var rows = candidates.find(conditions).stream()
-            .filter(row -> ((Number) row.get("courseId")).longValue() == sourceId).toList();
+        record(sessionId, messageId, sourceId, (ObjectNode) mapper.readTree(json));
+    }
+
+    /** used = 추천에 실제로 쓴 조건(말하지 않은 값은 기본값을 채운 사본). */
+    public void record(long sessionId, long messageId, long sourceId, ObjectNode used) {
+        ObjectNode conditions = used;
+        var rows = candidates.findCourse(sourceId, conditions.path("durationDays").asInt());
         if (rows.isEmpty()) throw new ResponseStatusException(HttpStatus.CONFLICT, "추천 코스를 다시 확인해 주세요.");
         var info = rows.getFirst();
         ObjectNode snapshot = mapper.createObjectNode();
@@ -59,14 +63,6 @@ public class RecommendedCourseService {
                 place.put("place_name", visit.get("placeName").toString());
             }
         }
-        // 이 세션의 소유자가 이미 로그인 회원이면(member_id 보유) 추천 출력과 같은 트랜잭션에서 바로 영구 저장한다.
-        Long memberId = jdbc.query("SELECT member_id FROM chat_sessions WHERE session_id=?",
-            (rs, row) -> rs.getObject(1, Long.class), sessionId).getFirst();
-        if (memberId != null) {
-            // 같은 대화에서 같은 코스·같은 조건이 다시 추천되면 새로 저장하지 않고 이미 저장한 코스를 쓴다.
-            Long already = alreadySaved(sessionId, sourceId, conditions);
-            snapshot.put("savedCourseId", already != null ? already : persist(memberId, snapshot, messageId));
-        }
         buffer.setRecommendation(sessionId, messageId, mapper.writeValueAsString(snapshot));
     }
 
@@ -79,7 +75,8 @@ public class RecommendedCourseService {
             if (owner.isEmpty() || !Long.valueOf(memberId).equals(owner.getFirst()) || pending == null)
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "저장할 추천 코스가 없습니다.");
             ObjectNode snapshot = (ObjectNode) mapper.readTree(pending);
-            if (snapshot.hasNonNull("savedCourseId")) return snapshot.path("savedCourseId").asLong();
+            if (snapshot.hasNonNull("savedCourseId")) throw alreadySavedError();
+            rejectDuplicate(memberId, snapshot);
             long courseId = persist(memberId, snapshot, messageId);
             snapshot.put("savedCourseId", courseId);
             buffer.setRecommendation(sessionId, messageId, mapper.writeValueAsString(snapshot));
@@ -93,7 +90,8 @@ public class RecommendedCourseService {
             """, (rs, row) -> rs.getString(1), messageId, sessionId, memberId);
         if (rows.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "저장할 추천 코스가 없습니다.");
         ObjectNode snapshot = (ObjectNode) mapper.readTree(rows.getFirst());
-        if (snapshot.hasNonNull("savedCourseId")) return snapshot.path("savedCourseId").asLong();
+        if (snapshot.hasNonNull("savedCourseId")) throw alreadySavedError();
+        rejectDuplicate(memberId, snapshot);
         long courseId = persist(memberId, snapshot, messageId);
         snapshot.put("savedCourseId", courseId);
         jdbc.update("UPDATE chat_messages SET recommendation_json=? WHERE message_id=?", mapper.writeValueAsString(snapshot), messageId);
@@ -156,20 +154,19 @@ public class RecommendedCourseService {
             """, courseDayId, seq, startTime, name, name, placeId);
     }
 
-    /** 이 대화의 이전 추천 중 같은 원본 코스·같은 여행 조건으로 이미 「내 코스」에 저장된 코스 번호. 없으면 null. */
-    private Long alreadySaved(long sessionId, long sourceId, ObjectNode conditions) {
-        for (var message : buffer.messages(sessionId)) {
-            if (message.recommendationJson() == null) continue;
-            JsonNode previous = mapper.readTree(message.recommendationJson());
-            if (previous.path("sourceCourseId").asLong() == sourceId && previous.hasNonNull("savedCourseId")
-                && previous.path("conditions").equals(conditions)) {
-                long courseId = previous.path("savedCourseId").asLong();
-                // 회원이 그 코스를 지웠으면 새로 저장한다.
-                Integer exists = jdbc.queryForObject("SELECT COUNT(*) FROM course WHERE id=?", Integer.class, courseId);
-                if (exists != null && exists > 0) return courseId;
-            }
-        }
-        return null;
+    /** 같은 원본 코스를 같은 출발일로 이미 저장했으면 막는다 (피드백: 이미 추천된 코스 중복 적용 안 되게). */
+    private void rejectDuplicate(long memberId, ObjectNode snapshot) {
+        Integer count = jdbc.queryForObject("""
+            SELECT COUNT(*) FROM course
+            WHERE member_no=? AND deleted_at IS NULL AND start_date=?
+              AND JSON_VALUE(condition_meta,'$.source_course_id')=?
+            """, Integer.class, memberId, snapshot.path("conditions").path("startDate").asText(),
+            String.valueOf(snapshot.path("sourceCourseId").asLong()));
+        if (count != null && count > 0) throw alreadySavedError();
+    }
+
+    private static ResponseStatusException alreadySavedError() {
+        return new ResponseStatusException(HttpStatus.CONFLICT, "이미 저장한 코스예요. 저장된 여행에서 확인해 주세요.");
     }
 
     public JsonNode read(String json) { return json == null ? null : mapper.readTree(json); }

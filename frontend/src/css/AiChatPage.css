@@ -35,6 +35,9 @@
 .cb-confirm-buttons button{padding:9px 20px;border:0;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer}
 .cb-confirm-yes{background:#1241C3;color:#fff}
 .cb-confirm-no{background:#F2F0F8;color:#2B5DE7;border:1px solid #E0E1EA}
+.cb-save-choice{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;padding:6px 0;font-size:13px;font-weight:700;color:#29243B}
+.cb-save-choice button{padding:9px 20px;border:0;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer}
+.cb-msg a{color:#2B5DE7;font-weight:700;text-decoration:underline}
 
 .cb-status{text-align:center;color:#4874EB;font-size:13px}
 .cb-error{margin:8px 0 0;color:#89543e;font-size:12px}

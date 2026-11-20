@@ -20,7 +20,7 @@ export default function StayBookingPage() {
   const [loadingRooms, setLoadingRooms] = useState(true);
   const [saving, setSaving] = useState(false);
   const [refresh, setRefresh] = useState(0);
-  const room = rooms.find((item) => item.roomId === roomId);
+  const room = rooms.find((item) => item.roomId === roomId && item.available !== false);
   const nights = getNightCount(checkIn, checkOut);
 
   useEffect(() => {
@@ -101,17 +101,18 @@ export default function StayBookingPage() {
               <label className="booking-form-field">인원<input type="number" min="1" max="18" value={guests} disabled={saving} onChange={(event) => changeCondition(setGuests, Number(event.target.value))} /></label>
               {loadingRooms && <p role="status">객실을 조회하고 있습니다.</p>}
               {!loadingRooms && !nights && <p>체크인보다 늦은 체크아웃 날짜를 선택해 주세요.</p>}
-              {!loadingRooms && nights > 0 && !notice && rooms.length === 0 && <p>선택한 조건에 예약할 수 있는 객실이 없습니다.</p>}
+              {!loadingRooms && nights > 0 && !notice && !rooms.some((item) => item.available !== false) && <p>선택한 조건에 예약할 수 있는 객실이 없습니다.</p>}
               <div className="booking-room-list">
                 {rooms.map((item) => (
-                  <article key={item.roomId} className={'booking-room' + (roomId === item.roomId ? ' is-selected' : '')}>
+                  <article key={item.roomId} className={'booking-room' + (roomId === item.roomId ? ' is-selected' : '') + (item.available === false ? ' is-sold-out' : '')}>
                     <div className="booking-room__body">
                       <h3>{item.name}</h3>
-                      <p>최대 {item.maxCapacity}명 · 잔여 {item.remaining}실</p>
+                      <p>최대 {item.maxCapacity}명 · {item.available === false ? '객실 없음' : `잔여 ${item.remaining}실`}</p>
                       <div className="booking-room__bottom">
-                        <strong>{nights}박 {formatWon(item.totalPrice)}</strong>
-                        <button type="button" disabled={saving} onClick={() => { setRoomId(item.roomId); setNotice(''); }}>
-                          {roomId === item.roomId ? '선택됨' : '객실 선택'}
+                        <strong>{item.available === false ? '객실 없음' : `${nights}박 ${formatWon(item.totalPrice)}`}</strong>
+                        {/* 피드백: 재고가 없으면 「객실 없음」으로 표시하고 선택을 막는다 */}
+                        <button type="button" disabled={saving || item.available === false} onClick={() => { setRoomId(item.roomId); setNotice(''); }}>
+                          {item.available === false ? '객실 없음' : roomId === item.roomId ? '선택됨' : '객실 선택'}
                         </button>
                       </div>
                     </div>
