@@ -92,8 +92,10 @@ public class ChatController {
         }
         var result = dialogue.processResult(id, input.content(), personalization.savedPreferences());
         long messageId = insertMessage(id, "ASSISTANT", result.message());
-        if (result.recommendedCourseId() != null)
-            recommendations.record(id, messageId, result.recommendedCourseId());
+        if (result.recommendedCourseId() != null) {
+            if (result.recommendConditions() != null) recommendations.record(id, messageId, result.recommendedCourseId(), result.recommendConditions());
+            else recommendations.record(id, messageId, result.recommendedCourseId());
+        }
     }
     @PostMapping("/sessions") @Transactional
     Chat create(@Valid @RequestBody MessageInput input, HttpSession session) {

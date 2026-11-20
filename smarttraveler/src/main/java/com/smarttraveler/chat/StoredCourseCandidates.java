@@ -37,20 +37,47 @@ public class StoredCourseCandidates {
         this.mapper = mapper;
     }
 
+    /** 지역을 말하지 않았을 때 전국 후보 중 비교할 코스 수 상한 (임베딩 비용·시간). */
+    static final int NATIONWIDE_LIMIT = 40;
+
     @Transactional(readOnly = true)
     public List<Map<String, Object>> find(ObjectNode conditions) {
+        return find(conditions, Set.of());
+    }
+
+    /**
+     * 추천 후보 코스의 방문 행. 지역이 없으면 전국에서(동행·교통이 맞는 코스 먼저, 최대 NATIONWIDE_LIMIT개) 고르고,
+     * excluded(이 대화에서 이미 추천한 코스)는 뺀다. 지역 이름을 말했는데 찾을 수 없으면 빈 목록.
+     */
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> find(ObjectNode conditions, Set<Long> excluded) {
         int duration = conditions.path("durationDays").asInt();
         if (duration < 1 || duration > 4) {
             return List.of();
         }
         Long region = regions.regionId(conditions);
-        if (region == null) {
+        boolean namedRegion = !conditions.path("regionName").asText("").isBlank();
+        if (region == null && namedRegion) {
             return List.of();
         }
+        List<Course> pool = region != null ? courses.findCandidates(region) : nationwide(conditions, duration, excluded);
+        return rows(pool, duration, excluded);
+    }
+
+    /** 추천한 코스 한 개의 방문 행 (저장용 스냅샷을 만들 때 다시 읽는다). */
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> findCourse(long courseId, int duration) {
+        return courses.findById(courseId).map(course -> rows(List.of(course), duration, Set.<Long>of())).orElse(List.of());
+    }
+
+    private List<Map<String, Object>> rows(List<Course> pool, int duration, Set<Long> excluded) {
         Map<Long, Course> selected = new HashMap<>();
         Map<Long, JsonNode> itineraries = new HashMap<>();
         Set<Long> placeIds = new HashSet<>();
-        for (Course course : courses.findCandidates(region)) {
+        for (Course course : pool) {
+            if (excluded.contains(course.getId())) {
+                continue;
+            }
             if (!course.getStartDate().plusDays(duration - 1L).equals(course.getEndDate())) {
                 continue;
             }
@@ -72,9 +99,11 @@ public class StoredCourseCandidates {
         }
 
         Map<Long, String> placeNames = new HashMap<>();
+        Map<Long, String> placeSummaries = new HashMap<>();
         for (var place : places.findAllById(placeIds)) {
             if (Boolean.TRUE.equals(place.getIsActive())) {
                 placeNames.put(place.getPlaceId(), place.getName());
+                placeSummaries.put(place.getPlaceId(), summary(place.getDescription()));
             }
         }
 
@@ -122,9 +151,43 @@ public class StoredCourseCandidates {
                 row.put("seq", visit.path("seq").asInt() == i + 1 ? i + 1 : null);
                 row.put("placeId", placeName == null ? null : placeId);
                 row.put("placeName", placeName);
+                row.put("placeSummary", placeName == null ? "" : placeSummaries.getOrDefault(placeId, ""));
                 rows.add(row);
             }
         }
         return rows;
+    }
+
+    /** 전국 후보: 일수가 맞는 RAG 코스 중 동행·교통이 맞는 것을 먼저, 최대 NATIONWIDE_LIMIT개. */
+    private List<Course> nationwide(ObjectNode conditions, int duration, Set<Long> excluded) {
+        String companion = conditions.path("companionType").asText("");
+        String transport = conditions.path("transportType").asText("");
+        List<Course> fitting = new ArrayList<>();
+        for (Course course : courses.findAllCandidates()) {
+            if (excluded.contains(course.getId()) || course.getStartDate() == null
+                    || !course.getStartDate().plusDays(duration - 1L).equals(course.getEndDate())) {
+                continue;
+            }
+            if (!RAG_SEED_BATCHES.contains(mapper.readTree(course.getConditionMeta()).path("seed_batch").asText())) {
+                continue;
+            }
+            fitting.add(course);
+        }
+        fitting.sort(java.util.Comparator.comparingInt((Course course) ->
+                (companion.isEmpty() || companion.equals(course.getCompanionType()) ? 0 : 1)
+                + (transport.isEmpty() || transport.equals(course.getTransportType()) ? 0 : 1))
+            .thenComparing(Course::getId));
+        return fitting.subList(0, Math.min(NATIONWIDE_LIMIT, fitting.size()));
+    }
+
+    /** 장소 설명의 첫 문장(최대 60자). 설명이 없으면 빈 문자열. */
+    static String summary(String description) {
+        if (description == null) return "";
+        String text = description.replaceAll("<[^>]*>", " ").replaceAll("\\s+", " ").trim();
+        if (text.isEmpty()) return "";
+        int end = text.indexOf(". ");
+        if (end < 0 && text.endsWith(".")) end = text.length() - 1;
+        String first = end > 0 ? text.substring(0, end + 1) : text;
+        return first.length() > 60 ? first.substring(0, 59).trim() + "…" : first;
     }
 }
