@@ -244,19 +244,14 @@ export default function App() {
         onLogin={loggedIn}
         onStart={chat.startChat}
         busy={chat.busy}
-        reviewAccess={
-          authCheckFailed ? 'error'
-            : !authChecked ? 'checking'
-            : member?.roleCode === 'USER' ? 'traveler'
-            : member ? 'other' : 'guest'
-        }
         reviewKey={`${member?.memberId ?? 'guest'}-${authRevision}`}
       />
     );
   }
 
   return (
-    <MainLayout member={member} loggingOut={loggingOut} onLogout={handleLogout} notice={notice} onDismissNotice={() => setNotice('')}>
+    <MainLayout member={member} loggingOut={loggingOut} onLogout={handleLogout} notice={notice} onDismissNotice={() => setNotice('')}
+      isHome={(routePath === '/' || routePath === '/main') && !(authChecked && member?.roleCode === 'USER' && routePath !== '/my-travel-style' && survey.memberId === member.memberId && survey.status === 'needed')}>
       {authChecked && member?.roleCode === 'USER' && routePath !== '/my-travel-style' && survey.memberId === member.memberId && survey.status === 'needed'
         ? <TravelStylePage key={`survey-${member.memberId}`} member={member} surveyMode initialData={survey.data}
             onSaved={() => setSurvey({ memberId: member.memberId, status: 'done', data: null })} />

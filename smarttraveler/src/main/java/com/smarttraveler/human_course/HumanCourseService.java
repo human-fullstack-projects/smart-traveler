@@ -65,32 +65,20 @@ public class HumanCourseService {
         return jdbc.queryForList("SELECT post_id FROM human_course_post WHERE status='VISIBLE' AND deleted_at IS NULL ORDER BY created_at DESC, post_id DESC")
             .stream().map(row -> post(((Number) row.get("post_id")).longValue(), viewer, false)).toList();
     }
-        @Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     public List<Post> homeReviews(Authentication auth) {
         long viewerId = viewer(auth);
-        if (viewerId < 0) {
-            return List.of();
-        }
-
         List<Long> postIds = jdbc.queryForList("""
             SELECT p.post_id
             FROM human_course_post p
-            JOIN (
-                SELECT author_tag.member_no, COUNT(*) AS shared_likes
-                FROM member_preference_tag viewer_tag
-                JOIN member_preference_tag author_tag
-                  ON author_tag.tag_id = viewer_tag.tag_id
-                WHERE viewer_tag.member_no = ?
-                  AND viewer_tag.polarity = 'like'
-                  AND author_tag.polarity = 'like'
-                GROUP BY author_tag.member_no
-            ) preference ON preference.member_no = p.author_id
             WHERE p.status = 'VISIBLE'
               AND p.deleted_at IS NULL
-              AND p.author_id <> ?
-            ORDER BY preference.shared_likes DESC, p.created_at DESC, p.post_id DESC
+            ORDER BY (SELECT COUNT(*) FROM human_course_like l WHERE l.post_id = p.post_id) DESC,
+                     (SELECT COUNT(*) FROM human_course_comment co
+                      WHERE co.post_id = p.post_id AND co.deleted_at IS NULL) DESC,
+                     p.created_at DESC, p.post_id DESC
             LIMIT 3
-            """, Long.class, viewerId, viewerId);
+            """, Long.class);
 
         return postIds.stream()
             .map(postId -> post(postId, viewerId, false))
@@ -122,9 +110,25 @@ public class HumanCourseService {
         boolean blinded = "BLINDED".equals(row.get("status"));
         if (blinded && !allowBlinded) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         Snapshot snapshot = snapshot(row);
-        List<String> urls = blinded ? List.of() : jdbc.queryForList("SELECT image_url FROM human_course_photo WHERE post_id=? ORDER BY sort_order, photo_id", String.class, id);
+        // 이 서버에서 실제로 열리는 사진만 보여 줌 (옛 사진은 올린 PC 폴더에만 있어 다른 PC에선 깨짐)
+        List<String> urls = blinded ? List.of() : jdbc.queryForList("SELECT image_url FROM human_course_photo WHERE post_id=? ORDER BY sort_order, photo_id", String.class, id)
+            .stream().filter(photos::exists).toList();
         List<Photo> photoAssets = new ArrayList<>();
         for (int index = 0; index < urls.size(); index++) photoAssets.add(new Photo("사진 " + (index + 1), urls.get(index)));
+        String coverPhotoUrl = null;
+        if (!blinded) {
+            coverPhotoUrl = urls.isEmpty() ? null : urls.getFirst();
+            if (coverPhotoUrl == null) {
+                List<String> placePhotos = jdbc.queryForList("""
+                    SELECT image.image_url FROM course_day d
+                    JOIN activity a ON a.course_day_id = d.id
+                    JOIN place_image image ON image.place_id = a.place_id
+                    WHERE d.course_id = ? AND image.image_url IS NOT NULL AND TRIM(image.image_url) <> ''
+                    ORDER BY d.day_no, a.seq, image.sort_order, image.place_image_id LIMIT 1
+                    """, String.class, number(row, "course_id"));
+                if (!placePhotos.isEmpty()) coverPhotoUrl = placePhotos.getFirst();
+            }
+        }
         List<Comment> comments = blinded ? List.of() : jdbc.query("""
             SELECT co.comment_id, co.content, co.author_id, COALESCE(NULLIF(m.nickname,''),m.login_id) AS author
             FROM human_course_comment co JOIN members m ON m.member_id=co.author_id
@@ -143,7 +147,8 @@ public class HumanCourseService {
             row.get("checkin_date") + " ~ " + row.get("checkout_date"), mine, String.valueOf(row.get("reservation_id")),
             blinded ? null : new MapPlace("stay-" + row.get("lodging_id"), null, string(row, "stay_name"),
                 string(row, "stay_address"), decimal(row.get("stay_latitude")),
-                decimal(row.get("stay_longitude")), "stay", stayImageUrl == null ? List.of() : List.of(stayImageUrl)));
+                decimal(row.get("stay_longitude")), "stay", stayImageUrl == null ? List.of() : List.of(stayImageUrl)),
+            coverPhotoUrl);
     }
 
     @Transactional(readOnly = true)

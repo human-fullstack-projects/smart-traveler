@@ -1,0 +1,12 @@
+/* AI TRIP 로고 (2026-11-19): AIT 핀 로고 + 「AI TRIP」 글자 · 글씨체 도현(OFL, public/fonts) */
+@font-face{font-family:'DoHyeon';src:url('/fonts/DoHyeon-Regular.ttf') format('truetype');font-display:swap}
+a.brand-mark{display:inline-flex;align-items:center;gap:10px;text-decoration:none;line-height:1;white-space:nowrap}
+a.brand-mark .brand-logo{width:auto;height:38px;flex:none;display:block}
+a.brand-mark .brand-word{font-family:'DoHyeon',Pretendard,sans-serif;font-weight:400;font-size:28px;letter-spacing:.01em;color:#29243B}
+a.brand-mark .brand-word b{font-weight:400;color:#3466F2}
+a.brand-mark.is-small .brand-logo{height:28px}
+a.brand-mark.is-small .brand-word{font-size:21px}
+/* 어두운 바탕(관리자 옆 메뉴) */
+a.brand-mark.on-dark .brand-word{color:#fff}
+a.brand-mark.on-dark .brand-word b{color:#B9B0FF}
+@media(max-width:700px){a.brand-mark .brand-logo{height:30px}a.brand-mark .brand-word{font-size:22px}}

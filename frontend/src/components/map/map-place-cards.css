@@ -1,23 +1,23 @@
 .map-place-cards { display: grid; gap: 9px; }
-.itinerary-map .map-place-card { box-sizing: border-box; display: flex; width: 100%; max-width: none; min-width: 0; align-items: center; justify-content: flex-start; gap: 13px; padding: 12px 16px; border: 1px solid #d9e9e1; border-radius: 13px; background: #fff; color: #315448; font: inherit; text-align: left; cursor: pointer; }
-.itinerary-map .map-place-card:hover:not(:disabled), .itinerary-map .map-place-card:focus-visible, .itinerary-map .map-place-card[aria-pressed="true"]:not(:disabled) { border-color: #5eae89; background: #eff9f3; }
-.map-place-card__badge { display: grid; flex: 0 0 auto; min-width: 42px; min-height: 42px; place-items: center; padding: 0 8px; border-radius: 13px; background: #e2f2e9; color: #1b7656; font-size: 14px; font-weight: 800; white-space: nowrap; }
+.itinerary-map .map-place-card { box-sizing: border-box; display: flex; width: 100%; max-width: none; min-width: 0; align-items: center; justify-content: flex-start; gap: 13px; padding: 12px 16px; border: 1px solid #D9DAE9; border-radius: 13px; background: #fff; color: #2549AD; font: inherit; text-align: left; cursor: pointer; }
+.itinerary-map .map-place-card:hover:not(:disabled), .itinerary-map .map-place-card:focus-visible, .itinerary-map .map-place-card[aria-pressed="true"]:not(:disabled) { border-color: #4C76EB; background: #F1EFF9; }
+.map-place-card__badge { display: grid; flex: 0 0 auto; min-width: 42px; min-height: 42px; place-items: center; padding: 0 8px; border-radius: 13px; background: #E6E2F2; color: #264BB2; font-size: 14px; font-weight: 800; white-space: nowrap; }
 .map-place-card__badge.is-stay { background: #fff0d8; color: #a55e22; font-size: 12px; }
 .map-place-card__text { display: grid; min-width: 0; flex: 1; gap: 2px; text-align: left; }
 .map-place-card__text strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
-.map-place-card__text small { overflow: hidden; color: #7a9487; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
-.map-place-card__arrow { color: #416d59; font-size: 23px; line-height: 1; }
+.map-place-card__text small { overflow: hidden; color: #4D77EB; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+.map-place-card__arrow { color: #2A5DE7; font-size: 23px; line-height: 1; }
 .itinerary-map .map-place-card.is-unresolved { border-color: #efc7c7; background: #fff9f8; }
 .itinerary-map .map-place-card.is-unresolved:hover:not(:disabled), .itinerary-map .map-place-card.is-unresolved[aria-pressed="true"]:not(:disabled) { border-color: #d98282; background: #fff0ee; }
 .map-place-card.is-unresolved .map-place-card__badge { background: #fde2de; color: #b44642; }
 .map-place-card.is-unresolved .map-place-card__arrow { color: #b44642; font-weight: 800; }
 .map-place-card__text .map-place-card__warning { color: #b44642; }
-.map-place-detail { padding: 20px; margin-top: -8px; border: 1px solid #d9e9e1; border-top: 0; border-radius: 0 0 13px 13px; background: #f8fcfa; animation: place-detail-open .18s ease-out; }
+.map-place-detail { padding: 20px; margin-top: -8px; border: 1px solid #D9DAE9; border-top: 0; border-radius: 0 0 13px 13px; background: #F9F8FC; animation: place-detail-open .18s ease-out; }
 .map-place-detail__content { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 24px; align-items: start; }
 .map-place-detail__content img { display: block; width: 100%; max-height: 320px; object-fit: cover; border-radius: 10px; }
 .map-place-detail__content h4 { margin: 0 0 10px; font-size: 18px; }
-.map-place-detail__content .map-place-detail__description { white-space: pre-line; line-height: 1.8; color: #315448; }
-.map-place-detail__no-photo { display: grid; min-height: 180px; place-items: center; border-radius: 10px; background: #edf3ef; color: #667f72; }
+.map-place-detail__content .map-place-detail__description { white-space: pre-line; line-height: 1.8; color: #2549AD; }
+.map-place-detail__no-photo { display: grid; min-height: 180px; place-items: center; border-radius: 10px; background: #EEEDF3; color: #3E6CEA; }
 @keyframes place-detail-open { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
 @media (max-width: 650px) { .map-place-detail__content { grid-template-columns: 1fr; gap: 16px; } }
 @media (prefers-reduced-motion: reduce) { .map-place-detail { animation: none; } }

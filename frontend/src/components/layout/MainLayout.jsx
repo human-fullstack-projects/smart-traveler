@@ -3,24 +3,22 @@ import '../../css/MainLayout.css';
 
 const navigation = [
   { label: '여행 시작', href: '#/' },
-  { label: '코스추천', href: '#/ai-course' },
-  { label: '조건검색', href: '#/conditions' },
   { label: '숙소 찾기', href: '#/stays' },
   { label: '저장된 여행', href: '#/my-courses' },
   { label: '휴먼 추천 코스', href: '#/human-courses' },
   { label: '마이페이지', href: '#/mypage' },
 ];
 
-const footerLinks = ['저장된 여행', '조건검색', '숙소 찾기', '내 휴먼 추천 코스', '마이페이지'];
+const footerLinks = ['저장된 여행', '숙소 찾기', '내 휴먼 추천 코스', '마이페이지'];
 
-export default function MainLayout({ children, member, loggingOut, onLogout, notice, onDismissNotice }) {
+export default function MainLayout({ children, member, loggingOut, onLogout, notice, onDismissNotice, isHome = false }) {
   const [globalNotice, setGlobalNotice] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
 
   const banner = notice || globalNotice;
 
   return (
-    <div className="main-page">
+    <div className={`main-page${isHome ? ' is-home' : ''}`}>
       <header className="mp-topbar">
         <div className="mp-topbar-left">
           <button
@@ -33,8 +31,8 @@ export default function MainLayout({ children, member, loggingOut, onLogout, not
           >
             <span /><span /><span />
           </button>
-          <a className="mp-brand st-brand" href="#/main">
-            SMART TRAVEL
+          <a className="mp-brand st-brand brand-mark" href="#/main" aria-label="AI TRIP 홈">
+            <img className="brand-logo" src="/images/brand/ait_pin.svg" alt="" /><span className="brand-word"><b>AI</b> TRIP</span>
           </a>
         </div>
 
@@ -92,7 +90,7 @@ export default function MainLayout({ children, member, loggingOut, onLogout, not
                 </span>
               ))}
             </nav>
-            <p className="mp-footer-fine">smart travel · 지도형 ver9 화면 시안</p>
+            <p className="mp-footer-fine">AI TRIP</p>
           </footer>
         </div>
       </div>

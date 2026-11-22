@@ -6,6 +6,7 @@ import './styles/tokens.css';
 import './styles/global.css';
 import './chat.css';
 import './styles/theme.css';
+import './styles/brand.css';
 
 const paymentQuery = new URLSearchParams(window.location.search);
 const reservationId = paymentQuery.get('stayReservationId');

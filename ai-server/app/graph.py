@@ -47,6 +47,8 @@ class DialogueState(TypedDict, total=False):
     courseCandidates: list[dict[str, Any]] | None
     savedPreferences: dict[str, Any] | None
     recommendedCourseId: int | None
+    extractOnly: bool
+    forceRecommend: bool
 
 
 def extract_with_openai(state: DialogueState) -> ExtractedConditions:
@@ -201,6 +203,8 @@ def recommend_with_openai(state: DialogueState) -> str:
 def build_graph(extractor: Callable[[DialogueState], ExtractedConditions] = extract_with_openai, recommender: Callable[[DialogueState], str] = recommend_with_openai):
     """추출 → 병합·검증 → 부족 조건 질문 또는 확인 안내를 실행한다."""
     def extract(state: DialogueState):
+        if state.get("forceRecommend"):
+            return {"changes": {}}
         return {"changes": valid_changes(extractor(state))}
 
     def merge(state: DialogueState):
@@ -213,6 +217,10 @@ def build_graph(extractor: Callable[[DialogueState], ExtractedConditions] = extr
         return {"merged": merged, "question": question}
 
     def route(state: DialogueState):
+        if state.get("forceRecommend"):
+            return "recommend"
+        if state.get("extractOnly"):
+            return "ask"
         if state["question"] != CHECK:
             return "ask"
         if state["merged"] != state["conditions"]:

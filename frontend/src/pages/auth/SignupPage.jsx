@@ -135,7 +135,7 @@ export default function SignupPage({ onLogin, guestCourseCount = 0 }) {
         <a className="auth-back" href="#/login">← 로그인으로</a>
         <div className="st-panel">
           <div className="auth-head">
-            <p className="auth-kicker">JOIN SMART TRAVEL</p>
+            <p className="auth-kicker">JOIN AI TRIP</p>
             <h1 id="signup-title" className="st-h2">회원가입</h1>
             <p>가입 유형을 고르고 정보를 입력해주세요.</p>
             {guestCourseCount > 0 && <p className="st-note">보관한 여행 코스 {guestCourseCount}건이 있습니다. 여행자 가입 완료 후 자동 로그인하여 계정에 연결하고, 가입 전에 보던 페이지로 돌아갑니다. 숙박업주는 가입 후 로그인하면 연결됩니다.</p>}

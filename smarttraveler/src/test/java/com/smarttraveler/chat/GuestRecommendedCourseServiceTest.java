@@ -19,7 +19,7 @@ class GuestRecommendedCourseServiceTest {
     JdbcTemplate jdbc = mock(JdbcTemplate.class);
     RecommendedCourseService courses = mock(RecommendedCourseService.class);
     PlatformTransactionManager manager = mock(PlatformTransactionManager.class);
-    GuestRecommendedCourseService service = new GuestRecommendedCourseService(jdbc, courses, manager);
+    GuestRecommendedCourseService service = new GuestRecommendedCourseService(jdbc, courses, manager, new ChatMessageBuffer(jdbc, manager));
     MockHttpSession session = new MockHttpSession();
     String snapshot = """
         {"title":"부산 코스","destination":"부산","conditions":{"startDate":"2026-12-10","durationDays":2}}
