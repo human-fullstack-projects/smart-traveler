@@ -50,7 +50,7 @@ public class SocialAuthController {
         session.removeAttribute(SocialOAuthSuccessHandler.PENDING);
         sessions.login(member, servletRequest, servletResponse);
         return new AuthController.MemberView(member.getMemberId(), member.getLoginId(),
-                member.getNickname(), member.getRoleCode());
+                member.getNickname(), member.getRoleCode(), member.getEmail());
     }
 
     public record ProviderView(boolean google, boolean kakao) {}

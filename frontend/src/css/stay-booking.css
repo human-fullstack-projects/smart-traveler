@@ -4,6 +4,19 @@
 .booking-room{grid-template-columns:clamp(110px, 23%, 170px) minmax(0, 1fr)}
 .booking-room.is-sold-out{opacity:.7}
 
+.booking-course-start { flex: 0 0 auto; max-width: min(100%, 270px); }
+.booking-course-start button {
+  padding: 11px 16px;
+  border: 0;
+  border-radius: 9px;
+  background: var(--stay-green);
+  color: #fff;
+  font-weight: 700;
+}
+.booking-course-start button:hover:not(:disabled) { background: var(--stay-green-dark); }
+.booking-course-start button:disabled { cursor: not-allowed; opacity: .65; }
+.booking-course-start .booking-notice { margin: 8px 0 0; color: #805e1b; }
+
 .booking-stay-info {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -252,6 +265,8 @@
 }
 
 @media (max-width: 620px) {
+  .booking-course-start { width: 100%; max-width: none; }
+  .booking-course-start button { width: 100%; }
   .booking-stay-photo-grid { grid-template-columns: minmax(0, 1fr); height: auto; }
   .booking-stay-photo-cover,
   .booking-stay-photo-extras { height: clamp(160px, 52vw, 270px); }

@@ -1,6 +1,8 @@
 package com.smarttraveler.stay.service;
 
 import com.smarttraveler.domain.entity.Lodging;
+import com.smarttraveler.stay.dto.StayDetailResponse;
+import com.smarttraveler.stay.dto.StayDetailResponse.Photo;
 import com.smarttraveler.stay.dto.StayResponse;
 import com.smarttraveler.stay.repository.StayRepository;
 import java.util.ArrayList;
@@ -27,11 +29,41 @@ public class StayService {
         return withPhotos(stayRepository.findWithInventory());
     }
 
-    public StayResponse get(Long lodgingId) {
-        Lodging lodging = stayRepository.findById(lodgingId)
+    public StayDetailResponse get(Long lodgingId) {
+        Lodging lodging = findActive(lodgingId);
+        List<Photo> photos = jdbc.query("""
+            SELECT COALESCE(NULLIF(thumbnail_url, ''), image_url) AS thumbnail_url,
+                   COALESCE(NULLIF(image_url, ''), thumbnail_url) AS photo_url
+            FROM lodging_photo
+            WHERE lodging_id=? AND COALESCE(NULLIF(thumbnail_url, ''), NULLIF(image_url, '')) IS NOT NULL
+            ORDER BY sort_order, photo_id
+            """, (rs, row) -> new Photo(rs.getString("photo_url"), rs.getString("thumbnail_url")), lodgingId);
+        Photo cover = photos.isEmpty() ? new Photo(null, null) : photos.getFirst();
+        List<Photo> roomPhotos = jdbc.query("""
+            SELECT NULLIF(TRIM(p.image_url), '') AS photo_url, NULLIF(TRIM(p.thumbnail_url), '') AS thumbnail_url
+            FROM room_photo p JOIN room r ON r.room_id=p.room_id
+            WHERE r.lodging_id=? AND r.is_active=TRUE
+              AND COALESCE(NULLIF(TRIM(p.image_url), ''), NULLIF(TRIM(p.thumbnail_url), '')) IS NOT NULL
+            ORDER BY r.room_id, p.sort_order, p.photo_id
+            """, (rs, row) -> new Photo(rs.getString("photo_url"), rs.getString("thumbnail_url")), lodgingId);
+
+        return new StayDetailResponse(
+            lodging.getLodgingId(), lodging.getName(), lodging.getAddress(), lodging.getLodgingType(),
+            lodging.getLatitude(), lodging.getLongitude(), lodging.getCheckinTime(), lodging.getCheckoutTime(),
+            cover.thumbnailUrl(), cover.imageUrl(), lodging.getAddressDetail(), lodging.getZipcode(),
+            lodging.getPhone(), lodging.getHomepageUrl(), lodging.getDescription(), lodging.getParkingInfo(),
+            lodging.getAmenities(), lodging.getRefundPolicy(), photos, roomPhotos
+        );
+    }
+
+    public void requireActive(Long lodgingId) {
+        findActive(lodgingId);
+    }
+
+    private Lodging findActive(Long lodgingId) {
+        return stayRepository.findById(lodgingId)
                 .filter(stay -> "ACTIVE".equals(stay.getStatus()))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        return withPhotos(List.of(lodging)).get(0);
     }
 
     // 숙소별 대표 사진 1장(정렬 순서 → 사진 번호). 숙소 수가 많아도 500곳씩 나눠 한 번에 읽음.

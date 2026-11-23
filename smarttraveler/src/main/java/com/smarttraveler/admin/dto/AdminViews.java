@@ -22,7 +22,7 @@ public final class AdminViews {
             case "MemberSuspensionHistory" -> "suspensionId memberId reasonCode reasonDetail startedAt suspendedUntil releasedAt processedBy createdAt";
             case "Lodging" -> "lodgingId ownerId sourceProvider sourceContentId lodgingType name address addressDetail zipcode latitude longitude phone homepageUrl description checkinTime checkoutTime parkingInfo amenities refundPolicy status rejectReason approvedAt createdAt updatedAt";
             case "Room" -> "roomId lodgingId name baseCapacity maxCapacity priceOffWeekday priceOffWeekend isActive createdAt updatedAt";
-            case "RoomReservation" -> "reservationId reservationNo memberId roomId courseId checkinDate checkoutDate guestCount roomQuantity bookerName bookerPhone requestMemo totalPrice status version cancelReason cancelledAt createdAt updatedAt";
+            case "RoomReservation" -> "reservationId reservationNo memberId roomId courseId checkinDate checkoutDate guestCount roomQuantity bookerName bookerPhone bookerEmail visitorName requestMemo totalPrice status version cancelReason cancelledAt createdAt updatedAt";
             case "RoomPayment" -> "paymentId reservationId idempotencyKey pgProvider paymentKey method amount status failReason approvedAt refundAmount refundedAt receiptUrl createdAt updatedAt";
             case "Course" -> "id memberNo destination startDate endDate adults children fixedEvents preferencesSnapshot tips assumptions title summary revisionRequest originTemplateId shareConsent generationMethodId status errorMessage model promptVersion isActive createdAt updatedAt deletedAt";
             default -> throw new IllegalArgumentException("No admin view for " + entity.getClass());
