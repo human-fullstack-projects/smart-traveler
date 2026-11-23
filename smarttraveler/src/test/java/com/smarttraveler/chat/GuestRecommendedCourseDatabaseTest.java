@@ -102,7 +102,8 @@ class GuestRecommendedCourseDatabaseTest {
         List<Map<String, Object>> consents = new ArrayList<>();
         for (var term : mapper.readTree(response.getResponse().getContentAsString())) consents.add(Map.of("termsId", term.path("termsId").asLong(), "agreed", true));
         String body = mapper.writeValueAsString(Map.of("role", "USER", "loginId", login, "password", "RagTest12345!",
-            "nickname", "RAG 이전 테스트", "email", login + "@example.invalid", "consents", consents));
+            "nickname", "RAG 이전 테스트", "email", login + "@example.invalid", "consents", consents,
+            "identityName", "RAG 테스트", "identityPhone", "010" + String.format("%08d", Math.floorMod(login.hashCode(), 100_000_000))));
         mvc.perform(post("/api/auth/signup").session(browser).with(csrf()).contentType("application/json").content(body)).andExpect(status().isCreated());
         return login;
     }

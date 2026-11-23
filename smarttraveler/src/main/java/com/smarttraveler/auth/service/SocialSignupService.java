@@ -34,7 +34,8 @@ public class SocialSignupService {
     }
 
     @Transactional
-    public Member create(PendingSocialProfile profile, String nickname, List<TermConsent> selected) {
+    public Member create(PendingSocialProfile profile, String nickname, List<TermConsent> selected,
+            String identityName, String identityPhone) {
         if (profile == null) throw bad("소셜 로그인부터 다시 진행해주세요.");
         if (nickname == null || nickname.isBlank() || nickname.trim().length() > 50)
             throw bad("닉네임은 1~50자로 입력해주세요.");
@@ -69,8 +70,11 @@ public class SocialSignupService {
         member.setRoleCode("USER");
         member.setStatus("ACTIVE");
         member.setCreatedAt(now); member.setUpdatedAt(now);
+        IdentityRules.apply(member, identityName, identityPhone, members, now);
         try { member = members.saveAndFlush(member); }
         catch (DataIntegrityViolationException exception) {
+            if (IdentityRules.isPhoneConflict(exception.getMostSpecificCause().getMessage()))
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 가입된 휴대폰 번호예요.");
             throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 사용 중인 이메일 또는 계정입니다.");
         }
         for (Map<String, Object> term : activeTerms) {

@@ -54,7 +54,7 @@ public class AuthSecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/stays", "/api/stays/*", "/api/stays/*/rooms").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/auth/signup").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/auth/terms").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/auth/terms", "/api/auth/phone-check").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/auth/social/providers", "/api/auth/social/pending").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/auth/social/signup").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/payments/webhook").permitAll()

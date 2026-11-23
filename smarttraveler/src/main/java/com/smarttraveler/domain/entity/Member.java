@@ -21,7 +21,8 @@ import java.time.LocalTime;
 @Entity
 @Table(name = "members", uniqueConstraints = {
         @UniqueConstraint(name = "UK_members2", columnNames = {"email"}),
-        @UniqueConstraint(name = "UK_members3", columnNames = {"login_id"})
+        @UniqueConstraint(name = "UK_members3", columnNames = {"login_id"}),
+        @UniqueConstraint(name = "UK_members_phone", columnNames = {"phone_number"})
 })
 /** 회원 */
 public class Member {
@@ -70,4 +71,16 @@ public class Member {
     @Column(name = "deleted_at")
     /** 탈퇴일시 */
     private LocalDateTime deletedAt;
+
+    @Column(name = "real_name", length = 50)
+    /** 본인인증 이름 */
+    private String realName;
+
+    @Column(name = "phone_number", length = 20)
+    /** 본인인증 휴대폰 번호(숫자만) */
+    private String phoneNumber;
+
+    @Column(name = "identity_verified_at")
+    /** 본인인증 일시 */
+    private LocalDateTime identityVerifiedAt;
 }

@@ -76,6 +76,7 @@ export async function deleteWithCsrf(path) {
 
 export async function getTerms() { return request('/api/auth/terms'); }
 
+export async function checkPhone(phone) { return request(`/api/auth/phone-check?phone=${encodeURIComponent(phone)}`); }
 export async function signup(data) { return postJsonWithCsrf('/api/auth/signup', data); }
 
 export async function getOwnerReview() { return request('/api/auth/owner-review'); }
