@@ -1,11 +1,17 @@
+import { useState } from 'react';
+
 export default function CourseCard({ course, detailHref }) {
   const titleId = `human-course-title-${course.id}`;
   const CardBody = detailHref ? 'a' : 'div';
-  // 서버 글은 coverPhotoUrl(실제로 열리는 사진만)을 쓰고, 화면 예시 글만 첫 사진을 씀
-  const cover = 'coverPhotoUrl' in course ? course.coverPhotoUrl : course.photoAssets?.[0]?.dataUrl;
+  const [failedUrls, setFailedUrls] = useState([]);
+  const routePhotos = (course.plan || []).flatMap(day => (day.places || []).flatMap(place =>
+    place?.kind === 'stay' ? [] : place?.imageUrls || []));
+  const cover = [course.coverPhotoUrl, ...(course.photoAssets || []).map(photo => photo.dataUrl),
+    ...routePhotos, ...(course.stay?.imageUrls || [])].find(url => url?.trim() && !failedUrls.includes(url));
   return <article className="course-card" aria-labelledby={titleId}>
     <CardBody className="course-card-body" href={detailHref} aria-labelledby={detailHref ? titleId : undefined}>
-      <div className="course-thumb">{cover ? <img src={cover} alt={`${course.title} 대표 사진`} loading="lazy" /> : <span>등록 사진 {course.photos?.length || 0}장</span>}</div>
+      <div className="course-thumb">{cover ? <img key={cover} src={cover} alt={`${course.title} 대표 사진`} loading="lazy"
+        onError={() => setFailedUrls(urls => [...urls, cover])} /> : <span>등록 사진 {course.photos?.length || 0}장</span>}</div>
       <div className="course-content">
         <div className="course-tags"><span className="badge">{course.region}</span><span className="badge badge-neutral">{course.category}</span><span className="badge badge-neutral">{course.companion}</span></div>
         <h3 id={titleId}>{course.title}</h3>

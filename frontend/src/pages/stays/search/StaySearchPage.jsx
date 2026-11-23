@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { StayArtwork, StayFooter, StayHeader, StatusPill } from '../shared/StayShell.jsx';
-import { formatWon, getDefaultStayDates, stayTypeLabels, toDateInputValue } from '../shared/stayData.js';
-import { getStayMap, getStayRegions, searchStays } from '../shared/stayApi.js';
+import { formatWon, getDefaultStayDates, stayTypeLabels } from '../shared/stayData.js';
+import { getStayRegions, searchStays } from '../shared/stayApi.js';
+import useStayCourse from '../shared/useStayCourse.js';
 import KakaoMap from '../../../components/map/KakaoMap.jsx';
 import { loadKakaoMaps } from '../../../components/map/loadKakaoMaps.js';
-import { resolveDestinationCenter } from '../../../components/map/resolveKakaoPlace.js';
+import { hasValidCoordinates, resolveDestinationCenter } from '../../../components/map/resolveKakaoPlace.js';
 import '../../../css/stay-search.css';
 import './stay-kakao-map.css';
 import './stay-search-paging.css';
@@ -15,14 +16,13 @@ const PRICE_MIN = 40000;
 const PRICE_MAX = 300000; // 끝까지 올리면 「제한 없음」
 const PAGE_SIZES = [5, 10];
 
-function readDestinationQuery() {
-  return new URLSearchParams((window.location.hash.split('?')[1] || '').trim()).get('destination') || '';
-}
-
-/** #/stays?sido=..&sigungu=.. 로 지역 ID가 직접 왔는지 읽는다(이름이 비슷한 지역을 구분하기 위해 ID를 우선 쓴다). */
-function readRegionIdQuery() {
-  const params = new URLSearchParams((window.location.hash.split('?')[1] || '').trim());
-  return { sido: params.get('sido') || '', sigungu: params.get('sigungu') || '' };
+function courseDates(course, today) {
+  const checkIn = course?.startDate;
+  const end = course?.endDate;
+  const duration = (Date.parse(end) - Date.parse(checkIn)) / 86400000;
+  if (!Number.isFinite(duration) || duration < 0 || duration > 30 || checkIn < today) return null;
+  const checkOut = duration === 0 ? new Date(Date.parse(checkIn) + 86400000).toISOString().slice(0, 10) : end;
+  return { checkIn, checkOut };
 }
 
 /** 목적지 글자(예: "부산 해운대")에 들어 있는 시·도 / 시·군·구를 찾는다. */
@@ -46,41 +46,48 @@ function pageNumbers(page, totalPages) {
   return Array.from({ length: Math.min(5, totalPages) }, (_, index) => start + index);
 }
 
-function SearchMap({ points, items, bounds, selectedId, onSelect, query, focus, fitRequest, onIdle, loading }) {
+function regionById(regions, regionId, destination) {
+  if (!regionId) return null;
+  const id = String(regionId);
+  const sido = regions.find(item => String(item.regionId) === id);
+  if (sido) {
+    const matched = matchRegion([sido], destination);
+    return { sido: id, sigungu: matched.sigungu };
+  }
+  const parent = regions.find(item => item.children.some(child => String(child.regionId) === id));
+  return parent ? { sido: String(parent.regionId), sigungu: id } : null;
+}
+
+function SearchMap({ items, selectedId, onSelect, query, focus, courseRoute }) {
   const [mapStatus, setMapStatus] = useState('loading');
-  const places = useMemo(() => points.map((point) => point.count > 1
-    ? { id: `cluster-${point.latitude}-${point.longitude}`, latitude: point.latitude, longitude: point.longitude, name: `숙소 ${point.count}곳`, kind: 'cluster', markerLabel: point.count.toLocaleString(), cluster: point }
-    : { id: String(point.lodgingId), latitude: point.latitude, longitude: point.longitude, name: point.name, kind: 'stay', markerLabel: items.some((item) => String(item.lodgingId) === String(point.lodgingId)) ? '★' : '·' }), [points, items]);
-  // 새 검색이면 조건에 맞는 숙소 전체 범위로 맞춤(멀리서 보면 숫자 묶음) → 확대하면 낱개 핀·★(지금 목록)
-  // 페이지를 넘길 때 bounds가 새 배열로 와도 지도의 현재 확대 위치는 유지한다.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const fitPoints = useMemo(() => bounds ? [{ latitude: bounds[0], longitude: bounds[1] }, { latitude: bounds[2], longitude: bounds[3] }] : [], [fitRequest]);
+  const stayPlaces = useMemo(() => items.filter(hasValidCoordinates).map(stay => ({
+    id: String(stay.lodgingId), latitude: stay.latitude, longitude: stay.longitude,
+    name: stay.name, kind: 'stay', markerLabel: '★',
+  })), [items]);
+  const places = useMemo(() => courseRoute ? [...stayPlaces, ...courseRoute.places] : stayPlaces, [stayPlaces, courseRoute]);
   const selectedItem = items.find((item) => String(item.lodgingId) === String(selectedId));
-  const selectedPoint = points.find((point) => point.count === 1 && String(point.lodgingId) === String(selectedId));
-  const selectedName = selectedItem?.name || selectedPoint?.name;
   const bookingQuery = selectedId ? new URLSearchParams({ stay: selectedId, ...query }).toString() : '';
 
   function handleMarker(place) {
-    if (place.kind === 'cluster') onSelect(null, { latitude: place.latitude, longitude: place.longitude });
-    else onSelect(place.id);
+    if (place.kind === 'stay') onSelect(place.id);
   }
 
   return (
-    <section className="stay-kakao-map" aria-label="숙소 검색 결과 지도">
-      <KakaoMap places={places} level={9} selectedId={selectedId} fitPoints={fitPoints} fitRequest={fitRequest} focus={focus} onIdle={onIdle} onMarkerClick={handleMarker} onStatusChange={setMapStatus} height="100%" />
-      {mapStatus === 'ready' && <div className="stay-kakao-map__tools"><span>{loading ? '지도 숙소 불러오는 중…' : '숫자 = 그 근처 숙소 수 · 누르면 확대 · ★ = 지금 목록'}</span></div>}
-      {mapStatus === 'ready' && selectedName && <div className="stay-kakao-map__details" role="status"><strong>{selectedName}</strong><span>{selectedItem ? (selectedItem.saleable ? `1박 ${formatWon(selectedItem.minPrice)}부터` : '선택 날짜 판매 없음') : '지도에서 선택한 숙소'}</span><a href={`#/stays/booking?${bookingQuery}`}>객실 보기 →</a></div>}
+    <section className="stay-kakao-map" aria-label={courseRoute ? '숙소와 저장된 여행 일정 지도' : '숙소 검색 결과 지도'}>
+      <KakaoMap places={places} paths={courseRoute?.paths} level={9} selectedId={selectedId} fitPoints={places} focus={focus}
+        onMarkerClick={handleMarker} onStatusChange={setMapStatus} height="100%" />
+      {mapStatus === 'ready' && selectedItem && <div className="stay-kakao-map__details" role="status"><strong>{selectedItem.name}</strong><span>{selectedItem.saleable ? `1박 ${formatWon(selectedItem.minPrice)}부터` : '선택 날짜 판매 없음'}</span><a href={`#/stays/booking?${bookingQuery}`}>객실 보기 →</a></div>}
     </section>
   );
 }
 
-function StayCard({ stay, selected, query, onSelect, onShow }) {
+function StayCard({ stay, selected, query, onShow }) {
   const [photoFailed, setPhotoFailed] = useState(false);
   const id = String(stay.lodgingId);
   const bookingQuery = new URLSearchParams({ stay: id, ...query }).toString();
   return (
-    <article className={`stay-result-card${selected ? ' is-selected' : ''}`} onMouseEnter={() => onSelect(id)}>
-      <button type="button" className="stay-result-card__image" onClick={() => onShow(stay)} aria-pressed={selected} aria-label={`${stay.name} 지도에서 보기`}>
+    <article className={`stay-result-card${selected ? ' is-selected' : ''}`} onMouseEnter={() => onShow(stay)}>
+      <button type="button" className="stay-result-card__image" onClick={() => onShow(stay, 4)} aria-pressed={selected} aria-label={`${stay.name} 지도에서 보기`}>
         {stay.thumbnailUrl && !photoFailed
           ? <img className="stay-result-card__photo" src={stay.thumbnailUrl} alt={`${stay.name} 사진`} loading="lazy" referrerPolicy="no-referrer" onError={() => setPhotoFailed(true)} />
           : <StayArtwork theme="ocean" label={`${stay.name} 이미지 영역`} compact />}
@@ -107,7 +114,7 @@ function StayCard({ stay, selected, query, onSelect, onShow }) {
               <a href={`#/stays/booking?${bookingQuery}`}>객실 보기</a>
             </div>
           ) : (
-            <div className="stay-result-card__price is-info"><span>날짜·인원을 바꿔 보세요</span><strong>예약 불가</strong><button type="button" onClick={() => onShow(stay)}>지도에서 보기</button></div>
+            <div className="stay-result-card__price is-info"><span>날짜·인원을 바꿔 보세요</span><strong>예약 불가</strong><button type="button" onClick={() => onShow(stay, 4)}>지도에서 보기</button></div>
           )}
         </div>
       </div>
@@ -117,9 +124,14 @@ function StayCard({ stay, selected, query, onSelect, onShow }) {
 
 export default function StaySearchPage() {
   const defaultDates = useMemo(() => getDefaultStayDates(), []);
-  const today = useMemo(() => toDateInputValue(new Date()), []);
-  const destinationQuery = useMemo(() => readDestinationQuery(), []);
-  const [regions, setRegions] = useState([]);
+  const today = useMemo(() => new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' }), []);
+  const params = new URLSearchParams(window.location.hash.split('?')[1]);
+  const courseId = params.get('courseId');
+  const { course, route: courseRoute, loading: courseLoading, error: courseError, retry: retryCourse } = useStayCourse(courseId);
+  const destinationQuery = course?.region || params.get('destination') || '';
+  const sidoQuery = params.get('sido') || '';
+  const sigunguQuery = params.get('sigungu') || '';
+  const [regions, setRegions] = useState(null);
   const [search, setSearch] = useState({ sido: '', sigungu: '', ...defaultDates, adults: 2, children: 0 });
   const [applied, setApplied] = useState(null);
   const [keyword, setKeyword] = useState('');
@@ -132,46 +144,53 @@ export default function StaySearchPage() {
   const [sort, setSort] = useState('distance');
   const [size, setSize] = useState(10);
   const [page, setPage] = useState(0);
-  const [result, setResult] = useState({ items: [], total: 0, totalPages: 1, bounds: null });
+  const [result, setResult] = useState({ items: [], total: 0, totalPages: 1 });
   const [loading, setLoading] = useState(false);
   const [notice, setNotice] = useState('');
   const [stayError, setStayError] = useState('');
   const [selectedId, setSelectedId] = useState(null);
   const [destinationCenter, setDestinationCenter] = useState(null);
-  const [view, setView] = useState(null);
-  const [points, setPoints] = useState([]);
-  const [mapLoading, setMapLoading] = useState(false);
   const [focus, setFocus] = useState(null);
-  const [fitRequest, setFitRequest] = useState(0);
   const resultsRef = useRef(null);
   const lastCriteriaKey = useRef(null);
 
-  // 지역 목록(시·도 18 + 시·군·구) → 목적지 글자가 있으면 그 지역으로 시작, 없으면 부산
   useEffect(() => {
-    getStayRegions().then((data) => {
-      setRegions(data);
-      const byId = readRegionIdQuery();
-      const sidoById = byId.sido ? data.find((item) => String(item.regionId) === byId.sido) : null;
-      const matched = sidoById
-        ? { sido: byId.sido, sigungu: sidoById.children.some((item) => String(item.regionId) === byId.sigungu) ? byId.sigungu : '' }
-        : matchRegion(data, destinationQuery);
-      if (destinationQuery && !byId.sido && !matched.sido) setNotice(`'${destinationQuery}' 지역을 찾지 못해 전국 결과를 보여 드려요.`);
-      const busan = data.find((item) => item.name.startsWith('부산'));
-      const start = { ...search, sido: matched.sido || (destinationQuery || byId.sido ? '' : String(busan?.regionId || '')), sigungu: matched.sigungu };
-      setSearch(start);
-      setApplied(start);
-    }).catch((error) => setStayError(error.message));
-    // 처음 한 번만
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    let active = true;
+    getStayRegions().then(data => { if (active) setRegions(data); })
+      .catch(error => { if (active) setStayError(error.message); });
+    return () => { active = false; };
   }, []);
 
   useEffect(() => {
-    if (!destinationQuery) return;
+    if (!regions || (courseId && !course)) return;
+    const sidoById = !course && sidoQuery ? regions.find(item => String(item.regionId) === sidoQuery) : null;
+    const matched = sidoById
+      ? { sido: sidoQuery, sigungu: sidoById.children.some(child => String(child.regionId) === sigunguQuery) ? sigunguQuery : '' }
+      : regionById(regions, course?.regionId, destinationQuery) || matchRegion(regions, destinationQuery);
+    const busan = regions.find(item => item.name.startsWith('부산'));
+    const dates = courseDates(course, today);
+    const start = {
+      sido: matched.sido || (course || destinationQuery || sidoQuery ? '' : String(busan?.regionId || '')),
+      sigungu: matched.sigungu,
+      ...(dates || defaultDates),
+      adults: course?.adults >= 1 && course.adults <= 10 ? course.adults : 2,
+      children: course?.children >= 0 && course.children <= 8 ? course.children ?? 0 : 0,
+    };
+    const messages = [];
+    if (destinationQuery && !sidoQuery && !matched.sido) messages.push(`'${destinationQuery}' 지역을 찾지 못해 전국 결과를 보여 드려요.`);
+    if (course && !dates) messages.push('여행 날짜로 예약할 수 없어 기본 숙박 날짜로 검색했어요. 필요하면 날짜를 바꿔 주세요.');
+    setNotice(messages.join(' '));
+    setSearch(start);
+    setApplied(start);
+  }, [regions, courseId, course, destinationQuery, sidoQuery, sigunguQuery, today, defaultDates]);
+
+  useEffect(() => {
+    if (!destinationQuery || courseId) return;
     let cancelled = false;
     loadKakaoMaps().then((maps) => resolveDestinationCenter(maps, destinationQuery))
       .then((center) => { if (!cancelled && center) setDestinationCenter(center); }).catch(() => {});
     return () => { cancelled = true; };
-  }, [destinationQuery]);
+  }, [destinationQuery, courseId]);
 
   // 가격 막대는 손을 뗀 뒤 0.4초 있다가 적용(움직이는 동안 요청을 줄임)
   useEffect(() => {
@@ -179,7 +198,7 @@ export default function StaySearchPage() {
     return () => clearTimeout(timer);
   }, [maxPrice]);
 
-  const conditions = useMemo(() => applied && ({
+  const conditions = useMemo(() => (!courseId || course) && applied && ({
     sido: applied.sido || undefined,
     sigungu: applied.sigungu || undefined,
     checkIn: applied.checkIn,
@@ -190,7 +209,7 @@ export default function StaySearchPage() {
     keyword: appliedKeyword.trim() || undefined,
     maxPrice: appliedMaxPrice >= PRICE_MAX ? undefined : appliedMaxPrice,
     bookableOnly: bookableOnly || undefined,
-  }), [applied, types, amenities, appliedKeyword, appliedMaxPrice, bookableOnly]);
+  }), [courseId, course, applied, types, amenities, appliedKeyword, appliedMaxPrice, bookableOnly]);
 
   // 조건이 바뀌면 1쪽부터
   useEffect(() => { setPage(0); }, [conditions, sort, size]);
@@ -206,30 +225,14 @@ export default function StaySearchPage() {
     let active = true;
     setLoading(true);
     setStayError('');
-    const center = destinationCenter ? { lat: destinationCenter.latitude, lng: destinationCenter.longitude } : {};
+    const start = courseRoute.places[0] || destinationCenter;
+    const center = start ? { lat: start.latitude, lng: start.longitude } : {};
     searchStays({ ...conditions, sort, page, size, ...center })
       .then((data) => { if (active) { setResult(data); setSelectedId(data.items[0] ? String(data.items[0].lodgingId) : null); } })
       .catch((error) => { if (active) setStayError(error.message); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, [conditions, sort, page, size, destinationCenter, criteriaKey]);
-
-  // 새 조건으로 첫 쪽이 나오면 지도를 그 숙소들에 맞춤
-  useEffect(() => { if (page === 0 && result.page === 0) setFitRequest((value) => value + 1); }, [result, page]);
-
-  // 지도: 보이는 범위 안 숙소만(많으면 묶음) — 움직임이 멈추고 0.3초 뒤 요청
-  useEffect(() => {
-    if (!conditions || !view) return undefined;
-    let active = true;
-    const timer = setTimeout(() => {
-      setMapLoading(true);
-      getStayMap({ ...conditions, swLat: view.swLat, swLng: view.swLng, neLat: view.neLat, neLng: view.neLng })
-        .then((data) => { if (active) setPoints(data.points); })
-        .catch(() => { if (active) setPoints([]); })
-        .finally(() => { if (active) setMapLoading(false); });
-    }, 300);
-    return () => { active = false; clearTimeout(timer); };
-  }, [conditions, view]);
+  }, [conditions, sort, page, size, destinationCenter, courseRoute, criteriaKey]);
 
   function toggleFilter(value, setter) {
     setter((current) => current.includes(value) ? current.filter((item) => item !== value) : [...current, value]);
@@ -237,6 +240,7 @@ export default function StaySearchPage() {
 
   function submit(event) {
     event.preventDefault();
+    if (!regions || (courseId && !course)) return;
     if (!search.checkIn || !search.checkOut || search.checkOut <= search.checkIn) {
       setNotice('체크아웃 날짜는 체크인 날짜보다 뒤여야 합니다.');
       return;
@@ -246,14 +250,9 @@ export default function StaySearchPage() {
     setNotice('');
   }
 
-  function selectFromMap(id, clusterCenter) {
-    if (clusterCenter) { setFocus((current) => ({ ...clusterCenter, level: Math.max(3, (view?.level || 9) - 2), key: (current?.key || 0) + 1 })); return; }
-    setSelectedId(id);
-  }
-
-  function showOnMap(stay) {
+  function showOnMap(stay, level) {
     setSelectedId(String(stay.lodgingId));
-    if (stay.latitude != null) setFocus((current) => ({ latitude: Number(stay.latitude), longitude: Number(stay.longitude), level: 4, key: (current?.key || 0) + 1 }));
+    if (hasValidCoordinates(stay)) setFocus((current) => ({ latitude: Number(stay.latitude), longitude: Number(stay.longitude), level, key: (current?.key || 0) + 1 }));
   }
 
   function goPage(next) {
@@ -261,29 +260,32 @@ export default function StaySearchPage() {
     resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  const sido = regions.find((item) => String(item.regionId) === String(search.sido));
-  const appliedSido = applied && regions.find((item) => String(item.regionId) === String(applied.sido));
+  const sido = regions?.find((item) => String(item.regionId) === String(search.sido));
+  const appliedSido = applied && regions?.find((item) => String(item.regionId) === String(applied.sido));
   const appliedSigungu = appliedSido?.children.find((item) => String(item.regionId) === String(applied.sigungu));
   const regionLabel = appliedSigungu ? `${appliedSido.name} ${appliedSigungu.name}` : appliedSido?.name || '전국';
-  const query = applied ? { checkIn: applied.checkIn, checkOut: applied.checkOut, adults: String(applied.adults), children: String(applied.children) } : {};
+  const query = applied ? { checkIn: applied.checkIn, checkOut: applied.checkOut, adults: String(applied.adults), children: String(applied.children), ...(courseId ? { courseId } : {}) } : {};
 
   return (
     <div className="stay-ui stay-search-page">
-      <StayHeader active="search" />
+      <StayHeader active="search" searchHref={window.location.hash} />
       <main className="stay-search-main">
         <section className="stay-search-hero">
           <div><span>STAY FINDER</span><h1>여행에 맞는 숙소를 찾아보세요.</h1><p>전국 숙소 중 조건에 맞는 곳을 {size}곳씩 보여 드려요. 선택한 날짜에 판매 중인 객실만 예약할 수 있어요.</p></div>
           <StatusPill tone="info">목록 · 지도 함께 보기</StatusPill>
         </section>
 
+        {course && <p className="stay-search-notice">저장된 여행 <strong>{course.title}</strong>에 숙소를 선택하고 있어요.</p>}
+        {courseLoading && <p className="stay-search-notice" role="status">저장된 여행 정보를 불러오고 있어요.</p>}
+        {courseError && <p className="stay-search-notice" role="alert">{courseError} <button type="button" onClick={retryCourse}>다시 시도</button> <a href="#/stays">여행 연결 없이 숙소 찾기</a></p>}
         <form className="stay-search-bar stay-search-bar--regions" onSubmit={submit}>
-          <label><span>시·도</span><select value={search.sido} onChange={(event) => setSearch({ ...search, sido: event.target.value, sigungu: '' })}><option value="">전국</option>{regions.map((item) => <option key={item.regionId} value={item.regionId}>{item.name} ({item.count.toLocaleString()})</option>)}</select></label>
+          <label><span>시·도</span><select value={search.sido} onChange={(event) => setSearch({ ...search, sido: event.target.value, sigungu: '' })}><option value="">전국</option>{regions?.map((item) => <option key={item.regionId} value={item.regionId}>{item.name} ({item.count.toLocaleString()})</option>)}</select></label>
           <label><span>시·군·구</span><select value={search.sigungu} disabled={!sido?.children.length} onChange={(event) => setSearch({ ...search, sigungu: event.target.value })}><option value="">전체</option>{(sido?.children || []).map((item) => <option key={item.regionId} value={item.regionId}>{item.name} ({item.count.toLocaleString()})</option>)}</select></label>
           <label><span>체크인</span><input type="date" min={today} value={search.checkIn} onChange={(event) => setSearch({ ...search, checkIn: event.target.value })} /></label>
           <label><span>체크아웃</span><input type="date" min={search.checkIn || today} value={search.checkOut} onChange={(event) => setSearch({ ...search, checkOut: event.target.value })} /></label>
           <label><span>성인</span><input type="number" min="1" max="10" value={search.adults} onChange={(event) => setSearch({ ...search, adults: Math.max(1, Number(event.target.value) || 1) })} /></label>
           <label><span>아동</span><input type="number" min="0" max="8" value={search.children} onChange={(event) => setSearch({ ...search, children: Math.max(0, Number(event.target.value) || 0) })} /></label>
-          <button type="submit">숙소 검색</button>
+          <button type="submit" disabled={!regions || Boolean(courseId && !course)}>숙소 검색</button>
         </form>
         {notice && <p className="stay-search-notice" role="status">{notice}</p>}
         {stayError && <p className="stay-search-notice" role="alert">{stayError}</p>}
@@ -307,7 +309,7 @@ export default function StaySearchPage() {
               </div>
             </div>
             {result.items.length
-              ? result.items.map((stay) => <StayCard key={stay.lodgingId} stay={stay} selected={selectedId === String(stay.lodgingId)} query={query} onSelect={setSelectedId} onShow={showOnMap} />)
+              ? result.items.map((stay) => <StayCard key={stay.lodgingId} stay={stay} selected={selectedId === String(stay.lodgingId)} query={query} onShow={showOnMap} />)
               : !loading && <div className="stay-results__empty"><strong>조건에 맞는 숙소가 없습니다.</strong><span>필터를 줄이거나 다른 지역·날짜를 선택해 주세요.</span></div>}
             {result.totalPages > 1 && (
               <nav className="stay-pagination" aria-label="검색 결과 페이지">
@@ -321,7 +323,7 @@ export default function StaySearchPage() {
             )}
           </section>
 
-          <div className="stay-map-column"><SearchMap points={points} items={result.items} bounds={result.bounds} selectedId={selectedId} onSelect={selectFromMap} query={query} focus={focus} fitRequest={fitRequest} onIdle={setView} loading={mapLoading} /><p>지도는 지금 보이는 범위의 숙소를 같은 조건으로 보여 줍니다. 멀리서 보면 근처 숙소를 숫자로 묶어 보여 줍니다.</p></div>
+          <div className="stay-map-column"><SearchMap items={result.items} selectedId={selectedId} onSelect={setSelectedId} query={query} focus={focus} courseRoute={courseId ? courseRoute : null} /><p>별표는 현재 목록에 있는 숙소입니다.{courseId && ' 번호와 점선은 저장된 여행의 일차별 방문 순서입니다.'}</p></div>
         </div>
       </main>
       <StayFooter />

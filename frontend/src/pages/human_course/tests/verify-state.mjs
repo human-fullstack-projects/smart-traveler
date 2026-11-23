@@ -92,11 +92,15 @@ try {
   const uploadedFirst = { ...coverOnly, photoAssets: [{ name: '올린 사진', dataUrl: '/api/human-courses/photos/first.jpg' }], coverPhotoUrl: '/api/human-courses/photos/first.jpg' };
   const uploadedHtml = renderToStaticMarkup(React.createElement(CourseCard, { course: uploadedFirst }));
   assert.ok(uploadedHtml.includes('/api/human-courses/photos/first.jpg'), '업로드 사진 표지 우선');
+  const stayOnly = { ...coverOnly, coverPhotoUrl: null, plan: [], stay: { imageUrls: ['https://example.test/stay.jpg'] } };
+  const stayHtml = renderToStaticMarkup(React.createElement(CourseCard, { course: stayOnly }));
+  assert.ok(stayHtml.includes('stay.jpg') && !stayHtml.includes('등록 사진 0장'), '방문지 사진이 없으면 숙소 사진을 표지로 사용');
   const guestList = renderToStaticMarkup(React.createElement(HumanCourseList, { ...state, isAuthenticated: false, execute() {} }));
   assert.ok(!guestList.includes('#/human-courses/create'), '비로그인 목록에서 작성 버튼 숨김');
   const { default: HumanCourseDetail } = await server.ssrLoadModule('/src/pages/human_course/pages/HumanCourseDetail.jsx');
   const detailWithoutUploads = renderToStaticMarkup(React.createElement(HumanCourseDetail, { courses: [coverOnly], courseId: coverOnly.id, isAuthenticated: false, execute() {} }));
   assert.ok(!detailWithoutUploads.includes('tourapi.jpg'), '상세 등록 사진에는 장소 표지를 섞지 않음');
+  assert.ok(detailWithoutUploads.includes('course-detail-map') && detailWithoutUploads.includes('clamp(350px, 40vw, 380px)'), '상세 지도 크기를 별도로 지정');
   const guestDetail = renderToStaticMarkup(React.createElement(HumanCourseDetail, { ...state, courseId: 1, isAuthenticated: false, execute() {} }));
   assert.ok(!guestDetail.includes('게시글 기능'), '비로그인 상세에서 게시글 기능 숨김');
   assert.ok(!guestDetail.includes('comment-form'), '비로그인 상세에서 댓글 작성 숨김');

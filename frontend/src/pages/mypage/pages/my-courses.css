@@ -54,6 +54,7 @@ html:has(.my-posts-list) { scrollbar-gutter: stable; }
 /* 상세 화면 본문은 가운데에 두고 대표 사진 안의 글은 왼쪽에서 시작한다. */
 .trip-detail-page .trip-detail-hero { justify-content: flex-start; text-align: left; }
 .saved-trip-detail .trip-detail-summary { justify-content: flex-start; }
+.saved-trip-stay-link { margin-top: 16px; }
 .trip-detail-page .mypage-course-map { --mypage-map-height: clamp(420px, 60vh, 640px); }
 .trip-detail-page .mypage-course-map > h2 { text-align: center; }
 /* 저장된 여행에서는 요약과 지도 제목을 대표 사진의 왼쪽 선에 맞춘다. */

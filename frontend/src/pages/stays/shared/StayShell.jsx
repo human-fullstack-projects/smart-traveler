@@ -1,13 +1,13 @@
 import '../../../css/stay-shared.css';
 
-export function StayHeader({ active = 'search' }) {
+export function StayHeader({ active = 'search', searchHref = '#/stays', bookingHref = '#/stays/booking' }) {
   return (
     <header className="stay-header">
       <div className="stay-header__inner">
         <a className="stay-brand brand-mark is-small" href="#/" aria-label="AI TRIP 홈"><img className="brand-logo" src="/images/brand/ait_pin.svg" alt="" /><span className="brand-word"><b>AI</b> TRIP</span></a>
         <nav className="stay-nav" aria-label="숙소 메뉴">
-          <a href="#/stays" aria-current={active === 'search' ? 'page' : undefined}>숙소 검색</a>
-          <a href="#/stays/booking" aria-current={active === 'booking' ? 'page' : undefined}>예약</a>
+          <a href={searchHref} aria-current={active === 'search' ? 'page' : undefined}>숙소 검색</a>
+          <a href={bookingHref} aria-current={active === 'booking' ? 'page' : undefined}>예약</a>
         </nav>
       </div>
     </header>

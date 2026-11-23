@@ -8,7 +8,7 @@ export const getRooms = (id, checkIn, checkOut, guestCount) => {
 };
 export const createReservation = (data) => postJsonWithCsrf('/api/reservations', data);
 
-// 여행자 숙소 찾기 (조건 검색 · 페이지 · 지도) — 서버가 거르고 5/10곳씩만 보냄
+// 여행자 숙소 찾기 — 조건에 맞는 숙소를 한 페이지씩 조회한다.
 const searchQuery = (params) => {
   const query = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {
@@ -19,5 +19,4 @@ const searchQuery = (params) => {
   return query.toString();
 };
 export const searchStays = (params) => request('/api/stays/search?' + searchQuery(params));
-export const getStayMap = (params) => request('/api/stays/map?' + searchQuery(params));
 export const getStayRegions = () => request('/api/stays/regions');

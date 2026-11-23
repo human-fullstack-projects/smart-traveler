@@ -25,7 +25,13 @@ public final class MyPageDtos {
     public record ImportRequest(@NotNull @Positive Long expectedMemberId,
                                 @NotEmpty @Size(max = 20) List<@NotNull @Valid Draft> courses) {}
     public record CourseView(String id, String title, String region, LocalDate startDate,
-                             LocalDate endDate, String state, List<Day> days, String coverImageUrl) {}
+                             LocalDate endDate, String state, List<Day> days, String coverImageUrl,
+                             Long regionId, Integer adults, Integer children) {
+        public CourseView(String id, String title, String region, LocalDate startDate,
+                          LocalDate endDate, String state, List<Day> days, String coverImageUrl) {
+            this(id, title, region, startDate, endDate, state, days, coverImageUrl, null, null, null);
+        }
+    }
     public record StayInfo(Long id, String address, String phone, String description,
                            String imageUrl, String checkinTime, String checkoutTime, boolean regionMatched) {}
     public record BookingView(String id, String reservationNo, String courseId, String stay,

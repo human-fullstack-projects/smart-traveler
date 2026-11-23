@@ -238,7 +238,7 @@ export default function App() {
   } else {
     const SidebarScreen = sidebarPageRoutes[routePath] || HomePage;
          content = (
-      <SidebarScreen key={routePath === '/stays/booking' ? route : routePath}//undefined
+      <SidebarScreen key={routePath === '/stays' || routePath === '/stays/booking' ? route : routePath}//undefined
         // key={routePath}
         onLogin={loggedIn}
         onStart={chat.startChat}

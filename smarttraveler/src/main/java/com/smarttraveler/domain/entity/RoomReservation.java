@@ -49,6 +49,9 @@ public class RoomReservation {
     /** 연결 코스 ID */
     private Long courseId;
 
+    @Column(name = "itinerary_snapshot", columnDefinition = "LONGTEXT")
+    private String itinerarySnapshot;
+
     @Column(name = "checkin_date", nullable = false)
     /** 체크인 날짜 */
     private LocalDate checkinDate;

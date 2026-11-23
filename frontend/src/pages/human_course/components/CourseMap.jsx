@@ -15,7 +15,7 @@ function renderPlacePhoto(place) {
   return <PlacePhoto key={place.id} name={place.name} imageUrls={place.imageUrls || []} emptyMessage="등록된 장소 사진이 없습니다." />;
 }
 
-export default function CourseMap({ region, plan = EMPTY_PLAN, stay, travelDates, preview = false, allDaysLabel }) {
+export default function CourseMap({ region, plan = EMPTY_PLAN, stay, travelDates, preview = false, allDaysLabel, height = '320px' }) {
   const days = useMemo(() => {
     const [checkIn, checkOut] = (travelDates || '').split('~').map((value) => Date.parse(value.trim()));
     return plan.map((day) => {
@@ -47,7 +47,7 @@ export default function CourseMap({ region, plan = EMPTY_PLAN, stay, travelDates
     center={centers[region] || Object.entries(centers).find(([name]) => String(region || '').includes(name))?.[1]}
     searchRegion={region}
     level={5}
-    height="320px"
+    height={height}
     showIntro={!preview}
     showCategories={false}
     showPlaceList={!preview}

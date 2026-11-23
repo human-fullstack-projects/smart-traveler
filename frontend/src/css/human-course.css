@@ -66,6 +66,8 @@
 .human-course-create .recommendation-map .itinerary-map__source { width: 86%; margin-inline: auto; }
 .human-course-create .preview-itinerary-map .itinerary-map__frame,
 .human-course-create .preview-itinerary-map .itinerary-map__source { width: 74%; margin-inline: auto; }
+.human-courses .course-detail-map .itinerary-map__frame,
+.human-courses .course-detail-map .itinerary-map__source { width: 94%; margin-inline: auto; }
 .human-courses h4 { margin-bottom: 8px; font-size: 14px; }
 .human-courses p { margin-bottom: 12px; }
 .human-courses small, .human-courses .muted { color: var(--sub); }

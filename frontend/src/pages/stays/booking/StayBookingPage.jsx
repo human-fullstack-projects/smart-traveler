@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../../contexts/AuthContext.jsx';
 import { createReservation, getRooms, getStay } from '../shared/stayApi.js';
+import useStayCourse from '../shared/useStayCourse.js';
 import { StayFooter, StayHeader } from '../shared/StayShell.jsx';
 import { formatWon, getDefaultStayDates, getNightCount, stayTypeLabels } from '../shared/stayData.js';
 import { StayCover, StayLocation, StayOverview } from './StayDetails.jsx';
@@ -10,6 +11,9 @@ import '../../../css/stay-booking.css';
 export default function StayBookingPage({ onStart, busy = false }) {
   const query = new URLSearchParams(window.location.hash.split('?')[1]);
   const lodgingId = query.get('stay');
+  const courseId = query.get('courseId');
+  const { course, route: courseRoute, loading: stayCourseLoading, error: stayCourseError, retry: retryStayCourse } = useStayCourse(courseId);
+  const backToSearch = courseId ? `#/stays?courseId=${encodeURIComponent(courseId)}` : '#/stays';
   const defaults = getDefaultStayDates();
   const { member, authChecked, authCheckFailed } = useAuth();
   const [checkIn, setCheckIn] = useState(query.get('checkIn') || defaults.checkIn);
@@ -85,7 +89,7 @@ export default function StayBookingPage({ onStart, busy = false }) {
 
   async function submit(event) {
     event.preventDefault();
-    if (!room || !bookerEmail || (!sameAsBooker && !visitorName.trim()) || saving) return;
+    if (!room || (courseId && !course) || !bookerEmail || (!sameAsBooker && !visitorName.trim()) || saving) return;
     const form = new FormData(event.currentTarget);
     setSaving(true);
     setNotice('');
@@ -95,6 +99,7 @@ export default function StayBookingPage({ onStart, busy = false }) {
         visitorName: sameAsBooker ? null : visitorName.trim(),
         requestMemo: form.get('requestMemo'), agreedToPolicy: form.has('agreedToPolicy'),
         expectedTotalPrice: room.totalPrice,
+        ...(course ? { courseId: course.id } : {}),
       });
       window.location.hash = '/payments/' + reservation.reservationId;
     } catch (error) {
@@ -111,11 +116,14 @@ export default function StayBookingPage({ onStart, busy = false }) {
 
   return (
     <div className="stay-ui stay-booking-page">
-      <StayHeader active="booking" />
+      <StayHeader active="booking" searchHref={backToSearch} bookingHref={window.location.hash} />
       <main className="booking-main">
-        <p><a href="#/stays">← 숙소 검색</a></p>
+        <p><a href={backToSearch}>← 숙소 검색</a></p>
         {!lodgingId && <p>숙소 검색에서 예약할 숙소를 선택해 주세요.</p>}
         {notice && <p className="booking-notice" role="alert">{notice}</p>}
+        {stayCourseLoading && <p className="booking-notice" role="status">저장된 여행 정보를 불러오고 있어요.</p>}
+        {stayCourseError && <p className="booking-notice" role="alert">{stayCourseError} <button type="button" onClick={retryStayCourse}>다시 시도</button></p>}
+        {course && <p>저장된 여행 <strong>{course.title}</strong>에 숙소를 선택하고 있어요.</p>}
         {stay && <>
           <header className="booking-title-row">
             <div>
@@ -134,7 +142,7 @@ export default function StayBookingPage({ onStart, busy = false }) {
           <StayCover stay={stay} />
           <div className="booking-stay-info">
             <StayOverview stay={stay} />
-            <StayLocation stay={stay} />
+            <StayLocation stay={stay} courseRoute={courseId ? courseRoute : null} />
           </div>
           <div className="booking-layout">
             <section className="booking-section">
@@ -188,7 +196,7 @@ export default function StayBookingPage({ onStart, busy = false }) {
                 <label className="booking-form-field">요청사항<textarea name="requestMemo" rows="3" maxLength="500" /></label>
                 <label className="booking-agreement"><input name="agreedToPolicy" type="checkbox" required />예약자와 방문자 정보가 숙소에 전달되며, 10분 이내에 테스트 결제를 진행해야 함을 확인했습니다.</label>
                 {member
-                  ? <button className="booking-pay-button" disabled={!room || !bookerEmail || saving} type="submit">{saving ? '예약 중…' : '예약하고 결제하기'}</button>
+                  ? <button className="booking-pay-button" disabled={!room || !bookerEmail || saving || Boolean(courseId && !course)} type="submit">{saving ? '예약 중…' : '예약하고 결제하기'}</button>
                   : <a className="booking-pay-button is-link" href="#/login">로그인하고 예약하기</a>}
               </form>
             </aside>
