@@ -1,4 +1,5 @@
 export const stayTypes = ['호텔', '리조트', '펜션', '게스트하우스'];
+export const stayTypeLabels = { HOTEL: '호텔', MOTEL: '모텔', PENSION: '펜션', RESORT: '리조트', GUESTHOUSE: '게스트하우스', HANOK: '한옥', CAMPING: '캠핑' };
 
 export const stays = [
   {
