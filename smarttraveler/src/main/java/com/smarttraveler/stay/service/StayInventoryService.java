@@ -16,8 +16,9 @@ import org.springframework.web.server.ResponseStatusException;
 public class StayInventoryService {
     private final JdbcTemplate jdbc;
 
+    /** available=false면 기간 중 하루라도 남은 객실이 없어 「객실 없음」으로 보여 주고 예약을 막는다. */
     public record RoomOption(long roomId, String name, int maxCapacity, int remaining,
-                             int totalPrice, List<RoomNight> nights) {}
+                             int totalPrice, List<RoomNight> nights, boolean available) {}
     public record RoomNight(long inventoryId, LocalDate date, int price, int remaining, boolean onSale) {}
     private record RoomInfo(long id, String name, int maxCapacity) {}
 
@@ -32,11 +33,11 @@ public class StayInventoryService {
         List<RoomOption> options = new ArrayList<>();
         for (RoomInfo room : rooms) {
             var nights = nights(room.id(), checkIn, checkOut, false);
-            if (available(nights, checkIn, checkOut)) {
-                int remaining = nights.stream().mapToInt(RoomNight::remaining).min().orElse(0);
-                options.add(new RoomOption(room.id(), room.name(), room.maxCapacity(), remaining,
-                        total(nights), nights));
-            }
+            // 피드백: 재고가 없는 객실도 목록에 남기고 「객실 없음」으로 표시한다 (예약은 서버에서도 막힘)
+            boolean open = available(nights, checkIn, checkOut);
+            int remaining = open ? nights.stream().mapToInt(RoomNight::remaining).min().orElse(0) : 0;
+            options.add(new RoomOption(room.id(), room.name(), room.maxCapacity(), remaining,
+                    open ? total(nights) : 0, open ? nights : List.of(), open));
         }
         return options;
     }

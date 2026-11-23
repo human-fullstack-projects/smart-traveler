@@ -303,12 +303,12 @@ const sampleCourses = [
   },
 ];
 
-// 메인 첫 화면 배경 사진 (public/images/hero/출처.txt)
+// 메인 첫 화면 배경 사진
 const HERO_PHOTOS = [
-  { src: '/images/hero/busan.jpg', place: '부산 · 해운대해수욕장', credit: '사진: 부산광역시 (공공누리 제1유형)' },
-  { src: '/images/hero/jeju.jpg', place: '제주 · 우도', credit: '사진: 제주영상문화산업진흥원 (공공누리 제1유형)' },
-  { src: '/images/hero/gyeongju.jpg', place: '경주 · 불국사', credit: '사진: 문화재청 (공공누리 제1유형)' },
-  { src: '/images/hero/seoul.jpg', place: '서울 · 경복궁 경회루', credit: '사진: 국가유산청 궁능유적본부 (공공누리 제1유형)' },
+  { src: '/images/hero/busan.jpg' },
+  { src: '/images/hero/jeju.jpg' },
+  { src: '/images/hero/gyeongju.jpg' },
+  { src: '/images/hero/seoul.jpg' },
 ];
 
 const quickPrompts = [
@@ -326,7 +326,7 @@ const quickPrompts = [
   },
 ];
 
-export default function MainPage({ onStart, busy = false, reviewAccess, reviewKey }) {
+export default function MainPage({ onStart, busy = false, reviewKey }) {
   const [message, setMessage] = useState('');
   const [notice, setNotice] = useState('');
   const [selectedCourse, setSelectedCourse] = useState(null);
@@ -436,18 +436,9 @@ export default function MainPage({ onStart, busy = false, reviewAccess, reviewKe
         </div>
       </header>
 
-      <p className="hero-credit">
-        <span className="hero-place"><img src="/images/hero/round_pushpin_3d.png" alt="" />{HERO_PHOTOS[photoIndex].place}</span>
-        <small>{HERO_PHOTOS[photoIndex].credit}</small>
-      </p>
-
       {/* 휴먼 추천 코스 3개: 사진 안쪽 아래 */}
       <div className="hero-courses">
-        <HomeReviewCards key={reviewKey} access={reviewAccess} />
-      </div>
-
-      <div className="hero-dots" aria-hidden="true">
-        {HERO_PHOTOS.map((photo, index) => <i key={photo.src} className={index === photoIndex ? 'is-on' : ''} />)}
+        <HomeReviewCards key={reviewKey} />
       </div>
 
       {/* 개발용 시험 도구(토스 결제·브라우저 알림)는 한 화면을 가리지 않게 오른쪽 아래 버튼 안으로 */}

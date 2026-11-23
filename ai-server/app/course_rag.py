@@ -44,6 +44,7 @@ def group_courses(rows, duration):
             row["dayNo"], {"theme": row["dayTheme"], "places": []}
         )
         day["places"].append((row["seq"], row["placeName"]))
+        day.setdefault("summaries", {})[row["placeName"]] = (row.get("placeSummary") or "").strip()
 
     expected_days = list(range(1, duration + 1))
     valid = [
@@ -168,7 +169,8 @@ def recommend_course_result(state):
             visit_date = start + timedelta(days=day_no - 1)
             lines.append(f"{day_no}일차 ({visit_date.isoformat()})")
             for visit, name in enumerate(day["places"], 1):
-                lines.append(f"{visit}. {name}")
+                summary = day.get("summaries", {}).get(name, "")
+                lines.append(f"{visit}. {name}" + (f" — {summary}" if summary else ""))
         lines.append("")
     if conditions.get("fixedEvents") or conditions.get("flowType") == "STAY_FIRST":
         lines.append("숙소와 고정 일정의 충족 여부는 별도로 확인해 주세요.")

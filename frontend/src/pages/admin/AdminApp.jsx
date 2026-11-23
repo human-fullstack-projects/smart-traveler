@@ -19,7 +19,7 @@ const LABEL = {
   ACTIVE: '정상', SUSPENDED: '정지', WITHDRAWN: '탈퇴', DELETED: '삭제',
   USER: '여행자', OWNER: '업주', ADMIN: '관리자',
   PENDING: '승인대기', APPROVED: '승인', REJECTED: '반려', INACTIVE: '운영중지', CLOSED: '폐업',
-  PENDING_PAYMENT: '결제대기', CONFIRMED: '예약확정', COMPLETED: '숙박완료', CANCELLED: '취소', CANCELED: '취소', REFUNDED: '환불', NO_SHOW: '노쇼', EXPIRED: '만료',
+  PENDING_PAYMENT: '결제대기', CONFIRMED: '예약', COMPLETED: '숙박완료', CANCELLED: '취소', CANCELED: '취소', REFUNDED: '환불', NO_SHOW: '노쇼', EXPIRED: '만료',
   REFUNDING: '환불 처리 중', REFUND_FAILED: '환불 실패',
   VISIBLE: '게시 중', PUBLISHED: '게시', BLINDED: '블라인드', HIDDEN: '숨김', RESOLVED: '처리완료', DISMISSED: '기각', OPEN: '신고 접수', RECEIVED: '신고 접수',
   READY: '결제 준비', DONE: '결제 완료', ABORTED: '결제 실패', SKIPPED: '건너뜀',
@@ -50,6 +50,33 @@ function useLoad(fn, deps) {
   }, deps); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(load, [load]);
   return [state, load];
+}
+
+/* 사진 없는 관광지에 사진 등록 (11-23) — 파란 「사진」 → 파일 고르기 → 서버(DB)에 저장 */
+function PlacePhotoUpload({ place, onDone }) {
+  const [busy, setBusy] = useState(false);
+  const pick = (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    if (!/^image\/(jpeg|png|webp|gif)$/.test(file.type)) { onDone({ ok: false, text: 'JPG·PNG·WebP·GIF 사진 파일을 골라 주세요.' }); return; }
+    if (file.size > 5 * 1024 * 1024) { onDone({ ok: false, text: '사진은 5MB까지 올릴 수 있어요.' }); return; }
+    const reader = new FileReader();
+    reader.onload = async () => {
+      setBusy(true);
+      try {
+        await adminPost(`/places/${place.placeId}/photo`, { name: file.name, dataUrl: reader.result });
+        onDone({ ok: true, text: `「${place.name}」 사진을 등록했어요.` });
+      } catch (err) { onDone({ ok: false, text: err.message }); }
+      finally { setBusy(false); }
+    };
+    reader.onerror = () => onDone({ ok: false, text: '사진 파일을 읽지 못했어요.' });
+    reader.readAsDataURL(file);
+  };
+  return <label className={`adm-link adm-photo-upload${busy ? ' busy' : ''}`} title="사진 파일 첨부">
+    {busy ? '올리는 중…' : '사진'}
+    <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden disabled={busy} onChange={pick} aria-label={`${place.name} 사진 첨부`} />
+  </label>;
 }
 
 const PAGE_SIZES = [3, 5, 10];
@@ -155,7 +182,7 @@ function MiniList({ title, rows, columns, empty = '없음', size = 3 }) {
         <tbody>{list.slice((p - 1) * size, p * size).map((r, i) => <tr key={i}>{columns.map((c, j) => <td key={j}>{c[1](r)}</td>)}</tr>)}</tbody></table>}
   </>;
 }
-const histCols = [['일시', (h) => date(h.createdAt || h.created_at)], ['처리', (h) => show(LABEL[h.action || h.toStatus || h.to_status] || h.action || h.toStatus || h.to_status)], ['사유', (h) => show(h.reason)]];
+const histCols = [['일시', (h) => date(h.createdAt || h.created_at)], ['처리', (h) => show(LABEL[h.action || h.toStatus || h.to_status || h.afterStatus] || h.action || h.toStatus || h.to_status || h.afterStatus)], ['사유', (h) => show(h.reason)]];
 
 /* ---------- 예약 (ADM-02~04) ---------- */
 function Orders() {
@@ -165,8 +192,14 @@ function Orders() {
   const [sel, setSel] = useState(null);
   const [detail, reloadDetail] = useLoad(() => (sel ? adminGet(`/orders/${sel}`) : Promise.resolve(null)), [sel]);
   const [reason, setReason] = useState('');
+  const [askRefund, setAskRefund] = useState(false);
   const [msg, run] = useAction(() => { reload(); reloadDetail(); });
   const o = detail.data?.order;
+  const rf = detail.data?.refund;
+  useEffect(() => setAskRefund(false), [sel]);
+  const refund = () => { setAskRefund(false); run(() => adminPost(`/orders/${sel}/refund`, { reason }), (r) => r?.order?.status === 'CANCELLED'
+    ? `예약을 취소했어요. 환불 ${won(r?.refund?.refundAmount ?? rf?.refundAmount)}`
+    : `환불에 실패했어요. 「환불 다시 시도」로 다시 할 수 있어요. (${r?.payments?.[0]?.failReason || '사유 확인'})`); };
   const act = (status) => run(() => adminPost(`/orders/${sel}/status`, { status, reason }), `예약 상태를 「${LABEL[status]}」(으)로 바꿨어요.`);
   return <>
     <div className="adm-filters adm-order-filters">
@@ -189,14 +222,24 @@ function Orders() {
       <Detail title="예약 상세">{!o ? <Pick /> : <>
         <DL items={[['예약번호', show(o.reservationNo)], ['상태', <Pill v={o.status} />], ['회원', show(o.memberId)], ['예약자', `${show(o.bookerName)} · ${show(o.bookerPhone)}`],
           ['객실', show(o.roomId)], ['인원', show(o.guestCount)], ['일정', `${show(o.checkinDate)} ~ ${show(o.checkoutDate)}`], ['금액', won(o.totalPrice)], ['연결 코스', show(o.courseId)], ['요청', show(o.requestMemo)]]} />
-        <MiniList title="결제" rows={detail.data.payments} empty="결제 기록 없음" columns={[['상태', (p) => <Pill v={p.status} />], ['금액', (p) => won(p.amount)], ['승인', (p) => date(p.approvedAt)]]} />
+        <MiniList title="결제" rows={detail.data.payments} empty="결제 기록 없음" columns={[['상태', (p) => <Pill v={p.status} />], ['금액', (p) => won(p.amount)], ['승인', (p) => date(p.approvedAt)], ['환불', (p) => (p.refundedAt ? `${won(p.refundAmount)} · ${date(p.refundedAt)}` : '—')]]} />
+        {rf?.cancellable && <div className="adm-refund">
+          <p className="adm-refund-text"><b>{rf.retry ? '환불 다시 시도' : '취소·환불'}</b> · 체크인 {rf.daysBefore}일 전 → 환불 {rf.rate}% <b>{won(rf.refundAmount)}</b> (결제 {won(rf.paidAmount)})</p>
+          <p className="st-note">환불 규정: 체크인 7일 전까지 100% · 3일 전까지 50% · 그 뒤 0%</p>
+        </div>}
         <MiniList title="처리 이력" rows={detail.data.history || detail.data.actions} empty="처리 이력 없음" columns={histCols} />
         <div className="adm-actions">
           <input className="st-input" placeholder="처리 사유 (취소·환불 시 필수)" value={reason} onChange={(e) => setReason(e.target.value)} />
-          <button className="st-btn" onClick={() => act('CONFIRMED')}>예약 확정</button>
+          <button className="st-btn" onClick={() => act('CONFIRMED')}>예약으로 변경</button>
           <button className="st-btn st-btn-line" onClick={() => act('COMPLETED')}>숙박 완료</button>
           <button className="st-btn st-btn-line" onClick={() => act('CANCELLED')}>예약 취소</button>
+          {rf?.cancellable && !askRefund && <button className="st-btn st-btn-danger" disabled={!reason.trim()} title={reason.trim() ? '' : '처리 사유를 먼저 적어 주세요'} onClick={() => setAskRefund(true)}>{rf.retry ? '환불 다시 시도' : '취소·환불'}</button>}
         </div>
+        {askRefund && <div className="adm-refund-confirm" role="alertdialog" aria-label="취소·환불 확인">
+          <span>{won(rf?.refundAmount)}을 환불하고 예약을 취소할까요? 되돌릴 수 없어요.</span>
+          <button className="st-btn st-btn-danger" onClick={refund}>네, 취소·환불</button>
+          <button className="st-btn st-btn-line" onClick={() => setAskRefund(false)}>아니요</button>
+        </div>}
       </>}</Detail>
     </div>
   </>;
@@ -309,16 +352,27 @@ function Members({ onChanged, ownerMode = false }) {
 /* ---------- 휴먼 추천 코스 (ADM-12~14, 19) ---------- */
 function HumanCourses({ onChanged }) {
   const [tab, setTab] = useState('courses');
+  // 조건 먼저 고르고(draft) → 아래 「휴먼 추천 코스」·「댓글」 버튼을 눌러야 그 조건으로 검색 (11-23 동업자)
   const [f, setF] = useState({});
   const [commentFilters, setCommentFilters] = useState({});
+  const [draft, setDraft] = useState({});
+  const [commentDraft, setCommentDraft] = useState({});
+  const [searchNo, setSearchNo] = useState(0);
+  const filterTab = tab === 'comments' ? 'comments' : 'courses';
+  const pickTab = (t) => {
+    if (t === 'courses') { setF({ ...draft }); setSearchNo((n) => n + 1); }
+    if (t === 'comments') { setCommentFilters({ ...commentDraft }); setSearchNo((n) => n + 1); }
+    setTab(t);
+  };
+  const dirty = filterTab === 'courses' ? JSON.stringify(draft) !== JSON.stringify(f) : JSON.stringify(commentDraft) !== JSON.stringify(commentFilters);
   const [scope, setScope] = useState('MAIN');
   const [exposureRegion, setExposureRegion] = useState('');
   const [exposurePostId, setExposurePostId] = useState('');
   const [month, setMonth] = useState(new Date().toISOString().slice(0, 7));
-  const [list, reload] = useLoad(() => adminGet('/human-courses', f), [JSON.stringify(f)]);
+  const [list, reload] = useLoad(() => adminGet('/human-courses', f), [JSON.stringify(f), searchNo]);
   const [allPosts, reloadAllPosts] = useLoad(() => adminGet('/human-courses'), []);
   const [reports, reloadReports] = useLoad(() => adminGet('/human-reports'), []);
-  const [comments, reloadComments] = useLoad(() => adminGet('/human-comments', commentFilters), [JSON.stringify(commentFilters)]);
+  const [comments, reloadComments] = useLoad(() => adminGet('/human-comments', commentFilters), [JSON.stringify(commentFilters), searchNo]);
   const [exposures, reloadExposures] = useLoad(() => adminGet('/human-exposures', { scope, region: scope === 'REGION' ? exposureRegion : '' }), [scope, exposureRegion]);
   const [popular, reloadPopular] = useLoad(() => adminGet('/human-popularity', { month }), [month]);
   const [picks, reloadPicks] = useLoad(() => adminGet('/human-monthly-picks', { month }), [month]);
@@ -330,10 +384,15 @@ function HumanCourses({ onChanged }) {
   const featured = c?.featured;
   const visiblePosts = (allPosts.data || []).filter((p) => p.status === 'VISIBLE' && !p.deletedAt);
   return <>
+    <div className="adm-search-first">
+      {filterTab === 'courses' && <Filters fields={[['status', '게시 상태', ['VISIBLE', 'BLINDED', 'DELETED']], ['reported', '신고 여부', ['true', 'false']], ['reportStatus', '신고 처리', ['PENDING', 'RESOLVED', 'DISMISSED', 'NONE']], ['region', '지역'], ['from', '작성 시작일'], ['to', '작성 종료일'], ['query', '제목']]} value={draft} onChange={setDraft} />}
+      {filterTab === 'comments' && <Filters fields={[['region', '지역'], ['from', '작성 시작일'], ['to', '작성 종료일'], ['query', '내용·작성자'], ['postId', '코스 번호']]} value={commentDraft} onChange={setCommentDraft} />}
+      <p className={`st-note adm-search-hint${dirty ? ' dirty' : ''}`}>{dirty
+        ? `조건이 바뀌었어요. 아래 「${filterTab === 'courses' ? '휴먼 추천 코스' : '댓글'}」를 눌러야 검색돼요.`
+        : `조건을 고른 뒤 아래 「${filterTab === 'courses' ? '휴먼 추천 코스' : '댓글'}」를 누르면 그 조건으로 검색해요.`}</p>
+    </div>
     <div className="adm-toolbar">
-      <Tabs value={tab} onChange={setTab} items={[['courses', '휴먼 추천 코스', list.data?.length], ['comments', '댓글', comments.data?.length], ['reports', '신고', reports.data?.length], ['exposure', '노출 관리', exposures.data?.length], ['monthly', '월간 인기', picks.data?.length]]} />
-      {tab === 'courses' && <Filters fields={[['status', '게시 상태', ['VISIBLE', 'BLINDED', 'DELETED']], ['reported', '신고 여부', ['true', 'false']], ['reportStatus', '신고 처리', ['PENDING', 'RESOLVED', 'DISMISSED', 'NONE']], ['region', '지역'], ['from', '작성 시작일'], ['to', '작성 종료일'], ['query', '제목']]} value={f} onChange={setF} />}
-      {tab === 'comments' && <Filters fields={[['region', '지역'], ['from', '작성 시작일'], ['to', '작성 종료일'], ['query', '내용·작성자'], ['postId', '코스 번호']]} value={commentFilters} onChange={setCommentFilters} />}
+      <Tabs value={tab} onChange={pickTab} items={[['courses', '휴먼 추천 코스', list.data?.length], ['comments', '댓글', comments.data?.length], ['reports', '신고', reports.data?.length], ['exposure', '노출 관리', exposures.data?.length], ['monthly', '월간 인기', picks.data?.length]]} />
     </div>
     <Msg msg={msg || ([list, comments, exposures, popular, picks].find((s) => s.error)?.error && { text: [list, comments, exposures, popular, picks].find((s) => s.error).error })} />
     {(tab === 'courses' || tab === 'reports') && <div className="adm-split">
@@ -437,7 +496,8 @@ function TourData() {
   const [f, setF] = useState({ sido: '', sigungu: '', type: '', query: '' });
   const [page, setPage] = useState(1);
   const [size, setSize] = useState(10);
-  const [places] = useLoad(() => adminGet('/places', { ...f, page, size }), [JSON.stringify(f), page, size]);
+  const [places, reloadPlaces] = useLoad(() => adminGet('/places', { ...f, page, size }), [JSON.stringify(f), page, size]);
+  const [photoMsg, setPhotoMsg] = useState(null);
   const d = data.data || {}; const n = d.counts || {};
   const regionRows = regions.data || [];
   const sidoRows = regionRows.filter((r) => r.regionLevel === 'SIDO');
@@ -446,7 +506,7 @@ function TourData() {
   const total = places.data?.total || 0;
   const pages = Math.max(1, Math.ceil(total / size));
   return <>
-    <Msg msg={(data.error || regions.error || places.error) && { text: data.error || regions.error || places.error }} />
+    <Msg msg={photoMsg || ((data.error || regions.error || places.error) && { text: data.error || regions.error || places.error })} />
     <div className="adm-stats adm-stats-row">
       {[['관광 장소', n.places, byType(n.byType)], ['사진 있음', n.withImage, byType(n.imageByType)],
         ['중심 관광지', n.hubRanks, [...byRegion(n.hubByRegion), ...(n.hubMonths || []).map((m) => `기준 ${String(m).slice(0, 4)}.${String(m).slice(4, 6)}`)]],
@@ -471,7 +531,7 @@ function TourData() {
       <div className="adm-card"><h2 className="adm-card-title">관광지 목록 <span className="st-note">{total}건</span></h2>
         <div className="adm-table-wrap">{!places.data ? <p className="adm-empty">불러오는 중…</p> : total === 0 ? <p className="adm-empty">해당 관광지가 없어요.</p>
           : <table className="adm-table"><thead><tr><th>이름</th><th>유형</th><th>지역</th><th>주소</th><th>사진</th></tr></thead>
-            <tbody>{places.data.rows.map((r) => <tr key={r.placeId}><td>{r.name}</td><td>{LABEL[r.placeType] || r.placeType}</td><td>{show(r.region)}</td><td>{show(r.address)}</td><td>{r.hasImage ? '있음' : '없음'}</td></tr>)}</tbody></table>}</div>
+            <tbody>{places.data.rows.map((r) => <tr key={r.placeId}><td>{r.name}</td><td>{LABEL[r.placeType] || r.placeType}</td><td>{show(r.region)}</td><td>{show(r.address)}</td><td>{r.hasImage ? '있음' : <PlacePhotoUpload place={r} onDone={(m) => { setPhotoMsg(m); if (m.ok) reloadPlaces(); }} />}</td></tr>)}</tbody></table>}</div>
         <Pager page={page} pages={pages} size={size} total={total} onPage={setPage} onSize={(n) => { setSize(n); setPage(1); }} />
       </div>
     </> : tab === 'hubs'

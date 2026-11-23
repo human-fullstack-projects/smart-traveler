@@ -18,6 +18,8 @@ class DialogueRequest(BaseModel):
     candidates: list[dict[str, Any]] = Field(default_factory=list, max_length=30)
     courseCandidates: list[dict[str, Any]] | None = None
     savedPreferences: SavedPreferences | None = None
+    extractOnly: bool = False  # 조건만 읽고 추천하지 않는다 (스프링이 후보를 고른 뒤 다시 부른다)
+    forceRecommend: bool = False  # 조건을 다시 읽지 않고 주어진 후보로 바로 추천한다 (조건 1개여도 추천)
 
 
 class ExtractedConditions(BaseModel):

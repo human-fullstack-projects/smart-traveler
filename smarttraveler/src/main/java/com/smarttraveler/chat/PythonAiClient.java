@@ -27,9 +27,14 @@ public class PythonAiClient {
         this.mapper = mapper;
         this.endpoint = URI.create(baseUrl.replaceAll("/+$", "") + "/internal/dialogue");
     }
-    public record Result(String message, boolean confirmed, Long recommendedCourseId) {
-        public Result(String message, boolean confirmed) { this(message, confirmed, null); }
+    /** recommendConditions = 추천에 실제로 쓴 조건(말하지 않은 값은 기본값을 채운 사본). 추천이 아니면 null. */
+    public record Result(String message, boolean confirmed, Long recommendedCourseId, ObjectNode recommendConditions) {
+        public Result(String message, boolean confirmed) { this(message, confirmed, null, null); }
+        public Result(String message, boolean confirmed, Long recommendedCourseId) { this(message, confirmed, recommendedCourseId, null); }
+        public Result withMessage(String text, ObjectNode used) { return new Result(text, confirmed, recommendedCourseId, used); }
     }
+    /** AI 서버 처리 방식: 조건만 읽기 / 주어진 후보로 바로 추천 / 예전 방식. */
+    public enum Mode { EXTRACT_ONLY, FORCE_RECOMMEND, LEGACY }
     public Result process(String message, String previousQuestion, ObjectNode conditions, List<Map<String, Object>> candidates) {
         return process(message, previousQuestion, conditions, candidates, null);
     }
@@ -41,7 +46,14 @@ public class PythonAiClient {
     public Result process(String message, String previousQuestion, ObjectNode conditions,
                           List<Map<String, Object>> candidates, List<Map<String, Object>> courseCandidates,
                           Map<String, Object> savedPreferences) {
+        return process(message, previousQuestion, conditions, candidates, courseCandidates, savedPreferences, Mode.LEGACY);
+    }
+    public Result process(String message, String previousQuestion, ObjectNode conditions,
+                          List<Map<String, Object>> candidates, List<Map<String, Object>> courseCandidates,
+                          Map<String, Object> savedPreferences, Mode mode) {
         Map<String, Object> payload = new LinkedHashMap<>();
+        if (mode == Mode.EXTRACT_ONLY) payload.put("extractOnly", true);
+        if (mode == Mode.FORCE_RECOMMEND) payload.put("forceRecommend", true);
         payload.put("message", message);
         payload.put("previousQuestion", previousQuestion);
         payload.put("conditions", conditions);

@@ -82,7 +82,7 @@ export default function TossCheckoutPage({ reservationId, result }) {
     {!result && holdExpiresAt && <p>결제 기한 {new Date(holdExpiresAt).toLocaleTimeString('ko-KR')}</p>}
     {checkout && <p>주문번호 {checkout.orderId} · {checkout.amount.toLocaleString('ko-KR')}원</p>}
     {!result && <><div id="toss-payment-methods" /><div id="toss-payment-agreement" /></>}
-    {checkout?.status === 'DONE' && <p role="status">결제 승인 완료 · {checkout.reservationStatus === 'CONFIRMED' ? '예약 확정' : '예약 확인 필요'}{checkout.receiptUrl && <> · <a href={checkout.receiptUrl} target="_blank" rel="noreferrer">테스트 영수증</a></>}</p>}
+    {checkout?.status === 'DONE' && <p role="status">결제 승인 완료 · {checkout.reservationStatus === 'CONFIRMED' ? '예약 완료' : '예약 확인 필요'}{checkout.receiptUrl && <> · <a href={checkout.receiptUrl} target="_blank" rel="noreferrer">테스트 영수증</a></>}</p>}
     {checkout?.status === 'IN_PROGRESS' && <p role="status">결제 결과를 확인 중입니다. 잠시 후 상태를 다시 조회해 주세요.</p>}
     {error && <p role="alert">{error}</p>}
     {result === 'failure' && <p><a href={'#/payments/' + reservationId}>결제 다시 시도</a></p>}
