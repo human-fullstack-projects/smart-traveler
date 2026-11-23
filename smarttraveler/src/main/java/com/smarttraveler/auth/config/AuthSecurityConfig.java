@@ -65,6 +65,7 @@ public class AuthSecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/human-courses/exposed", "/api/human-courses/monthly-picks", "/api/human-courses/home-reviews").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/human-courses", "/api/human-courses/*", "/api/human-courses/photos/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/place-photos/*").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/owner-photos/*").permitAll()
                 .requestMatchers("/admin", "/admin/**", "/api/admin", "/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/", "/login", "/403", "/error", "/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
                 .anyRequest().authenticated());

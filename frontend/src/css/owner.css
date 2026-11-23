@@ -662,3 +662,53 @@
 .owner-rooms-view .owner-room-list article{grid-template-columns:minmax(0,1fr) auto;align-items:center}
 .owner-rooms-view .owner-room-list article .owner-badge{justify-self:end;white-space:nowrap}
 .owner-room-input input,.owner-room-input select{width:100%;min-width:0;box-sizing:border-box}
+
+/* 업주 숙소·객실 사진 등록 */
+.owner-photos .owner-panel__head{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.owner-photo-add{padding:9px 14px;border:0;border-radius:9px;background:var(--owner-green);color:#fff;font-weight:800;cursor:pointer}
+.owner-photo-add:disabled{opacity:.5;cursor:default}
+.owner-photo-hint{margin:6px 0 12px;color:var(--owner-muted);font-size:12px}
+.owner-photo-error{color:#C2412D;font-size:13px}
+.owner-photo-empty{color:var(--owner-muted);font-size:13px}
+.owner-photo-grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.owner-photo-grid li{position:relative;aspect-ratio:4/3;border-radius:10px;overflow:hidden;border:1px solid var(--owner-line);background:#EFEDF6}
+.owner-photo-grid img{width:100%;height:100%;object-fit:cover;display:block}
+.owner-photo-badge,.owner-photo-source{position:absolute;left:6px;top:6px;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:800;background:var(--owner-green);color:#fff}
+.owner-photo-source{left:auto;right:6px;top:auto;bottom:6px;background:rgba(30,60,141,.72);font-weight:600}
+.owner-photo-delete{position:absolute;right:6px;top:6px;width:28px;height:28px;border:0;border-radius:50%;background:rgba(20,24,48,.7);color:#fff;font-size:17px;line-height:1;cursor:pointer}
+.owner-photo-confirm{position:absolute;inset:auto 6px 6px 6px;display:flex;gap:6px}
+.owner-photo-confirm button{flex:1;padding:6px 0;border:0;border-radius:7px;font-weight:800;cursor:pointer;background:#fff;color:var(--owner-ink)}
+.owner-photo-confirm button:first-child{background:#C2412D;color:#fff}
+
+/* 객실 재고 확인 (c안 · 선택 상자 + 날짜 알약) */
+.owner-stock .owner-panel__head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:10px}
+.owner-stock-legend{display:flex;flex-wrap:wrap;gap:12px;color:var(--owner-muted);font-size:12px}
+.owner-stock-legend i,.owner-stock-pill i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+.is-ok>i,.owner-stock-legend i.is-ok{background:#1E8E5A}.is-low>i,.owner-stock-legend i.is-low{background:#B86A00}.is-none>i,.owner-stock-legend i.is-none{background:#C2412D}
+.owner-stock-selects{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}
+.owner-stock-selects label{display:grid;gap:5px;color:var(--owner-muted);font-size:12px}
+.owner-stock-selects select{min-width:190px;padding:9px 12px;border:1.5px solid var(--owner-line);border-radius:10px;background:#fff;color:var(--owner-ink)}
+.owner-stock-pills{display:flex;flex-wrap:wrap;gap:6px}
+.owner-stock-pill{display:flex;align-items:center;padding:4px 9px;border:1.5px solid var(--owner-line);border-radius:999px;background:#fff;color:var(--owner-ink);font-size:11px;cursor:pointer;font-variant-numeric:tabular-nums}
+.owner-stock-pill.is-on{border-color:var(--owner-green);background:#ECE8F7;font-weight:800}
+.owner-stock-detail{margin-top:14px;padding:16px;border:1px solid var(--owner-line);border-radius:14px;background:#fff;display:grid;gap:12px}
+.owner-stock-detail__head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px}
+.owner-stock-detail__head h3{margin:0;font-size:15px}
+.owner-stock-badge{padding:3px 10px;border-radius:999px;font-size:12px;font-weight:800}
+.owner-stock-badge.is-ok{background:#E3F4EB;color:#1E8E5A}.owner-stock-badge.is-low{background:#FFF1DC;color:#B86A00}.owner-stock-badge.is-none{background:#FDE6E2;color:#C2412D}
+.owner-stock-stats{margin:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.owner-stock-stats div{padding:10px;border-radius:10px;background:var(--owner-bg)}
+.owner-stock-stats dt{font-size:11px;color:var(--owner-muted)}.owner-stock-stats dd{margin:2px 0 0;font-size:18px;font-weight:900;font-variant-numeric:tabular-nums}
+.owner-stock-qty{display:flex;flex-wrap:wrap;align-items:center;gap:8px;color:var(--owner-muted);font-size:13px}
+.owner-stock-qty>button:not(.owner-primary){width:34px;height:34px;border:1px solid var(--owner-line);border-radius:8px;background:#fff;color:var(--owner-ink);cursor:pointer;font-size:16px}
+.owner-stock-qty button:disabled{opacity:.4;cursor:default}
+.owner-stock-qty output{min-width:34px;text-align:center;font-size:17px;font-weight:900;color:var(--owner-ink)}
+.owner-stock-note{margin:0;color:var(--owner-muted);font-size:12px}
+.owner-stock-range{margin-top:14px}
+.owner-stock-range summary{cursor:pointer;color:var(--owner-green);font-weight:800;font-size:13px}
+.owner-stock-range .owner-season-row{margin-top:10px}
+@media (max-width:720px){.owner-stock-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.owner-stock-qty .owner-primary{margin-left:6px;padding:9px 20px;border:0;border-radius:9px;background:var(--owner-green);color:#fff;font-size:13px;font-weight:800;cursor:pointer}
+.owner-stock-pill i{width:6px;height:6px;margin-right:4px}.owner-stock-pills{gap:5px}
+.owner-page .owner-stock-pill{font-size:11px;line-height:1.4}.owner-page .owner-stock-qty>button:not(.owner-primary){font-size:15px}
+.owner-page .owner-stock-pills{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}.owner-page .owner-stock-pill{justify-content:center;white-space:nowrap}
