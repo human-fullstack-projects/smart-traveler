@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../../contexts/AuthContext.jsx';
 import { createReservation, getRooms, getStay } from '../shared/stayApi.js';
 import { StayFooter, StayHeader } from '../shared/StayShell.jsx';
@@ -7,11 +7,32 @@ import { StayCover, StayLocation, StayOverview } from './StayDetails.jsx';
 import StayPhotoGallery from './StayPhotoGallery.jsx';
 import '../../../css/stay-booking.css';
 
-export default function StayBookingPage() {
+const provinceNames = {
+  서울: '서울특별시', 부산: '부산광역시', 대구: '대구광역시', 인천: '인천광역시', 광주: '광주광역시',
+  대전: '대전광역시', 울산: '울산광역시', 세종: '세종특별자치시', 경기: '경기도', 강원: '강원특별자치도',
+  충북: '충청북도', 충남: '충청남도', 전북: '전북특별자치도', 전남: '전라남도', 경북: '경상북도',
+  경남: '경상남도', 제주: '제주특별자치도',
+};
+
+function stayCourseMessage(stay) {
+  const name = stay?.name?.trim();
+  const address = stay?.address?.trim();
+  if (!name || !address) return '';
+
+  const [province, district, borough] = address.split(/\s+/);
+  const provinceName = provinceNames[province] || province;
+  if (!/^[가-힣]+(?:시|도)$/.test(provinceName) || !/^[가-힣]+[시군구]$/.test(district ?? '')) {
+    return `${address} ${name}`;
+  }
+  const cityBorough = district.endsWith('시') && /^[가-힣]+구$/.test(borough ?? '') ? borough : '';
+  return [provinceName, district, cityBorough, name].filter(Boolean).join(' ');
+}
+
+export default function StayBookingPage({ onStart, busy = false }) {
   const query = new URLSearchParams(window.location.hash.split('?')[1]);
   const lodgingId = query.get('stay');
   const defaults = getDefaultStayDates();
-  const { member } = useAuth();
+  const { member, authChecked, authCheckFailed } = useAuth();
   const [checkIn, setCheckIn] = useState(query.get('checkIn') || defaults.checkIn);
   const [checkOut, setCheckOut] = useState(query.get('checkOut') || defaults.checkOut);
   const [guests, setGuests] = useState(Number(query.get('adults') || 2) + Number(query.get('children') || 0));
@@ -24,6 +45,10 @@ export default function StayBookingPage() {
   const [refresh, setRefresh] = useState(0);
   const [visitorName, setVisitorName] = useState('');
   const [sameAsBooker, setSameAsBooker] = useState(false);
+  const [startingCourse, setStartingCourse] = useState(false);
+  const [courseError, setCourseError] = useState('');
+  const courseInFlight = useRef(false);
+  const courseMessage = stayCourseMessage(stay);
   const bookerName = member?.nickname?.trim() || member?.loginId || '';
   const bookerEmail = member?.email?.trim() || '';
   const room = rooms.find((item) => item.roomId === roomId && item.available !== false);
@@ -62,6 +87,21 @@ export default function StayBookingPage() {
     setRooms([]);
     setNotice('');
     setter(value);
+  }
+
+  async function startCourse() {
+    if (!onStart || !courseMessage || !authChecked || authCheckFailed || busy || courseInFlight.current) return;
+    courseInFlight.current = true;
+    setStartingCourse(true);
+    setCourseError('');
+    try {
+      await onStart(courseMessage);
+    } catch {
+      setCourseError('대화를 시작하지 못했어요. 잠시 후 다시 시도해 주세요.');
+    } finally {
+      courseInFlight.current = false;
+      setStartingCourse(false);
+    }
   }
 
   async function submit(event) {
@@ -104,6 +144,13 @@ export default function StayBookingPage() {
               <h1>{stay.name}</h1>
               {stay.address && <span>{stay.address}</span>}
             </div>
+            {onStart && courseMessage && <div className="booking-course-start">
+              <button type="button" onClick={startCourse}
+                disabled={!authChecked || authCheckFailed || busy || startingCourse}>
+                {startingCourse ? '대화 시작 중…' : '이 숙소 주변 여행 코스 짜기'}
+              </button>
+              {courseError && <p className="booking-notice" role="alert">{courseError}</p>}
+            </div>}
           </header>
           <StayCover stay={stay} />
           <div className="booking-stay-info">

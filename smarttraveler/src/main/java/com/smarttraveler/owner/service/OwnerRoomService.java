@@ -110,7 +110,8 @@ public class OwnerRoomService {
     public List<OwnerReservation> reservations(String loginId) {
         long ownerId = lodgings.ownerIdOf(loginId);
         return jdbc.query("""
-            SELECT rr.reservation_id, rr.reservation_no, rr.booker_name, rr.booker_phone, rr.guest_count, rr.room_quantity,
+            SELECT rr.reservation_id, rr.reservation_no, rr.booker_name, rr.booker_phone, rr.booker_email,
+                   COALESCE(rr.visitor_name, rr.booker_name) AS visitor_name, rr.guest_count, rr.room_quantity,
                    rr.checkin_date, rr.checkout_date, rr.total_price, rr.status, rr.request_memo,
                    r.name AS room_name, l.name AS lodging_name
             FROM room_reservation rr JOIN room r ON r.room_id = rr.room_id JOIN lodging l ON l.lodging_id = r.lodging_id
@@ -120,7 +121,8 @@ public class OwnerRoomService {
             """, (rs, row) -> new OwnerReservation(rs.getLong("reservation_id"), rs.getString("reservation_no"),
                 rs.getString("booker_name"), rs.getString("booker_phone"), rs.getInt("guest_count"), rs.getInt("room_quantity"),
                 rs.getDate("checkin_date").toLocalDate(), rs.getDate("checkout_date").toLocalDate(), rs.getInt("total_price"),
-                rs.getString("status"), rs.getString("request_memo"), rs.getString("room_name"), rs.getString("lodging_name")),
+                rs.getString("status"), rs.getString("request_memo"), rs.getString("room_name"), rs.getString("lodging_name"),
+                rs.getString("booker_email"), rs.getString("visitor_name")),
             ownerId);
     }
 

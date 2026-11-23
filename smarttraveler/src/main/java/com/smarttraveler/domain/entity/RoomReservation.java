@@ -69,6 +69,12 @@ public class RoomReservation {
     /** 예약자 연락처 */
     private String bookerPhone;
 
+    @Column(name = "booker_email", length = 255)
+    private String bookerEmail;
+
+    @Column(name = "visitor_name", length = 50)
+    private String visitorName;
+
     @Column(name = "request_memo", length = 500)
     /** 요청사항 */
     private String requestMemo;
