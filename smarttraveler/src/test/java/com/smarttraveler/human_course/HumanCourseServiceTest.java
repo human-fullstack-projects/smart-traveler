@@ -10,6 +10,7 @@ import com.smarttraveler.human_course.HumanCourseDtos.PostInput;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.mockito.ArgumentCaptor;
 import org.junit.jupiter.api.Test;
@@ -44,6 +45,25 @@ class HumanCourseServiceTest {
         assertFalse(HumanCourseService.eligibility("COMPLETED", now.plusDays(1), true, false).isEmpty());
         assertFalse(HumanCourseService.eligibility("COMPLETED", yesterday, false, false).isEmpty());
         assertFalse(HumanCourseService.eligibility("COMPLETED", yesterday, true, true).isEmpty());
+    }
+
+    @Test void listUsesStayPhotoOnlyWhenThereIsNoVisitPhoto() {
+        var jdbc = mock(JdbcTemplate.class);
+        var service = new HumanCourseService(jdbc, mock(ObjectMapper.class), mock(MemberRepository.class),
+            mock(HumanCoursePhotoStore.class), mock(HumanManagementService.class));
+        when(jdbc.queryForList(contains("SELECT post_id FROM human_course_post")))
+            .thenReturn(List.of(Map.of("post_id", 1L)));
+        when(jdbc.queryForList(contains("WHERE p.post_id=?"), eq(-1L), eq(-1L), eq(1L)))
+            .thenReturn(List.of(Map.of("author_id", 7L, "status", "VISIBLE", "course_id", 3L,
+                "start_date", "2026-11-01", "end_date", "2026-11-02", "lock_version", 1,
+                "content", "후기", "created_at", "2026-11-03 12:00:00", "likes", 0,
+                "stay_image_url", "https://example.test/stay.jpg")));
+
+        assertEquals("https://example.test/stay.jpg", service.list(null).getFirst().coverPhotoUrl());
+
+        when(jdbc.queryForList(contains("SELECT image.image_url FROM course_day"), eq(String.class), eq(3L)))
+            .thenReturn(List.of("https://example.test/visit.jpg"));
+        assertEquals("https://example.test/visit.jpg", service.list(null).getFirst().coverPhotoUrl());
     }
 
     @Test void anonymousCannotCreateOrDelete() {

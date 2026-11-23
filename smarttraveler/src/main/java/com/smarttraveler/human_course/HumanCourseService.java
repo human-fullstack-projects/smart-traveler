@@ -115,6 +115,7 @@ public class HumanCourseService {
             .stream().filter(photos::exists).toList();
         List<Photo> photoAssets = new ArrayList<>();
         for (int index = 0; index < urls.size(); index++) photoAssets.add(new Photo("사진 " + (index + 1), urls.get(index)));
+        String stayImageUrl = string(row, "stay_image_url");
         String coverPhotoUrl = null;
         if (!blinded) {
             coverPhotoUrl = urls.isEmpty() ? null : urls.getFirst();
@@ -126,7 +127,7 @@ public class HumanCourseService {
                     WHERE d.course_id = ? AND image.image_url IS NOT NULL AND TRIM(image.image_url) <> ''
                     ORDER BY d.day_no, a.seq, image.sort_order, image.place_image_id LIMIT 1
                     """, String.class, number(row, "course_id"));
-                if (!placePhotos.isEmpty()) coverPhotoUrl = placePhotos.getFirst();
+                coverPhotoUrl = placePhotos.isEmpty() ? stayImageUrl : placePhotos.getFirst();
             }
         }
         List<Comment> comments = blinded ? List.of() : jdbc.query("""
@@ -136,7 +137,6 @@ public class HumanCourseService {
             """, (rs, n) -> new Comment(String.valueOf(rs.getLong("comment_id")), rs.getString("author"),
                 rs.getString("content"), rs.getLong("author_id") == viewer), id);
         String body = blinded ? "" : string(row, "content");
-        String stayImageUrl = string(row, "stay_image_url");
         return new Post(id, string(row, "title"), string(row, "author"), string(row, "region"),
             string(row, "category") == null ? "미분류" : string(row, "category"), string(row, "companion_type"),
             string(row, "summary") == null ? body.substring(0, Math.min(150, body.length())) : string(row, "summary"),

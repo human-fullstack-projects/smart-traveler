@@ -4,7 +4,11 @@ import com.smarttraveler.admin.repository.RoomRepository;
 import com.smarttraveler.auth.repository.MemberRepository;
 import com.smarttraveler.domain.entity.Member;
 import com.smarttraveler.domain.entity.RoomReservation;
+import com.smarttraveler.mypage.dto.MyPageDtos.CourseView;
+import com.smarttraveler.mypage.repository.MyPageRepository;
 import com.smarttraveler.reservation.dto.CreateReservationRequest;
+import com.smarttraveler.reservation.dto.ReservationItinerary;
+import com.smarttraveler.reservation.dto.ReservationItinerary.BookedStay;
 import com.smarttraveler.reservation.dto.ReservationResponse;
 import com.smarttraveler.reservation.repository.ReservationRepository;
 import com.smarttraveler.stay.service.StayInventoryService;
@@ -21,6 +25,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.databind.ObjectMapper;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +36,8 @@ public class ReservationService {
     private final StayService stays;
     private final StayInventoryService inventory;
     private final JdbcTemplate jdbc;
+    private final MyPageRepository myPage;
+    private final ObjectMapper mapper;
 
     @Transactional
     public ReservationResponse create(CreateReservationRequest request, Authentication auth) {
@@ -45,10 +52,15 @@ public class ReservationService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "방문자 이름을 입력해 주세요.");
         }
         inventory.validateDates(request.checkIn(), request.checkOut());
+        CourseView course = null;
+        if (request.courseId() != null) {
+            course = myPage.course(member.getMemberId(), request.courseId());
+            if (course == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "저장된 여행을 찾을 수 없습니다.");
+        }
         var room = rooms.findById(request.roomId())
                 .filter(item -> Boolean.TRUE.equals(item.getIsActive()))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        stays.requireActive(room.getLodgingId());
+        var lodging = stays.requireActive(room.getLodgingId());
         if (request.guestCount() > room.getMaxCapacity()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "객실 정원을 초과했습니다.");
         }
@@ -77,6 +89,13 @@ public class ReservationService {
         reservation.setRoomQuantity(1);
         reservation.setStatus("PENDING_PAYMENT");
         reservation.setTotalPrice(total);
+        if (course != null) {
+            if (course.id().startsWith("course-")) reservation.setCourseId(Long.parseLong(course.id().substring(7)));
+            var bookedStay = new BookedStay(lodging.getLodgingId(), lodging.getName(), lodging.getAddress(),
+                    lodging.getAddressDetail(), lodging.getLatitude(), lodging.getLongitude(), room.getRoomId(),
+                    room.getName(), request.checkIn(), request.checkOut());
+            reservation.setItinerarySnapshot(mapper.writeValueAsString(new ReservationItinerary(course, bookedStay)));
+        }
         reservations.saveAndFlush(reservation);
 
         LocalDateTime expiresAt = jdbc.queryForObject("SELECT DATE_ADD(NOW(), INTERVAL 10 MINUTE)",
@@ -129,8 +148,10 @@ public class ReservationService {
     }
 
     private ReservationResponse toResponse(RoomReservation reservation, OffsetDateTime expiresAt) {
+        var snapshot = reservation.getItinerarySnapshot();
         return new ReservationResponse(reservation.getReservationId(), reservation.getRoomId(),
                 reservation.getCheckinDate(), reservation.getCheckoutDate(), reservation.getGuestCount(),
-                reservation.getTotalPrice(), reservation.getStatus(), reservation.getReservationNo(), expiresAt);
+                reservation.getTotalPrice(), reservation.getStatus(), reservation.getReservationNo(), expiresAt,
+                snapshot == null ? null : mapper.readValue(snapshot, ReservationItinerary.class));
     }
 }

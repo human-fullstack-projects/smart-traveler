@@ -1,15 +1,30 @@
 package com.smarttraveler.reservation;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.smarttraveler.admin.repository.RoomRepository;
 import com.smarttraveler.auth.repository.MemberRepository;
+import com.smarttraveler.domain.entity.Lodging;
 import com.smarttraveler.domain.entity.Member;
 import com.smarttraveler.domain.entity.Room;
+import com.smarttraveler.domain.entity.RoomPayment;
 import com.smarttraveler.domain.entity.RoomReservation;
+import com.smarttraveler.mypage.dto.MyPageDtos.CourseView;
+import com.smarttraveler.mypage.dto.MyPageDtos.Day;
+import com.smarttraveler.mypage.repository.MyPageRepository;
+import com.smarttraveler.payment.repository.PaymentRepository;
+import com.smarttraveler.payment.service.TossGateway;
+import com.smarttraveler.payment.service.TossPaymentService;
+import com.smarttraveler.payment.service.TossWebhookVerifier;
 import com.smarttraveler.reservation.dto.CreateReservationRequest;
 import com.smarttraveler.reservation.repository.ReservationRepository;
 import com.smarttraveler.reservation.service.ReservationService;
@@ -19,25 +34,111 @@ import com.smarttraveler.stay.service.StayService;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.databind.ObjectMapper;
 
 class ReservationServiceTest {
+    private static final LocalDate CHECK_IN = LocalDate.of(2026, 12, 1);
+    private static final LocalDate CHECK_OUT = CHECK_IN.plusDays(1);
+    private final ReservationRepository reservations = mock(ReservationRepository.class);
+    private final MemberRepository members = mock(MemberRepository.class);
+    private final RoomRepository rooms = mock(RoomRepository.class);
+    private final StayInventoryService inventory = mock(StayInventoryService.class);
+    private final StayService stays = mock(StayService.class);
+    private final MyPageRepository myPage = mock(MyPageRepository.class);
+    private final ObjectMapper mapper = new ObjectMapper();
+    private final ReservationService service = new ReservationService(reservations, members, rooms, stays,
+            inventory, mock(JdbcTemplate.class), myPage, mapper);
+    private final Authentication auth = mock(Authentication.class);
+
     @ParameterizedTest
     @NullSource
     @ValueSource(strings = " 실제 방문자 ")
     void savesBookerFromTheAccountAndVisitorFromTheRequest(String visitorName) {
-        var reservations = mock(ReservationRepository.class);
-        var members = mock(MemberRepository.class);
-        var rooms = mock(RoomRepository.class);
-        var inventory = mock(StayInventoryService.class);
-        var service = new ReservationService(reservations, members, rooms, mock(StayService.class),
-                inventory, mock(JdbcTemplate.class));
-        var auth = mock(Authentication.class);
+        setUpReservation();
+        var response = service.create(request(visitorName, null), auth);
+        var saved = savedReservation();
+        assertEquals(7L, saved.getMemberId());
+        assertEquals("여행자", saved.getBookerName());
+        assertEquals("account@example.invalid", saved.getBookerEmail());
+        assertEquals(visitorName == null ? "여행자" : "실제 방문자", saved.getVisitorName());
+        assertNull(response.itinerary());
+    }
+
+    @ParameterizedTest
+    @CsvSource({"course-23,23", "draft-23,"})
+    void savesOwnedCourseAndBookedStayTogether(String sourceId, Long linkedCourseId) {
+        setUpReservation();
+        var course = new CourseView(sourceId, "부산 여행", "부산", CHECK_IN, CHECK_OUT, "DRAFT",
+                List.of(new Day(CHECK_IN, List.of("광안리", "민락수변공원"))), null);
+        when(myPage.course(7L, sourceId)).thenReturn(course);
+
+        var response = service.create(request(null, sourceId), auth);
+        var saved = savedReservation();
+        assertEquals(linkedCourseId, saved.getCourseId());
+        assertEquals(course, response.itinerary().course());
+        assertEquals("벡스코호스텔", response.itinerary().stay().name());
+        assertEquals("더블룸", response.itinerary().stay().roomName());
+        assertEquals(CHECK_OUT, response.itinerary().stay().checkOut());
+        verify(myPage).course(7L, sourceId);
+    }
+
+    @Test
+    void rejectsMissingOrUnownedCourseBeforeHoldingInventory() {
+        setUpReservation();
+        var error = assertThrows(ResponseStatusException.class, () -> service.create(request(null, "course-99"), auth));
+        assertEquals(HttpStatus.NOT_FOUND, error.getStatusCode());
+        verify(reservations, never()).saveAndFlush(any());
+        verify(inventory, never()).nights(11L, CHECK_IN, CHECK_OUT, true);
+    }
+
+    @Test
+    void keepsTheItineraryWhenPaymentConfirmsTheReservation() {
+        setUpReservation();
+        var course = new CourseView("course-23", "부산 여행", "부산", CHECK_IN, CHECK_OUT, "DRAFT",
+                List.of(new Day(CHECK_IN, List.of("광안리"))), null);
+        when(myPage.course(7L, course.id())).thenReturn(course);
+        var created = service.create(request(null, course.id()), auth);
+        var reservation = savedReservation();
+        reservation.setReservationId(77L);
+        when(reservations.findById(77L)).thenReturn(Optional.of(reservation));
+
+        var payments = mock(PaymentRepository.class);
+        var payment = new RoomPayment();
+        payment.setOrderId("order-test");
+        payment.setPaymentKey("payment-test");
+        payment.setAmount(100_000);
+        when(payments.findFirstByReservationIdOrderByCreatedAtDesc(77L)).thenReturn(Optional.of(payment));
+        var jdbc = mock(JdbcTemplate.class);
+        when(jdbc.queryForList(contains("FOR UPDATE"), eq(Long.class), eq(77L))).thenReturn(List.of(77L));
+        when(jdbc.queryForObject(contains("COUNT(*)"), eq(Long.class), eq(77L), eq(11L),
+                eq(CHECK_IN), eq(CHECK_OUT), eq(1), eq(false))).thenReturn(1L);
+        when(jdbc.update(contains("SET i.held_quantity"), eq(77L))).thenReturn(1);
+        var gateway = mock(TossGateway.class);
+        when(gateway.get("payment-test")).thenReturn(mapper.readTree("""
+            {"orderId":"order-test","paymentKey":"payment-test","totalAmount":100000,"status":"DONE"}
+            """));
+        var paymentService = new TossPaymentService(payments, reservations, members, jdbc, gateway,
+                mock(TossWebhookVerifier.class), mapper, "test_gck_local");
+
+        paymentService.sync(77L, auth);
+
+        verify(reservations).save(reservation);
+        var confirmed = service.get(77L, auth);
+        assertEquals("CONFIRMED", confirmed.status());
+        assertEquals(created.itinerary(), confirmed.itinerary());
+    }
+
+    private void setUpReservation() {
         when(auth.getName()).thenReturn("account");
         var member = new Member();
         member.setMemberId(7L);
@@ -48,23 +149,27 @@ class ReservationServiceTest {
         var room = new Room();
         room.setRoomId(11L);
         room.setLodgingId(12L);
+        room.setName("더블룸");
         room.setIsActive(true);
         room.setMaxCapacity(2);
         when(rooms.findById(11L)).thenReturn(Optional.of(room));
-        LocalDate checkIn = LocalDate.of(2026, 12, 1);
-        LocalDate checkOut = checkIn.plusDays(1);
-        var nights = List.of(new RoomNight(13L, checkIn, 100_000, 1, true));
-        when(inventory.nights(11L, checkIn, checkOut, true)).thenReturn(nights);
-        when(inventory.available(nights, checkIn, checkOut)).thenReturn(true);
+        var lodging = new Lodging();
+        lodging.setLodgingId(12L);
+        lodging.setName("벡스코호스텔");
+        when(stays.requireActive(12L)).thenReturn(lodging);
+        var nights = List.of(new RoomNight(13L, CHECK_IN, 100_000, 1, true));
+        when(inventory.nights(11L, CHECK_IN, CHECK_OUT, true)).thenReturn(nights);
+        when(inventory.available(nights, CHECK_IN, CHECK_OUT)).thenReturn(true);
         when(inventory.total(nights)).thenReturn(100_000);
+    }
 
-        service.create(new CreateReservationRequest(11L, checkIn, checkOut, 2, visitorName, null, true, 100_000), auth);
+    private CreateReservationRequest request(String visitorName, String courseId) {
+        return new CreateReservationRequest(11L, CHECK_IN, CHECK_OUT, 2, visitorName, null, true, 100_000, courseId);
+    }
 
+    private RoomReservation savedReservation() {
         var saved = ArgumentCaptor.forClass(RoomReservation.class);
         verify(reservations).saveAndFlush(saved.capture());
-        assertEquals(7L, saved.getValue().getMemberId());
-        assertEquals("여행자", saved.getValue().getBookerName());
-        assertEquals("account@example.invalid", saved.getValue().getBookerEmail());
-        assertEquals(visitorName == null ? "여행자" : "실제 방문자", saved.getValue().getVisitorName());
+        return saved.getValue();
     }
 }

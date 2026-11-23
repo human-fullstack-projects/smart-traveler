@@ -12,6 +12,7 @@ public record ReservationResponse(
         Integer totalPrice,
         String status,
         String reservationNo,
-        OffsetDateTime holdExpiresAt
+        OffsetDateTime holdExpiresAt,
+        ReservationItinerary itinerary
 ) {
 }

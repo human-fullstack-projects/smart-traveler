@@ -59,8 +59,8 @@ public class StayService {
         );
     }
 
-    public void requireActive(Long lodgingId) {
-        findActive(lodgingId);
+    public Lodging requireActive(Long lodgingId) {
+        return findActive(lodgingId);
     }
 
     private Lodging findActive(Long lodgingId) {

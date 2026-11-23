@@ -1,3 +1,10 @@
+.kakao-map-marker {
+  --stay-marker-fill: #fff;
+  --stay-marker-border: #f4ae35;
+  --stay-marker-text: #2447a9;
+  --stay-marker-highlight: #fff4dd;
+}
+
 .itinerary-map .kakao-map-marker {
   display: grid;
   width: 46px;
@@ -13,5 +20,5 @@
   cursor: pointer;
   white-space: nowrap;
 }
-.itinerary-map .kakao-map-marker--stay { width: auto; min-width: 54px; height: 36px; padding: 0 7px; border: 3px solid #f4ae35; border-radius: 20px; background: #fff; color: #2447A9; font-size: 12px; }
+.itinerary-map .kakao-map-marker--stay { width: auto; min-width: 54px; height: 36px; padding: 0 7px; border: 3px solid var(--stay-marker-border); border-radius: 20px; background: var(--stay-marker-fill); color: var(--stay-marker-text); font-size: 12px; }
 .itinerary-map .kakao-map-marker.is-selected { outline: 3px solid #f7bb45; outline-offset: 2px; transform: scale(1.1); }

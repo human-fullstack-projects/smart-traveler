@@ -48,9 +48,11 @@ public class MyPageRepository {
             }, memberId));
         result.addAll(jdbc.query("""
             SELECT c.id, COALESCE(c.title, c.destination) AS title, c.destination, c.start_date, c.end_date,
+                   c.region_id, c.adults, c.children,
                    -- 챗봇이 저장한 추천 코스(chat_message_id)는 예약 전까지 「저장된 여행」(DRAFT)으로 보인다.
                    CASE WHEN JSON_EXTRACT(c.condition_meta, '$.chat_message_id') IS NOT NULL
-                         AND NOT EXISTS (SELECT 1 FROM room_reservation r WHERE r.course_id = c.id)
+                         AND NOT EXISTS (SELECT 1 FROM room_reservation r WHERE r.course_id = c.id
+                                         AND r.status IN ('CONFIRMED', 'COMPLETED'))
                         THEN 'DRAFT' ELSE c.status END AS status,
                    (SELECT image.image_url FROM course_day d
                     JOIN activity a ON a.course_day_id=d.id
@@ -63,7 +65,8 @@ public class MyPageRepository {
                 String photo = rs.getString("itinerary_photo");
                 return new CourseView("course-" + rs.getLong("id"), rs.getString("title"), region,
                     rs.getObject("start_date", LocalDate.class), rs.getObject("end_date", LocalDate.class),
-                    rs.getString("status"), List.of(), photo != null ? photo : regionalPhoto(region, regionalPhotos));
+                    rs.getString("status"), List.of(), photo != null ? photo : regionalPhoto(region, regionalPhotos),
+                    rs.getObject("region_id", Long.class), rs.getObject("adults", Integer.class), rs.getObject("children", Integer.class));
             }, memberId));
         return result;
     }
@@ -98,7 +101,8 @@ public class MyPageRepository {
                             point.getObject("longitude", Double.class)), rs.getLong("id"));
                     return new Day(date == null ? c.startDate().plusDays(rs.getInt("day_no") - 1L) : date, places, mapPlaces);
                 }, Long.parseLong(id.substring(7)), memberId);
-            return new CourseView(c.id(), c.title(), c.region(), c.startDate(), c.endDate(), c.state(), days, c.coverImageUrl());
+            return new CourseView(c.id(), c.title(), c.region(), c.startDate(), c.endDate(), c.state(), days, c.coverImageUrl(),
+                    c.regionId(), c.adults(), c.children());
         }).orElse(null);
     }
 

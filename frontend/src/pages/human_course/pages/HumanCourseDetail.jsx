@@ -32,7 +32,9 @@ export default function HumanCourseDetail({ courses = previewCourses, reservatio
         <CoursePhotoGallery key={course.id} title={course.title} photos={photos} />
         <hr className="divider" /><h3>여행 후기</h3><p className="course-review-text">{course.body}</p>
       </article>
-      <section className="panel"><div className="panel-heading"><h2>지역 지도</h2></div><CourseMap region={course.region} plan={course.plan} stay={stay} travelDates={course.travelDates} allDaysLabel="전체 일정" /></section>
+      <section className="panel course-detail-map"><div className="panel-heading"><h2>지역 지도</h2></div>
+        <CourseMap region={course.region} plan={course.plan} stay={stay} travelDates={course.travelDates} allDaysLabel="전체 일정" height="clamp(350px, 40vw, 380px)" />
+      </section>
       <CourseComments course={course} execute={execute} isAuthenticated={isAuthenticated} />
       {isAuthenticated && <CourseActions key={course.id} course={course} execute={execute} />}
     </> : null}
