@@ -69,6 +69,11 @@ export async function putJsonWithCsrf(path, data) {
 }
 
 
+export async function deleteWithCsrf(path) {
+  const csrf = await request('/api/auth/csrf');
+  return request(path, { method: 'DELETE', headers: { [csrf.headerName]: csrf.token } });
+}
+
 export async function getTerms() { return request('/api/auth/terms'); }
 
 export async function signup(data) { return postJsonWithCsrf('/api/auth/signup', data); }

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import '../../css/owner.css';
-import { postJsonWithCsrf, putJsonWithCsrf, request } from '../../api/auth.js';
+import { deleteWithCsrf, postJsonWithCsrf, putJsonWithCsrf, request } from '../../api/auth.js';
 
 const tabs = [
   { id: 'dashboard', label: '대시보드' },
@@ -302,7 +302,96 @@ function Reservations() {
 //   );
 // }
 
-function LodgingDetail({ lodgingId, onBack, onSaved }) {
+// 숙소·객실 사진 등록 (업주 피드백): 파일 고르기 → DB 저장 → 여행자 숙소 상세·객실 카드에 보임. 새로 올린 사진이 대표(맨 앞).
+const MAX_OWNER_PHOTOS = 10;
+const readAsDataUrl = (file) => new Promise((resolve, reject) => {
+  const reader = new FileReader();
+  reader.onload = () => resolve(reader.result);
+  reader.onerror = () => reject(new Error('사진 파일을 읽지 못했어요.'));
+  reader.readAsDataURL(file);
+});
+
+function OwnerPhotos({ apiPath, title, hint, setToast }) {
+  const [photos, setPhotos] = useState(null);
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [confirmId, setConfirmId] = useState(null);
+  const input = useRef(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setPhotos(null); setError(''); setConfirmId(null);
+    request(apiPath)
+      .then((data) => { if (!cancelled) setPhotos(data); })
+      .catch((failure) => { if (!cancelled) setError(failure.message); });
+    return () => { cancelled = true; };
+  }, [apiPath]);
+
+  const uploadedCount = photos?.filter((photo) => photo.uploaded).length ?? 0;
+
+  async function upload(event) {
+    const files = [...event.target.files];
+    event.target.value = '';
+    if (!files.length) return;
+    setBusy(true); setError('');
+    let done = 0;
+    try {
+      for (const file of files) {
+        if (file.size > 5 * 1024 * 1024) throw new Error(`「${file.name}」은 5MB가 넘어요. 더 작은 사진을 골라 주세요.`);
+        const next = await postJsonWithCsrf(apiPath, { name: file.name, dataUrl: await readAsDataUrl(file) });
+        setPhotos(next); done += 1;
+      }
+    } catch (failure) {
+      setError(failure.message);
+    } finally {
+      setBusy(false);
+      if (done) setToast?.(`${title}: 사진 ${done}장을 올렸어요. 여행자 숙소 화면에 바로 보여요.`);
+    }
+  }
+
+  async function remove(photoId) {
+    setBusy(true); setError('');
+    try {
+      setPhotos(await deleteWithCsrf(`${apiPath}/${photoId}`));
+      setToast?.(`${title}: 사진을 지웠어요.`);
+    } catch (failure) {
+      setError(failure.message);
+    } finally { setBusy(false); setConfirmId(null); }
+  }
+
+  return (
+    <section className="owner-panel owner-photos" aria-label={`${title} 사진`}>
+      <div className="owner-panel__head">
+        <div><span>PHOTOS</span><h2>{title} 사진</h2></div>
+        <button type="button" className="owner-photo-add" onClick={() => input.current?.click()} disabled={busy || uploadedCount >= MAX_OWNER_PHOTOS}>
+          {busy ? '올리는 중…' : '＋ 사진 올리기'}
+        </button>
+        <input ref={input} type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple hidden onChange={upload} />
+      </div>
+      <p className="owner-photo-hint">{hint} JPG·PNG·WebP·GIF, 한 장 5MB까지 · 직접 올린 사진 {uploadedCount}/{MAX_OWNER_PHOTOS}장 · 새로 올린 사진이 맨 앞(대표)에 와요.</p>
+      {error && <p role="alert" className="owner-photo-error">{error}</p>}
+      {!photos && !error && <p role="status">사진을 불러오는 중이에요.</p>}
+      {photos && !photos.length && <p className="owner-photo-empty">아직 사진이 없어요. 「＋ 사진 올리기」로 첫 사진을 올려 주세요.</p>}
+      {photos?.length > 0 && (
+        <ul className="owner-photo-grid">
+          {photos.map((photo, index) => (
+            <li key={photo.photoId}>
+              <img src={photo.thumbnailUrl || photo.imageUrl} alt={`${title} 사진 ${index + 1}`} loading="lazy" />
+              {index === 0 && <span className="owner-photo-badge">대표</span>}
+              {photo.uploaded
+                ? (confirmId === photo.photoId
+                  ? <div className="owner-photo-confirm"><button type="button" onClick={() => remove(photo.photoId)} disabled={busy}>지우기</button><button type="button" onClick={() => setConfirmId(null)}>취소</button></div>
+                  : <button type="button" className="owner-photo-delete" aria-label={`${title} 사진 ${index + 1} 지우기`} onClick={() => setConfirmId(photo.photoId)}>×</button>)
+                : <span className="owner-photo-source">기존 사진</span>}
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+function LodgingDetail({ lodgingId, onBack, onSaved, setToast }) {
   const [detail, setDetail] = useState(null);
   const [error, setError] = useState('');
   const [editing, setEditing] = useState(false);
@@ -367,11 +456,13 @@ function LodgingDetail({ lodgingId, onBack, onSaved }) {
           </>
         )}
       </section>
+      {detail && <OwnerPhotos apiPath={`/api/owner/lodgings/${lodgingId}/photos`} title={detail.name}
+        hint="여행자 숙소 상세 화면 맨 위 사진 칸에 보여요." setToast={setToast} />}
     </div>
   );
 }
 
-function LodgingManagement({ lodgings, error, onCreated, onUpdated }) {
+function LodgingManagement({ lodgings, error, onCreated, onUpdated, setToast }) {
   const [creating, setCreating] = useState(false);
   const [selectedLodgingId, setSelectedLodgingId] = useState(null);
 
@@ -380,6 +471,7 @@ function LodgingManagement({ lodgings, error, onCreated, onUpdated }) {
       <LodgingDetail
         key={selectedLodgingId}
         lodgingId={selectedLodgingId}
+        setToast={setToast}
         onBack={() => setSelectedLodgingId(null)}
         onSaved={() => {
           setSelectedLodgingId(null);
@@ -596,6 +688,9 @@ function LodgingForm({ initialDetail, onSaved, onCancel }) {
 
 const today = () => new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
 const addDays = (day, count) => new Date(Date.parse(day) + count * 86400000).toISOString().slice(0, 10);
+const shortDate = (day) => `${Number(day.slice(5, 7))}/${Number(day.slice(8, 10))}`;
+const weekdayOf = (day) => '일월화수목금토'[new Date(`${day}T00:00:00Z`).getUTCDay()];
+const stockLevel = (day) => (day.remaining <= 0 ? 'is-none' : day.remaining <= 2 ? 'is-low' : 'is-ok');
 
 // 객실 · 요금: 내 숙소들의 실제 객실 (숙소 이름 표시) · 날짜별 판매 수량 정하기 · 객실 추가 (피드백)
 function Rooms({ lodgings, setToast }) {
@@ -604,6 +699,11 @@ function Rooms({ lodgings, setToast }) {
   const [revision, setRevision] = useState(0);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [days, setDays] = useState([]);
+  // 재고 확인 (c안 · 선택 상자): 숙소·객실·기간(7일) 고르기 → 날짜 알약 → 아래 카드에 그날 숫자·수량 바꾸기
+  const [lodgingFilter, setLodgingFilter] = useState('');
+  const [week, setWeek] = useState(0);
+  const [pickedDate, setPickedDate] = useState(null);
+  const [dayQty, setDayQty] = useState(null);
   const [range, setRange] = useState(() => ({ from: today(), to: addDays(today(), 6), quantity: 0 }));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -620,13 +720,36 @@ function Rooms({ lodgings, setToast }) {
   useEffect(() => {
     if (!selectedRoom) { setDays([]); return undefined; }
     let cancelled = false;
-    request(`/api/owner/rooms/${selectedRoom}/inventory?days=14`)
+    request(`/api/owner/rooms/${selectedRoom}/inventory?from=${addDays(today(), week * 7)}&days=7`)
       .then((data) => { if (!cancelled) setDays(data); })
       .catch(() => { if (!cancelled) setDays([]); });
     return () => { cancelled = true; };
-  }, [selectedRoom, revision]);
+  }, [selectedRoom, revision, week]);
 
   const room = rooms?.find((item) => item.roomId === selectedRoom);
+  const roomChoices = rooms?.filter((item) => !lodgingFilter || String(item.lodgingId) === lodgingFilter) ?? [];
+  const lodgingChoices = rooms ? [...new Map(rooms.map((item) => [item.lodgingId, item.lodgingName])).entries()] : [];
+  const picked = days.find((day) => day.date === pickedDate) ?? days[0];
+  const weekLabel = (index) => `${shortDate(addDays(today(), index * 7))} ~ ${shortDate(addDays(today(), index * 7 + 6))}`;
+
+  function pickRoom(roomId) { setSelectedRoom(roomId); setPickedDate(null); setDayQty(null); setError(''); }
+  function pickLodging(value) {
+    setLodgingFilter(value);
+    const first = rooms?.find((item) => !value || String(item.lodgingId) === value);
+    if (first && (!room || (value && String(room.lodgingId) !== value))) pickRoom(first.roomId);
+  }
+
+  async function saveDay() {
+    if (!picked || dayQty === null) return;
+    setBusy(true); setError('');
+    try {
+      await putJsonWithCsrf(`/api/owner/rooms/${selectedRoom}/inventory`, { from: picked.date, to: picked.date, quantity: Number(dayQty) });
+      setToast(`${room.lodgingName} · ${room.name}: ${picked.date} 판매 수량을 ${dayQty}개로 정했어요.${Number(dayQty) === 0 ? ' 이 날은 여행자에게 「객실 없음」으로 보여요.' : ''}`);
+      setDayQty(null); setRevision((value) => value + 1);
+    } catch (failure) {
+      setError(failure.status === 409 ? (failure.message || '이미 예약된 객실보다 적게 정할 수 없어요.') : failure.message);
+    } finally { setBusy(false); }
+  }
 
   async function saveQuantity(event) {
     event.preventDefault();
@@ -684,7 +807,7 @@ function Rooms({ lodgings, setToast }) {
         <section className="owner-panel owner-room-list" aria-label="등록 객실">
           <div className="owner-panel__head"><div><span>ROOM TYPES</span><h2>등록 객실</h2></div></div>
           {rooms.map((item) => (
-            <article key={item.roomId} className={selectedRoom === item.roomId ? 'is-selected' : ''} onClick={() => setSelectedRoom(item.roomId)}>
+            <article key={item.roomId} className={selectedRoom === item.roomId ? 'is-selected' : ''} onClick={() => pickRoom(item.roomId)}>
               <div>
                 <span className="owner-room-lodging">{item.lodgingName}</span>
                 <h3>{item.name}</h3>
@@ -697,24 +820,69 @@ function Rooms({ lodgings, setToast }) {
         </section>
       )}
       {room && (
-        <section className="owner-panel" aria-label="날짜별 판매 수량">
-          <div className="owner-panel__head"><div><span>INVENTORY</span><h2>{room.lodgingName} · {room.name} 날짜별 판매 수량</h2></div></div>
-          <form className="owner-season-row" onSubmit={saveQuantity}>
-            <label>시작일<input type="date" value={range.from} onChange={(event) => setRange({ ...range, from: event.target.value })} /></label>
-            <span>~</span>
-            <label>종료일<input type="date" value={range.to} min={range.from} onChange={(event) => setRange({ ...range, to: event.target.value })} /></label>
-            <label>판매 수량<input type="number" min="0" max="500" value={range.quantity} onChange={(event) => setRange({ ...range, quantity: event.target.value })} /></label>
-            <button type="submit" disabled={busy}>{busy ? '저장 중…' : '적용'}</button>
-          </form>
-          {error && <p role="alert">{error}</p>}
-          <div className="owner-inventory-table">
-            <table>
-              <thead><tr><th scope="col">날짜</th><th scope="col">판매 수량</th><th scope="col">예약</th><th scope="col">남은 객실</th><th scope="col">요금</th></tr></thead>
-              <tbody>{days.map((day) => <tr key={day.date}><td>{day.date}</td><td>{day.total}</td><td>{day.used}</td><td>{day.remaining > 0 ? day.remaining : <strong>객실 없음</strong>}</td><td>{formatWon(day.price)}</td></tr>)}</tbody>
-            </table>
+        <section className="owner-panel owner-stock" aria-label="날짜별 판매 수량">
+          <div className="owner-panel__head">
+            <div><span>INVENTORY</span><h2>객실 재고 확인</h2></div>
+            <div className="owner-stock-legend"><span><i className="is-ok" />넉넉 (3개 이상)</span><span><i className="is-low" />적음 (1~2개)</span><span><i className="is-none" />객실 없음</span></div>
           </div>
+          <div className="owner-stock-selects">
+            <label>숙소<select value={lodgingFilter} onChange={(event) => pickLodging(event.target.value)}>
+              <option value="">전체 숙소</option>
+              {lodgingChoices.map(([id, name]) => <option key={id} value={String(id)}>{name}</option>)}
+            </select></label>
+            <label>객실<select value={selectedRoom ?? ''} onChange={(event) => pickRoom(Number(event.target.value))}>
+              {roomChoices.map((item) => <option key={item.roomId} value={item.roomId}>{lodgingFilter ? item.name : `${item.lodgingName} · ${item.name}`}</option>)}
+            </select></label>
+            <label>기간<select value={week} onChange={(event) => { setWeek(Number(event.target.value)); setPickedDate(null); setDayQty(null); }}>
+              {Array.from({ length: 13 }, (_, index) => <option key={index} value={index}>{weekLabel(index)}</option>)}
+            </select></label>
+          </div>
+          <div className="owner-stock-pills" role="group" aria-label="날짜 고르기">
+            {days.map((day) => (
+              <button key={day.date} type="button" className={`owner-stock-pill ${stockLevel(day)}${picked?.date === day.date ? ' is-on' : ''}`}
+                aria-pressed={picked?.date === day.date} aria-label={`${day.date} 남은 객실 ${day.remaining > 0 ? day.remaining : '없음'}`} onClick={() => { setPickedDate(day.date); setDayQty(null); setError(''); }}>
+                <i />{shortDate(day.date)} ({weekdayOf(day.date)})
+              </button>
+            ))}
+            {!days.length && <p className="owner-photo-empty">이 기간에는 판매 칸이 없어요. 아래 「기간 한꺼번에 정하기」로 판매 수량을 넣어 주세요.</p>}
+          </div>
+          {picked && (
+            <div className="owner-stock-detail" aria-live="polite">
+              <div className="owner-stock-detail__head">
+                <h3>{room.lodgingName} · {room.name} — {picked.date} ({weekdayOf(picked.date)})</h3>
+                <span className={`owner-stock-badge ${stockLevel(picked)}`}>{picked.remaining <= 0 ? '객실 없음' : picked.remaining <= 2 ? '남은 객실 적음' : '판매 중'}</span>
+              </div>
+              <dl className="owner-stock-stats">
+                <div><dt>판매 수량</dt><dd>{picked.total}</dd></div>
+                <div><dt>예약</dt><dd>{picked.used}</dd></div>
+                <div><dt>남은 객실</dt><dd>{picked.remaining > 0 ? picked.remaining : '없음'}</dd></div>
+                <div><dt>요금</dt><dd>{formatWon(picked.price)}</dd></div>
+              </dl>
+              <div className="owner-stock-qty">
+                <span>이 날 판매 수량</span>
+                <button type="button" aria-label="하나 줄이기" disabled={busy || (dayQty ?? picked.total) <= picked.used} onClick={() => setDayQty(Math.max(picked.used, (dayQty ?? picked.total) - 1))}>−</button>
+                <output aria-live="polite">{dayQty ?? picked.total}</output>
+                <button type="button" aria-label="하나 늘리기" disabled={busy || (dayQty ?? picked.total) >= 500} onClick={() => setDayQty(Math.min(500, (dayQty ?? picked.total) + 1))}>＋</button>
+                <button type="button" className="owner-primary" disabled={busy || dayQty === null || dayQty === picked.total} onClick={saveDay}>{busy ? '저장 중…' : '저장'}</button>
+              </div>
+              <p className="owner-stock-note">예약된 {picked.used}개보다 적게는 줄일 수 없어요. 0으로 저장하면 여행자 화면에 「객실 없음」으로 보이고 예약이 막혀요.</p>
+            </div>
+          )}
+          {error && <p role="alert">{error}</p>}
+          <details className="owner-stock-range">
+            <summary>기간 한꺼번에 정하기</summary>
+            <form className="owner-season-row" onSubmit={saveQuantity}>
+              <label>시작일<input type="date" value={range.from} onChange={(event) => setRange({ ...range, from: event.target.value })} /></label>
+              <span>~</span>
+              <label>종료일<input type="date" value={range.to} min={range.from} onChange={(event) => setRange({ ...range, to: event.target.value })} /></label>
+              <label>판매 수량<input type="number" min="0" max="500" value={range.quantity} onChange={(event) => setRange({ ...range, quantity: event.target.value })} /></label>
+              <button type="submit" disabled={busy}>{busy ? '저장 중…' : '적용'}</button>
+            </form>
+          </details>
         </section>
       )}
+      {room && <OwnerPhotos apiPath={`/api/owner/rooms/${room.roomId}/photos`} title={`${room.lodgingName} · ${room.name}`}
+        hint="여행자 숙소 예약 화면의 객실 카드와 숙소 사진 칸에 보여요." setToast={setToast} />}
     </div>
   );
 }
@@ -752,6 +920,7 @@ export default function OwnerPage({ member, onLogout, loggingOut }) {
         <LodgingManagement
           lodgings={lodgings}
           error={lodgingError}
+          setToast={setToast}
           onUpdated={() => {
             setLodgingRevision((revision) => revision + 1);
             setToast('숙소 정보를 저장했어요.');
