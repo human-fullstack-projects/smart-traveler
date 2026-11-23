@@ -30,6 +30,21 @@ public class TossGateway {
                 .retrieve().body(JsonNode.class);
     }
 
+    /** 결제 취소. cancelAmount가 null이면 전액 취소 (토스 문서: 값이 없으면 전액 취소). */
+    public JsonNode cancel(String paymentKey, String cancelReason, Integer cancelAmount, String idempotencyKey) {
+        Map<String, Object> body = new java.util.LinkedHashMap<>();
+        body.put("cancelReason", cancelReason);
+        if (cancelAmount != null) body.put("cancelAmount", cancelAmount);
+        return client.post().uri("/v1/payments/{paymentKey}/cancel", paymentKey)
+                .headers(headers -> {
+                    headers.setBasicAuth(encodedKey());
+                    headers.set("Idempotency-Key", idempotencyKey);
+                })
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(body)
+                .retrieve().body(JsonNode.class);
+    }
+
     public JsonNode get(String paymentKey) {
         return client.get().uri("/v1/payments/{paymentKey}", paymentKey)
                 .headers(headers -> headers.setBasicAuth(encodedKey()))
