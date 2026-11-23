@@ -173,8 +173,8 @@ def test_group_courses_without_duration_accepts_any_contiguous_days():
 def test_recommend_course_result_without_start_date_shows_day_only(offline):
     plain = conditions()
     plain["startDate"] = None
-    answer, course_id = rag.recommend_course_result(dict(merged=plain, courseCandidates=rows()))
-    assert course_id == 1 and "1일차" in answer and "(2026" not in answer
+    answer, course_id, course_ids = rag.recommend_course_result(dict(merged=plain, courseCandidates=rows()))
+    assert course_id == 1 and course_ids == [1] and "1일차" in answer and "(2026" not in answer
 
 
 def place(place_id, name="관광지"):

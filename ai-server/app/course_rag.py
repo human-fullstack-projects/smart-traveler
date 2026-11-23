@@ -164,18 +164,18 @@ def recommend_course_result(state):
     conditions = state["merged"]
     duration = conditions.get("durationDays")
     if duration is not None and duration > 4:
-        return "현재 준비된 코스는 1~4일 일정이에요. 여행 일수를 조정해 주세요.", None
+        return "현재 준비된 코스는 1~4일 일정이에요. 여행 일수를 조정해 주세요.", None, None
 
     courses = group_courses(state["courseCandidates"], duration)
     if not courses:
-        return "입력하신 지역과 일수가 일치하는 코스가 없어요. 지역 또는 여행 일수를 바꿔 보세요.", None
+        return "입력하신 지역과 일수가 일치하는 코스가 없어요. 지역 또는 여행 일수를 바꿔 보세요.", None, None
 
     effective, excluded, unknown_exclusion = effective_preferences(conditions, state.get("savedPreferences"))
     if unknown_exclusion:
-        return "말씀하신 제외 조건을 저장 코스 정보로 확인하기 어려워요. 실내·야외, 일정 밀도, 풍경 중 제외할 조건을 구체적으로 알려주세요.", None
+        return "말씀하신 제외 조건을 저장 코스 정보로 확인하기 어려워요. 실내·야외, 일정 밀도, 풍경 중 제외할 조건을 구체적으로 알려주세요.", None, None
     courses = [course for course in courses if satisfies_exclusions(course["info"], excluded)]
     if not courses:
-        return "명시한 제외 조건을 충족한다고 확인할 수 있는 코스가 없어요. 제외 조건이나 지역·일수를 조정해 주세요.", None
+        return "명시한 제외 조건을 충족한다고 확인할 수 있는 코스가 없어요. 제외 조건이나 지역·일수를 조정해 주세요.", None, None
 
     preferences = ", ".join(conditions.get("preferences") or [])
     region = conditions.get("regionName") or courses[0]["info"]["destination"]
@@ -206,4 +206,5 @@ def recommend_course_result(state):
         lines.append("")
     if conditions.get("fixedEvents") or conditions.get("flowType") == "STAY_FIRST":
         lines.append("숙소와 고정 일정의 충족 여부는 별도로 확인해 주세요.")
-    return "\n".join(lines), ranked[0][0]["info"]["courseId"]
+    course_ids = [chosen["info"]["courseId"] for chosen, _, _, _ in ranked]
+    return "\n".join(lines), course_ids[0], course_ids

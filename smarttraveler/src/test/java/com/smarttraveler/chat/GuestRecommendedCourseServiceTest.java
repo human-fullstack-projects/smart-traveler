@@ -27,10 +27,11 @@ class GuestRecommendedCourseServiceTest {
 
     @BeforeEach @SuppressWarnings("unchecked") void setup() {
         when(courses.read(anyString())).thenAnswer(call -> JsonMapper.builder().build().readTree(call.getArgument(0, String.class)));
+        when(courses.guestSnapshot(snapshot, null, null)).thenReturn(snapshot);
         when(jdbc.query(contains("SELECT m.recommendation_json"), any(RowMapper.class), anyLong(), anyLong())).thenReturn(List.of(snapshot));
         when(jdbc.query(contains("SELECT member_id"), any(RowMapper.class), anyLong())).thenReturn(Collections.singletonList(null));
         when(manager.getTransaction(any())).thenReturn(new SimpleTransactionStatus());
-        when(courses.save(7L, 1L, 10L)).thenReturn(new RecommendedCourseService.SavedResult(99L, null, null, "부산"));
+        when(courses.save(7L, 1L, 10L, "2026-12-10", null)).thenReturn(new RecommendedCourseService.SavedResult(99L, null, null, "부산"));
     }
     @Test void newestRecommendationWinsAndExpiredSessionHasNoPreview() {
         service.store(session, 1, 10);
@@ -53,15 +54,27 @@ class GuestRecommendedCourseServiceTest {
         assertNull(service.status(session, 7L));
         assertEquals(99L, service.claim(session, 7));
         assertNull(service.claim(session, 8));
-        verify(courses, times(2)).save(7L, 1L, 10L);
+        verify(courses, times(2)).save(7L, 1L, 10L, "2026-12-10", null);
     }
     @Test void databaseFailureKeepsPendingAndSuccessfulRetryClearsIt() {
         service.store(session, 1, 10);
-        when(courses.save(7L, 1L, 10L)).thenThrow(new IllegalStateException("insert failed")).thenReturn(new RecommendedCourseService.SavedResult(99L, null, null, "부산"));
+        when(courses.save(7L, 1L, 10L, "2026-12-10", null)).thenThrow(new IllegalStateException("insert failed")).thenReturn(new RecommendedCourseService.SavedResult(99L, null, null, "부산"));
         assertThrows(IllegalStateException.class, () -> service.claim(session, 7));
         verify(manager).rollback(any());
         assertNotNull(service.status(session, 7L));
         assertEquals(99L, service.claim(session, 7));
         assertNull(service.status(session, 7L));
+    }
+
+    @Test void claimUsesSelectedCourseAndEnteredDate() {
+        String selected = """
+            {"title":"부산 두 번째 코스","sourceCourseId":20,"candidateCourseIds":[10,20],
+             "conditions":{"startDate":"2026-12-19","durationDays":2}}
+            """;
+        when(courses.guestSnapshot(snapshot, "2026-12-19", 20L)).thenReturn(selected);
+        when(courses.save(7L, 1L, 10L, "2026-12-19", 20L))
+            .thenReturn(new RecommendedCourseService.SavedResult(100L, null, null, "부산"));
+        assertEquals("부산 두 번째 코스", service.store(session, 1, 10, "2026-12-19", 20L).title());
+        assertEquals(100L, service.claim(session, 7));
     }
 }

@@ -32,6 +32,7 @@ export default function AiChatPage({
   retrySave,
 }) {
   const [startDateInput, setStartDateInput] = useState('');
+  const [courseSelection, setCourseSelection] = useState(null);
   if (loading) return <p className="cb-status" role="status">대화를 불러오는 중입니다.</p>;
   if (!sessionId) return (
     <>
@@ -39,9 +40,10 @@ export default function AiChatPage({
       {guestLimitReached && (
         <div className="cb-modal-backdrop" role="dialog" aria-modal="true">
           <div className="cb-modal">
-            <p>비회원은 새 대화를 1번만 시작할 수 있어요. 로그인하시면 더 많은 서비스를 누릴 수 있어요.</p>
+            <p>비회원은 대화를 1회만 이용할 수 있습니다.</p>
+            <p>로그인 하시고 더 많은 서비스를 누리세요.</p>
             <div className="cb-save-choice">
-              <a className="cb-confirm-yes" href="#/login">로그인하러 가기</a>
+              <a className="cb-confirm-yes" href="#/login">로그인</a>
               <button type="button" className="cb-confirm-no" onClick={dismissGuestLimit}>닫기</button>
             </div>
           </div>
@@ -50,7 +52,13 @@ export default function AiChatPage({
     </>
   );
 
-  const lastRecommendation = messages.filter((message) => message.recommendation).at(-1)?.recommendation;
+  const recommendationMessage = messages.findLast((message) => message.recommendation);
+  const lastRecommendation = recommendationMessage?.recommendation;
+  const candidateIds = lastRecommendation?.candidateCourseIds ?? [];
+  const multipleCourses = candidateIds.length > 1;
+  const selectedCourseId = courseSelection?.sessionId === sessionId && courseSelection?.messageId === recommendationMessage?.id
+    ? courseSelection.courseId : null;
+  const saveSelectedCourse = () => saveCourse(startDateInput || null, selectedCourseId);
   const needsStartDate = courseSaveStatus === 'ask' && !lastRecommendation?.conditions?.startDate;
   const lastMessage = messages.at(-1);
   const awaitingConfirmation = !busy && lastMessage?.role === 'ASSISTANT' && lastMessage.content.includes('조건을 확인해 주세요');
@@ -74,18 +82,27 @@ export default function AiChatPage({
           </div>
         )}
         {/* 추천 코스 저장 여부 (피드백: 저장하기 Y/N) */}
-        {!busy && courseSaveStatus === 'ask' && !needsStartDate && (
+        {!busy && courseSaveStatus === 'ask' && (
           <div className="cb-save-choice" role="group" aria-label="추천 코스 저장">
-            <span>1위 추천 코스를 저장할까요?</span>
-            <button type="button" className="cb-confirm-yes" onClick={() => saveCourse()}>저장하기</button>
-            <button type="button" className="cb-confirm-no" onClick={skipCourse}>안 할게요</button>
-          </div>
-        )}
-        {!busy && needsStartDate && (
-          <div className="cb-save-choice" role="group" aria-label="추천 코스 저장">
-            <span>출발일을 알려주시면 1위 추천 코스를 저장해 드려요.</span>
-            <input type="date" value={startDateInput} onChange={(event) => setStartDateInput(event.target.value)} />
-            <button type="button" className="cb-confirm-yes" disabled={!startDateInput} onClick={() => saveCourse(startDateInput)}>이 날짜로 저장</button>
+            {multipleCourses ? (
+              <div className="cb-save-choice" role="group" aria-label="저장할 코스 선택">
+                {candidateIds.map((courseId, index) => (
+                  <label key={courseId}>
+                    <input type="checkbox" checked={selectedCourseId === courseId}
+                      onChange={(event) => setCourseSelection({
+                        sessionId, messageId: recommendationMessage.id, courseId: event.target.checked ? courseId : null,
+                      })} />
+                    코스{index + 1}
+                  </label>
+                ))}
+              </div>
+            ) : <span>추천 코스를 저장할까요?</span>}
+            {needsStartDate && (
+              <label>출발일 <input type="date" value={startDateInput} onChange={(event) => setStartDateInput(event.target.value)} /></label>
+            )}
+            <button type="button" className="cb-confirm-yes"
+              disabled={(multipleCourses && !selectedCourseId) || (needsStartDate && !startDateInput)}
+              onClick={saveSelectedCourse}>저장하기</button>
             <button type="button" className="cb-confirm-no" onClick={skipCourse}>안 할게요</button>
           </div>
         )}
@@ -104,7 +121,7 @@ export default function AiChatPage({
         )}
         {courseSaveStatus === 'declined' && <p className="cb-status" role="status">저장하지 않았어요. 다른 조건을 말씀하시면 새 코스를 추천해 드릴게요.</p>}
         {courseSaveStatus === 'duplicate' && <p className="cb-error" role="alert">이미 저장한 코스예요. <a href="#/my-courses">저장된 여행 보기</a></p>}
-        {courseSaveStatus === 'error' && <p className="cb-error" role="alert">코스를 저장하지 못했습니다. <button type="button" onClick={() => saveCourse(startDateInput || null)}>다시 저장</button></p>}
+        {courseSaveStatus === 'error' && <p className="cb-error" role="alert">코스를 저장하지 못했습니다. <button type="button" onClick={saveSelectedCourse}>다시 저장</button></p>}
         <ChatComposer busy={busy} onSend={sendMessage} placeholder="여행에 대해 더 이야기해 주세요." />
         {saveStatus === 'error' && (
           <p className="cb-error" role="alert">

@@ -48,12 +48,27 @@ public class ConditionDialogueService {
      * 기본값으로 채워 바로 추천한다(FORCE_RECOMMEND) ③ 조건이 하나도 없고 「몰라」류 답이면 휴먼 추천 코스를 안내한다.
      */
     public PythonAiClient.Result processResult(long sessionId, String message, Map<String, Object> savedPreferences) {
+        return processResult(sessionId, message, savedPreferences, null);
+    }
+
+    public PythonAiClient.Result processResult(long sessionId, String message, Map<String, Object> savedPreferences, Long lodgingId) {
         List<String> saved = jdbc.query("SELECT conditions_json FROM chat_session_conditions WHERE session_id = ?", (rs, row) -> rs.getString(1), sessionId);
         ObjectNode conditions = saved.isEmpty() ? emptyConditions() : readConditions(saved.get(0));
         ObjectNode previous = conditions.deepCopy();
         // 저장 전 메시지까지 포함한 챗봇의 마지막 질문
         String previousQuestion = buffer.lastAssistant(sessionId);
-        var read = ai.process(message, previousQuestion, conditions, List.of(), null, savedPreferences, PythonAiClient.Mode.EXTRACT_ONLY);
+        Map<String, Object> lodging = null;
+        PythonAiClient.Result read = null;
+        if (lodgingId != null) {
+            lodging = lodgings.findById(lodgingId);
+            if (lodging == null) return new PythonAiClient.Result("예약 화면에서 이용 가능한 숙소를 다시 선택해 주세요.", false);
+            conditions.put("lodgingId", lodgingId);
+            conditions.put("lodgingName", (String) lodging.get("name"));
+            conditions.put("regionId", (Long) lodging.get("regionId"));
+            conditions.put("regionName", (String) lodging.get("regionName"));
+        } else {
+            read = ai.process(message, previousQuestion, conditions, List.of(), null, savedPreferences, PythonAiClient.Mode.EXTRACT_ONLY);
+        }
         if (saved.isEmpty() || !conditions.equals(previous)) {
             jdbc.update("INSERT INTO chat_session_conditions (session_id, conditions_json, confirmed) VALUES (?, ?, FALSE) ON DUPLICATE KEY UPDATE conditions_json = VALUES(conditions_json), confirmed = FALSE", sessionId, mapper.writeValueAsString(conditions));
         }
@@ -77,34 +92,34 @@ public class ConditionDialogueService {
             }
         }
         ObjectNode filled = conditions.deepCopy();
-        if (filled.path("lodgingId").isIntegralNumber() && filled.path("lodgingId").asLong() > 0) {
-            var lodging = lodgings.findById(filled.path("lodgingId").asLong());
-            if (lodging != null) {
-                Long namedRegion = filled.path("regionName").asText("").isBlank() ? null : candidates.regionId(filled);
-                if (namedRegion != null && !namedRegion.equals(lodging.get("regionId")))
-                    return new PythonAiClient.Result("말씀하신 지역과 숙소 위치가 달라요. 어느 지역을 기준으로 할까요?", false);
-                filled.put("regionId", (Long) lodging.get("regionId"));
-            }
+        boolean lodgingBased = filled.path("lodgingId").asLong() > 0;
+        if (lodgingBased) {
+            if (lodging == null) lodging = lodgings.findById(filled.path("lodgingId").asLong());
+            if (lodging == null) return new PythonAiClient.Result("예약 화면에서 이용 가능한 숙소를 다시 선택해 주세요.", false);
+            Long namedRegion = lodgingId != null || filled.path("regionName").asText("").isBlank()
+                ? null : candidates.regionId(filled);
+            if (namedRegion != null && !namedRegion.equals(lodging.get("regionId")))
+                return new PythonAiClient.Result("말씀하신 지역과 숙소 위치가 달라요. 어느 지역을 기준으로 할까요?", false);
+            filled.put("regionId", (Long) lodging.get("regionId"));
         }
         // 일정·인원을 둘 다 안 받았으면, 조건에 맞는 코스를 취향과 무관하게 있는 만큼(최대 3개) 보여준다.
         boolean headcountGiven = filled.path("adults").isIntegralNumber() || !filled.path("companionType").asText("").isBlank();
         boolean showAllMatches = !filled.path("durationDays").isIntegralNumber() && !headcountGiven;
         String note = fillDefaults(filled);
-        if (!filled.path("regionName").asText("").isBlank() && candidates.regionId(filled) == null)
+        if (!lodgingBased && !filled.path("regionName").asText("").isBlank() && candidates.regionId(filled) == null)
             return new PythonAiClient.Result("‘" + filled.path("regionName").asText() + "’ 지역을 찾지 못했어요. 시·도 이름(예: 부산, 제주, 강원)으로 다시 알려 주세요.", false);
         java.util.Set<Long> already = recommendedBefore(sessionId);
-        List<Map<String, Object>> courseRows = courseRagEnabled ? courses.find(filled, already) : List.of();
+        boolean searchCourses = courseRagEnabled && (!lodgingBased || filled.path("regionId").asLong() > 0);
+        List<Map<String, Object>> courseRows = searchCourses ? courses.find(filled, already) : List.of();
         boolean repeated = false;
-        if (courseRagEnabled && courseRows.isEmpty() && !already.isEmpty()) {
+        if (searchCourses && courseRows.isEmpty() && !already.isEmpty()) {
             courseRows = courses.find(filled, java.util.Set.of());
             repeated = !courseRows.isEmpty();
         }
         List<Map<String, Object>> placeRows = List.of();
         if (courseRows.isEmpty()) {
             courseRows = null;
-            boolean lodgingBased = filled.path("lodgingId").isIntegralNumber() && filled.path("lodgingId").asLong() > 0;
             if (lodgingBased) {
-                var lodging = lodgings.findById(filled.path("lodgingId").asLong());
                 placeRows = places(lodging, filled);
                 if (placeRows.size() < 3)
                     return new PythonAiClient.Result("주변 후보가 부족해요. 반경을 넓히거나 다른 조건으로 다시 시도해 주세요.", false);
@@ -117,13 +132,13 @@ public class ConditionDialogueService {
         var result = ai.process(message, previousQuestion, filled.deepCopy(), placeRows, courseRows, Map.of(), PythonAiClient.Mode.FORCE_RECOMMEND, showAllMatches);
         jdbc.update("UPDATE chat_session_conditions SET confirmed=TRUE WHERE session_id=?", sessionId);
         String head = (repeated ? "새로 추천할 코스가 더 없어서 앞서 추천한 코스 중에서 골랐어요.\n" : "") + note;
-        String tail = "\n\n높은 품질의 답변을 원하시면 추가 조건을 입력해 주세요.";
+        String tail = "\n\n높은 품질의 답변을 원하시면 추가 조건을 입력해 주세요." + missingConditionExamples(conditions);
         return result.withMessage((head.isEmpty() ? result.message() : head + "\n\n" + result.message()) + tail, filled);
     }
 
     /** 숙소 좌표 주변의 활성 관광지 (기존 코스가 없을 때만 쓴다). 취향 단어가 이름·주소에 있으면 앞으로 보낸다. */
     private List<Map<String, Object>> places(Map<String, Object> lodging, ObjectNode filled) {
-        if (lodging == null) return List.of();
+        if (lodging.get("latitude") == null || lodging.get("longitude") == null) return List.of();
         var rows = candidates.findNearLodging((java.math.BigDecimal) lodging.get("latitude"), (java.math.BigDecimal) lodging.get("longitude"));
         List<String> preferences = new java.util.ArrayList<>();
         filled.path("preferences").forEach(p -> preferences.add(p.asText("")));
@@ -188,6 +203,19 @@ public class ConditionDialogueService {
         if (!parts.isEmpty()) text.append(String.join(" · ", parts)).append("으로 잡았어요");
         if (!any.isEmpty()) text.append(parts.isEmpty() ? "" : ", ").append(String.join("·", any)).append("은 상관없음으로 골랐어요");
         return text.append(". 바꾸고 싶으면 말씀하시거나 오른쪽에서 바꿀 수 있어요.").toString();
+    }
+
+    /** 아직 입력하지 않은 조건의 예시를 줄 단위로 안내한다 (입력한 조건은 예시에서 뺀다). */
+    static String missingConditionExamples(JsonNode c) {
+        List<String> lines = new java.util.ArrayList<>();
+        boolean regionGiven = !c.path("regionName").asText("").isBlank() || (c.path("regionId").isIntegralNumber() && c.path("regionId").asLong() > 0);
+        if (!regionGiven) lines.add("여행 지역 정보 (예: 제주도, 부산, 강릉, 경주)");
+        if (c.path("startDate").asText("").isBlank()) lines.add("출발 날짜 정보 (예: 12월 5일, 12월 19일, 1월 9일, 2월 6일)");
+        if (!c.path("durationDays").isIntegralNumber()) lines.add("여행 기간 정보 (예: 2박 3일, 당일치기, 1박 2일, 3박 4일)");
+        if (c.path("companionType").asText("").isBlank()) lines.add("동행 유형 정보 (예: 친구, 혼자, 연인, 가족)");
+        if (!c.path("adults").isIntegralNumber()) lines.add("동행 인원수 정보 (예: 총 2명, 총 1명, 총 3명, 총 4명)");
+        if (c.path("transportType").asText("").isBlank()) lines.add("교통 수단 정보 (예: 렌터카, 자가용, 대중교통, 도보)");
+        return lines.isEmpty() ? "" : "\n" + String.join("\n", lines);
     }
 
     /** 이 대화에서 이미 추천한 원본 코스 번호 (같은 코스를 다시 추천하지 않기). */

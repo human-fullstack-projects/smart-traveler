@@ -48,6 +48,7 @@ class DialogueState(TypedDict, total=False):
     courseCandidates: list[dict[str, Any]] | None
     savedPreferences: dict[str, Any] | None
     recommendedCourseId: int | None
+    recommendedCourseIds: list[int] | None
     recommendedPlaces: list[dict[str, int]] | None
     extractOnly: bool
     forceRecommend: bool
@@ -245,14 +246,16 @@ def build_graph(extractor: Callable[[DialogueState], ExtractedConditions] = extr
 
     def recommend(state: DialogueState):
         course_id = None
+        course_ids = None
         places = None
         if state.get("courseCandidates") is not None:
-            answer, course_id = recommend_course_result(state)
+            answer, course_id, course_ids = recommend_course_result(state)
         elif state["merged"].get("lodgingId"):
             answer, places = recommend_lodging_itinerary(state)
         else:
             answer = recommender(state)
-        return {"question": answer, "confirmed": True, "recommendedCourseId": course_id, "recommendedPlaces": places}
+        return {"question": answer, "confirmed": True, "recommendedCourseId": course_id,
+                "recommendedCourseIds": course_ids, "recommendedPlaces": places}
 
     def clarify(state: DialogueState):
         # 확인으로 해석하기 어려우면 조작 방법을 다시 안내한다.

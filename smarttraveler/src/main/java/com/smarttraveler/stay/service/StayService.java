@@ -29,6 +29,7 @@ public class StayService {
         return withPhotos(stayRepository.findWithInventory());
     }
 
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public StayDetailResponse get(Long lodgingId) {
         Lodging lodging = findActive(lodgingId);
         List<Photo> photos = jdbc.query("""
@@ -48,7 +49,9 @@ public class StayService {
             """, (rs, row) -> new Photo(rs.getString("photo_url"), rs.getString("thumbnail_url")), lodgingId);
 
         return new StayDetailResponse(
-            lodging.getLodgingId(), lodging.getName(), lodging.getAddress(), lodging.getLodgingType(),
+            lodging.getLodgingId(), lodging.getRegionId(),
+            lodging.getRegion() == null ? null : lodging.getRegion().getFullName(),
+            lodging.getName(), lodging.getAddress(), lodging.getLodgingType(),
             lodging.getLatitude(), lodging.getLongitude(), lodging.getCheckinTime(), lodging.getCheckoutTime(),
             cover.thumbnailUrl(), cover.imageUrl(), lodging.getAddressDetail(), lodging.getZipcode(),
             lodging.getPhone(), lodging.getHomepageUrl(), lodging.getDescription(), lodging.getParkingInfo(),

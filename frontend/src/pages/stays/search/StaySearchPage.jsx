@@ -19,10 +19,16 @@ function readDestinationQuery() {
   return new URLSearchParams((window.location.hash.split('?')[1] || '').trim()).get('destination') || '';
 }
 
-/** #/stays?sido=..&sigungu=.. 로 지역 ID가 직접 왔는지 읽는다(이름이 비슷한 지역을 구분하기 위해 ID를 우선 쓴다). */
+/** #/stays?sido=..&sigungu=..&checkIn=..&checkOut=..&adults=..&children=..&course=.. 로 저장한 코스에서 넘어온 조건을 읽는다
+ * (이름이 비슷한 지역을 구분하기 위해 ID를 우선 쓴다). */
 function readRegionIdQuery() {
   const params = new URLSearchParams((window.location.hash.split('?')[1] || '').trim());
-  return { sido: params.get('sido') || '', sigungu: params.get('sigungu') || '' };
+  return {
+    sido: params.get('sido') || '', sigungu: params.get('sigungu') || '',
+    checkIn: params.get('checkIn') || '', checkOut: params.get('checkOut') || '',
+    adults: params.get('adults') || '', children: params.get('children') || '',
+    courseId: params.get('course') || '',
+  };
 }
 
 /** 목적지 글자(예: "부산 해운대")에 들어 있는 시·도 / 시·군·구를 찾는다. */
@@ -157,7 +163,11 @@ export default function StaySearchPage() {
         : matchRegion(data, destinationQuery);
       if (destinationQuery && !byId.sido && !matched.sido) setNotice(`'${destinationQuery}' 지역을 찾지 못해 전국 결과를 보여 드려요.`);
       const busan = data.find((item) => item.name.startsWith('부산'));
-      const start = { ...search, sido: matched.sido || (destinationQuery || byId.sido ? '' : String(busan?.regionId || '')), sigungu: matched.sigungu };
+      const start = {
+        ...search, sido: matched.sido || (destinationQuery || byId.sido ? '' : String(busan?.regionId || '')), sigungu: matched.sigungu,
+        checkIn: byId.checkIn || search.checkIn, checkOut: byId.checkOut || search.checkOut,
+        adults: byId.adults ? Number(byId.adults) : search.adults, children: byId.children ? Number(byId.children) : search.children,
+      };
       setSearch(start);
       setApplied(start);
     }).catch((error) => setStayError(error.message));

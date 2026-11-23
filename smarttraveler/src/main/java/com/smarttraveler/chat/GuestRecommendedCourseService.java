@@ -30,6 +30,10 @@ public class GuestRecommendedCourseService {
     }
 
     public Preview store(HttpSession session, long sessionId, long messageId) {
+        return store(session, sessionId, messageId, null, null);
+    }
+
+    public Preview store(HttpSession session, long sessionId, long messageId, String startDate, Long courseId) {
         synchronized (session) {
             Pending current = (Pending) session.getAttribute(PENDING);
             if (current != null && current.memberId() != null) throw conflict();
@@ -47,7 +51,7 @@ public class GuestRecommendedCourseService {
             }
             if (rows.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "보관할 추천 코스가 없습니다.");
             if (current == null || newer(messageId, current.messageId())) {
-                current = new Pending(sessionId, messageId, rows.getFirst(), null);
+                current = new Pending(sessionId, messageId, courses.guestSnapshot(rows.getFirst(), startDate, courseId), null);
                 session.setAttribute(PENDING, current);
             }
             return preview(current);
@@ -82,7 +86,11 @@ public class GuestRecommendedCourseService {
             if (owners.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "보관한 대화를 찾을 수 없습니다.");
             if (owners.getFirst() != null && owners.getFirst() != memberId) throw conflict();
             jdbc.update("UPDATE chat_sessions SET member_id=? WHERE session_id=?", memberId, claimed.sessionId());
-            return courses.save(memberId, claimed.sessionId(), claimed.messageId()).courseId();
+            JsonNode snapshot = courses.read(claimed.snapshot());
+            Long chosenCourseId = snapshot.path("candidateCourseIds").size() > 1
+                ? snapshot.path("sourceCourseId").asLong() : null;
+            return courses.save(memberId, claimed.sessionId(), claimed.messageId(),
+                snapshot.path("conditions").path("startDate").asText(null), chosenCourseId).courseId();
         });
         Objects.requireNonNull(courseId);
         synchronized (session) {

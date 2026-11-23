@@ -56,6 +56,8 @@ class CourseDialogueServiceTest {
         assertTrue(result.message().startsWith("입력하신 조건: 지역\n말씀하지 않은 조건은 기간 1박 2일 · 어른 1명으로 잡았어요"), result.message());
         assertTrue(result.message().contains("동행·교통은 상관없음"), result.message());
         assertTrue(result.message().contains("높은 품질의 답변을 원하시면 추가 조건을 입력해 주세요."), result.message());
+        assertTrue(result.message().contains("출발 날짜 정보"));
+        assertFalse(result.message().contains("여행 지역 정보"));
         ArgumentCaptor<ObjectNode> used = ArgumentCaptor.forClass(ObjectNode.class);
         verify(ai).process(eq("부산 가고 싶어"), any(), used.capture(), eq(List.of()), eq(rows), anyMap(), eq(PythonAiClient.Mode.FORCE_RECOMMEND), anyBoolean());
         assertEquals(2, used.getValue().path("durationDays").asInt());
@@ -202,6 +204,59 @@ class CourseDialogueServiceTest {
     }
 
     @Test
+    void bookingUsesSelectedLodgingAndKeepsItForLaterMessages() {
+        ObjectNode selected = mapper.createObjectNode();
+        stored(null);
+        when(lodgings.findById(21L)).thenReturn(Map.of(
+            "name", "같은 이름 숙소", "regionId", 17L, "regionName", "부산광역시 해운대구"));
+        when(places.regionId(any())).thenReturn(17L);
+        var rows = List.of(Map.<String, Object>of("courseId", 20L));
+        when(courses.find(any(), any())).thenReturn(rows);
+        when(ai.process(anyString(), any(), any(), anyList(), eq(rows), anyMap(), eq(PythonAiClient.Mode.FORCE_RECOMMEND), anyBoolean()))
+            .thenReturn(new PythonAiClient.Result("추천 1 · 코스 #20", true, 20L));
+
+        var first = service.processResult(1, "숙소: 같은 이름 숙소, 지역: 다른 지역", Map.of(), 21L);
+
+        assertEquals(20L, first.recommendedCourseId(), first.message());
+        assertEquals(17L, first.recommendConditions().path("regionId").asLong());
+        assertEquals(2, first.recommendConditions().path("durationDays").asInt());
+        var saved = ArgumentCaptor.forClass(String.class);
+        verify(jdbc).update(contains("INSERT INTO chat_session_conditions"), eq(1L), saved.capture());
+        selected.setAll((ObjectNode) mapper.readTree(saved.getValue()));
+        assertEquals(21L, selected.path("lodgingId").asLong());
+        verify(lodgings, never()).findByName(anyString());
+
+        stored(selected);
+        extractReturns("질문", Map.of("durationDays", 3));
+        var next = service.processResult(1, "3일로 바꿔줘", Map.of());
+        assertEquals(21L, next.recommendConditions().path("lodgingId").asLong());
+        assertEquals(3, next.recommendConditions().path("durationDays").asInt());
+    }
+
+    @Test
+    void bookingWithNoRegionUsesNearbyPlaces() {
+        stored(null);
+        var latitude = java.math.BigDecimal.valueOf(35);
+        var longitude = java.math.BigDecimal.valueOf(129);
+        when(lodgings.findById(21L)).thenReturn(Map.of("name", "숙소", "latitude", latitude, "longitude", longitude));
+        var nearby = List.of(Map.<String, Object>of("placeId", 1L), Map.<String, Object>of("placeId", 2L), Map.<String, Object>of("placeId", 3L));
+        when(places.findNearLodging(latitude, longitude)).thenReturn(nearby);
+        when(ai.process(anyString(), any(), any(), eq(nearby), isNull(), anyMap(), eq(PythonAiClient.Mode.FORCE_RECOMMEND), anyBoolean()))
+            .thenReturn(new PythonAiClient.Result("숙소 주변 일정", true));
+
+        assertTrue(service.processResult(1, "숙소: 숙소", Map.of(), 21L).message().contains("숙소 주변 일정"));
+        verify(courses, never()).find(any(), any());
+    }
+
+    @Test
+    void missingBookingLodgingAsksToSelectAgain() {
+        stored(null);
+        when(lodgings.findById(21L)).thenReturn(null);
+        assertTrue(service.processResult(1, "숙소: 없는 숙소", Map.of(), 21L).message().contains("다시 선택"));
+        verify(lodgings, never()).findByName(anyString());
+    }
+
+    @Test
     void durationNotRequiredWhenLodgingBased() {
         stored(null);
         extractReturns("질문", Map.of("lodgingName", "바다뷰펜션"));
@@ -216,7 +271,7 @@ class CourseDialogueServiceTest {
         var result = service.processResult(1, "바다뷰펜션 근처로 코스 짜줘", Map.of());
 
         assertEquals(20L, result.recommendedCourseId());
-        assertFalse(result.message().contains("출발 "));
+        assertTrue(result.message().contains("출발 날짜 정보"));
     }
 
     @Test

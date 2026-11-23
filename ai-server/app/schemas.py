@@ -42,6 +42,7 @@ class DialogueResponse(BaseModel):
     question: str = Field(min_length=1, max_length=20000)
     confirmed: bool = False
     recommendedCourseId: int | None = Field(default=None, gt=0)
+    recommendedCourseIds: list[int] | None = None
     recommendedPlaces: list[dict[str, int]] | None = None
 
 

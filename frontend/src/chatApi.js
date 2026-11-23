@@ -33,18 +33,19 @@ export const chatApi = {
     await guestCourseStorage;
     return request('/guest-course/claim', { method: 'POST' });
   },
-  storeGuestCourse: (id, messageId) => {
-    guestCourseStorage = guestCourseStorage.catch(() => {}).then(() => request(`/sessions/${encodeURIComponent(id)}/recommendations/${encodeURIComponent(messageId)}/guest`, { method: 'POST' }));
+  storeGuestCourse: (id, messageId, startDate, courseId) => {
+    guestCourseStorage = guestCourseStorage.catch(() => {}).then(() => request(`/sessions/${encodeURIComponent(id)}/recommendations/${encodeURIComponent(messageId)}/guest`, { method: 'POST', body: JSON.stringify({ startDate, courseId }) }));
     return guestCourseStorage;
   },
-  saveRecommendedCourse: (id, messageId, startDate = null) => request(`/sessions/${encodeURIComponent(id)}/recommendations/${encodeURIComponent(messageId)}/save`,
-    { method: 'POST', body: startDate ? JSON.stringify({ startDate }) : undefined }),
+  saveRecommendedCourse: (id, messageId, startDate, courseId) => request(`/sessions/${encodeURIComponent(id)}/recommendations/${encodeURIComponent(messageId)}/save`,
+    { method: 'POST', body: JSON.stringify({ startDate, courseId }) }),
   tourPlaces: (province, district, page) => {
     const query = new URLSearchParams({ province, page: String(page) });
     if (district) query.set('district', district);
     return request(`/tour/places?${query}`, { method: 'POST' });
   },
-  create: (content, regionId = null) => request('/sessions', { method: 'POST', body: JSON.stringify({ content, regionId }) }),
+  create: (content, regionId = null, lodgingId = null) => request('/sessions',
+    { method: 'POST', body: JSON.stringify({ content, regionId, lodgingId }) }),
   load: (id) => request(`/sessions/${encodeURIComponent(id)}`),
   send: (id, content, regionId = null) => request(`/sessions/${encodeURIComponent(id)}/messages`, { method: 'POST', body: JSON.stringify({ content, regionId }) }),
   // 모아 둔 대화를 DB에 저장한다(대화 종료·다른 페이지 이동).

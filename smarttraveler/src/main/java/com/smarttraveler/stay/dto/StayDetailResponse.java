@@ -6,6 +6,8 @@ import java.util.List;
 
 public record StayDetailResponse(
         Long lodgingId,
+        Long regionId,
+        String regionName,
         String name,
         String address,
         String lodgingType,

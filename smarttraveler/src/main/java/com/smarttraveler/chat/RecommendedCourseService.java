@@ -35,6 +35,26 @@ public class RecommendedCourseService {
 
     /** used = 추천에 실제로 쓴 조건(말하지 않은 값은 기본값을 채운 사본). */
     public void record(long sessionId, long messageId, long sourceId, ObjectNode used) {
+        record(sessionId, messageId, sourceId, used, List.of(sourceId));
+    }
+
+    /** candidateIds = 함께 보여준 추천 코스 전체(1위부터), 화면에서 저장할 코스를 고를 때 쓴다. */
+    public void record(long sessionId, long messageId, long sourceId, ObjectNode used, List<Long> candidateIds) {
+        buffer.setRecommendation(sessionId, messageId, mapper.writeValueAsString(buildSnapshot(sourceId, used, candidateIds)));
+    }
+
+    private ObjectNode reselect(ObjectNode snapshot, Long chosenCourseId) {
+        if (snapshot.hasNonNull("savedCourseId")) throw alreadySavedError();
+        if (chosenCourseId == null) return snapshot;
+        List<Long> candidateIds = new java.util.ArrayList<>();
+        snapshot.path("candidateCourseIds").forEach(id -> candidateIds.add(id.asLong()));
+        if (!candidateIds.contains(chosenCourseId)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "선택한 코스가 추천 목록에 없습니다.");
+        if (snapshot.path("sourceCourseId").asLong() == chosenCourseId) return snapshot;
+        ObjectNode conditions = ((ObjectNode) snapshot.path("conditions")).deepCopy();
+        return buildSnapshot(chosenCourseId, conditions, candidateIds);
+    }
+
+    private ObjectNode buildSnapshot(long sourceId, ObjectNode used, List<Long> candidateIds) {
         ObjectNode conditions = used;
         Integer requested = conditions.path("durationDays").isIntegralNumber() ? conditions.path("durationDays").asInt() : null;
         var rows = candidates.findCourse(sourceId, requested);
@@ -50,6 +70,8 @@ public class RecommendedCourseService {
         snapshot.set("regionId", mapper.valueToTree(info.get("regionId")));
         snapshot.put("generationMethodId", jdbc.queryForObject("SELECT generation_method_id FROM course WHERE id=?", Integer.class, sourceId));
         snapshot.set("conditions", conditions);
+        var candidateArray = snapshot.putArray("candidateCourseIds");
+        candidateIds.forEach(candidateArray::add);
         var itinerary = snapshot.putArray("itinerary");
         for (int day = 1; day <= duration; day++) {
             int dayNo = day;
@@ -67,7 +89,7 @@ public class RecommendedCourseService {
                 place.put("place_name", visit.get("placeName").toString());
             }
         }
-        buffer.setRecommendation(sessionId, messageId, mapper.writeValueAsString(snapshot));
+        return snapshot;
     }
 
     /** 기존 코스가 없을 때 숙소 주변 장소로 새로 짠 일정을 메시지에 붙인다(원본 코스 없음, 숙소 ID를 대신 기록). */
@@ -78,7 +100,7 @@ public class RecommendedCourseService {
         snapshot.putNull("sourceCourseId");
         snapshot.put("lodgingId", used.path("lodgingId").asLong());
         snapshot.put("title", used.path("lodgingName").asText("숙소") + " 주변 코스");
-        snapshot.put("destination", used.path("regionName").asText(""));
+        snapshot.put("destination", used.path("regionName").asText(used.path("lodgingName").asText("")));
         snapshot.set("regionId", used.path("regionId"));
         snapshot.put("generationMethodId", 2);
         snapshot.set("conditions", used);
@@ -109,14 +131,18 @@ public class RecommendedCourseService {
 
     @Transactional
     public SavedResult save(long memberId, long sessionId, long messageId, String startDateOverride) {
+        return save(memberId, sessionId, messageId, startDateOverride, null);
+    }
+
+    @Transactional
+    public SavedResult save(long memberId, long sessionId, long messageId, String startDateOverride, Long chosenCourseId) {
         // 아직 저장 전(보관함) 메시지: 대화 주인이 이 회원인지 확인하고 메모리의 추천 정보를 쓴다.
         if (buffer.isPending(sessionId, messageId)) {
             var owner = jdbc.query("SELECT member_id FROM chat_sessions WHERE session_id=? FOR UPDATE", (rs, row) -> rs.getObject(1, Long.class), sessionId);
             String pending = buffer.pendingRecommendation(sessionId, messageId).orElse(null);
             if (owner.isEmpty() || !Long.valueOf(memberId).equals(owner.getFirst()) || pending == null)
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "저장할 추천 코스가 없습니다.");
-            ObjectNode snapshot = (ObjectNode) mapper.readTree(pending);
-            if (snapshot.hasNonNull("savedCourseId")) throw alreadySavedError();
+            ObjectNode snapshot = reselect((ObjectNode) mapper.readTree(pending), chosenCourseId);
             applyStartDateOverride(snapshot, startDateOverride);
             rejectDuplicate(memberId, snapshot);
             SavedResult saved = persist(memberId, snapshot, messageId);
@@ -131,8 +157,7 @@ public class RecommendedCourseService {
               AND m.recommendation_json IS NOT NULL FOR UPDATE
             """, (rs, row) -> rs.getString(1), messageId, sessionId, memberId);
         if (rows.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "저장할 추천 코스가 없습니다.");
-        ObjectNode snapshot = (ObjectNode) mapper.readTree(rows.getFirst());
-        if (snapshot.hasNonNull("savedCourseId")) throw alreadySavedError();
+        ObjectNode snapshot = reselect((ObjectNode) mapper.readTree(rows.getFirst()), chosenCourseId);
         applyStartDateOverride(snapshot, startDateOverride);
         rejectDuplicate(memberId, snapshot);
         SavedResult saved = persist(memberId, snapshot, messageId);
@@ -148,6 +173,12 @@ public class RecommendedCourseService {
         if (startDateOverride == null || startDateOverride.isBlank())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "출발일을 입력해 주세요.");
         conditions.put("startDate", java.time.LocalDate.parse(startDateOverride).toString());
+    }
+
+    String guestSnapshot(String storedSnapshot, String startDate, Long courseId) {
+        ObjectNode snapshot = reselect((ObjectNode) mapper.readTree(storedSnapshot), courseId);
+        if (startDate != null) applyStartDateOverride(snapshot, startDate);
+        return mapper.writeValueAsString(snapshot);
     }
 
     /** 추천 스냅샷을 회원의 course/course_day로 영속화하고 새 course id와 지역 정보를 반환한다. */

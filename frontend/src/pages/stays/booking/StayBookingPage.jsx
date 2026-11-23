@@ -74,7 +74,10 @@ export default function StayBookingPage({ onStart, busy = false }) {
     setStartingCourse(true);
     setCourseError('');
     try {
-      await onStart(courseMessage);
+      const message = stay.regionName
+        ? `숙소: ${courseMessage}, 지역: ${stay.regionName}`
+        : `숙소: ${courseMessage}`;
+      await onStart(message, stay.regionId ?? null, stay.lodgingId);
     } catch {
       setCourseError('대화를 시작하지 못했어요. 잠시 후 다시 시도해 주세요.');
     } finally {
