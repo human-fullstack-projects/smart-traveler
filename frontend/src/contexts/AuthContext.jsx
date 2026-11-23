@@ -127,7 +127,7 @@ export function AuthProvider({ children }) {
 
   function updateMemberProfile(expectedMemberId, changes) {
     setMember(previous => previous?.memberId === expectedMemberId
-      ? { ...previous, nickname: changes.nickname } : previous);
+      ? { ...previous, ...changes } : previous);
   }
 
   async function logout() {

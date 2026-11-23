@@ -4,6 +4,7 @@ import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -35,9 +36,13 @@ public class RecommendedCourseService {
     /** used = 추천에 실제로 쓴 조건(말하지 않은 값은 기본값을 채운 사본). */
     public void record(long sessionId, long messageId, long sourceId, ObjectNode used) {
         ObjectNode conditions = used;
-        var rows = candidates.findCourse(sourceId, conditions.path("durationDays").asInt());
+        Integer requested = conditions.path("durationDays").isIntegralNumber() ? conditions.path("durationDays").asInt() : null;
+        var rows = candidates.findCourse(sourceId, requested);
         if (rows.isEmpty()) throw new ResponseStatusException(HttpStatus.CONFLICT, "추천 코스를 다시 확인해 주세요.");
         var info = rows.getFirst();
+        // 기간을 말하지 않고 기존 코스를 추천한 경우, 그 코스의 실제 일수를 저장용 조건에 채운다.
+        int duration = requested != null ? requested : rows.stream().mapToInt(row -> ((Number) row.get("dayNo")).intValue()).max().orElse(0);
+        conditions.put("durationDays", duration);
         ObjectNode snapshot = mapper.createObjectNode();
         snapshot.put("sourceCourseId", sourceId);
         snapshot.put("title", info.get("title").toString());
@@ -46,7 +51,6 @@ public class RecommendedCourseService {
         snapshot.put("generationMethodId", jdbc.queryForObject("SELECT generation_method_id FROM course WHERE id=?", Integer.class, sourceId));
         snapshot.set("conditions", conditions);
         var itinerary = snapshot.putArray("itinerary");
-        int duration = conditions.path("durationDays").asInt();
         for (int day = 1; day <= duration; day++) {
             int dayNo = day;
             var visits = rows.stream().filter(row -> ((Number) row.get("dayNo")).intValue() == dayNo).toList();
@@ -66,8 +70,45 @@ public class RecommendedCourseService {
         buffer.setRecommendation(sessionId, messageId, mapper.writeValueAsString(snapshot));
     }
 
+    /** 기존 코스가 없을 때 숙소 주변 장소로 새로 짠 일정을 메시지에 붙인다(원본 코스 없음, 숙소 ID를 대신 기록). */
+    public void recordLodgingItinerary(long sessionId, long messageId, ObjectNode used, List<Map<String, Object>> places) {
+        int actualDays = places.stream().mapToInt(place -> (Integer) place.get("dayNo")).max().orElse(1);
+        used.put("durationDays", actualDays);
+        ObjectNode snapshot = mapper.createObjectNode();
+        snapshot.putNull("sourceCourseId");
+        snapshot.put("lodgingId", used.path("lodgingId").asLong());
+        snapshot.put("title", used.path("lodgingName").asText("숙소") + " 주변 코스");
+        snapshot.put("destination", used.path("regionName").asText(""));
+        snapshot.set("regionId", used.path("regionId"));
+        snapshot.put("generationMethodId", 2);
+        snapshot.set("conditions", used);
+        var itinerary = snapshot.putArray("itinerary");
+        Map<Integer, List<Map<String, Object>>> byDay = new java.util.TreeMap<>();
+        for (var place : places) byDay.computeIfAbsent((Integer) place.get("dayNo"), key -> new java.util.ArrayList<>()).add(place);
+        for (var entry : byDay.entrySet()) {
+            ObjectNode day = itinerary.addObject();
+            day.put("day_no", entry.getKey());
+            day.put("theme", "숙소 주변 관광");
+            var visits = day.putArray("visits");
+            for (var place : entry.getValue()) {
+                ObjectNode visit = visits.addObject();
+                visit.put("seq", (Integer) place.get("seq"));
+                visit.put("place_id", ((Number) place.get("placeId")).longValue());
+                visit.put("place_name", (String) place.get("name"));
+            }
+        }
+        buffer.setRecommendation(sessionId, messageId, mapper.writeValueAsString(snapshot));
+    }
+
+    public record SavedResult(long courseId, Long sidoId, Long sigunguId, String regionName) {}
+
     @Transactional
-    public long save(long memberId, long sessionId, long messageId) {
+    public SavedResult save(long memberId, long sessionId, long messageId) {
+        return save(memberId, sessionId, messageId, null);
+    }
+
+    @Transactional
+    public SavedResult save(long memberId, long sessionId, long messageId, String startDateOverride) {
         // 아직 저장 전(보관함) 메시지: 대화 주인이 이 회원인지 확인하고 메모리의 추천 정보를 쓴다.
         if (buffer.isPending(sessionId, messageId)) {
             var owner = jdbc.query("SELECT member_id FROM chat_sessions WHERE session_id=? FOR UPDATE", (rs, row) -> rs.getObject(1, Long.class), sessionId);
@@ -76,11 +117,12 @@ public class RecommendedCourseService {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "저장할 추천 코스가 없습니다.");
             ObjectNode snapshot = (ObjectNode) mapper.readTree(pending);
             if (snapshot.hasNonNull("savedCourseId")) throw alreadySavedError();
+            applyStartDateOverride(snapshot, startDateOverride);
             rejectDuplicate(memberId, snapshot);
-            long courseId = persist(memberId, snapshot, messageId);
-            snapshot.put("savedCourseId", courseId);
+            SavedResult saved = persist(memberId, snapshot, messageId);
+            snapshot.put("savedCourseId", saved.courseId());
             buffer.setRecommendation(sessionId, messageId, mapper.writeValueAsString(snapshot));
-            return courseId;
+            return saved;
         }
         messageId = buffer.resolve(sessionId, messageId);
         var rows = jdbc.query("""
@@ -91,27 +133,40 @@ public class RecommendedCourseService {
         if (rows.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "저장할 추천 코스가 없습니다.");
         ObjectNode snapshot = (ObjectNode) mapper.readTree(rows.getFirst());
         if (snapshot.hasNonNull("savedCourseId")) throw alreadySavedError();
+        applyStartDateOverride(snapshot, startDateOverride);
         rejectDuplicate(memberId, snapshot);
-        long courseId = persist(memberId, snapshot, messageId);
-        snapshot.put("savedCourseId", courseId);
+        SavedResult saved = persist(memberId, snapshot, messageId);
+        snapshot.put("savedCourseId", saved.courseId());
         jdbc.update("UPDATE chat_messages SET recommendation_json=? WHERE message_id=?", mapper.writeValueAsString(snapshot), messageId);
-        return courseId;
+        return saved;
     }
 
-    /** 추천 스냅샷을 회원의 course/course_day로 영속화하고 새 course id를 반환한다. */
-    private long persist(long memberId, ObjectNode snapshot, long messageId) {
+    /** 출발일 없이 추천한 일정을 저장할 때 날짜를 받아 채운다. */
+    private void applyStartDateOverride(ObjectNode snapshot, String startDateOverride) {
+        ObjectNode conditions = (ObjectNode) snapshot.path("conditions");
+        if (!conditions.path("startDate").asText("").isBlank()) return;
+        if (startDateOverride == null || startDateOverride.isBlank())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "출발일을 입력해 주세요.");
+        conditions.put("startDate", java.time.LocalDate.parse(startDateOverride).toString());
+    }
+
+    /** 추천 스냅샷을 회원의 course/course_day로 영속화하고 새 course id와 지역 정보를 반환한다. */
+    private SavedResult persist(long memberId, ObjectNode snapshot, long messageId) {
         JsonNode conditions = snapshot.path("conditions");
         LocalDate start = LocalDate.parse(conditions.path("startDate").asText());
         LocalDate end = start.plusDays(conditions.path("durationDays").asInt() - 1L);
         ObjectNode metadata = mapper.createObjectNode();
-        metadata.put("source_course_id", snapshot.path("sourceCourseId").asLong());
+        if (snapshot.hasNonNull("sourceCourseId")) metadata.put("source_course_id", snapshot.path("sourceCourseId").asLong());
+        else metadata.putNull("source_course_id");
+        if (snapshot.hasNonNull("lodgingId")) metadata.put("lodging_id", snapshot.path("lodgingId").asLong());
         metadata.put("chat_message_id", messageId); metadata.set("itinerary", snapshot.path("itinerary"));
+        Long regionId = snapshot.path("regionId").isIntegralNumber() ? snapshot.path("regionId").asLong() : null;
         Object[] values = {memberId, snapshot.path("destination").asText(), start, end,
             conditions.path("adults").asInt(), conditions.path("children").asInt(),
             mapper.writeValueAsString(conditions.path("fixedEvents").isArray() ? conditions.path("fixedEvents") : List.of()),
             mapper.writeValueAsString(conditions), snapshot.path("title").asText(), snapshot.path("generationMethodId").asInt(),
             conditions.path("companionType").asText(), conditions.path("transportType").asText(), conditions.path("flowType").asText("COURSE_FIRST"),
-            mapper.writeValueAsString(metadata), snapshot.path("regionId").isNumber() ? snapshot.path("regionId").asLong() : null};
+            mapper.writeValueAsString(metadata), regionId};
         var key = new GeneratedKeyHolder();
         jdbc.update(connection -> {
             var statement = connection.prepareStatement("""
@@ -136,7 +191,12 @@ public class RecommendedCourseService {
             long courseDayId = Objects.requireNonNull(dayKey.getKey()).longValue();
             for (JsonNode visit : day.path("visits")) insertActivity(courseDayId, visit);
         }
-        return courseId;
+        if (regionId == null) return new SavedResult(courseId, null, null, snapshot.path("destination").asText());
+        var region = jdbc.queryForMap("SELECT region_id, parent_region_id, region_level, full_name FROM region WHERE region_id=?", regionId);
+        boolean isSido = "SIDO".equals(region.get("region_level"));
+        Long sidoId = isSido ? regionId : (Long) region.get("parent_region_id");
+        Long sigunguId = isSido ? null : regionId;
+        return new SavedResult(courseId, sidoId, sigunguId, (String) region.get("full_name"));
     }
 
     /** 추천 방문지를 activity 행으로도 저장해 마이페이지 상세·지도가 장소 좌표를 쓸 수 있게 한다. 시간은 10시부터 2시간 간격의 기본값이다. */
@@ -154,14 +214,16 @@ public class RecommendedCourseService {
             """, courseDayId, seq, startTime, name, name, placeId);
     }
 
-    /** 같은 원본 코스를 같은 출발일로 이미 저장했으면 막는다 (피드백: 이미 추천된 코스 중복 적용 안 되게). */
+    /** 같은 원본 코스(또는 같은 숙소 기준 일정)를 같은 출발일로 이미 저장했으면 막는다 (피드백: 이미 추천된 코스 중복 적용 안 되게). */
     private void rejectDuplicate(long memberId, ObjectNode snapshot) {
+        boolean lodgingBased = snapshot.hasNonNull("lodgingId");
+        String column = lodgingBased ? "$.lodging_id" : "$.source_course_id";
+        String value = lodgingBased ? String.valueOf(snapshot.path("lodgingId").asLong()) : String.valueOf(snapshot.path("sourceCourseId").asLong());
         Integer count = jdbc.queryForObject("""
             SELECT COUNT(*) FROM course
             WHERE member_no=? AND deleted_at IS NULL AND start_date=?
-              AND JSON_VALUE(condition_meta,'$.source_course_id')=?
-            """, Integer.class, memberId, snapshot.path("conditions").path("startDate").asText(),
-            String.valueOf(snapshot.path("sourceCourseId").asLong()));
+              AND JSON_VALUE(condition_meta,?)=?
+            """, Integer.class, memberId, snapshot.path("conditions").path("startDate").asText(), column, value);
         if (count != null && count > 0) throw alreadySavedError();
     }
 

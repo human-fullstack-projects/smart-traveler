@@ -168,7 +168,8 @@ function Reservations() {
         checkOut: item.checkOut,
         people: `${item.guestCount}명 · 객실 ${item.roomQuantity}개`,
         amount: item.totalPrice,
-        phone: item.bookerPhone,
+        contact: item.bookerEmail || item.bookerPhone,
+        visitorName: item.visitorName || item.bookerName,
         memo: item.requestMemo,
         status: reservationLabels[item.status] || item.status,
       }))); })
@@ -282,7 +283,8 @@ function Reservations() {
               <div><dt>체크인</dt><dd>{selected.checkIn}</dd></div>
               <div><dt>체크아웃</dt><dd>{selected.checkOut}</dd></div>
               <div><dt>결제 금액</dt><dd>{formatWon(selected.amount)}</dd></div>
-              <div><dt>연락처</dt><dd>{selected.phone}</dd></div>
+              <div><dt>연락처</dt><dd>{selected.contact}</dd></div>
+              <div><dt>방문자</dt><dd>{selected.visitorName}</dd></div>
               {selected.memo && <div><dt>요청사항</dt><dd>{selected.memo}</dd></div>}
             </dl>
           </aside>

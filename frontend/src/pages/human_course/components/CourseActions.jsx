@@ -48,9 +48,9 @@ export default function CourseActions({ course, execute }) {
 
   return <section className="panel"><div className="panel-heading"><h2>게시글 기능</h2></div>
     <div className="actions">
-      <button className="primary" type="button" onClick={changeLike} disabled={liking} aria-pressed={course.likedByMe} aria-busy={liking}>{liking ? '처리 중…' : course.likedByMe ? '좋아요 취소' : '좋아요 누르기'}</button>
+      <button className="primary" type="button" onClick={changeLike} disabled={course.mine || liking} aria-pressed={course.likedByMe} aria-busy={liking}>{liking ? '처리 중…' : course.likedByMe ? '좋아요 취소' : '좋아요 누르기'}</button>
       <span className="muted" aria-live="polite">좋아요 {course.likes}개</span>
-      {!course.mine && !course.reportedByMe && <button type="button" aria-haspopup="dialog" onClick={openReport} disabled={liking}>게시글 신고</button>}
+      {!course.reportedByMe && <button type="button" aria-haspopup="dialog" onClick={openReport} disabled={course.mine || liking}>게시글 신고</button>}
     </div>
     {course.mine && <p className="right-action"><a className="button btn-full" href={`#/human-courses/${course.id}/edit`}>저장된 여행 수정하기 →</a></p>}
     {course.mine && <div className="delete-course"><button type="button" onClick={() => setDeleting(true)}>내 게시글 삭제</button>{deleting && <div className="note" role="group" aria-label="게시글 삭제 확인"><p>게시글과 댓글을 삭제할까요? 삭제 후에는 되돌릴 수 없습니다.</p><div className="actions"><button type="button" onClick={async () => { const result = await execute?.({ type: 'delete', id: course.id }); if (result?.error) setNotice(result.error); else if (result?.id) window.location.hash = '/human-courses'; }}>삭제 확인</button><button type="button" onClick={() => setDeleting(false)}>취소</button></div></div>}</div>}

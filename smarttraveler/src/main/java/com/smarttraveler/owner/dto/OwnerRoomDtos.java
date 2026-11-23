@@ -30,5 +30,6 @@ public final class OwnerRoomDtos {
 
     public record OwnerReservation(long reservationId, String reservationNo, String bookerName, String bookerPhone,
                                    int guestCount, int roomQuantity, LocalDate checkIn, LocalDate checkOut, int totalPrice,
-                                   String status, String requestMemo, String roomName, String lodgingName) {}
+                                   String status, String requestMemo, String roomName, String lodgingName,
+                                   String bookerEmail, String visitorName) {}
 }

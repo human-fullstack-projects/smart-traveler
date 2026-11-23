@@ -2,6 +2,7 @@ package com.smarttraveler.reservation.service;
 
 import com.smarttraveler.admin.repository.RoomRepository;
 import com.smarttraveler.auth.repository.MemberRepository;
+import com.smarttraveler.domain.entity.Member;
 import com.smarttraveler.domain.entity.RoomReservation;
 import com.smarttraveler.reservation.dto.CreateReservationRequest;
 import com.smarttraveler.reservation.dto.ReservationResponse;
@@ -33,12 +34,21 @@ public class ReservationService {
 
     @Transactional
     public ReservationResponse create(CreateReservationRequest request, Authentication auth) {
-        Long memberId = memberId(auth);
+        Member member = member(auth);
+        String bookerName = member.getNickname() == null || member.getNickname().isBlank()
+                ? member.getLoginId() : member.getNickname().strip();
+        if (member.getEmail() == null || member.getEmail().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "내 정보에 이메일을 등록해 주세요.");
+        }
+        String visitorName = request.visitorName() == null ? bookerName : request.visitorName().strip();
+        if (visitorName.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "방문자 이름을 입력해 주세요.");
+        }
         inventory.validateDates(request.checkIn(), request.checkOut());
         var room = rooms.findById(request.roomId())
                 .filter(item -> Boolean.TRUE.equals(item.getIsActive()))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        stays.get(room.getLodgingId());
+        stays.requireActive(room.getLodgingId());
         if (request.guestCount() > room.getMaxCapacity()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "객실 정원을 초과했습니다.");
         }
@@ -54,13 +64,15 @@ public class ReservationService {
 
         RoomReservation reservation = new RoomReservation();
         reservation.setReservationNo("ST-" + UUID.randomUUID());
-        reservation.setMemberId(memberId);
+        reservation.setMemberId(member.getMemberId());
         reservation.setRoomId(room.getRoomId());
         reservation.setCheckinDate(request.checkIn());
         reservation.setCheckoutDate(request.checkOut());
         reservation.setGuestCount(request.guestCount());
-        reservation.setBookerName(request.bookerName().strip());
-        reservation.setBookerPhone(request.bookerPhone().strip());
+        reservation.setBookerName(bookerName);
+        reservation.setBookerPhone("");
+        reservation.setBookerEmail(member.getEmail().strip());
+        reservation.setVisitorName(visitorName);
         reservation.setRequestMemo(request.requestMemo());
         reservation.setRoomQuantity(1);
         reservation.setStatus("PENDING_PAYMENT");
@@ -97,8 +109,12 @@ public class ReservationService {
     }
 
     private Long memberId(Authentication auth) {
+        return member(auth).getMemberId();
+    }
+
+    private Member member(Authentication auth) {
         return members.findByLoginId(auth.getName())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED)).getMemberId();
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
     }
 
     private OffsetDateTime holdExpiresAt(Long reservationId) {

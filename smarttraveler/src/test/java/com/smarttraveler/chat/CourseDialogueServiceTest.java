@@ -20,8 +20,9 @@ class CourseDialogueServiceTest {
     private final PythonAiClient ai = mock(PythonAiClient.class);
     private final StoredPlaceCandidates places = mock(StoredPlaceCandidates.class);
     private final StoredCourseCandidates courses = mock(StoredCourseCandidates.class);
+    private final StoredLodgingCandidates lodgings = mock(StoredLodgingCandidates.class);
     private final ConditionDialogueService service = new ConditionDialogueService(jdbc, mapper,
-        new ChatMessageBuffer(jdbc, mock(org.springframework.transaction.PlatformTransactionManager.class)), ai, places, courses, true);
+        new ChatMessageBuffer(jdbc, mock(org.springframework.transaction.PlatformTransactionManager.class)), ai, places, courses, lodgings, true);
 
     @SuppressWarnings("unchecked")
     private void stored(ObjectNode conditions) {
@@ -45,22 +46,70 @@ class CourseDialogueServiceTest {
         when(places.regionId(any())).thenReturn(6L);
         var rows = List.of(Map.<String, Object>of("courseId", 11L));
         when(courses.find(any(), any())).thenReturn(rows);
-        when(ai.process(anyString(), any(), any(), anyList(), any(), anyMap(), eq(PythonAiClient.Mode.FORCE_RECOMMEND)))
+        when(ai.process(anyString(), any(), any(), anyList(), any(), anyMap(), eq(PythonAiClient.Mode.FORCE_RECOMMEND), anyBoolean()))
             .thenReturn(new PythonAiClient.Result("추천 1 · 코스 #11", true, 11L));
 
         var result = service.processResult(1, "부산 가고 싶어", Map.of());
 
         assertEquals(11L, result.recommendedCourseId());
         assertTrue(result.message().contains("추천 1 · 코스 #11"));
-        assertTrue(result.message().startsWith("말씀하지 않은 조건은 기간 1박 2일"), result.message());
+        assertTrue(result.message().startsWith("입력하신 조건: 지역\n말씀하지 않은 조건은 기간 1박 2일 · 어른 1명으로 잡았어요"), result.message());
         assertTrue(result.message().contains("동행·교통은 상관없음"), result.message());
+        assertTrue(result.message().contains("높은 품질의 답변을 원하시면 추가 조건을 입력해 주세요."), result.message());
         ArgumentCaptor<ObjectNode> used = ArgumentCaptor.forClass(ObjectNode.class);
-        verify(ai).process(eq("부산 가고 싶어"), any(), used.capture(), eq(List.of()), eq(rows), anyMap(), eq(PythonAiClient.Mode.FORCE_RECOMMEND));
+        verify(ai).process(eq("부산 가고 싶어"), any(), used.capture(), eq(List.of()), eq(rows), anyMap(), eq(PythonAiClient.Mode.FORCE_RECOMMEND), anyBoolean());
         assertEquals(2, used.getValue().path("durationDays").asInt());
         assertEquals(1, used.getValue().path("adults").asInt());
-        assertFalse(used.getValue().path("startDate").asText().isBlank());
+        assertTrue(used.getValue().path("startDate").asText().isBlank());
         assertEquals("부산", result.recommendConditions().path("regionName").asText());
         verify(jdbc).update(contains("confirmed=TRUE"), eq(1L));
+    }
+
+    @Test
+    void companionAloneSatisfiesHeadcountWithoutDefaultNote() {
+        stored(null);
+        extractReturns("질문", Map.of("regionName", "부산", "companionType", "FRIENDS"));
+        when(places.regionId(any())).thenReturn(6L);
+        var rows = List.of(Map.<String, Object>of("courseId", 12L));
+        when(courses.find(any(), any())).thenReturn(rows);
+        when(ai.process(anyString(), any(), any(), anyList(), any(), anyMap(), eq(PythonAiClient.Mode.FORCE_RECOMMEND), anyBoolean()))
+            .thenReturn(new PythonAiClient.Result("추천 1 · 코스 #12", true, 12L));
+
+        var result = service.processResult(1, "친구랑 부산 갈래", Map.of());
+
+        assertTrue(result.message().contains("입력하신 조건: 지역, 동행, 인원수"), result.message());
+        assertFalse(result.message().contains("어른 1명"), result.message());
+        assertEquals(1, result.recommendConditions().path("adults").asInt());
+    }
+
+    @Test
+    void showAllMatchesIsTrueOnlyWhenDurationAndHeadcountAreBothMissing() {
+        stored(null);
+        extractReturns("질문", Map.of("regionName", "부산"));
+        when(places.regionId(any())).thenReturn(6L);
+        var rows = List.of(Map.<String, Object>of("courseId", 30L));
+        when(courses.find(any(), any())).thenReturn(rows);
+        when(ai.process(anyString(), any(), any(), anyList(), any(), anyMap(), eq(PythonAiClient.Mode.FORCE_RECOMMEND), anyBoolean()))
+            .thenReturn(new PythonAiClient.Result("추천 1 · 코스 #30", true, 30L));
+
+        service.processResult(1, "부산 가고 싶어", Map.of());
+
+        verify(ai).process(anyString(), any(), any(), anyList(), eq(rows), anyMap(), eq(PythonAiClient.Mode.FORCE_RECOMMEND), eq(true));
+    }
+
+    @Test
+    void showAllMatchesIsFalseWhenHeadcountGivenViaCompanion() {
+        stored(null);
+        extractReturns("질문", Map.of("regionName", "부산", "companionType", "FRIENDS"));
+        when(places.regionId(any())).thenReturn(6L);
+        var rows = List.of(Map.<String, Object>of("courseId", 31L));
+        when(courses.find(any(), any())).thenReturn(rows);
+        when(ai.process(anyString(), any(), any(), anyList(), any(), anyMap(), eq(PythonAiClient.Mode.FORCE_RECOMMEND), anyBoolean()))
+            .thenReturn(new PythonAiClient.Result("추천 1 · 코스 #31", true, 31L));
+
+        service.processResult(1, "친구랑 부산 갈래", Map.of());
+
+        verify(ai).process(anyString(), any(), any(), anyList(), eq(rows), anyMap(), eq(PythonAiClient.Mode.FORCE_RECOMMEND), eq(false));
     }
 
     @Test
@@ -71,10 +120,10 @@ class CourseDialogueServiceTest {
         when(courses.find(any(), any())).thenReturn(List.of());
         var placeRows = List.of(Map.<String, Object>of("placeId", 7L));
         when(places.find(any())).thenReturn(placeRows);
-        when(ai.process(anyString(), any(), any(), anyList(), any(), anyMap(), eq(PythonAiClient.Mode.FORCE_RECOMMEND)))
+        when(ai.process(anyString(), any(), any(), anyList(), any(), anyMap(), eq(PythonAiClient.Mode.FORCE_RECOMMEND), anyBoolean()))
             .thenReturn(new PythonAiClient.Result("관광지 추천", true));
-        assertTrue(service.processResult(1, "부산 2일", Map.of()).message().endsWith("관광지 추천"));
-        verify(ai).process(anyString(), any(), any(), eq(placeRows), isNull(), anyMap(), eq(PythonAiClient.Mode.FORCE_RECOMMEND));
+        assertTrue(service.processResult(1, "부산 2일", Map.of()).message().contains("관광지 추천"));
+        verify(ai).process(anyString(), any(), any(), eq(placeRows), isNull(), anyMap(), eq(PythonAiClient.Mode.FORCE_RECOMMEND), anyBoolean());
     }
 
     @Test
@@ -86,7 +135,7 @@ class CourseDialogueServiceTest {
         assertTrue(result.message().contains("휴먼 추천 코스"));
         assertTrue(result.message().contains("[서울 하루](#/human-courses/3)"));
         assertTrue(result.message().contains("(#/human-courses)"));
-        verify(ai, never()).process(anyString(), any(), any(), anyList(), any(), anyMap(), eq(PythonAiClient.Mode.FORCE_RECOMMEND));
+        verify(ai, never()).process(anyString(), any(), any(), anyList(), any(), anyMap(), eq(PythonAiClient.Mode.FORCE_RECOMMEND), anyBoolean());
         verifyNoInteractions(courses);
     }
 
@@ -108,6 +157,69 @@ class CourseDialogueServiceTest {
     }
 
     @Test
+    void lodgingNameResolvesWhenOneMatch() {
+        stored(null);
+        extractReturns("질문", Map.of("lodgingName", "바다뷰펜션"));
+        when(lodgings.findByName("바다뷰펜션")).thenReturn(List.of(
+            Map.of("lodgingId", 5L, "name", "바다뷰펜션", "address", "부산 해운대구", "regionId", 6L)));
+        when(lodgings.findById(5L)).thenReturn(Map.of("lodgingId", 5L, "name", "바다뷰펜션", "address", "부산 해운대구", "regionId", 6L));
+        var rows = List.of(Map.<String, Object>of("courseId", 20L));
+        when(courses.find(any(), any())).thenReturn(rows);
+        when(ai.process(anyString(), any(), any(), anyList(), any(), anyMap(), eq(PythonAiClient.Mode.FORCE_RECOMMEND), anyBoolean()))
+            .thenReturn(new PythonAiClient.Result("추천 1 · 코스 #20", true, 20L));
+
+        var result = service.processResult(1, "바다뷰펜션 근처로 코스 짜줘", Map.of());
+
+        assertEquals(20L, result.recommendedCourseId());
+        ArgumentCaptor<ObjectNode> used = ArgumentCaptor.forClass(ObjectNode.class);
+        verify(ai).process(anyString(), any(), used.capture(), anyList(), eq(rows), anyMap(), eq(PythonAiClient.Mode.FORCE_RECOMMEND), anyBoolean());
+        assertEquals(6L, used.getValue().path("regionId").asLong());
+    }
+
+    @Test
+    void lodgingNameAsksWhenMultipleMatches() {
+        stored(null);
+        extractReturns("질문", Map.of("lodgingName", "바다뷰"));
+        when(lodgings.findByName("바다뷰")).thenReturn(List.of(
+            Map.of("lodgingId", 5L, "name", "바다뷰펜션", "address", "부산 해운대구", "regionId", 6L),
+            Map.of("lodgingId", 6L, "name", "바다뷰모텔", "address", "속초 중앙동", "regionId", 9L)));
+
+        var result = service.processResult(1, "바다뷰 근처로 코스 짜줘", Map.of());
+
+        assertTrue(result.message().contains("바다뷰펜션") && result.message().contains("바다뷰모텔"));
+        verify(ai, never()).process(anyString(), any(), any(), anyList(), any(), anyMap(), eq(PythonAiClient.Mode.FORCE_RECOMMEND), anyBoolean());
+    }
+
+    @Test
+    void lodgingNameAsksAgainWhenNoMatch() {
+        stored(null);
+        extractReturns("질문", Map.of("lodgingName", "없는숙소"));
+        when(lodgings.findByName("없는숙소")).thenReturn(List.of());
+
+        var result = service.processResult(1, "없는숙소 근처로 코스 짜줘", Map.of());
+
+        assertTrue(result.message().contains("찾지 못했어요"));
+    }
+
+    @Test
+    void durationNotRequiredWhenLodgingBased() {
+        stored(null);
+        extractReturns("질문", Map.of("lodgingName", "바다뷰펜션"));
+        when(lodgings.findByName("바다뷰펜션")).thenReturn(List.of(
+            Map.of("lodgingId", 5L, "name", "바다뷰펜션", "address", "부산 해운대구", "regionId", 6L)));
+        when(lodgings.findById(5L)).thenReturn(Map.of("lodgingId", 5L, "name", "바다뷰펜션", "address", "부산 해운대구", "regionId", 6L));
+        var rows = List.of(Map.<String, Object>of("courseId", 20L));
+        when(courses.find(any(), any())).thenReturn(rows);
+        when(ai.process(anyString(), any(), any(), anyList(), any(), anyMap(), eq(PythonAiClient.Mode.FORCE_RECOMMEND), anyBoolean()))
+            .thenReturn(new PythonAiClient.Result("추천 1 · 코스 #20", true, 20L));
+
+        var result = service.processResult(1, "바다뷰펜션 근처로 코스 짜줘", Map.of());
+
+        assertEquals(20L, result.recommendedCourseId());
+        assertFalse(result.message().contains("출발 "));
+    }
+
+    @Test
     void fillDefaultsKeepsWhatTheUserSaid() {
         ObjectNode c = mapper.createObjectNode();
         c.put("regionName", "제주"); c.put("durationDays", 3); c.put("startDate", "2026-12-10");
@@ -115,9 +227,9 @@ class CourseDialogueServiceTest {
         String note = ConditionDialogueService.fillDefaults(c);
         assertEquals(3, c.path("durationDays").asInt());
         assertEquals("2026-12-10", c.path("startDate").asText());
-        assertEquals(2, c.path("adults").asInt());
+        assertEquals(1, c.path("adults").asInt());
         assertEquals(0, c.path("children").asInt());
-        assertEquals("말씀하지 않은 조건은 어른 2명으로 잡았어요. 바꾸고 싶으면 말씀하시거나 오른쪽에서 바꿀 수 있어요.", note);
+        assertEquals("입력하신 조건: 지역, 출발일, 기간, 동행, 인원수, 교통", note);
         assertFalse(ConditionDialogueService.hasAnyCondition(mapper.createObjectNode()));
         assertTrue(ConditionDialogueService.NO_IDEA.matcher("글쎄요 딱히").find());
         assertFalse(ConditionDialogueService.NO_IDEA.matcher("부산 가고 싶어").find());

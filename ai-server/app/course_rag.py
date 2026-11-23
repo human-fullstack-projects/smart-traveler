@@ -29,7 +29,7 @@ def label(value):
     return LABELS.get(value, value) or ""
 
 
-def group_courses(rows, duration):
+def group_courses(rows, duration=None):
     grouped = {}
     invalid = set()
     for row in rows:
@@ -46,10 +46,15 @@ def group_courses(rows, duration):
         day["places"].append((row["seq"], row["placeName"]))
         day.setdefault("summaries", {})[row["placeName"]] = (row.get("placeSummary") or "").strip()
 
-    expected_days = list(range(1, duration + 1))
+    def is_valid_days(days):
+        ordered = sorted(days)
+        if duration is not None:
+            return ordered == list(range(1, duration + 1))
+        return ordered == list(range(1, len(ordered) + 1))
+
     valid = [
         course for course_id, course in grouped.items()
-        if course_id not in invalid and sorted(course["days"]) == expected_days
+        if course_id not in invalid and is_valid_days(course["days"])
     ]
     result = []
     for course in valid:
@@ -88,7 +93,7 @@ def cosine_similarity(left, right):
     return dot / norm if norm else 0
 
 
-def rank_courses(courses, similarities, effective, excluded):
+def rank_courses(courses, similarities, effective, excluded, show_all_matches=False):
     relevant = sorted(zip(courses, similarities, strict=True),
                       key=lambda pair: (-pair[1], pair[0]["info"]["courseId"]))
     shortlist = [pair for pair in relevant if satisfies_exclusions(pair[0]["info"], excluded)][:20]
@@ -98,7 +103,9 @@ def rank_courses(courses, similarities, effective, excluded):
         score, matched = preference_score(course["info"], relevance, effective)
         ranked.append((course, score, cosine, matched))
     ranked.sort(key=lambda item: (-item[1], -item[2], item[0]["info"]["courseId"]))
-    return ranked[:3 if effective else 1]
+    # 일정·인원을 안 받았으면 취향과 무관하게 맞는 코스를 있는 만큼(최대 3개) 보여준다.
+    limit = min(3, len(ranked)) if show_all_matches else (3 if effective else 1)
+    return ranked[:limit]
 
 
 def course_reason(course, matched):
@@ -129,10 +136,34 @@ def recommend_course(state):
     return recommend_course_result(state)[0]
 
 
+def recommend_lodging_itinerary(state):
+    """기존 코스가 없을 때 숙소 주변 관광지로 숙소→관광지→숙소 일정을 짠다.
+    경로 최적화는 하지 않고, 이미 거리순으로 정렬돼 전달된 후보를 하루 3곳씩 그대로 잘라 배분한다."""
+    conditions = state["merged"]
+    duration = conditions.get("durationDays") or 1
+    places = state.get("candidates") or []
+    per_day = 3
+    needed = per_day * duration
+    if len(places) < min(3, needed):
+        return "주변 후보가 부족해요. 반경을 넓히거나 다른 조건으로 다시 시도해 주세요.", None
+    chosen = places[:needed]
+    start = date.fromisoformat(conditions["startDate"]) if conditions.get("startDate") else None
+    lines = ["숙소 주변 관광지로 짠 일정이에요."]
+    day_chunks = [chosen[i:i + per_day] for i in range(0, len(chosen), per_day)]
+    recommended = []
+    for day_no, day_places in enumerate(day_chunks, 1):
+        header = f"{day_no}일차" + (f" ({(start + timedelta(days=day_no - 1)).isoformat()})" if start else "")
+        lines.append(header)
+        for seq, place in enumerate(day_places, 1):
+            lines.append(f"{seq}. {place['name']} — {place.get('address', '')}")
+            recommended.append({"dayNo": day_no, "seq": seq, "placeId": place["placeId"]})
+    return "\n".join(lines), recommended
+
+
 def recommend_course_result(state):
     conditions = state["merged"]
-    duration = conditions["durationDays"]
-    if duration > 4:
+    duration = conditions.get("durationDays")
+    if duration is not None and duration > 4:
         return "현재 준비된 코스는 1~4일 일정이에요. 여행 일수를 조정해 주세요.", None
 
     courses = group_courses(state["courseCandidates"], duration)
@@ -148,8 +179,9 @@ def recommend_course_result(state):
 
     preferences = ", ".join(conditions.get("preferences") or [])
     region = conditions.get("regionName") or courses[0]["info"]["destination"]
+    duration_text = f"{duration}일 여행" if duration is not None else "여행"
     query = (
-        f"{region} {duration}일 여행, "
+        f"{region} {duration_text}, "
         f"동행 {label(conditions.get('companionType'))}, "
         f"이동수단 {label(conditions.get('transportType'))}, 희망 취향 {preferences}"
     )
@@ -159,15 +191,15 @@ def recommend_course_result(state):
     embedder = OpenAIEmbeddings(model=model_name, request_timeout=12, max_retries=0)
     query_vector = embedder.embed_query(query)
     similarities = [cosine_similarity(query_vector, vector) for vector in vectors]
-    ranked = rank_courses(courses, similarities, effective, excluded)
-    start = date.fromisoformat(conditions["startDate"])
+    ranked = rank_courses(courses, similarities, effective, excluded, state.get("showAllMatches", False))
+    start = date.fromisoformat(conditions["startDate"]) if conditions.get("startDate") else None
     lines = []
     for number, (chosen, _, _, matched) in enumerate(ranked, 1):
         lines.extend([f"추천 {number} · 코스 #{chosen['info']['courseId']}", chosen["info"]["title"],
                       course_reason(chosen, matched)])
         for day_no, day in chosen["days"].items():
-            visit_date = start + timedelta(days=day_no - 1)
-            lines.append(f"{day_no}일차 ({visit_date.isoformat()})")
+            header = f"{day_no}일차 ({(start + timedelta(days=day_no - 1)).isoformat()})" if start else f"{day_no}일차"
+            lines.append(header)
             for visit, name in enumerate(day["places"], 1):
                 summary = day.get("summaries", {}).get(name, "")
                 lines.append(f"{visit}. {name}" + (f" — {summary}" if summary else ""))

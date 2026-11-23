@@ -5,7 +5,7 @@ from app import main
 
 
 def extracted(**changes):
-    values = dict(regionName=None, startDate=None, durationDays=None, adults=None, children=None, companionType=None, transportType=None, preferences=None)
+    values = dict(regionName=None, startDate=None, durationDays=None, adults=None, children=None, companionType=None, transportType=None, preferences=None, lodgingName=None)
     values.update(changes)
     return ExtractedConditions(**values)
 
@@ -72,7 +72,7 @@ def test_LangChain_OpenAI_요청을_실제_네트워크_없이_검증(monkeypatc
     requests = []
     def openai_mock(request):
         requests.append(json.loads(request.content))
-        body = {"regionName": "부산", "startDate": None, "durationDays": 3, "adults": None, "children": None, "companionType": "FRIENDS", "transportType": None, "preferences": None}
+        body = {"regionName": "부산", "startDate": None, "durationDays": 3, "adults": None, "children": None, "companionType": "FRIENDS", "transportType": None, "preferences": None, "lodgingName": None}
         return httpx2.Response(200, json={"id": "resp_test", "object": "response", "created_at": 1730000000, "status": "completed", "model": "gpt-4o-mini", "output": [{"type": "message", "id": "msg_test", "status": "completed", "role": "assistant", "content": [{"type": "output_text", "text": json.dumps(body, ensure_ascii=False), "annotations": []}]}], "tools": [], "tool_choice": "auto", "parallel_tool_calls": False})
     client = httpx2.Client(transport=httpx2.MockTransport(openai_mock))
     monkeypatch.setenv("OPENAI_API_KEY", "test-key")

@@ -19,7 +19,8 @@ def dialogue(request: DialogueRequest):
     """대화 한 차례를 처리한다. 대화와 조건 저장은 스프링 서버가 맡는다."""
     try:
         result = graph.invoke(request.model_dump())
-        return DialogueResponse(changes=result["changes"], question=result["question"], confirmed=result.get("confirmed", False), recommendedCourseId=result.get("recommendedCourseId"))
+        return DialogueResponse(changes=result["changes"], question=result["question"], confirmed=result.get("confirmed", False),
+                                 recommendedCourseId=result.get("recommendedCourseId"), recommendedPlaces=result.get("recommendedPlaces"))
     except Exception as exc:
         # 외부 오류에는 API 키나 대화 원문을 포함하지 않는다.
         raise HTTPException(status_code=503, detail="AI 요청을 처리할 수 없습니다. 서버 설정과 연결을 확인해 주세요.") from exc

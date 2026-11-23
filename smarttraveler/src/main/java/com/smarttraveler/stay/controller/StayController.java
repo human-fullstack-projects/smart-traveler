@@ -1,5 +1,6 @@
 package com.smarttraveler.stay.controller;
 
+import com.smarttraveler.stay.dto.StayDetailResponse;
 import com.smarttraveler.stay.dto.StayResponse;
 import com.smarttraveler.stay.dto.StaySearchDtos;
 import com.smarttraveler.stay.service.StaySearchService;
@@ -75,12 +76,12 @@ public class StayController {
     public List<RoomOption> rooms(@PathVariable Long lodgingId, @RequestParam LocalDate checkIn,
                                  @RequestParam LocalDate checkOut, @RequestParam int guestCount) {
         if (guestCount < 1) throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-        stayService.get(lodgingId);
+        stayService.requireActive(lodgingId);
         return inventory.rooms(lodgingId, checkIn, checkOut, guestCount);
     }
 
     @GetMapping("/{lodgingId}")
-    public StayResponse detail(@PathVariable Long lodgingId) {
+    public StayDetailResponse detail(@PathVariable Long lodgingId) {
         return stayService.get(lodgingId);
     }
 }

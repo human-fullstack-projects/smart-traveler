@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Size;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -26,13 +27,15 @@ public class ChatController {
     private final RecommendedCourseService recommendations;
     private final GuestRecommendedCourseService guestCourses;
     private final ChatMessageBuffer buffer;
+    private final GuestChatQuota guestQuota;
     private static final String GUEST = ChatController.class.getName() + ".guest";
-    public ChatController(JdbcTemplate jdbc, ConditionDialogueService dialogue, ChatPersonalization personalization, CourseRegionController regions, RecommendedCourseService recommendations, GuestRecommendedCourseService guestCourses, ChatMessageBuffer buffer) {
+    public ChatController(JdbcTemplate jdbc, ConditionDialogueService dialogue, ChatPersonalization personalization, CourseRegionController regions, RecommendedCourseService recommendations, GuestRecommendedCourseService guestCourses, ChatMessageBuffer buffer, GuestChatQuota guestQuota) {
         this.jdbc = jdbc; this.dialogue = dialogue; this.personalization = personalization;
         this.regions = regions;
         this.recommendations = recommendations;
         this.guestCourses = guestCourses;
         this.buffer = buffer;
+        this.guestQuota = guestQuota;
     }
 
     record MessageInput(@NotBlank @Size(max = 4000) String content, @jakarta.validation.constraints.Positive Long regionId) {
@@ -95,11 +98,14 @@ public class ChatController {
         if (result.recommendedCourseId() != null) {
             if (result.recommendConditions() != null) recommendations.record(id, messageId, result.recommendedCourseId(), result.recommendConditions());
             else recommendations.record(id, messageId, result.recommendedCourseId());
+        } else if (result.recommendedPlaces() != null) {
+            recommendations.recordLodgingItinerary(id, messageId, result.recommendConditions(), result.recommendedPlaces());
         }
     }
     @PostMapping("/sessions") @Transactional
-    Chat create(@Valid @RequestBody MessageInput input, HttpSession session) {
+    Chat create(@Valid @RequestBody MessageInput input, HttpSession session, Authentication authentication) {
         String owner = guest(session);
+        guestQuota.reserve(owner, session, authentication);
         var key = new GeneratedKeyHolder();
         jdbc.update(connection -> {
             var statement = connection.prepareStatement("INSERT INTO chat_sessions (guest_token, session_title, member_id) VALUES (?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
@@ -134,7 +140,9 @@ public class ChatController {
         buffer.flush(id);
         return load(id, session);
     }
-    record SavedCourse(long courseId) {}
+    record Region(Long sidoId, Long sigunguId, String name) {}
+    record SavedCourse(long courseId, Region region) {}
+    record SaveInput(String startDate) {}
     @PostMapping("/sessions/{id}/recommendations/{messageId}/guest")
     GuestRecommendedCourseService.Preview storeGuestRecommendation(@PathVariable long id, @PathVariable long messageId, HttpSession session) {
         if (personalization.memberId() != null) throw new ResponseStatusException(HttpStatus.CONFLICT, "회원 코스 저장을 이용해 주세요.");
@@ -142,11 +150,13 @@ public class ChatController {
         return guestCourses.store(session, id, messageId);
     }
     @PostMapping("/sessions/{id}/recommendations/{messageId}/save") @Transactional
-    SavedCourse saveRecommendation(@PathVariable long id, @PathVariable long messageId, HttpSession session) {
+    SavedCourse saveRecommendation(@PathVariable long id, @PathVariable long messageId,
+                                   @RequestBody(required = false) SaveInput input, HttpSession session) {
         Long memberId = personalization.memberId();
         if (memberId == null) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
         lockOwner(id, session);
-        return new SavedCourse(recommendations.save(memberId, id, messageId));
+        var saved = recommendations.save(memberId, id, messageId, input == null ? null : input.startDate());
+        return new SavedCourse(saved.courseId(), new Region(saved.sidoId(), saved.sigunguId(), saved.regionName()));
     }
     @PutMapping("/sessions/{id}/conditions") @Transactional
     void saveConditions(@PathVariable long id, @Valid @RequestBody ConditionsInput input, HttpSession session) {

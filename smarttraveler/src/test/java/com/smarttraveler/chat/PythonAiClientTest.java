@@ -44,4 +44,33 @@ class PythonAiClientTest {
                 () -> client.process("추천해줘", "확인", conditions, List.of(), List.of(Map.of("courseId", 1L))));
         } finally { server.stop(0); }
     }
+
+    @Test void recommendedPlacesMustComeFromSentCandidates() throws Exception {
+        var mapper = JsonMapper.builder().build();
+        var places = new java.util.concurrent.atomic.AtomicReference<Object>();
+        var server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        server.createContext("/internal/dialogue", exchange -> {
+            var payload = new java.util.LinkedHashMap<String, Object>(Map.of("changes", Map.of(), "question", "숙소 주변 일정", "confirmed", true));
+            payload.put("recommendedPlaces", places.get());
+            byte[] body = mapper.writeValueAsString(payload).getBytes(StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, body.length);
+            exchange.getResponseBody().write(body);
+            exchange.close();
+        });
+        server.start();
+        try {
+            var client = new PythonAiClient(mapper, "http://127.0.0.1:" + server.getAddress().getPort());
+            var conditions = mapper.createObjectNode();
+            var candidates = List.of(Map.<String, Object>of("placeId", 7L, "name", "해변", "address", "부산"));
+            places.set(List.of(Map.of("dayNo", 1, "seq", 1, "placeId", 7L)));
+            var result = client.process("추천해줘", "확인", conditions, candidates, null);
+            assertEquals(1, result.recommendedPlaces().size());
+            assertEquals("해변", result.recommendedPlaces().get(0).get("name"));
+
+            places.set(List.of(Map.of("dayNo", 1, "seq", 1, "placeId", 999L)));
+            assertThrows(org.springframework.web.server.ResponseStatusException.class,
+                () -> client.process("추천해줘", "확인", conditions, candidates, null));
+        } finally { server.stop(0); }
+    }
 }

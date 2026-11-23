@@ -34,10 +34,9 @@ public class AuthController {
             SecurityContextHolder.clearContext();
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
         }
-        // Return only public account fields; never serialize the Member entity/password.
-        return new MemberView(member.getMemberId(), member.getLoginId(), member.getNickname(), member.getRoleCode());
+        return new MemberView(member.getMemberId(), member.getLoginId(), member.getNickname(), member.getRoleCode(), member.getEmail());
     }
 
     public record CsrfView(String headerName, String token) {}
-    public record MemberView(Long memberId, String loginId, String nickname, String roleCode) {}
+    public record MemberView(Long memberId, String loginId, String nickname, String roleCode, String email) {}
 }

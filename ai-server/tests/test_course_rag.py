@@ -115,6 +115,13 @@ def test_small_candidate_counts(offline, count):
     if not count: assert "코스가 없어요" in answer
 
 
+@pytest.mark.parametrize("count,expected", [(1, 1), (2, 2), (4, 3)])
+def test_show_all_matches_ignores_preference_limit(offline, count, expected):
+    candidates = sum((rows(i) for i in range(1, count + 1)), [])
+    answer = rag.recommend_course(dict(merged=conditions(), courseCandidates=candidates, showAllMatches=True))
+    assert answer.count("· 코스 #") == expected
+
+
 def test_missing_days_inactive_places_and_bad_sequences_rejected():
     assert rag.group_courses(rows(duration=2)[:4], 2) == []
     invalid = rows()
@@ -138,7 +145,7 @@ def test_four_day_three_courses_fit_response_contract_and_followup(offline):
 
 def empty_extraction(**updates):
     values = dict(regionName=None, startDate=None, durationDays=None, adults=None, children=None,
-                  companionType=None, transportType=None, preferences=None)
+                  companionType=None, transportType=None, preferences=None, lodgingName=None)
     return ExtractedConditions(**(values | updates))
 
 
@@ -156,3 +163,39 @@ def test_changed_region_or_duration_requires_reconfirmation(offline):
         result = graph.invoke(dict(message="바꿔서 추천해줘", previousQuestion=CHECK,
                                    conditions=conditions(), courseCandidates=rows()))
         assert result["question"] == CHECK and not result.get("confirmed")
+
+
+def test_group_courses_without_duration_accepts_any_contiguous_days():
+    courses = rag.group_courses(rows(duration=3), None)
+    assert len(courses) == 1 and sorted(courses[0]["days"]) == [1, 2, 3]
+
+
+def test_recommend_course_result_without_start_date_shows_day_only(offline):
+    plain = conditions()
+    plain["startDate"] = None
+    answer, course_id = rag.recommend_course_result(dict(merged=plain, courseCandidates=rows()))
+    assert course_id == 1 and "1일차" in answer and "(2026" not in answer
+
+
+def place(place_id, name="관광지"):
+    return {"placeId": place_id, "name": f"{name}{place_id}", "address": "부산 해운대구"}
+
+
+def test_recommend_lodging_itinerary_splits_by_day():
+    merged = dict(conditions(duration=2), lodgingId=1)
+    answer, places = rag.recommend_lodging_itinerary(dict(merged=merged, candidates=[place(i) for i in range(1, 7)]))
+    assert [p["dayNo"] for p in places] == [1, 1, 1, 2, 2, 2]
+    assert "1일차 (2026-12-10)" in answer and "2일차 (2026-12-11)" in answer
+
+
+def test_recommend_lodging_itinerary_without_start_date_shows_day_only():
+    merged = dict(conditions(duration=1), lodgingId=1)
+    merged["startDate"] = None
+    answer, places = rag.recommend_lodging_itinerary(dict(merged=merged, candidates=[place(i) for i in range(1, 4)]))
+    assert places and "1일차" in answer and "(2026" not in answer
+
+
+def test_recommend_lodging_itinerary_insufficient_candidates():
+    merged = dict(conditions(duration=1), lodgingId=1)
+    answer, places = rag.recommend_lodging_itinerary(dict(merged=merged, candidates=[place(1), place(2)]))
+    assert places is None and "부족" in answer
