@@ -18,6 +18,12 @@ final class ConditionMerger {
             if (!name.equals(to.path("regionName").asText(""))) to.putNull("regionId");
             to.put("regionName", name);
         }
+        JsonNode lodging = from.path("lodgingName");
+        if (lodging.isTextual() && !lodging.asText().isBlank() && lodging.asText().trim().length() <= 100) {
+            String name = lodging.asText().trim();
+            if (!name.equals(to.path("lodgingName").asText(""))) to.putNull("lodgingId");
+            to.put("lodgingName", name);
+        }
         JsonNode date = from.path("startDate");
         if (date.isTextual()) {
             try { to.put("startDate", LocalDate.parse(date.asText()).toString()); }

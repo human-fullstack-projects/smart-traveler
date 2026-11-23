@@ -30,7 +30,7 @@ class GuestRecommendedCourseServiceTest {
         when(jdbc.query(contains("SELECT m.recommendation_json"), any(RowMapper.class), anyLong(), anyLong())).thenReturn(List.of(snapshot));
         when(jdbc.query(contains("SELECT member_id"), any(RowMapper.class), anyLong())).thenReturn(Collections.singletonList(null));
         when(manager.getTransaction(any())).thenReturn(new SimpleTransactionStatus());
-        when(courses.save(7L, 1L, 10L)).thenReturn(99L);
+        when(courses.save(7L, 1L, 10L)).thenReturn(new RecommendedCourseService.SavedResult(99L, null, null, "부산"));
     }
     @Test void newestRecommendationWinsAndExpiredSessionHasNoPreview() {
         service.store(session, 1, 10);
@@ -57,7 +57,7 @@ class GuestRecommendedCourseServiceTest {
     }
     @Test void databaseFailureKeepsPendingAndSuccessfulRetryClearsIt() {
         service.store(session, 1, 10);
-        when(courses.save(7L, 1L, 10L)).thenThrow(new IllegalStateException("insert failed")).thenReturn(99L);
+        when(courses.save(7L, 1L, 10L)).thenThrow(new IllegalStateException("insert failed")).thenReturn(new RecommendedCourseService.SavedResult(99L, null, null, "부산"));
         assertThrows(IllegalStateException.class, () -> service.claim(session, 7));
         verify(manager).rollback(any());
         assertNotNull(service.status(session, 7L));

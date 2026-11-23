@@ -34,6 +34,15 @@ try {
   assert.ok(!preview.includes('저장된 코스가 없습니다.'));
   console.log('PASS: stored guest recommendation is visible in my-courses with a login link');
 
+  const { buildStayNavHash } = await server.ssrLoadModule('/src/pages/ai-chat/hooks/useAiChat.js');
+  const lodgingHash = buildStayNavHash({ sidoId: 10 }, { lodgingId: 5, startDate: '2026-12-10', durationDays: 2, adults: 2, children: 1 });
+  assert.ok(lodgingHash.startsWith('/stays/booking?'));
+  assert.ok(lodgingHash.includes('stay=5') && lodgingHash.includes('checkIn=2026-12-10') && lodgingHash.includes('checkOut=2026-12-11') && lodgingHash.includes('children=1'));
+  const regionHash = buildStayNavHash({ sidoId: 10, sigunguId: 25, name: '부산광역시 해운대구' }, { lodgingId: null });
+  assert.ok(regionHash.startsWith('/stays?') && regionHash.includes('sido=10') && regionHash.includes('sigungu=25'));
+  assert.equal(buildStayNavHash(null, { lodgingId: null }), null);
+  console.log('PASS: saved course navigates to the specific lodging booking page when known, otherwise to the region search page');
+
   const previousFetch = globalThis.fetch;
   const called = [];
   let releaseStorage;

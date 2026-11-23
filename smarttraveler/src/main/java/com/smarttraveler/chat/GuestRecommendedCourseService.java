@@ -82,7 +82,7 @@ public class GuestRecommendedCourseService {
             if (owners.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "보관한 대화를 찾을 수 없습니다.");
             if (owners.getFirst() != null && owners.getFirst() != memberId) throw conflict();
             jdbc.update("UPDATE chat_sessions SET member_id=? WHERE session_id=?", memberId, claimed.sessionId());
-            return courses.save(memberId, claimed.sessionId(), claimed.messageId());
+            return courses.save(memberId, claimed.sessionId(), claimed.messageId()).courseId();
         });
         Objects.requireNonNull(courseId);
         synchronized (session) {

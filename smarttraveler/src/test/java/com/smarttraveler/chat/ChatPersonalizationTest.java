@@ -57,7 +57,7 @@ class ChatPersonalizationTest {
     void accountSwitchRevokesReadWriteAccessToOldChat() {
         var jdbc = mock(JdbcTemplate.class);
         var dialogue = mock(ConditionDialogueService.class);
-        var controller = new ChatController(jdbc, dialogue, personalization, mock(CourseRegionController.class), mock(RecommendedCourseService.class), mock(GuestRecommendedCourseService.class), new ChatMessageBuffer(jdbc, mock(org.springframework.transaction.PlatformTransactionManager.class)));
+        var controller = new ChatController(jdbc, dialogue, personalization, mock(CourseRegionController.class), mock(RecommendedCourseService.class), mock(GuestRecommendedCourseService.class), new ChatMessageBuffer(jdbc, mock(org.springframework.transaction.PlatformTransactionManager.class)), mock(GuestChatQuota.class));
         var session = new MockHttpSession();
         when(jdbc.query(anyString(), any(RowMapper.class), any(Object[].class))).thenReturn(List.of());
         when(jdbc.queryForObject(anyString(), eq(Integer.class), eq(1L), anyString())).thenReturn(1);
@@ -80,7 +80,7 @@ class ChatPersonalizationTest {
     void bothChatEntryPointsReadCurrentPreferences() {
         var jdbc = mock(JdbcTemplate.class);
         var dialogue = mock(ConditionDialogueService.class);
-        var controller = new ChatController(jdbc, dialogue, personalization, mock(CourseRegionController.class), mock(RecommendedCourseService.class), mock(GuestRecommendedCourseService.class), new ChatMessageBuffer(jdbc, mock(org.springframework.transaction.PlatformTransactionManager.class)));
+        var controller = new ChatController(jdbc, dialogue, personalization, mock(CourseRegionController.class), mock(RecommendedCourseService.class), mock(GuestRecommendedCourseService.class), new ChatMessageBuffer(jdbc, mock(org.springframework.transaction.PlatformTransactionManager.class)), mock(GuestChatQuota.class));
         var session = new MockHttpSession();
         login("first", 7);
         when(preferences.find(7, List.of())).thenReturn(new Preferences(7, "relaxed", "normal", List.of(), List.of(), true));
@@ -89,12 +89,24 @@ class ChatPersonalizationTest {
             .when(jdbc).update(any(PreparedStatementCreator.class), any(KeyHolder.class));
         when(jdbc.queryForObject(anyString(), eq(Integer.class), eq(1L), anyString())).thenReturn(1);
         when(jdbc.query(anyString(), any(RowMapper.class), any(Object[].class))).thenReturn(List.of());
-        controller.create(new ChatController.MessageInput("부산"), session);
+        controller.create(new ChatController.MessageInput("부산"), session, null);
         // A locked owned chat must exist for follow-up messages.
         when(jdbc.query(contains("FOR UPDATE"), any(RowMapper.class), eq(1L), anyString())).thenReturn(List.of(1L));
         controller.send(1, new ChatController.MessageInput("네"), session);
         verify(dialogue).processResult(1, "부산", Map.of("pace", "relaxed"));
         verify(dialogue).processResult(1, "네", Map.of("pace", "relaxed"));
         verify(preferences, times(2)).find(7, List.of());
+    }
+
+    @Test @SuppressWarnings("unchecked")
+    void newChatIsBlockedWhenGuestQuotaIsExhausted() {
+        var jdbc = mock(JdbcTemplate.class);
+        var dialogue = mock(ConditionDialogueService.class);
+        var quota = mock(GuestChatQuota.class);
+        var controller = new ChatController(jdbc, dialogue, personalization, mock(CourseRegionController.class), mock(RecommendedCourseService.class), mock(GuestRecommendedCourseService.class), new ChatMessageBuffer(jdbc, mock(org.springframework.transaction.PlatformTransactionManager.class)), quota);
+        var session = new MockHttpSession();
+        doThrow(new GuestChatQuota.LimitReached()).when(quota).reserve(anyString(), eq(session), any());
+        assertThrows(GuestChatQuota.LimitReached.class, () -> controller.create(new ChatController.MessageInput("부산"), session, null));
+        verify(jdbc, never()).update(any(PreparedStatementCreator.class), any(KeyHolder.class));
     }
 }

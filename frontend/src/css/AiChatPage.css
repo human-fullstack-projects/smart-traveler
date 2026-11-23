@@ -42,6 +42,8 @@
 .cb-status{text-align:center;color:#4874EB;font-size:13px}
 .cb-error{margin:8px 0 0;color:#89543e;font-size:12px}
 .cb-intro{white-space:pre-line;line-height:1.9;color:#21439E;margin:0}
+.cb-modal-backdrop{position:fixed;inset:0;background:rgba(16,23,34,.45);display:flex;align-items:center;justify-content:center;padding:20px;z-index:50}
+.cb-modal{max-width:360px;background:#fff;border-radius:16px;padding:24px;text-align:center;display:grid;gap:14px}
 .cb-region-picker{width:100%;padding:14px;border:1px solid #DBDCE6;border-radius:14px;background:#fff}
 .cb-region-toggle{width:100%;padding:10px;border:0;border-radius:9px;background:#E8E4F3;color:#0D3DC4;font-weight:700;cursor:pointer}
 .cb-region-list{max-height:280px;overflow-y:auto;display:grid;gap:6px;margin-top:10px}

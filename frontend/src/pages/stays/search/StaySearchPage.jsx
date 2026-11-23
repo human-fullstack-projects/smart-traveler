@@ -21,6 +21,12 @@ function readDestinationQuery() {
   return new URLSearchParams((window.location.hash.split('?')[1] || '').trim()).get('destination') || '';
 }
 
+/** #/stays?sido=..&sigungu=.. 로 지역 ID가 직접 왔는지 읽는다(이름이 비슷한 지역을 구분하기 위해 ID를 우선 쓴다). */
+function readRegionIdQuery() {
+  const params = new URLSearchParams((window.location.hash.split('?')[1] || '').trim());
+  return { sido: params.get('sido') || '', sigungu: params.get('sigungu') || '' };
+}
+
 /** 목적지 글자(예: "부산 해운대")에 들어 있는 시·도 / 시·군·구를 찾는다. */
 function matchRegion(regions, text) {
   if (!text) return { sido: '', sigungu: '' };
@@ -146,10 +152,14 @@ export default function StaySearchPage() {
   useEffect(() => {
     getStayRegions().then((data) => {
       setRegions(data);
-      const matched = matchRegion(data, destinationQuery);
-      if (destinationQuery && !matched.sido) setNotice(`'${destinationQuery}' 지역을 찾지 못해 전국 결과를 보여 드려요.`);
+      const byId = readRegionIdQuery();
+      const sidoById = byId.sido ? data.find((item) => String(item.regionId) === byId.sido) : null;
+      const matched = sidoById
+        ? { sido: byId.sido, sigungu: sidoById.children.some((item) => String(item.regionId) === byId.sigungu) ? byId.sigungu : '' }
+        : matchRegion(data, destinationQuery);
+      if (destinationQuery && !byId.sido && !matched.sido) setNotice(`'${destinationQuery}' 지역을 찾지 못해 전국 결과를 보여 드려요.`);
       const busan = data.find((item) => item.name.startsWith('부산'));
-      const start = { ...search, sido: matched.sido || (destinationQuery ? '' : String(busan?.regionId || '')), sigungu: matched.sigungu };
+      const start = { ...search, sido: matched.sido || (destinationQuery || byId.sido ? '' : String(busan?.regionId || '')), sigungu: matched.sigungu };
       setSearch(start);
       setApplied(start);
     }).catch((error) => setStayError(error.message));

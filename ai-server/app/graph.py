@@ -6,7 +6,7 @@ from typing import Any, Callable, TypedDict
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
 from langgraph.graph import END, START, StateGraph
-from .course_rag import recommend_course_result
+from .course_rag import recommend_course_result, recommend_lodging_itinerary
 from .schemas import ExtractedConditions, PlaceRecommendations
 
 INTRO = "여행 일정을 추천해 드리기 위해 몇가지 정보를 요청할게요."
@@ -30,7 +30,8 @@ GUIDE = (
     "**동행 유형 정보** (예: 친구, 혼자, 연인, 가족)\n"
     "**동행 인원수 정보** (예: 총 2명, 총 1명, 총 3명, 총 4명)\n"
     "**교통 수단 정보** (예: 렌터카, 자가용, 대중교통, 도보)\n"
-    "추가 정보를 입력하시면 여행자님에게 맞춤 여행일정을 짜드릴게요."
+    "추가 정보를 입력하시면 여행자님에게 맞춤 여행일정을 짜드릴게요.\n"
+    "계획 내용이 하나도 없으시다면 \"모르겠어\" 라고 입력해 주세요."
 )
 CONFIRMATION_PROMPTS = {LEGACY_CHECK, CHECK, CLARIFY, EDIT}
 
@@ -47,8 +48,10 @@ class DialogueState(TypedDict, total=False):
     courseCandidates: list[dict[str, Any]] | None
     savedPreferences: dict[str, Any] | None
     recommendedCourseId: int | None
+    recommendedPlaces: list[dict[str, int]] | None
     extractOnly: bool
     forceRecommend: bool
+    showAllMatches: bool
 
 
 def extract_with_openai(state: DialogueState) -> ExtractedConditions:
@@ -93,6 +96,9 @@ def valid_changes(extracted: ExtractedConditions) -> dict[str, Any]:
     preferences = raw.get("preferences")
     if isinstance(preferences, list) and len(preferences) <= 20 and all(isinstance(x, str) and 0 < len(x.strip()) <= 100 for x in preferences):
         result["preferences"] = [x.strip() for x in preferences]
+    lodging = raw.get("lodgingName")
+    if isinstance(lodging, str) and 0 < len(lodging.strip()) <= 100:
+        result["lodgingName"] = lodging.strip()
     return result
 
 
@@ -239,11 +245,14 @@ def build_graph(extractor: Callable[[DialogueState], ExtractedConditions] = extr
 
     def recommend(state: DialogueState):
         course_id = None
+        places = None
         if state.get("courseCandidates") is not None:
             answer, course_id = recommend_course_result(state)
+        elif state["merged"].get("lodgingId"):
+            answer, places = recommend_lodging_itinerary(state)
         else:
             answer = recommender(state)
-        return {"question": answer, "confirmed": True, "recommendedCourseId": course_id}
+        return {"question": answer, "confirmed": True, "recommendedCourseId": course_id, "recommendedPlaces": places}
 
     def clarify(state: DialogueState):
         # 확인으로 해석하기 어려우면 조작 방법을 다시 안내한다.

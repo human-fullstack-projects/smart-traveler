@@ -6,7 +6,7 @@ from app.schemas import ExtractedConditions
 
 def extracted(**changes):
     values = dict(regionName=None, startDate=None, durationDays=None, adults=None, children=None,
-                  companionType=None, transportType=None, preferences=None)
+                  companionType=None, transportType=None, preferences=None, lodgingName=None)
     values.update(changes)
     return ExtractedConditions(**values)
 

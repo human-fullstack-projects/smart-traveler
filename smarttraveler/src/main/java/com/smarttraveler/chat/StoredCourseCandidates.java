@@ -51,8 +51,8 @@ public class StoredCourseCandidates {
      */
     @Transactional(readOnly = true)
     public List<Map<String, Object>> find(ObjectNode conditions, Set<Long> excluded) {
-        int duration = conditions.path("durationDays").asInt();
-        if (duration < 1 || duration > 4) {
+        Integer duration = conditions.path("durationDays").isIntegralNumber() ? conditions.path("durationDays").asInt() : null;
+        if (duration != null && (duration < 1 || duration > 4)) {
             return List.of();
         }
         Long region = regions.regionId(conditions);
@@ -64,13 +64,13 @@ public class StoredCourseCandidates {
         return rows(pool, duration, excluded);
     }
 
-    /** 추천한 코스 한 개의 방문 행 (저장용 스냅샷을 만들 때 다시 읽는다). */
+    /** 추천한 코스 한 개의 방문 행 (저장용 스냅샷을 만들 때 다시 읽는다). duration이 없으면 코스의 원래 일수를 그대로 쓴다. */
     @Transactional(readOnly = true)
-    public List<Map<String, Object>> findCourse(long courseId, int duration) {
+    public List<Map<String, Object>> findCourse(long courseId, Integer duration) {
         return courses.findById(courseId).map(course -> rows(List.of(course), duration, Set.<Long>of())).orElse(List.of());
     }
 
-    private List<Map<String, Object>> rows(List<Course> pool, int duration, Set<Long> excluded) {
+    private List<Map<String, Object>> rows(List<Course> pool, Integer duration, Set<Long> excluded) {
         Map<Long, Course> selected = new HashMap<>();
         Map<Long, JsonNode> itineraries = new HashMap<>();
         Set<Long> placeIds = new HashSet<>();
@@ -78,7 +78,7 @@ public class StoredCourseCandidates {
             if (excluded.contains(course.getId())) {
                 continue;
             }
-            if (!course.getStartDate().plusDays(duration - 1L).equals(course.getEndDate())) {
+            if (duration != null && !course.getStartDate().plusDays(duration - 1L).equals(course.getEndDate())) {
                 continue;
             }
             JsonNode metadata = mapper.readTree(course.getConditionMeta());
@@ -158,14 +158,14 @@ public class StoredCourseCandidates {
         return rows;
     }
 
-    /** 전국 후보: 일수가 맞는 RAG 코스 중 동행·교통이 맞는 것을 먼저, 최대 NATIONWIDE_LIMIT개. */
-    private List<Course> nationwide(ObjectNode conditions, int duration, Set<Long> excluded) {
+    /** 전국 후보: 일수가 맞는 RAG 코스 중 동행·교통이 맞는 것을 먼저, 최대 NATIONWIDE_LIMIT개. duration이 없으면 일수로 거르지 않는다. */
+    private List<Course> nationwide(ObjectNode conditions, Integer duration, Set<Long> excluded) {
         String companion = conditions.path("companionType").asText("");
         String transport = conditions.path("transportType").asText("");
         List<Course> fitting = new ArrayList<>();
         for (Course course : courses.findAllCandidates()) {
             if (excluded.contains(course.getId()) || course.getStartDate() == null
-                    || !course.getStartDate().plusDays(duration - 1L).equals(course.getEndDate())) {
+                    || (duration != null && !course.getStartDate().plusDays(duration - 1L).equals(course.getEndDate()))) {
                 continue;
             }
             if (!RAG_SEED_BATCHES.contains(mapper.readTree(course.getConditionMeta()).path("seed_batch").asText())) {

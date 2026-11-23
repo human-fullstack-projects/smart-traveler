@@ -20,6 +20,7 @@ class DialogueRequest(BaseModel):
     savedPreferences: SavedPreferences | None = None
     extractOnly: bool = False  # 조건만 읽고 추천하지 않는다 (스프링이 후보를 고른 뒤 다시 부른다)
     forceRecommend: bool = False  # 조건을 다시 읽지 않고 주어진 후보로 바로 추천한다 (조건 1개여도 추천)
+    showAllMatches: bool = False  # 일정·인원을 안 받았으면 취향과 무관하게 맞는 코스를 있는 만큼(최대 3개) 보여준다
 
 
 class ExtractedConditions(BaseModel):
@@ -33,6 +34,7 @@ class ExtractedConditions(BaseModel):
     companionType: Literal["SOLO", "COUPLE", "FRIENDS", "FAMILY"] | None
     transportType: Literal["PUBLIC_TRANSPORT", "CAR"] | None
     preferences: list[str] | None = Field(description="변경된 경우 갱신된 전체 여행 취향")
+    lodgingName: str | None = Field(description="사용자가 말한 숙소 이름")
 
 
 class DialogueResponse(BaseModel):
@@ -40,6 +42,7 @@ class DialogueResponse(BaseModel):
     question: str = Field(min_length=1, max_length=20000)
     confirmed: bool = False
     recommendedCourseId: int | None = Field(default=None, gt=0)
+    recommendedPlaces: list[dict[str, int]] | None = None
 
 
 class SelectedPlace(BaseModel):

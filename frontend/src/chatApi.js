@@ -17,8 +17,14 @@ async function request(path, options = {}) {
     headers['Content-Type'] = 'application/json'; headers[token.headerName] = token.token;
   }
   const response = await fetch(`/api/chat${path}`, { cache: 'no-store', ...options, headers, credentials: 'same-origin' });
-  if (!response.ok) throw new Error(`서버 요청 실패 (${response.status})`);
-  return response.status === 204 || response.headers.get('content-length') === '0' ? null : response.text().then((text) => text ? JSON.parse(text) : null);
+  const text = response.status === 204 || response.headers.get('content-length') === '0' ? '' : await response.text();
+  const body = text ? JSON.parse(text) : null;
+  if (!response.ok) {
+    const error = new Error(body?.message || `서버 요청 실패 (${response.status})`);
+    error.status = response.status; error.code = body?.code;
+    throw error;
+  }
+  return body;
 }
 export const chatApi = {
   courseRegions: () => request('/course-regions'),
@@ -31,7 +37,8 @@ export const chatApi = {
     guestCourseStorage = guestCourseStorage.catch(() => {}).then(() => request(`/sessions/${encodeURIComponent(id)}/recommendations/${encodeURIComponent(messageId)}/guest`, { method: 'POST' }));
     return guestCourseStorage;
   },
-  saveRecommendedCourse: (id, messageId) => request(`/sessions/${encodeURIComponent(id)}/recommendations/${encodeURIComponent(messageId)}/save`, { method: 'POST' }),
+  saveRecommendedCourse: (id, messageId, startDate = null) => request(`/sessions/${encodeURIComponent(id)}/recommendations/${encodeURIComponent(messageId)}/save`,
+    { method: 'POST', body: startDate ? JSON.stringify({ startDate }) : undefined }),
   tourPlaces: (province, district, page) => {
     const query = new URLSearchParams({ province, page: String(page) });
     if (district) query.set('district', district);
