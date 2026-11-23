@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { StayArtwork, StayFooter, StayHeader, StatusPill } from '../shared/StayShell.jsx';
-import { formatWon, getDefaultStayDates, toDateInputValue } from '../shared/stayData.js';
+import { formatWon, getDefaultStayDates, stayTypeLabels, toDateInputValue } from '../shared/stayData.js';
 import { getStayMap, getStayRegions, searchStays } from '../shared/stayApi.js';
 import KakaoMap from '../../../components/map/KakaoMap.jsx';
 import { loadKakaoMaps } from '../../../components/map/loadKakaoMaps.js';
@@ -9,8 +9,6 @@ import '../../../css/stay-search.css';
 import './stay-kakao-map.css';
 import './stay-search-paging.css';
 
-// 서버 숙소 종류 코드 → 화면 이름 (DB에 있는 7가지 전부)
-const TYPE_LABELS = { HOTEL: '호텔', MOTEL: '모텔', PENSION: '펜션', RESORT: '리조트', GUESTHOUSE: '게스트하우스', HANOK: '한옥', CAMPING: '캠핑' };
 // DB lodging.amenities에 실제로 있는 값 중 많이 쓰는 것
 const AMENITY_OPTIONS = ['주차', '와이파이', '취사', '바비큐', '조식', '수영장', '엘리베이터', '넷플릭스'];
 const PRICE_MIN = 40000;
@@ -91,7 +89,7 @@ function StayCard({ stay, selected, query, onSelect, onShow }) {
       <div className="stay-result-card__body">
         <div className="stay-result-card__top">
           <div>
-            <p className="stay-result-card__category">{TYPE_LABELS[stay.lodgingType] || stay.lodgingType} · {stay.regionName || ''}</p>
+            <p className="stay-result-card__category">{stayTypeLabels[stay.lodgingType] || stay.lodgingType} · {stay.regionName || ''}</p>
             <h2>{stay.name}</h2>
           </div>
         </div>
@@ -294,7 +292,7 @@ export default function StaySearchPage() {
           <aside className="stay-filter" aria-label="숙소 검색 필터">
             <div className="stay-filter__head"><h2>필터</h2><button type="button" onClick={() => { setTypes([]); setAmenities([]); setMaxPrice(PRICE_MAX); setBookableOnly(false); setKeyword(''); setAppliedKeyword(''); }}>초기화</button></div>
             <fieldset><legend>숙소 이름</legend><form className="stay-filter__keyword" onSubmit={(event) => { event.preventDefault(); setAppliedKeyword(keyword); }}><input type="search" maxLength={50} placeholder="예: 호텔, 펜션 이름" value={keyword} onChange={(event) => setKeyword(event.target.value)} /><button type="submit">찾기</button></form></fieldset>
-            <fieldset><legend>숙소 유형</legend>{Object.entries(TYPE_LABELS).map(([code, label]) => <label key={code}><input type="checkbox" checked={types.includes(code)} onChange={() => toggleFilter(code, setTypes)} />{label}</label>)}</fieldset>
+            <fieldset><legend>숙소 유형</legend>{Object.entries(stayTypeLabels).map(([code, label]) => <label key={code}><input type="checkbox" checked={types.includes(code)} onChange={() => toggleFilter(code, setTypes)} />{label}</label>)}</fieldset>
             <fieldset><legend>편의시설</legend>{AMENITY_OPTIONS.map((item) => <label key={item}><input type="checkbox" checked={amenities.includes(item)} onChange={() => toggleFilter(item, setAmenities)} />{item}</label>)}</fieldset>
             <fieldset><legend>1박 최대 요금</legend><input className="stay-filter__range" type="range" min={PRICE_MIN} max={PRICE_MAX} step="10000" value={maxPrice} onChange={(event) => setMaxPrice(Number(event.target.value))} /><strong>{maxPrice >= PRICE_MAX ? '제한 없음' : `${formatWon(maxPrice)} 이하`}</strong></fieldset>
             <label className="stay-filter__switch"><input type="checkbox" checked={bookableOnly} onChange={(event) => setBookableOnly(event.target.checked)} /><span />예약 가능 숙소만</label>

@@ -125,3 +125,21 @@
 @media (max-width: 800px) {
   .adm .adm-head { align-items: flex-start; flex-wrap: wrap; }
 }
+
+/* 확정 예약 취소·환불 (11-23) */
+.adm-refund { margin-top: 14px; padding: 12px 14px; border: 1px solid var(--st-line); border-radius: var(--st-radius-s); background: #F7F8FD; }
+.adm-refund-text { margin: 0 0 4px; font-size: 14px; }
+.st-btn.st-btn-danger { background: var(--st-danger); border-color: var(--st-danger); color: #fff; }
+.st-btn.st-btn-danger:disabled { opacity: .45; cursor: not-allowed; }
+.adm-refund-confirm { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; padding: 10px 14px; border-radius: var(--st-radius-s); background: rgba(168, 59, 75, .08); font-size: 14px; }
+.adm-refund-confirm span { flex: 1 1 100%; }
+
+/* 휴먼 추천 코스: 조건 먼저 → 탭 눌러 검색 (11-23) */
+.adm-search-first { margin-bottom: 12px; padding: 14px 16px 6px; border: 1px solid var(--st-line); border-radius: 12px; background: var(--st-surface); }
+.adm-search-first .adm-filters { margin-bottom: 6px; }
+.adm-search-hint { margin: 0 0 8px; }
+.adm-search-hint.dirty { color: var(--st-danger); font-weight: 700; }
+
+/* 관광지 사진 등록 (11-23) */
+.adm-photo-upload { color: var(--st-blue, #3466F2); font-weight: 700; text-decoration: underline; cursor: pointer; }
+.adm-photo-upload.busy { color: var(--st-muted); cursor: progress; text-decoration: none; }

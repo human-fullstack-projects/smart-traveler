@@ -88,7 +88,7 @@ public class AdminDataService {
     public List<RoomReservation> reservations() { return reservations.findAll(); }
     public RoomReservation reservation(Long id) { return reservations.findById(id).orElseThrow(() -> missing("예약")); }
     public List<RoomPayment> paymentsForReservation(Long id) { return payments.findByReservationIdOrderByCreatedAtDesc(id); }
-    public List<ReservationActionHistory> reservationHistory(Long id) { return reservationActions.findByReservationIdOrderByCreatedAtDesc(id); }
+    public List<ReservationActionHistory> reservationHistory(Long id) { return reservationActions.findByReservationIdOrderByCreatedAtDescIdDesc(id); }
     public List<Course> courses() { return courses.findAll(); }
     public Course course(Long id) { return courses.findById(id).orElseThrow(() -> missing("코스")); }
     public List<CourseTemplate> templates() { return templates.findAll(); }

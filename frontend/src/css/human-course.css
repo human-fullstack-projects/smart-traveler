@@ -78,7 +78,6 @@
 .human-courses .mock-notice { background: #fff; border: 1px dashed #c7cfd4; color: #64717b; font-size: 12px; border-radius: 5px; padding: 10px 13px; margin-bottom: 20px; }
 .human-courses .layout { display: grid; grid-template-columns: 274px minmax(0, 1fr); gap: 18px; align-items: start; }
 .human-courses .layout.wide-left { grid-template-columns: minmax(0, 1fr) 290px; }
-.human-courses .human-course-detail-layout.is-read-only { grid-template-columns: minmax(0, 1fr); }
 .human-courses .human-course-list-layout { grid-template-columns: minmax(0, 1fr); }
 .human-courses .human-course-list-layout .course-grid { grid-template-columns: minmax(0, 1fr); }
 .human-courses .layout > * { min-width: 0; }
@@ -252,7 +251,20 @@
 .human-courses .comment-form textarea { min-height: 86px; }
 .human-courses .comment-counter { display: block; margin-top: 5px; color: var(--sub); font-size: 11px; text-align: right; }
 .human-courses .comment-form > button { min-width: 96px; min-height: 44px; margin-bottom: 19px; }
-.human-courses .like-action { justify-content: space-between; }
+.human-courses .course-report-dialog[open] {
+  width: min(440px, calc(100% - 32px));
+  max-height: calc(100% - 32px);
+  overflow: auto;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface);
+  color: var(--text);
+}
+.human-courses .course-report-dialog::backdrop { background: #15172599; }
+.human-courses .course-report-dialog textarea { resize: vertical; }
+.human-courses .course-report-actions { justify-content: flex-end; }
 .human-courses .step-row { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin-bottom: 17px; color: var(--sub); font-size: 12px; }
 .human-courses .step { display: inline-flex; gap: 6px; align-items: center; border: 1px solid #DADBE2; padding: 7px 9px; border-radius: 5px; background: #fff; }
 .human-courses .step strong { color: #265AE7; }
@@ -270,9 +282,6 @@
 .human-courses .sidebar-hint ol { margin: 0; padding-left: 20px; }
 .human-courses .sidebar-hint li { margin: 9px 0; }
 .human-courses .right-action { margin-top: 12px; }
-.human-courses details { margin: 16px 0; padding: 12px; border: 1px dashed #bac6ce; border-radius: 6px; }
-.human-courses summary { cursor: pointer; font-weight: 600; }
-.human-courses details[open] > summary { margin-bottom: 14px; }
 .human-courses .course-preview { background: #FCFCFD; }
 .human-courses .course-preview .writing-sample { margin-bottom: 14px; }
 .human-courses .form-error { color: #a73434; border: 1px solid #ebbbbb; background: #fff7f7; padding: 10px; border-radius: 5px; }
@@ -324,8 +333,6 @@
   .human-courses .photo-boxes { grid-template-columns: minmax(0, 1fr); }
   .human-courses .photo-boxes li { min-height: 0; }
   .human-courses .photo-boxes img { max-height: none; }
-  .human-courses .actions.like-action { align-items: stretch; flex-direction: column; }
-  .human-courses .actions.like-action button { width: 100%; }
   .human-courses .footer-tools { justify-content: flex-start; }
 }
 .human-courses .recommendation-preview { width: min(760px, calc(100vw - 32px)); max-height: 85vh; overflow-y: auto; border: 1px solid #cfcedc; border-radius: 20px; padding: 28px; color: #2c2c4c; background: #fafafd; box-sizing: border-box; }
