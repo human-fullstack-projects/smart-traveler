@@ -67,7 +67,7 @@ export default function SignupPage({ onLogin, guestCourseCount = 0 }) {
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(null);
-  const [verified, setVerified] = useState(null); // 시연용 본인인증 결과(서버로 보내지 않음)
+  const [verified, setVerified] = useState(null); // 시연용 본인인증 결과(가입 때 이름·번호를 서버에 저장)
   const [identityOpen, setIdentityOpen] = useState(false);
   const inFlight = useRef(false);
   const closeTerm = useCallback(() => setOpenTerm(null), []);
@@ -90,16 +90,17 @@ export default function SignupPage({ onLogin, guestCourseCount = 0 }) {
     if (Object.keys(e).length) { setNotice('입력한 내용을 확인해주세요.'); return; }
     if (terms.some((t) => t.required && !agreed[t.termsId])) { setNotice('필수 약관에 동의해주세요.'); return; }
     if (role === 'USER' && !verified) { setIdentityOpen(true); return; }
-    await register();
+    await register(verified);
   }
 
-  async function register() {
+  async function register(identity) {
     if (inFlight.current) return;
     inFlight.current = true;
     setBusy(true); setNotice('');
     try {
       const body = { role, loginId: form.loginId, password: form.password, nickname: form.nickname.trim(), email: form.email.trim(),
         consents: terms.map((t) => ({ termsId: t.termsId, agreed: Boolean(agreed[t.termsId]) })) };
+      if (role === 'USER' && identity) { body.identityName = identity.name; body.identityPhone = identity.phone; }
       if (role === 'OWNER') ['businessNumber', 'businessName', 'representativeName', 'businessAddress', 'businessPhone'].forEach((k) => { body[k] = form[k].trim(); });
       const result = await signup(body);
       if (role === 'USER' && guestCourseCount > 0 && onLogin) {
@@ -113,6 +114,7 @@ export default function SignupPage({ onLogin, guestCourseCount = 0 }) {
       }
       setDone(result);
     } catch (err) {
+      if (/휴대폰 번호|본인인증/.test(err.message || '')) setVerified(null); // 다시 인증받게
       setNotice(err.message);
     } finally { inFlight.current = false; setBusy(false); }
   }
@@ -195,7 +197,7 @@ export default function SignupPage({ onLogin, guestCourseCount = 0 }) {
       {openTerm && <TermsModal term={openTerm} title={TERM_NAMES[openTerm.type] || openTerm.type}
         returnFocus={returnFocus} onClose={closeTerm} onAgree={agreeTerm} />}
       {identityOpen && <IdentityModal onClose={() => setIdentityOpen(false)}
-        onVerified={(info) => { setVerified(info); setIdentityOpen(false); register(); }} />}
+        onVerified={(info) => { setVerified(info); setIdentityOpen(false); register(info); }} />}
     </div>
   );
 }

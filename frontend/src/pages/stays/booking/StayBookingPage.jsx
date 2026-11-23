@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../../contexts/AuthContext.jsx';
 import { createReservation, getRooms, getStay } from '../shared/stayApi.js';
-import useStayCourse from '../shared/useStayCourse.js';
+import useStayCourse, { readStayCourseId } from '../shared/useStayCourse.js';
 import { StayFooter, StayHeader } from '../shared/StayShell.jsx';
 import { formatWon, getDefaultStayDates, getNightCount, stayTypeLabels } from '../shared/stayData.js';
 import { StayCover, StayLocation, StayOverview } from './StayDetails.jsx';
@@ -11,7 +11,7 @@ import '../../../css/stay-booking.css';
 export default function StayBookingPage({ onStart, busy = false }) {
   const query = new URLSearchParams(window.location.hash.split('?')[1]);
   const lodgingId = query.get('stay');
-  const courseId = query.get('courseId');
+  const courseId = readStayCourseId(query);
   const { course, route: courseRoute, loading: stayCourseLoading, error: stayCourseError, retry: retryStayCourse } = useStayCourse(courseId);
   const backToSearch = courseId ? `#/stays?courseId=${encodeURIComponent(courseId)}` : '#/stays';
   const defaults = getDefaultStayDates();
@@ -78,7 +78,7 @@ export default function StayBookingPage({ onStart, busy = false }) {
     setStartingCourse(true);
     setCourseError('');
     try {
-      await onStart(courseMessage);
+      await onStart(courseMessage, stay.regionId ?? null, stay.lodgingId);
     } catch {
       setCourseError('대화를 시작하지 못했어요. 잠시 후 다시 시도해 주세요.');
     } finally {

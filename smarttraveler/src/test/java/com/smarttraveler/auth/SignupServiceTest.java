@@ -51,7 +51,43 @@ class SignupServiceTest {
 
     private SignupRequest owner(String loginId, String email, String businessNumber) {
         return new SignupRequest("OWNER", loginId, "password123", "새 업주", email,
-                businessNumber, "상호", "대표", "주소", "02-1234-5678", List.of(new TermConsent(1L, true)));
+                businessNumber, "상호", "대표", "주소", "02-1234-5678", List.of(new TermConsent(1L, true)), null, null);
+    }
+
+    private SignupRequest traveler(String name, String phone) {
+        return new SignupRequest("USER", "newuser", "password123", "새 여행자", "user@example.com",
+                null, null, null, null, null, List.of(new TermConsent(1L, true)), name, phone);
+    }
+
+    @Test void travelerSavesIdentityNameAndDigitsOnlyPhone() {
+        signup.create(traveler(" 홍길동 ", "010-1234-5678"));
+        verify(members).saveAndFlush(argThat(member -> "홍길동".equals(member.getRealName())
+                && "01012345678".equals(member.getPhoneNumber()) && member.getIdentityVerifiedAt() != null));
+    }
+
+    @Test void travelerNeedsIdentity() {
+        expect(traveler(null, "010-1234-5678"), HttpStatus.BAD_REQUEST, "본인인증 이름을 확인해주세요.");
+        expect(traveler("홍길동", "02-123-4567"), HttpStatus.BAD_REQUEST, "본인인증 휴대폰 번호를 확인해주세요.");
+        verify(members, never()).saveAndFlush(any());
+    }
+
+    @Test void samePhoneCannotSignUpTwice() {
+        when(members.existsByPhoneNumber("01012345678")).thenReturn(true);
+        expect(traveler("홍길동", "01012345678"), HttpStatus.CONFLICT, "이미 가입된 휴대폰 번호예요.");
+        assertFalse(signup.phoneAvailable("010-1234-5678"));
+        assertTrue(signup.phoneAvailable("010-9999-0000"));
+        verify(members, never()).saveAndFlush(any());
+    }
+
+    @Test void phoneConstraintRaceNamesPhone() {
+        when(members.saveAndFlush(any(Member.class))).thenThrow(new DataIntegrityViolationException(
+                "insert failed", new IllegalStateException("Duplicate entry for key 'UK_members_phone'")));
+        expect(traveler("홍길동", "010-1234-5678"), HttpStatus.CONFLICT, "이미 가입된 휴대폰 번호예요.");
+    }
+
+    @Test void ownerSignupDoesNotNeedIdentity() {
+        signup.create(owner("newowner", "new@example.com", "123-45-67890"));
+        verify(members).saveAndFlush(argThat(member -> member.getPhoneNumber() == null));
     }
 
     private void expect(SignupRequest request, HttpStatus status, String message) {

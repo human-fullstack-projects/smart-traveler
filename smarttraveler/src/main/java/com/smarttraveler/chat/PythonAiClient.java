@@ -28,11 +28,13 @@ public class PythonAiClient {
         this.endpoint = URI.create(baseUrl.replaceAll("/+$", "") + "/internal/dialogue");
     }
     /** recommendConditions = 추천에 실제로 쓴 조건(말하지 않은 값은 기본값을 채운 사본). 추천이 아니면 null.
+     * recommendedCourseIds = 함께 보여준 추천 코스 전체(1위부터 순서대로), 저장할 코스를 고를 때 쓴다.
      * recommendedPlaces = 기존 코스 없이 숙소 주변 장소로 새로 짠 일정(day·순서·장소, 후보에 있던 것만). */
-    public record Result(String message, boolean confirmed, Long recommendedCourseId, ObjectNode recommendConditions, List<Map<String, Object>> recommendedPlaces) {
-        public Result(String message, boolean confirmed) { this(message, confirmed, null, null, null); }
-        public Result(String message, boolean confirmed, Long recommendedCourseId) { this(message, confirmed, recommendedCourseId, null, null); }
-        public Result withMessage(String text, ObjectNode used) { return new Result(text, confirmed, recommendedCourseId, used, recommendedPlaces); }
+    public record Result(String message, boolean confirmed, Long recommendedCourseId, List<Long> recommendedCourseIds,
+                          ObjectNode recommendConditions, List<Map<String, Object>> recommendedPlaces) {
+        public Result(String message, boolean confirmed) { this(message, confirmed, null, null, null, null); }
+        public Result(String message, boolean confirmed, Long recommendedCourseId) { this(message, confirmed, recommendedCourseId, null, null, null); }
+        public Result withMessage(String text, ObjectNode used) { return new Result(text, confirmed, recommendedCourseId, recommendedCourseIds, used, recommendedPlaces); }
     }
     /** AI 서버 처리 방식: 조건만 읽기 / 주어진 후보로 바로 추천 / 예전 방식. */
     public enum Mode { EXTRACT_ONLY, FORCE_RECOMMEND, LEGACY }
@@ -82,12 +84,25 @@ public class PythonAiClient {
                 throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "AI 서버 응답 형식이 올바르지 않습니다.");
             ConditionMerger.merge(changes, conditions);
             Long recommended = null;
+            List<Long> recommendedIds = null;
             JsonNode courseId = parsed.path("recommendedCourseId");
             if (!courseId.isMissingNode() && !courseId.isNull()) {
                 if (!courseId.isIntegralNumber() || !courseId.canConvertToLong() || courseId.asLong() <= 0 || courseCandidates == null
                     || courseCandidates.stream().noneMatch(row -> ((Number) row.get("courseId")).longValue() == courseId.asLong()))
                     throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "추천 코스가 후보와 일치하지 않습니다.");
                 recommended = courseId.asLong();
+                recommendedIds = new java.util.ArrayList<>();
+                JsonNode idsNode = parsed.path("recommendedCourseIds");
+                if (idsNode.isArray() && !idsNode.isEmpty()) {
+                    for (JsonNode item : idsNode) {
+                        if (!item.isIntegralNumber() || !item.canConvertToLong() || item.asLong() <= 0
+                            || courseCandidates.stream().noneMatch(row -> ((Number) row.get("courseId")).longValue() == item.asLong()))
+                            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "추천 코스가 후보와 일치하지 않습니다.");
+                        recommendedIds.add(item.asLong());
+                    }
+                } else {
+                    recommendedIds.add(recommended);
+                }
             }
             List<Map<String, Object>> recommendedPlaces = null;
             JsonNode placesNode = parsed.path("recommendedPlaces");
@@ -109,7 +124,7 @@ public class PythonAiClient {
                 }
                 recommendedPlaces = list;
             }
-            return new Result(question.asText(), parsed.path("confirmed").asBoolean(false), recommended, null, recommendedPlaces);
+            return new Result(question.asText(), parsed.path("confirmed").asBoolean(false), recommended, recommendedIds, null, recommendedPlaces);
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "AI 서버 요청이 중단되었습니다.");

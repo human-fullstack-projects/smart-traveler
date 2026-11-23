@@ -44,7 +44,7 @@ def test_코스_장소_옆에_설명_한_줄(monkeypatch):
     monkeypatch.setattr(course_rag, "OpenAIEmbeddings", lambda **kw: type("E", (), {"embed_query": lambda self, q: [1.0, 0.0]})())
     monkeypatch.setattr(course_rag, "course_reason", lambda course, matched: "이유")
     state = {"merged": {"regionName": "부산", "startDate": "2026-12-10", "durationDays": 1}, "courseCandidates": rows}
-    text, course_id = course_rag.recommend_course_result(state)
-    assert course_id == 7
+    text, course_id, course_ids = course_rag.recommend_course_result(state)
+    assert course_id == 7 and course_ids == [7]
     assert "1. 해운대해수욕장 — 부산 대표 해변." in text
     assert "2. 동백섬\n" in text + "\n"

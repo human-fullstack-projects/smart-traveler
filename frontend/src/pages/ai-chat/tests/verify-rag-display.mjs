@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { createServer } from 'vite';
+import { createEmptyConditions } from '../../../travelConditions.js';
 
 const server = await createServer({ server: { middlewareMode: true }, appType: 'custom' });
 try {
@@ -25,6 +26,16 @@ try {
   assert.ok(html.includes(content));
   assert.equal((html.match(/4일차 \(2026-12-13\)/g) || []).length, 3);
   assert.ok(html.includes('코스 #3'));
+  const { default: AiChatPage } = await server.ssrLoadModule('/src/pages/ai-chat/AiChatPage.jsx');
+  const chat = renderToStaticMarkup(React.createElement(AiChatPage, {
+    sessionId: 1, courseSaveStatus: 'ask', conditions: createEmptyConditions(),
+    messages: [{ id: 7, role: 'ASSISTANT', content, recommendation: {
+      candidateCourseIds: [1, 2, 3], conditions: { startDate: '2026-12-10' },
+    } }],
+  }));
+  assert.equal((chat.match(/type="checkbox"[^>]*\/>코스[123]/g) || []).length, 3);
+  assert.ok(chat.indexOf('코스 #3') < chat.indexOf('저장할 코스 선택'));
+  assert.match(chat, /disabled="">저장하기/);
   console.log(`PASS: all three four-day courses render without truncation (${content.length} characters)`);
   const { default: MyCourses } = await server.ssrLoadModule('/src/pages/mypage/pages/MyCourses.jsx');
   const preview = renderToStaticMarkup(React.createElement(MyCourses, {
@@ -35,22 +46,26 @@ try {
   console.log('PASS: stored guest recommendation is visible in my-courses with a login link');
 
   const { buildStayNavHash } = await server.ssrLoadModule('/src/pages/ai-chat/hooks/useAiChat.js');
-  const lodgingHash = buildStayNavHash({ sidoId: 10 }, { lodgingId: 5, startDate: '2026-12-10', durationDays: 2, adults: 2, children: 1 });
+  const lodgingHash = buildStayNavHash({ sidoId: 10 }, { lodgingId: 5, startDate: '2026-12-10', durationDays: 2, adults: 2, children: 1 }, 12);
   assert.ok(lodgingHash.startsWith('/stays/booking?'));
-  assert.ok(lodgingHash.includes('stay=5') && lodgingHash.includes('checkIn=2026-12-10') && lodgingHash.includes('checkOut=2026-12-11') && lodgingHash.includes('children=1'));
-  const regionHash = buildStayNavHash({ sidoId: 10, sigunguId: 25, name: '부산광역시 해운대구' }, { lodgingId: null });
+  assert.ok(lodgingHash.includes('stay=5') && lodgingHash.includes('course=12') && lodgingHash.includes('checkIn=2026-12-10') && lodgingHash.includes('checkOut=2026-12-11') && lodgingHash.includes('children=1'));
+  const regionHash = buildStayNavHash({ sidoId: 10, sigunguId: 25, name: '부산광역시 해운대구' }, { lodgingId: null, startDate: '2026-12-10', durationDays: 3, adults: 2, children: 1 }, 34);
   assert.ok(regionHash.startsWith('/stays?') && regionHash.includes('sido=10') && regionHash.includes('sigungu=25'));
+  assert.ok(regionHash.includes('course=34') && regionHash.includes('checkIn=2026-12-10') && regionHash.includes('checkOut=2026-12-12') && regionHash.includes('adults=2') && regionHash.includes('children=1'));
   assert.equal(buildStayNavHash(null, { lodgingId: null }), null);
-  console.log('PASS: saved course navigates to the specific lodging booking page when known, otherwise to the region search page');
+  console.log('PASS: saved course navigates to the specific lodging booking page when known, otherwise to the region search page, carrying course id · dates · headcount either way');
 
   const previousFetch = globalThis.fetch;
   const called = [];
   let releaseStorage;
-  globalThis.fetch = async (url) => {
+  globalThis.fetch = async (url, options) => {
     called.push(url);
     const json = value => new Response(JSON.stringify(value), { headers: { 'Content-Type': 'application/json' } });
     if (url.endsWith('/csrf')) return json({ headerName: 'X-CSRF-TOKEN', token: 'test' });
-    if (url.endsWith('/guest')) return new Promise(resolve => { releaseStorage = () => resolve(json({ messageId: 7 })); });
+    if (url.endsWith('/guest')) {
+      assert.deepEqual(JSON.parse(options.body), { startDate: '2026-12-10', courseId: 2 });
+      return new Promise(resolve => { releaseStorage = () => resolve(json({ messageId: 7 })); });
+    }
     if (url === '/api/auth/login') return json({ authenticated: true });
     if (url === '/api/auth/me') return json({ memberId: 1, nickname: '회원' });
     throw new Error(`Unexpected request: ${url}`);
@@ -58,7 +73,7 @@ try {
   try {
     const { chatApi } = await server.ssrLoadModule('/src/chatApi.js');
     const { login } = await server.ssrLoadModule('/src/api/auth.js');
-    const storage = chatApi.storeGuestCourse(1, 7);
+    const storage = chatApi.storeGuestCourse(1, 7, '2026-12-10', 2);
     const loggedIn = login('test', 'test');
     while (!releaseStorage) await new Promise(resolve => setTimeout(resolve, 0));
     assert.ok(!called.includes('/api/auth/login'));

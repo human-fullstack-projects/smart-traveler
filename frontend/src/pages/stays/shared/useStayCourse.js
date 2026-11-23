@@ -5,6 +5,12 @@ import { hasValidCoordinates, resolveKakaoPlace } from '../../../components/map/
 import { myPageApi } from '../../mypage/api/myPageApi.js';
 import { mapDays } from '../../mypage/data/mapDays.js';
 
+export function readStayCourseId(params) {
+  const courseId = params.get('courseId');
+  const legacyId = params.get('course');
+  return courseId || (/^[1-9]\d*$/.test(legacyId) ? `course-${legacyId}` : null);
+}
+
 export default function useStayCourse(courseId) {
   const { member, authChecked, authCheckFailed, retryAuth } = useAuth();
   const memberId = member?.memberId;

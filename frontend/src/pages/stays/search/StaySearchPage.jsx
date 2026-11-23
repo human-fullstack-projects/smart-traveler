@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { StayArtwork, StayFooter, StayHeader, StatusPill } from '../shared/StayShell.jsx';
 import { formatWon, getDefaultStayDates, stayTypeLabels } from '../shared/stayData.js';
 import { getStayRegions, searchStays } from '../shared/stayApi.js';
-import useStayCourse from '../shared/useStayCourse.js';
+import useStayCourse, { readStayCourseId } from '../shared/useStayCourse.js';
 import KakaoMap from '../../../components/map/KakaoMap.jsx';
 import { loadKakaoMaps } from '../../../components/map/loadKakaoMaps.js';
 import { hasValidCoordinates, resolveDestinationCenter } from '../../../components/map/resolveKakaoPlace.js';
@@ -16,13 +16,17 @@ const PRICE_MIN = 40000;
 const PRICE_MAX = 300000; // 끝까지 올리면 「제한 없음」
 const PAGE_SIZES = [5, 10];
 
-function courseDates(course, today) {
-  const checkIn = course?.startDate;
-  const end = course?.endDate;
+function lodgingDates(checkIn, end, today) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(checkIn) || !/^\d{4}-\d{2}-\d{2}$/.test(end)) return null;
   const duration = (Date.parse(end) - Date.parse(checkIn)) / 86400000;
   if (!Number.isFinite(duration) || duration < 0 || duration > 30 || checkIn < today) return null;
   const checkOut = duration === 0 ? new Date(Date.parse(checkIn) + 86400000).toISOString().slice(0, 10) : end;
   return { checkIn, checkOut };
+}
+
+function guestCount(queryValue, courseValue, min, max, fallback) {
+  const count = Number(queryValue || courseValue);
+  return Number.isInteger(count) && count >= min && count <= max ? count : fallback;
 }
 
 /** 목적지 글자(예: "부산 해운대")에 들어 있는 시·도 / 시·군·구를 찾는다. */
@@ -126,11 +130,15 @@ export default function StaySearchPage() {
   const defaultDates = useMemo(() => getDefaultStayDates(), []);
   const today = useMemo(() => new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' }), []);
   const params = new URLSearchParams(window.location.hash.split('?')[1]);
-  const courseId = params.get('courseId');
+  const courseId = readStayCourseId(params);
   const { course, route: courseRoute, loading: courseLoading, error: courseError, retry: retryCourse } = useStayCourse(courseId);
   const destinationQuery = course?.region || params.get('destination') || '';
   const sidoQuery = params.get('sido') || '';
   const sigunguQuery = params.get('sigungu') || '';
+  const checkInQuery = params.get('checkIn');
+  const checkOutQuery = params.get('checkOut');
+  const adultsQuery = params.get('adults');
+  const childrenQuery = params.get('children');
   const [regions, setRegions] = useState(null);
   const [search, setSearch] = useState({ sido: '', sigungu: '', ...defaultDates, adults: 2, children: 0 });
   const [applied, setApplied] = useState(null);
@@ -163,26 +171,27 @@ export default function StaySearchPage() {
 
   useEffect(() => {
     if (!regions || (courseId && !course)) return;
-    const sidoById = !course && sidoQuery ? regions.find(item => String(item.regionId) === sidoQuery) : null;
+    const sidoById = sidoQuery ? regions.find(item => String(item.regionId) === sidoQuery) : null;
     const matched = sidoById
       ? { sido: sidoQuery, sigungu: sidoById.children.some(child => String(child.regionId) === sigunguQuery) ? sigunguQuery : '' }
       : regionById(regions, course?.regionId, destinationQuery) || matchRegion(regions, destinationQuery);
     const busan = regions.find(item => item.name.startsWith('부산'));
-    const dates = courseDates(course, today);
+    const dates = lodgingDates(checkInQuery, checkOutQuery, today)
+      || lodgingDates(course?.startDate, course?.endDate, today);
     const start = {
       sido: matched.sido || (course || destinationQuery || sidoQuery ? '' : String(busan?.regionId || '')),
       sigungu: matched.sigungu,
       ...(dates || defaultDates),
-      adults: course?.adults >= 1 && course.adults <= 10 ? course.adults : 2,
-      children: course?.children >= 0 && course.children <= 8 ? course.children ?? 0 : 0,
+      adults: guestCount(adultsQuery, course?.adults, 1, 10, 2),
+      children: guestCount(childrenQuery, course?.children, 0, 8, 0),
     };
     const messages = [];
     if (destinationQuery && !sidoQuery && !matched.sido) messages.push(`'${destinationQuery}' 지역을 찾지 못해 전국 결과를 보여 드려요.`);
-    if (course && !dates) messages.push('여행 날짜로 예약할 수 없어 기본 숙박 날짜로 검색했어요. 필요하면 날짜를 바꿔 주세요.');
+    if ((course || checkInQuery || checkOutQuery) && !dates) messages.push('여행 날짜로 예약할 수 없어 기본 숙박 날짜로 검색했어요. 필요하면 날짜를 바꿔 주세요.');
     setNotice(messages.join(' '));
     setSearch(start);
     setApplied(start);
-  }, [regions, courseId, course, destinationQuery, sidoQuery, sigunguQuery, today, defaultDates]);
+  }, [regions, courseId, course, destinationQuery, sidoQuery, sigunguQuery, checkInQuery, checkOutQuery, adultsQuery, childrenQuery, today, defaultDates]);
 
   useEffect(() => {
     if (!destinationQuery || courseId) return;

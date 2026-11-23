@@ -11,7 +11,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
+import java.util.Map;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -46,14 +49,21 @@ public class SocialAuthController {
         PendingSocialProfile profile = session == null ? null
                 : (PendingSocialProfile) session.getAttribute(SocialOAuthSuccessHandler.PENDING);
         if (profile == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "소셜 로그인부터 다시 진행해주세요.");
-        Member member = signup.create(profile, request.nickname(), request.consents());
+        Member member = signup.create(profile, request.nickname(), request.consents(),
+                request.identityName(), request.identityPhone());
         session.removeAttribute(SocialOAuthSuccessHandler.PENDING);
         sessions.login(member, servletRequest, servletResponse);
         return new AuthController.MemberView(member.getMemberId(), member.getLoginId(),
                 member.getNickname(), member.getRoleCode(), member.getEmail());
     }
 
+    /** 가입 화면이 이유(닉네임·휴대폰 번호 중복 등)를 그대로 보여 주게 message로 돌려준다. */
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<Map<String, String>> socialError(ResponseStatusException error) {
+        return ResponseEntity.status(error.getStatusCode()).body(Map.of("message", String.valueOf(error.getReason())));
+    }
+
     public record ProviderView(boolean google, boolean kakao) {}
     public record PendingView(String provider, String nickname, String email) {}
-    public record SignupRequest(String nickname, List<TermConsent> consents) {}
+    public record SignupRequest(String nickname, List<TermConsent> consents, String identityName, String identityPhone) {}
 }

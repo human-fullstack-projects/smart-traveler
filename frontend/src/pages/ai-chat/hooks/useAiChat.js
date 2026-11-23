@@ -7,12 +7,13 @@ const STORAGE_KEY = 'smart-travel-chat-session';
 const CHAT_PATHS = ['/chat', '/ai-course'];
 const chatPath = (hash) => CHAT_PATHS.includes((hash.replace(/^#/, '').split('?')[0].replace(/\/$/, '')) || '/');
 
-/** 저장 응답의 region으로 숙소 검색 화면 주소를 만든다. */
-export function buildStaySearchHash(region) {
+/** 저장 응답의 region으로 숙소 검색 화면 주소를 만든다. 저장한 코스ID·여행 날짜·인원수도 함께 넘긴다. */
+export function buildStaySearchHash(region, usedConditions, courseId) {
   const params = new URLSearchParams();
   if (region.sidoId) params.set('sido', String(region.sidoId));
   if (region.sigunguId) params.set('sigungu', String(region.sigunguId));
   if (region.name) params.set('destination', region.name);
+  addStayNavParams(params, usedConditions, courseId);
   return `/stays?${params.toString()}`;
 }
 
@@ -22,21 +23,28 @@ function addDays(dateText, days) {
   return new Date(Date.UTC(year, month - 1, day + days)).toISOString().slice(0, 10);
 }
 
+/** 코스ID·여행 날짜(체크인·체크아웃)·인원수를 쿼리에 채운다. */
+function addStayNavParams(params, usedConditions, courseId) {
+  if (courseId) params.set('course', String(courseId));
+  const start = usedConditions?.startDate;
+  if (start) {
+    params.set('checkIn', start);
+    params.set('checkOut', addDays(start, Math.max(1, (usedConditions.durationDays || 1) - 1)));
+  }
+  if (usedConditions?.adults) params.set('adults', String(usedConditions.adults));
+  if (usedConditions?.children) params.set('children', String(usedConditions.children));
+}
+
 /** 저장한 추천이 특정 숙소 기준이면 그 숙소의 예약 페이지로, 아니면 지역 검색 페이지로 안내한다. */
-export function buildStayNavHash(region, usedConditions) {
+export function buildStayNavHash(region, usedConditions, courseId) {
   const lodgingId = usedConditions?.lodgingId;
   if (lodgingId) {
     const params = new URLSearchParams({ stay: String(lodgingId) });
-    const start = usedConditions.startDate;
-    if (start) {
-      params.set('checkIn', start);
-      params.set('checkOut', addDays(start, Math.max(1, (usedConditions.durationDays || 1) - 1)));
-    }
-    params.set('adults', String(usedConditions.adults || 1));
-    if (usedConditions.children) params.set('children', String(usedConditions.children));
+    addStayNavParams(params, usedConditions, courseId);
+    if (!params.has('adults')) params.set('adults', '1');
     return `/stays/booking?${params.toString()}`;
   }
-  return region ? buildStaySearchHash(region) : null;
+  return region ? buildStaySearchHash(region, usedConditions, courseId) : null;
 }
 
 function parse(chat) {
@@ -147,26 +155,26 @@ export default function useAiChat({ ownerKey = 'guest', ready = true, authRevisi
     else setCourseSaveStatus(previous => (previous === 'saving' || previous === 'error' || previous === 'duplicate') ? previous : 'ask');
   }, [messages, sessionId, scope, ready, loadedScope]);
 
-  async function saveCourse(startDate = null) {
+  async function saveCourse(startDate = null, chosenCourseId = null) {
     const last = messages.filter(message => message.recommendation).at(-1);
-    if (!last || !sessionId || savingCourses.current.has(last.id)) return;
+    if (!last || !sessionId || savingCourses.current.has(last.id) || (last.recommendation.candidateCourseIds?.length > 1 && !chosenCourseId)) return;
     const version = generation.current;
     savingCourses.current.add(last.id);
     setCourseSaveStatus('saving');
     try {
       if (ownerKey === 'guest') {
-        await chatApi.storeGuestCourse(sessionId, last.id);
+        await chatApi.storeGuestCourse(sessionId, last.id, startDate, chosenCourseId);
         if (version !== generation.current) return;
         setMessages(previous => previous.map(message => message.id === last.id
           ? { ...message, recommendation: { ...message.recommendation, guestStored: true } } : message));
         window.dispatchEvent(new Event('smart-travel-guest-course-updated'));
       } else {
-        const result = await chatApi.saveRecommendedCourse(sessionId, last.id, startDate);
+        const result = await chatApi.saveRecommendedCourse(sessionId, last.id, startDate, chosenCourseId);
         if (version !== generation.current) return;
         setMessages(previous => previous.map(message => message.id === last.id
           ? { ...message, recommendation: { ...message.recommendation, savedCourseId: result.courseId } } : message));
         window.dispatchEvent(new Event('smart-travel-courses-updated'));
-        setSavedStayHash(buildStayNavHash(result.region, { ...last.recommendation.conditions, startDate: last.recommendation.conditions?.startDate || startDate }));
+        setSavedStayHash(buildStayNavHash(result.region, { ...last.recommendation.conditions, startDate: last.recommendation.conditions?.startDate || startDate }, result.courseId));
       }
     } catch (error) {
       if (version === generation.current) setCourseSaveStatus(error?.status === 409 ? 'duplicate' : 'error');
@@ -186,7 +194,7 @@ export default function useAiChat({ ownerKey = 'guest', ready = true, authRevisi
     if (savedStayHash) window.location.hash = savedStayHash;
   }
 
-  async function startChat(message, regionId = null) {
+  async function startChat(message, regionId = null, lodgingId = null) {
     if (!ready || loadedScope !== scope) return;
     const version = generation.current;
     setBusy(true);
@@ -196,7 +204,7 @@ export default function useAiChat({ ownerKey = 'guest', ready = true, authRevisi
       if (version !== generation.current) return;
       let chat;
       try {
-        chat = await chatApi.create(message, regionId);
+        chat = await chatApi.create(message, regionId, lodgingId);
       } catch (error) {
         if (error?.code === 'GUEST_AI_LIMIT') { setGuestLimitReached(true); return; }
         throw error;
