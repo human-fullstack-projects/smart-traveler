@@ -35,8 +35,10 @@ public class AdminRestController {
     private final AdminDataService data;
     private final TourSyncService tour;
     private final JdbcTemplate jdbc;
-    public AdminRestController(AdminDataService data, TourSyncService tour, JdbcTemplate jdbc) {
-        this.data=data; this.tour=tour; this.jdbc=jdbc;
+    private final com.smarttraveler.admin.service.ReservationRefundService refunds;
+    public AdminRestController(AdminDataService data, TourSyncService tour, JdbcTemplate jdbc,
+                               com.smarttraveler.admin.service.ReservationRefundService refunds) {
+        this.data=data; this.tour=tour; this.jdbc=jdbc; this.refunds=refunds;
     }
 
     @GetMapping({"", "/dashboard"})
@@ -88,7 +90,14 @@ public class AdminRestController {
             SELECT a.* FROM room_payment_attempt a JOIN room_payment p ON p.payment_id=a.payment_id
             WHERE p.reservation_id=? ORDER BY a.created_at DESC""", id));
         result.put("history", data.reservationHistory(id));
+        result.put("refund", refunds.preview(id));
         return result;
+    }
+    /** 확정 예약 취소·환불 (환불 실패 예약 다시 시도도 같은 주소). */
+    @PostMapping("/orders/{id}/refund")
+    public Map<String,Object> orderRefund(@PathVariable Long id, @RequestBody StatusChange body, Principal principal) {
+        refunds.cancelAndRefund(id, body.reason(), principal.getName());
+        return order(id);
     }
     @PostMapping("/orders/{id}/status")
     public Map<String,Object> orderStatus(@PathVariable Long id, @RequestBody StatusChange body, Principal principal) {

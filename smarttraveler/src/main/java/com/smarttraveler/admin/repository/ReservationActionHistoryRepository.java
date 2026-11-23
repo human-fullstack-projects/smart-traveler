@@ -5,5 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface ReservationActionHistoryRepository extends JpaRepository<ReservationActionHistory, Long> {
-    List<ReservationActionHistory> findByReservationIdOrderByCreatedAtDesc(Long reservationId);
+    List<ReservationActionHistory> findByReservationIdOrderByCreatedAtDescIdDesc(Long reservationId);
 }
