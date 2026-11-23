@@ -224,11 +224,13 @@ class SocialOAuthTest {
         SocialSignupService signup = new SocialSignupService(members, links, encoder, jdbc);
 
         Member member = signup.create(new PendingSocialProfile("KAKAO", "456", "처음", null), "새 여행자",
-                List.of(new TermConsent(1L, true), new TermConsent(2L, false)));
+                List.of(new TermConsent(1L, true), new TermConsent(2L, false)), "홍길동", "010-2222-3333");
 
         assertEquals("USER", member.getRoleCode());
         assertEquals("kakao_456", member.getLoginId());
         assertNull(member.getEmail());
+        assertEquals("홍길동", member.getRealName());
+        assertEquals("01022223333", member.getPhoneNumber());
         verify(jdbc).update(contains("INSERT INTO member_consents"), eq(30L), eq(1L), eq(true), any());
         verify(jdbc).update(contains("INSERT INTO member_consents"), eq(30L), eq(2L), eq(false), any());
         verify(links).saveAndFlush(any(MemberSocialAccount.class));

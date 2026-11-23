@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { checkPhone } from '../../api/auth';
 
-// 휴대폰 본인인증 팝업 (시연용) — 실제 문자 발송·서버 저장 없음. 인증번호는 화면에 보여 주는 DEMO_CODE.
+// 휴대폰 본인인증 팝업 (시연용) — 실제 문자 발송 없음. 인증번호는 화면에 보여 주는 DEMO_CODE.
+// 인증한 이름·번호는 가입 요청과 함께 서버에 저장되고, 이미 가입된 번호는 「인증번호 받기」에서 막는다.
 const DEMO_CODE = '123456';
 const LIMIT_SECONDS = 180;
 
@@ -22,6 +24,7 @@ export default function IdentityModal({ onVerified, onClose }) {
   const [left, setLeft] = useState(LIMIT_SECONDS);
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
+  const [checking, setChecking] = useState(false);
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -49,9 +52,15 @@ export default function IdentityModal({ onVerified, onClose }) {
     return () => clearTimeout(timer);
   }, [sent, left]);
 
-  function requestCode() {
+  async function requestCode() {
     if (!name.trim()) { setError('이름을 입력해주세요.'); return; }
     if (!/^01[016789]-?\d{3,4}-?\d{4}$/.test(phone)) { setError('휴대폰 번호를 확인해주세요. 예: 010-1234-5678'); return; }
+    setChecking(true);
+    try {
+      const result = await checkPhone(phone);
+      if (!result?.available) { setError('이미 가입된 휴대폰 번호예요.'); setSent(false); return; }
+    } catch (err) { setError(err.message || '휴대폰 번호를 확인하지 못했어요. 다시 시도해주세요.'); return; }
+    finally { setChecking(false); }
     setError(''); setCode(''); setSent(true); setLeft(LIMIT_SECONDS);
   }
 
@@ -78,8 +87,8 @@ export default function IdentityModal({ onVerified, onClose }) {
           <label className="st-field"><span>휴대폰 번호 <span className="auth-required" aria-hidden="true">*</span></span>
             <div className="identity-inline">
               <input className="st-input" type="tel" value={phone} placeholder="010-1234-5678" autoComplete="tel"
-                onChange={(e) => { setPhone(formatPhone(e.target.value)); setError(''); }} />
-              <button type="button" className="st-btn st-btn-line" onClick={requestCode}>인증번호 받기</button>
+                onChange={(e) => { setPhone(formatPhone(e.target.value)); setError(''); setSent(false); setCode(''); }} />
+              <button type="button" className="st-btn st-btn-line" onClick={requestCode} disabled={checking}>{checking ? '확인 중…' : '인증번호 받기'}</button>
             </div></label>
           {sent && <>
             <p className="identity-demo" role="status">문자를 보냈어요 (시연용 인증번호: <b>{DEMO_CODE}</b>)</p>

@@ -28,6 +28,12 @@ public class SignupController {
     @org.springframework.web.bind.annotation.GetMapping("/terms")
     public List<Map<String,Object>> terms() { return signup.activeTerms(); }
 
+    /** 본인인증 「인증번호 받기」 때 이미 가입된 번호인지 확인. */
+    @org.springframework.web.bind.annotation.GetMapping("/phone-check")
+    public Map<String, Boolean> phoneCheck(@org.springframework.web.bind.annotation.RequestParam String phone) {
+        return Map.of("available", signup.phoneAvailable(phone));
+    }
+
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<Map<String, String>> signupError(ResponseStatusException error) {
         return ResponseEntity.status(error.getStatusCode()).body(Map.of("message", error.getReason()));

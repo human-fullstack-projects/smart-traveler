@@ -3,6 +3,7 @@ import '../../css/Auth.css';
 import { getTerms } from '../../api/auth';
 import { getPendingSocial, socialSignup } from './socialApi';
 import TermsModal from './TermsModal';
+import IdentityModal from './IdentityModal';
 
 const TERM_NAMES = { SERVICE: '서비스 이용약관', PRIVACY: '개인정보 수집·이용', LOCATION: '위치정보 이용', MARKETING: '마케팅 정보 수신' };
 
@@ -16,6 +17,8 @@ export default function SocialSignupPage({ onLogin }) {
   const [notice, setNotice] = useState('');
   const [nicknameError, setNicknameError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [verified, setVerified] = useState(null); // 시연용 본인인증 결과(가입 때 이름·번호를 서버에 저장)
+  const [identityOpen, setIdentityOpen] = useState(false);
 
   useEffect(() => {
     Promise.all([getPendingSocial(), getTerms()]).then(([pending, active]) => {
@@ -29,12 +32,21 @@ export default function SocialSignupPage({ onLogin }) {
     setNicknameError('');
     if (!terms.length) { setNotice('약관을 불러오지 못했어요.'); return; }
     if (terms.some((term) => term.required && !agreed[term.termsId])) { setNotice('필수 약관에 동의해주세요.'); return; }
+    if (!verified) { setIdentityOpen(true); return; }
+    await register(verified);
+  }
+
+  async function register(identity) {
     setBusy(true); setNotice('');
     try {
       const member = await socialSignup({ nickname: nickname.trim(),
-        consents: terms.map((term) => ({ termsId: term.termsId, agreed: Boolean(agreed[term.termsId]) })) });
+        consents: terms.map((term) => ({ termsId: term.termsId, agreed: Boolean(agreed[term.termsId]) })),
+        identityName: identity.name, identityPhone: identity.phone });
       onLogin(member);
-    } catch (error) { setNotice(error.message); }
+    } catch (error) {
+      if (/휴대폰 번호|본인인증/.test(error.message || '')) setVerified(null); // 다시 인증받게
+      setNotice(error.message);
+    }
     finally { setBusy(false); }
   }
 
@@ -63,6 +75,7 @@ export default function SocialSignupPage({ onLogin }) {
           </label><button type="button" className="auth-term-view"
             onClick={(event) => { setReturnFocus(event.currentTarget); setOpenTerm(term); }}>보기</button></div>)}
         </div>
+        {verified && <p className="identity-done" role="status">✓ 본인인증 완료 · {verified.name} · {verified.phone.replace(/-(\d{3,4})-/, '-****-')}</p>}
         <button type="submit" className="st-btn st-btn-lg auth-submit" disabled={busy}>{busy ? '가입 중…' : '가입하고 시작하기'}</button>
       </form>}
       {notice && <p className="auth-notice error" role="status">{notice}</p>}
@@ -70,5 +83,7 @@ export default function SocialSignupPage({ onLogin }) {
     {openTerm && <TermsModal term={openTerm} title={TERM_NAMES[openTerm.type] || openTerm.type}
       returnFocus={returnFocus} onClose={() => setOpenTerm(null)}
       onAgree={() => { setAgreed((current) => ({ ...current, [openTerm.termsId]: true })); setOpenTerm(null); }} />}
+    {identityOpen && <IdentityModal onClose={() => setIdentityOpen(false)}
+      onVerified={(info) => { setVerified(info); setIdentityOpen(false); register(info); }} />}
   </div>;
 }

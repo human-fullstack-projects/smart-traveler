@@ -44,6 +44,12 @@ public class SignupService {
             """);
     }
 
+    public boolean phoneAvailable(String phone) {
+        String digits = IdentityRules.normalizePhone(phone);
+        if (digits == null) throw bad("휴대폰 번호를 확인해주세요.");
+        return !members.existsByPhoneNumber(digits);
+    }
+
     @Transactional
     public SignupResult create(SignupRequest request) {
         if (request == null) throw bad("가입 정보가 없습니다.");
@@ -98,6 +104,7 @@ public class SignupService {
         member.setRoleCode(role);
         member.setStatus("ACTIVE");
         member.setCreatedAt(now); member.setUpdatedAt(now);
+        if ("USER".equals(role)) IdentityRules.apply(member, request.identityName(), request.identityPhone(), members, now);
         try { member = members.saveAndFlush(member); }
         catch (DataIntegrityViolationException e) { throw integrityError(e); }
         for (Map<String, Object> term : activeTerms) {
@@ -129,6 +136,8 @@ public class SignupService {
             return new ResponseStatusException(HttpStatus.CONFLICT, "이미 사용 중인 아이디입니다.", error);
         if (constraint.contains("uk_members2") || constraint.contains("members.email"))
             return new ResponseStatusException(HttpStatus.CONFLICT, "이미 사용 중인 이메일입니다.", error);
+        if (IdentityRules.isPhoneConflict(details))
+            return new ResponseStatusException(HttpStatus.CONFLICT, "이미 가입된 휴대폰 번호예요.", error);
         if (constraint.contains("uk_owner_profiles2") || constraint.contains("owner_profiles.business_number"))
             return new ResponseStatusException(HttpStatus.CONFLICT, "사업자번호가 이미 사용 중입니다.", error);
         return new ResponseStatusException(HttpStatus.BAD_REQUEST, "가입 정보 또는 사업자 정보를 확인해주세요.", error);
