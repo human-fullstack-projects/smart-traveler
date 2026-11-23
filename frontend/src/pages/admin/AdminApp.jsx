@@ -187,7 +187,7 @@ function Orders() {
       <Table title="예약 목록" rows={list.data} rowKey="reservationId" selected={sel} onSelect={setSel} empty="아직 객실 예약이 없어요."
         columns={[['예약번호', (r) => show(r.reservationNo)], ['체크인', (r) => show(r.checkinDate)], ['인원', (r) => show(r.guestCount)], ['금액', (r) => won(r.totalPrice)], ['상태', (r) => <Pill v={r.status} />]]} />
       <Detail title="예약 상세">{!o ? <Pick /> : <>
-        <DL items={[['예약번호', show(o.reservationNo)], ['상태', <Pill v={o.status} />], ['회원', show(o.memberId)], ['예약자', `${show(o.bookerName)} · ${show(o.bookerPhone)}`],
+        <DL items={[['예약번호', show(o.reservationNo)], ['상태', <Pill v={o.status} />], ['회원', show(o.memberId)], ['예약자', `${show(o.bookerName)} · ${show(o.bookerEmail || o.bookerPhone)}`], ['방문자', show(o.visitorName || o.bookerName)],
           ['객실', show(o.roomId)], ['인원', show(o.guestCount)], ['일정', `${show(o.checkinDate)} ~ ${show(o.checkoutDate)}`], ['금액', won(o.totalPrice)], ['연결 코스', show(o.courseId)], ['요청', show(o.requestMemo)]]} />
         <MiniList title="결제" rows={detail.data.payments} empty="결제 기록 없음" columns={[['상태', (p) => <Pill v={p.status} />], ['금액', (p) => won(p.amount)], ['승인', (p) => date(p.approvedAt)]]} />
         <MiniList title="처리 이력" rows={detail.data.history || detail.data.actions} empty="처리 이력 없음" columns={histCols} />

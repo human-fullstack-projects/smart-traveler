@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../../../contexts/AuthContext.jsx';
 import { createReservation, getRooms, getStay } from '../shared/stayApi.js';
 import { StayFooter, StayHeader } from '../shared/StayShell.jsx';
-import { formatWon, getDefaultStayDates, getNightCount } from '../shared/stayData.js';
+import { formatWon, getDefaultStayDates, getNightCount, stayTypeLabels } from '../shared/stayData.js';
+import { StayCover, StayLocation, StayOverview } from './StayDetails.jsx';
+import StayPhotoGallery from './StayPhotoGallery.jsx';
 import '../../../css/stay-booking.css';
 
 export default function StayBookingPage() {
@@ -20,8 +22,17 @@ export default function StayBookingPage() {
   const [loadingRooms, setLoadingRooms] = useState(true);
   const [saving, setSaving] = useState(false);
   const [refresh, setRefresh] = useState(0);
+  const [visitorName, setVisitorName] = useState('');
+  const [sameAsBooker, setSameAsBooker] = useState(false);
+  const bookerName = member?.nickname?.trim() || member?.loginId || '';
+  const bookerEmail = member?.email?.trim() || '';
   const room = rooms.find((item) => item.roomId === roomId && item.available !== false);
   const nights = getNightCount(checkIn, checkOut);
+
+  useEffect(() => {
+    setSameAsBooker(false);
+    setVisitorName('');
+  }, [member?.memberId]);
 
   useEffect(() => {
     if (!lodgingId) return;
@@ -55,14 +66,14 @@ export default function StayBookingPage() {
 
   async function submit(event) {
     event.preventDefault();
-    if (!room || !member || saving) return;
+    if (!room || !bookerEmail || (!sameAsBooker && !visitorName.trim()) || saving) return;
     const form = new FormData(event.currentTarget);
     setSaving(true);
     setNotice('');
     try {
       const reservation = await createReservation({
         roomId: room.roomId, checkIn, checkOut, guestCount: guests,
-        bookerName: form.get('bookerName'), bookerPhone: form.get('bookerPhone'),
+        visitorName: sameAsBooker ? null : visitorName.trim(),
         requestMemo: form.get('requestMemo'), agreedToPolicy: form.has('agreedToPolicy'),
         expectedTotalPrice: room.totalPrice,
       });
@@ -87,9 +98,17 @@ export default function StayBookingPage() {
         {!lodgingId && <p>숙소 검색에서 예약할 숙소를 선택해 주세요.</p>}
         {notice && <p className="booking-notice" role="alert">{notice}</p>}
         {stay && <>
-          <div className="booking-title-row">
-            <div><h1>{stay.name}</h1><p>{stay.address}</p>
-              <p>체크인 {stay.checkinTime?.slice(0, 5)} · 체크아웃 {stay.checkoutTime?.slice(0, 5)}</p></div>
+          <header className="booking-title-row">
+            <div>
+              {stay.lodgingType && <p>{stayTypeLabels[stay.lodgingType] || stay.lodgingType}</p>}
+              <h1>{stay.name}</h1>
+              {stay.address && <span>{stay.address}</span>}
+            </div>
+          </header>
+          <StayCover stay={stay} />
+          <div className="booking-stay-info">
+            <StayOverview stay={stay} />
+            <StayLocation stay={stay} />
           </div>
           <div className="booking-layout">
             <section className="booking-section">
@@ -105,6 +124,7 @@ export default function StayBookingPage() {
               <div className="booking-room-list">
                 {rooms.map((item) => (
                   <article key={item.roomId} className={'booking-room' + (roomId === item.roomId ? ' is-selected' : '') + (item.available === false ? ' is-sold-out' : '')}>
+                    <StayPhotoGallery title={item.name} photos={item.photos ?? []} room />
                     <div className="booking-room__body">
                       <h3>{item.name}</h3>
                       <p>최대 {item.maxCapacity}명 · {item.available === false ? '객실 없음' : `잔여 ${item.remaining}실`}</p>
@@ -127,12 +147,22 @@ export default function StayBookingPage() {
                   {room.nights.map((night) => <div key={night.date}><span>{night.date}</span><strong>{formatWon(night.price)}</strong></div>)}
                   <div className="is-total"><span>총 결제 금액</span><strong>{formatWon(room.totalPrice)}</strong></div>
                 </div>}
-                <label className="booking-form-field">예약자 이름<input name="bookerName" maxLength="50" required /></label>
-                <label className="booking-form-field">연락처<input name="bookerPhone" type="tel" maxLength="30" required /></label>
+                <label className="booking-form-field">예약자 이름<input value={bookerName} disabled /></label>
+                <label className="booking-form-field">연락처 (이메일)<input type="email" value={bookerEmail} disabled /></label>
+                {member && !bookerEmail && <p className="booking-contact-note">예약하려면 <a href="#/my-profile">내 정보</a>에 이메일을 등록해 주세요.</p>}
+                <label className="booking-agreement booking-same-visitor">
+                  <input type="checkbox" checked={sameAsBooker} disabled={!member || saving} onChange={(event) => {
+                    setSameAsBooker(event.target.checked);
+                    setVisitorName('');
+                  }} />예약자와 동일
+                </label>
+                <label className="booking-form-field">방문자 이름<input name="visitorName" maxLength={50} autoComplete="off"
+                  required={!sameAsBooker} value={sameAsBooker ? bookerName : visitorName}
+                  disabled={!member || sameAsBooker || saving} onChange={(event) => setVisitorName(event.target.value)} /></label>
                 <label className="booking-form-field">요청사항<textarea name="requestMemo" rows="3" maxLength="500" /></label>
-                <label className="booking-agreement"><input name="agreedToPolicy" type="checkbox" required />예약자 정보가 숙소에 전달되며, 10분 이내에 테스트 결제를 진행해야 함을 확인했습니다.</label>
+                <label className="booking-agreement"><input name="agreedToPolicy" type="checkbox" required />예약자와 방문자 정보가 숙소에 전달되며, 10분 이내에 테스트 결제를 진행해야 함을 확인했습니다.</label>
                 {member
-                  ? <button className="booking-pay-button" disabled={!room || saving} type="submit">{saving ? '예약 중…' : '예약하고 결제하기'}</button>
+                  ? <button className="booking-pay-button" disabled={!room || !bookerEmail || saving} type="submit">{saving ? '예약 중…' : '예약하고 결제하기'}</button>
                   : <a className="booking-pay-button is-link" href="#/login">로그인하고 예약하기</a>}
               </form>
             </aside>
