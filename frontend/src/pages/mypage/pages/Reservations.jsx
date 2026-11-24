@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import TourPhoto from '../../../components/media/TourPhoto';
 import AccessNotice from '../components/AccessNotice';
 import MyCourseMap from '../components/MyCourseMap';
 import { myPageApi } from '../api/myPageApi';
@@ -8,9 +9,9 @@ import { money } from '../utils/format';
 import tripCover from '../utils/tripCover';
 import '../../../css/mypage.css';
 import './my-courses.css';
-function StayPhoto({url,name}) {
- const [failed,setFailed]=useState(false);
- return <aside className="reservation-stay-photo"><h3>숙소 사진</h3>{url&&!failed?<img src={url} referrerPolicy="no-referrer" alt={`${name || '숙소'} 사진`} onError={()=>setFailed(true)}/>:<div className="reservation-stay-photo__empty"><span aria-hidden="true">▧</span><p>등록된 숙소 사진이 없습니다.</p></div>}</aside>;
+function StayPhoto({ url, name, load }) {
+  return <TourPhoto localUrl={url} load={load} alt={`${name || '숙소'} 사진`}
+    missing="등록된 숙소 사진이 없습니다." />;
 }
 function BookingStayInfo({ booking }) {
  const stay = booking.stayInfo;
@@ -31,7 +32,7 @@ const labels={COMPLETED:'숙박 완료',CONFIRMED:'예약',PENDING_PAYMENT:'결�
 // 연결된 일정의 대표 사진을 우선 사용한다.
 const cover = (course, booking) => course?.coverImageUrl || booking.coverImageUrl || tripCover(course?.region || booking.stay || '');
 
-function BookingItinerary({ booking, course, memberId }) {
+function BookingItinerary({ booking, course, memberId, loadStayPhotos }) {
   const stay = booking.itinerary?.stay;
   const extraPlaces = useMemo(() => {
     const info = booking.stayInfo;
@@ -45,11 +46,19 @@ function BookingItinerary({ booking, course, memberId }) {
   if (!hasCourse && !extraPlaces.length) return null;
   const title = hasCourse ? (extraPlaces.length ? '여행 일정과 숙소 위치' : '여행 일정') : '숙소 위치';
   return <MyCourseMap course={course} courseId={booking.courseId} memberId={memberId}
-    expanded title={title} hideMapControls showPlaceDetails extraPlaces={extraPlaces} extraTitle="예약한 숙소" />;
+    expanded title={title} hideMapControls showPlaceDetails extraPlaces={extraPlaces} extraTitle="예약한 숙소"
+    renderExtraPlaceDetails={place => <StayPhoto url={booking.stayInfo?.imageUrl} name={place.name} load={loadStayPhotos} />} />;
 }
 
 function ReservationDetail({ booking, course, memberId, badge, category }) {
   const [cancelNotice, setCancelNotice] = useState('');
+  const loadStayPhotos = useMemo(() => {
+    let photos;
+    return () => photos ??= myPageApi.reservationTourPhotos(booking.id).catch(error => {
+      photos = undefined;
+      throw error;
+    });
+  }, [booking.id]);
   return <div className="mypage trips-page trip-detail-page">
     <a className="trips-back trips-back-pill" href="#/reservations">← 내 예약 목록</a>
     <header className="trip-detail-hero">
@@ -77,9 +86,11 @@ function ReservationDetail({ booking, course, memberId, badge, category }) {
         </div>
         {cancelNotice && <p role="status">{cancelNotice}</p>}
       </div>
-      <StayPhoto url={booking.stayInfo?.imageUrl} name={booking.stay} />
+      <aside className="reservation-stay-photo"><h3>숙소 사진</h3>
+        <StayPhoto url={booking.stayInfo?.imageUrl} name={booking.stay} load={loadStayPhotos} />
+      </aside>
     </section>
-    <BookingItinerary booking={booking} course={course} memberId={memberId} />
+    <BookingItinerary booking={booking} course={course} memberId={memberId} loadStayPhotos={loadStayPhotos} />
     <div className="trip-detail-footer"><a className="trips-back trips-back-pill" href="#/reservations">← 내 예약 목록</a></div>
   </div>;
 }

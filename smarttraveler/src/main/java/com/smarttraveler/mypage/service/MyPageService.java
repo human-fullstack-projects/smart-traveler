@@ -3,6 +3,7 @@ package com.smarttraveler.mypage.service;
 import com.smarttraveler.auth.repository.MemberRepository;
 import com.smarttraveler.mypage.dto.MyPageDtos.*;
 import com.smarttraveler.mypage.repository.MyPageRepository;
+import com.smarttraveler.tour.service.TourPhotoService.Target;
 import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import org.springframework.http.HttpStatus;
@@ -43,11 +44,33 @@ public class MyPageService {
 
     public PlaceDetails placeDetails(Authentication auth, Long placeId, String name, String region) {
         owner(auth, null);
-        if ((placeId != null && placeId <= 0) || name.length()>200 || region.length()>100
-                || (placeId==null && name.isBlank())) throw denied(HttpStatus.BAD_REQUEST);
+        validatePlace(placeId, name, region);
         var place = data.placeDetails(placeId,name.trim(),region.trim());
         if (place==null) throw denied(HttpStatus.NOT_FOUND);
         return place;
+    }
+
+    public Target placePhotoTarget(Authentication auth, Long placeId, String name, String address, String region) {
+        owner(auth, null);
+        validatePlace(placeId, name, region);
+        if (address.length() > 250) throw denied(HttpStatus.BAD_REQUEST);
+        if (placeId != null) {
+            var target = data.placePhotoTarget(placeId, address.trim(), region.trim());
+            if (target != null) return target;
+        }
+        return new Target(null, name.trim(), address.trim(), region.trim(), false);
+    }
+
+    public Target lodgingPhotoTarget(Authentication auth, String bookingId) {
+        var booking = booking(auth, null, bookingId);
+        Long lodgingId = booking.stayInfo() != null ? booking.stayInfo().id()
+                : booking.itinerary() != null && booking.itinerary().stay() != null ? booking.itinerary().stay().lodgingId() : null;
+        return lodgingId == null ? null : data.lodgingPhotoTarget(lodgingId);
+    }
+
+    private void validatePlace(Long placeId, String name, String region) {
+        if ((placeId != null && placeId <= 0) || name.length() > 200 || region.length() > 100
+                || (placeId == null && name.isBlank())) throw denied(HttpStatus.BAD_REQUEST);
     }
 
     public BookingView booking(Authentication auth, Long expectedMemberId, String bookingId) {
