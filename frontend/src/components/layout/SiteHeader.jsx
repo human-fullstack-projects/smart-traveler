@@ -89,7 +89,12 @@ export default function SiteHeader({ member, loggingOut, onLogout }) {
             </a>}
             <nav className="header-account-mobile-nav" aria-label="주 메뉴">{navigation.map(renderLink)}</nav>
             {member ? <>
-              <nav className="header-account-links" aria-label="내 계정">{accountLinks.map(renderLink)}</nav>
+              <nav className="header-account-links" aria-label="내 계정">
+                {accountLinks.map(renderLink)}
+                {member.roleCode === 'ADMIN' && (
+                  <a href="#/admin" onClick={() => setMenuOpen(false)}>관리자 페이지</a>
+                )}
+              </nav>
               <button className="header-account-logout" type="button" disabled={loggingOut} onClick={onLogout}>
                 {loggingOut ? '로그아웃 중…' : '로그아웃'}
               </button>
