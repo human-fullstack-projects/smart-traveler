@@ -95,10 +95,18 @@ function OwnerLodgingStatus({ lodgings, error }) {
 }
 
 function Dashboard({ onNavigate, lodgings, lodgingError }) {
+  const [newReservationCount, setNewReservationCount] = useState(0);
+  const [todaySummary, setTodaySummary] = useState({ checkIn: 0, checkOut: 0 });
+
+  useEffect(() => {
+    request('/api/owner/reservations/new-count').then(setNewReservationCount);
+    request('/api/owner/reservations/today-summary').then(setTodaySummary);
+  }, []);
+
   const metrics = [
-    { label: '오늘 체크인', value: 2 },
-    { label: '오늘 체크아웃', value: 1 },
-    { label: '신규 예약', value: 6 },
+    { label: '오늘 체크인', value: todaySummary.checkIn },
+    { label: '오늘 체크아웃', value: todaySummary.checkOut },
+    { label: '신규 예약', value: newReservationCount },
   ];
 
   return (
@@ -159,6 +167,7 @@ function Reservations() {
 
   useEffect(() => {
     let cancelled = false;
+    postJsonWithCsrf('/api/owner/reservations/mark-checked', {});
     request('/api/owner/reservations')
       .then((data) => { if (!cancelled) setRows(data.map((item) => ({
         id: item.reservationNo,

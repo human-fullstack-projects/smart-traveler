@@ -4,6 +4,7 @@ import com.smarttraveler.owner.dto.OwnerRoomDtos.InventoryDay;
 import com.smarttraveler.owner.dto.OwnerRoomDtos.InventoryUpdate;
 import com.smarttraveler.owner.dto.OwnerRoomDtos.OwnerReservation;
 import com.smarttraveler.owner.dto.OwnerRoomDtos.OwnerRoom;
+import com.smarttraveler.owner.dto.OwnerRoomDtos.TodaySummary;
 import com.smarttraveler.owner.dto.OwnerRoomDtos.RoomInput;
 import java.sql.Statement;
 import java.time.DayOfWeek;
@@ -124,6 +125,47 @@ public class OwnerRoomService {
                 rs.getString("status"), rs.getString("request_memo"), rs.getString("room_name"), rs.getString("lodging_name"),
                 rs.getString("booker_email"), rs.getString("visitor_name")),
             ownerId);
+    }
+
+    /** 결제 완료(CONFIRMED)됐지만 업주가 아직 확인하지 않은 예약 수를 신규 예약으로 본다. */
+    @Transactional(readOnly = true)
+    public int newReservationCount(String loginId) {
+        long ownerId = lodgings.ownerIdOf(loginId);
+        return jdbc.queryForObject("""
+            SELECT COUNT(*)
+            FROM room_reservation rr JOIN room r ON r.room_id = rr.room_id JOIN lodging l ON l.lodging_id = r.lodging_id
+            WHERE l.owner_id = ? AND rr.status = 'CONFIRMED' AND rr.owner_checked_at IS NULL
+            """, Integer.class, ownerId);
+    }
+
+    /** 예약 현황 탭을 열면 호출 : 미확인 예약을 전부 확인 처리한다. */
+    @Transactional
+    public void markReservationsChecked(String loginId) {
+        long ownerId = lodgings.ownerIdOf(loginId);
+        jdbc.update("""
+            UPDATE room_reservation rr JOIN room r ON r.room_id = rr.room_id JOIN lodging l ON l.lodging_id = r.lodging_id
+            SET rr.owner_checked_at = NOW()
+            WHERE l.owner_id = ? AND rr.status = 'CONFIRMED' AND rr.owner_checked_at IS NULL
+            """, ownerId);
+    }
+
+    /** 오늘 체크인·체크아웃 건수 (취소·환불 제외). */
+    @Transactional(readOnly = true)
+    public TodaySummary todaySummary(String loginId) {
+        long ownerId = lodgings.ownerIdOf(loginId);
+        int checkIn = jdbc.queryForObject("""
+            SELECT COUNT(*)
+            FROM room_reservation rr JOIN room r ON r.room_id = rr.room_id JOIN lodging l ON l.lodging_id = r.lodging_id
+            WHERE l.owner_id = ? AND rr.checkin_date = CURRENT_DATE()
+              AND rr.status NOT IN ('CANCELLED', 'CANCELED', 'REFUNDING', 'REFUNDED', 'REFUND_FAILED')
+            """, Integer.class, ownerId);
+        int checkOut = jdbc.queryForObject("""
+            SELECT COUNT(*)
+            FROM room_reservation rr JOIN room r ON r.room_id = rr.room_id JOIN lodging l ON l.lodging_id = r.lodging_id
+            WHERE l.owner_id = ? AND rr.checkout_date = CURRENT_DATE()
+              AND rr.status NOT IN ('CANCELLED', 'CANCELED', 'REFUNDING', 'REFUNDED', 'REFUND_FAILED')
+            """, Integer.class, ownerId);
+        return new TodaySummary(checkIn, checkOut);
     }
 
     private void requireMyLodging(long ownerId, long lodgingId) {

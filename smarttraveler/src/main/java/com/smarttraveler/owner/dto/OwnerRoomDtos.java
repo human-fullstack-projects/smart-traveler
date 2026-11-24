@@ -32,4 +32,6 @@ public final class OwnerRoomDtos {
                                    int guestCount, int roomQuantity, LocalDate checkIn, LocalDate checkOut, int totalPrice,
                                    String status, String requestMemo, String roomName, String lodgingName,
                                    String bookerEmail, String visitorName) {}
+
+    public record TodaySummary(int checkIn, int checkOut) {}
 }

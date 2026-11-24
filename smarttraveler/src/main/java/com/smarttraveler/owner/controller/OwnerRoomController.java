@@ -5,6 +5,7 @@ import com.smarttraveler.owner.dto.OwnerRoomDtos.InventoryUpdate;
 import com.smarttraveler.owner.dto.OwnerRoomDtos.OwnerReservation;
 import com.smarttraveler.owner.dto.OwnerRoomDtos.OwnerRoom;
 import com.smarttraveler.owner.dto.OwnerRoomDtos.RoomInput;
+import com.smarttraveler.owner.dto.OwnerRoomDtos.TodaySummary;
 import com.smarttraveler.owner.service.OwnerRoomService;
 import jakarta.validation.Valid;
 import java.security.Principal;
@@ -50,5 +51,20 @@ public class OwnerRoomController {
     @GetMapping("/reservations")
     public List<OwnerReservation> reservations(Principal principal) {
         return service.reservations(principal.getName());
+    }
+
+    @GetMapping("/reservations/new-count")
+    public int newReservationCount(Principal principal) {
+        return service.newReservationCount(principal.getName());
+    }
+
+    @PostMapping("/reservations/mark-checked")
+    public void markChecked(Principal principal) {
+        service.markReservationsChecked(principal.getName());
+    }
+
+    @GetMapping("/reservations/today-summary")
+    public TodaySummary todaySummary(Principal principal) {
+        return service.todaySummary(principal.getName());
     }
 }
