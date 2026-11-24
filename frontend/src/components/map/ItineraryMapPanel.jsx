@@ -41,6 +41,9 @@ export default function ItineraryMapPanel({ days = EMPTY_DAYS, center, searchReg
     loadKakaoMaps().then(async (maps) => {
       if (!maps.services?.Geocoder || !maps.services?.Places) throw new Error('장소 검색 서비스를 사용할 수 없습니다.');
       return Promise.all(places.map(async (place) => {
+        if (place.kind === 'stay' && hasValidCoordinates(place) && place.address) {
+          return { ...place, locationStatus: 'ready', addressStatus: 'provided' };
+        }
         try { return await resolveKakaoPlace(maps, place, searchRegion); }
         catch { return unavailable(place); }
       }));

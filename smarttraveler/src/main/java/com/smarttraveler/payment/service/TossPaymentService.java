@@ -54,8 +54,9 @@ public class TossPaymentService {
         if (!clientKey.startsWith("test_gck_")) {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "토스 테스트 키를 설정해 주세요.");
         }
-        requireHeld(reservation);
-        RoomPayment payment = payments.findFirstByReservationIdOrderByCreatedAtDesc(reservationId)
+        var existing = payments.findFirstByReservationIdOrderByCreatedAtDesc(reservationId);
+        if (existing.filter(payment -> "DONE".equals(payment.getStatus())).isEmpty()) requireHeld(reservation);
+        RoomPayment payment = existing
                 .orElseGet(() -> payments.save(newPayment(reservation)));
         if (!Objects.equals(payment.getAmount(), reservation.getTotalPrice())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "예약 금액과 결제 금액이 다릅니다.");

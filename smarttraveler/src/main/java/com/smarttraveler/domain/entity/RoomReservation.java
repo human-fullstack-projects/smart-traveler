@@ -27,6 +27,8 @@ import java.time.LocalTime;
 })
 /** 객실예약 */
 public class RoomReservation {
+    public static final String PAYMENT_TIMEOUT_REASON = "결제 시간 초과";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "reservation_id", nullable = false)

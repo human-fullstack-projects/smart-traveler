@@ -101,8 +101,9 @@ class ReservationServiceTest {
         verify(inventory, never()).nights(11L, CHECK_IN, CHECK_OUT, true);
     }
 
-    @Test
-    void keepsTheItineraryWhenPaymentConfirmsTheReservation() {
+    @ParameterizedTest
+    @CsvSource({"DONE,CONFIRMED", "ABORTED,PENDING_PAYMENT"})
+    void keepsTheItineraryAndConfirmsOnlyAnApprovedPayment(String paymentStatus, String reservationStatus) {
         setUpReservation();
         var course = new CourseView("course-23", "부산 여행", "부산", CHECK_IN, CHECK_OUT, "DRAFT",
                 List.of(new Day(CHECK_IN, List.of("광안리"))), null);
@@ -120,22 +121,30 @@ class ReservationServiceTest {
         when(payments.findFirstByReservationIdOrderByCreatedAtDesc(77L)).thenReturn(Optional.of(payment));
         var jdbc = mock(JdbcTemplate.class);
         when(jdbc.queryForList(contains("FOR UPDATE"), eq(Long.class), eq(77L))).thenReturn(List.of(77L));
-        when(jdbc.queryForObject(contains("COUNT(*)"), eq(Long.class), eq(77L), eq(11L),
-                eq(CHECK_IN), eq(CHECK_OUT), eq(1), eq(false))).thenReturn(1L);
-        when(jdbc.update(contains("SET i.held_quantity"), eq(77L))).thenReturn(1);
+        boolean approved = "DONE".equals(paymentStatus);
+        if (approved) {
+            when(jdbc.queryForObject(contains("COUNT(*)"), eq(Long.class), eq(77L), eq(11L),
+                    eq(CHECK_IN), eq(CHECK_OUT), eq(1), eq(false))).thenReturn(1L);
+            when(jdbc.update(contains("SET i.held_quantity"), eq(77L))).thenReturn(1);
+        }
         var gateway = mock(TossGateway.class);
         when(gateway.get("payment-test")).thenReturn(mapper.readTree("""
-            {"orderId":"order-test","paymentKey":"payment-test","totalAmount":100000,"status":"DONE"}
-            """));
+            {"orderId":"order-test","paymentKey":"payment-test","totalAmount":100000,"status":"%s"}
+            """.formatted(paymentStatus)));
         var paymentService = new TossPaymentService(payments, reservations, members, jdbc, gateway,
                 mock(TossWebhookVerifier.class), mapper, "test_gck_local");
 
-        paymentService.sync(77L, auth);
+        assertEquals(paymentStatus, paymentService.sync(77L, auth).status());
 
-        verify(reservations).save(reservation);
-        var confirmed = service.get(77L, auth);
-        assertEquals("CONFIRMED", confirmed.status());
-        assertEquals(created.itinerary(), confirmed.itinerary());
+        if (approved) {
+            verify(reservations).save(reservation);
+        } else {
+            verify(reservations, never()).save(any());
+            verify(jdbc, never()).update(contains("SET i.held_quantity"), eq(77L));
+        }
+        var fetched = service.get(77L, auth);
+        assertEquals(reservationStatus, fetched.status());
+        assertEquals(created.itinerary(), fetched.itinerary());
     }
 
     private void setUpReservation() {

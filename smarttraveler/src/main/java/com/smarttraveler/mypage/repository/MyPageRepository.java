@@ -1,14 +1,20 @@
 package com.smarttraveler.mypage.repository;
 
+import static com.smarttraveler.domain.entity.RoomReservation.PAYMENT_TIMEOUT_REASON;
+
 import com.smarttraveler.mypage.dto.MyPageDtos.*;
+import com.smarttraveler.reservation.dto.ReservationItinerary;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 
 @Repository
@@ -34,6 +40,7 @@ public class MyPageRepository {
     }
 
     public List<CourseView> courses(long memberId) {
+        Set<String> bookedIds = bookedCourseIds(memberId);
         Map<String, Optional<String>> regionalPhotos = new HashMap<>();
         List<CourseView> result = new ArrayList<>(jdbc.query("""
             SELECT id, title, region, start_date, end_date, days_json
@@ -42,17 +49,16 @@ public class MyPageRepository {
                 String region = rs.getString("region");
                 List<Day> days = readDays(rs.getString("days_json"));
                 String photo = draftPhoto(days, region);
-                return new CourseView("draft-" + rs.getLong("id"), rs.getString("title"), region,
+                String id = "draft-" + rs.getLong("id");
+                return new CourseView(id, rs.getString("title"), region,
                     rs.getObject("start_date", LocalDate.class), rs.getObject("end_date", LocalDate.class),
-                    "DRAFT", days, photo != null ? photo : regionalPhoto(region, regionalPhotos));
+                    bookedIds.contains(id) ? "BOOKED" : "DRAFT", days,
+                    photo != null ? photo : regionalPhoto(region, regionalPhotos));
             }, memberId));
         result.addAll(jdbc.query("""
             SELECT c.id, COALESCE(c.title, c.destination) AS title, c.destination, c.start_date, c.end_date,
                    c.region_id, c.adults, c.children,
-                   -- 챗봇이 저장한 추천 코스(chat_message_id)는 예약 전까지 「저장된 여행」(DRAFT)으로 보인다.
                    CASE WHEN JSON_EXTRACT(c.condition_meta, '$.chat_message_id') IS NOT NULL
-                         AND NOT EXISTS (SELECT 1 FROM room_reservation r WHERE r.course_id = c.id
-                                         AND r.status IN ('CONFIRMED', 'COMPLETED'))
                         THEN 'DRAFT' ELSE c.status END AS status,
                    (SELECT image.image_url FROM course_day d
                     JOIN activity a ON a.course_day_id=d.id
@@ -63,12 +69,26 @@ public class MyPageRepository {
             """, (rs, n) -> {
                 String region = rs.getString("destination");
                 String photo = rs.getString("itinerary_photo");
-                return new CourseView("course-" + rs.getLong("id"), rs.getString("title"), region,
+                String id = "course-" + rs.getLong("id");
+                return new CourseView(id, rs.getString("title"), region,
                     rs.getObject("start_date", LocalDate.class), rs.getObject("end_date", LocalDate.class),
-                    rs.getString("status"), List.of(), photo != null ? photo : regionalPhoto(region, regionalPhotos),
+                    bookedIds.contains(id) ? "BOOKED" : rs.getString("status"), List.of(),
+                    photo != null ? photo : regionalPhoto(region, regionalPhotos),
                     rs.getObject("region_id", Long.class), rs.getObject("adults", Integer.class), rs.getObject("children", Integer.class));
             }, memberId));
         return result;
+    }
+
+    private Set<String> bookedCourseIds(long memberId) {
+        return new HashSet<>(jdbc.queryForList("""
+            SELECT DISTINCT COALESCE(CONCAT('course-', r.course_id),
+                JSON_UNQUOTE(JSON_EXTRACT(IF(JSON_VALID(r.itinerary_snapshot), r.itinerary_snapshot, NULL), '$.course.id')))
+            FROM room_reservation r
+            WHERE r.member_id=? AND (r.course_id IS NOT NULL OR r.itinerary_snapshot IS NOT NULL)
+              AND (r.status IN ('CONFIRMED', 'COMPLETED', 'REFUNDING', 'REFUND_FAILED')
+                OR (r.status='CANCELLED' AND EXISTS (SELECT 1 FROM room_payment p
+                    WHERE p.reservation_id=r.reservation_id AND p.approved_at IS NOT NULL)))
+            """, String.class, memberId));
     }
 
     public CourseView course(long memberId, String id) {
@@ -120,7 +140,8 @@ public class MyPageRepository {
             LEFT JOIN lodging l ON l.lodging_id=ro.lodging_id LEFT JOIN course c ON c.id=r.course_id
             LEFT JOIN mypage_course_draft draft ON draft.member_id=r.member_id
               AND draft.id=JSON_UNQUOTE(JSON_EXTRACT(CASE WHEN JSON_VALID(r.request_memo) THEN r.request_memo ELSE '{}' END,'$.draftId'))
-            WHERE r.member_id=?
+            WHERE r.member_id=? AND r.status<>'PENDING_PAYMENT'
+              AND NOT (r.status='CANCELLED' AND r.cancel_reason <=> ?)
             ), lodging_matches AS (
                 SELECT owned.*, CASE WHEN booked_provider='TEST' OR booked_stay_name LIKE '[테스트]%'
                     THEN (SELECT candidate.lodging_id FROM lodging candidate
@@ -144,6 +165,7 @@ public class MyPageRepository {
                 FROM owned_reservations owned
             )
             SELECT matched.*, display_stay.name AS stay_name, display_stay.address AS stay_address,
+                   display_stay.latitude AS stay_latitude, display_stay.longitude AS stay_longitude,
                    COALESCE(match_region, stay_region.sigungu_name, stay_region.region_name) AS cover_region,
                    display_stay.phone AS stay_phone, display_stay.description AS stay_description,
                    display_stay.checkin_time AS stay_checkin_time, display_stay.checkout_time AS stay_checkout_time,
@@ -158,15 +180,31 @@ public class MyPageRepository {
             FROM lodging_matches matched LEFT JOIN lodging display_stay ON display_stay.lodging_id=display_lodging_id
             LEFT JOIN region stay_region ON stay_region.region_id=display_stay.region_id
             ORDER BY matched.created_at DESC, matched.reservation_id DESC
-            """, (rs, n) -> new BookingView(String.valueOf(rs.getLong("reservation_id")), rs.getString("reservation_no"),
-                rs.getString("owned_course_id"),
-                rs.getString("stay_name"), rs.getString("room_name"), rs.getObject("checkin_date", LocalDate.class),
-                rs.getObject("checkout_date", LocalDate.class), rs.getInt("guest_count"), rs.getInt("total_price"),
-                rs.getString("status"), rs.getObject("display_lodging_id") == null ? null : new StayInfo(
-                    rs.getLong("display_lodging_id"), rs.getString("stay_address"), rs.getString("stay_phone"),
-                    rs.getString("stay_description"), rs.getString("stay_image_url"), rs.getString("stay_checkin_time"),
-                    rs.getString("stay_checkout_time"), rs.getLong("display_lodging_id") != rs.getLong("booked_lodging_id")),
-                rs.getString("owned_course_id") == null ? regionalPhoto(rs.getString("cover_region"), regionalPhotos) : null), memberId, memberId);
+            """, (rs, n) -> {
+                var itinerary = readItinerary(rs.getString("itinerary_snapshot"));
+                String courseId = itinerary != null && itinerary.course() != null
+                        ? itinerary.course().id() : rs.getString("owned_course_id");
+                Long lodgingId = rs.getObject("display_lodging_id", Long.class);
+                var stay = lodgingId == null ? null : new StayInfo(lodgingId, rs.getString("stay_address"),
+                        rs.getString("stay_phone"), rs.getString("stay_description"), rs.getString("stay_image_url"),
+                        rs.getString("stay_checkin_time"), rs.getString("stay_checkout_time"),
+                        !lodgingId.equals(rs.getObject("booked_lodging_id", Long.class)),
+                        rs.getObject("stay_latitude", Double.class), rs.getObject("stay_longitude", Double.class));
+                String cover = courseId == null ? regionalPhoto(rs.getString("cover_region"), regionalPhotos) : null;
+                return new BookingView(String.valueOf(rs.getLong("reservation_id")), rs.getString("reservation_no"),
+                        courseId, rs.getString("stay_name"), rs.getString("room_name"),
+                        rs.getObject("checkin_date", LocalDate.class), rs.getObject("checkout_date", LocalDate.class),
+                        rs.getInt("guest_count"), rs.getInt("total_price"), rs.getString("status"), stay, cover, itinerary);
+            }, memberId, memberId, PAYMENT_TIMEOUT_REASON);
+    }
+
+    private ReservationItinerary readItinerary(String snapshot) {
+        if (snapshot == null) return null;
+        try {
+            return mapper.readValue(snapshot, ReservationItinerary.class);
+        } catch (JacksonException ignored) {
+            return null;
+        }
     }
 
     private String draftPhoto(List<Day> days, String region) {

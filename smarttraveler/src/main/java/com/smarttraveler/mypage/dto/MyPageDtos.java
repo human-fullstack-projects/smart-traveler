@@ -1,5 +1,6 @@
 package com.smarttraveler.mypage.dto;
 
+import com.smarttraveler.reservation.dto.ReservationItinerary;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import java.time.LocalDate;
@@ -33,13 +34,20 @@ public final class MyPageDtos {
         }
     }
     public record StayInfo(Long id, String address, String phone, String description,
-                           String imageUrl, String checkinTime, String checkoutTime, boolean regionMatched) {}
+                           String imageUrl, String checkinTime, String checkoutTime, boolean regionMatched,
+                           Double latitude, Double longitude) {
+        public StayInfo(Long id, String address, String phone, String description,
+                        String imageUrl, String checkinTime, String checkoutTime, boolean regionMatched) {
+            this(id, address, phone, description, imageUrl, checkinTime, checkoutTime, regionMatched, null, null);
+        }
+    }
     public record BookingView(String id, String reservationNo, String courseId, String stay,
                               String room, LocalDate date, LocalDate endDate, int guests,
-                              int price, String status, StayInfo stayInfo, String coverImageUrl) {
+                              int price, String status, StayInfo stayInfo, String coverImageUrl,
+                              ReservationItinerary itinerary) {
         public BookingView(String id, String reservationNo, String courseId, String stay, String room,
                            LocalDate date, LocalDate endDate, int guests, int price, String status, StayInfo stayInfo) {
-            this(id, reservationNo, courseId, stay, room, date, endDate, guests, price, status, stayInfo, null);
+            this(id, reservationNo, courseId, stay, room, date, endDate, guests, price, status, stayInfo, null, null);
         }
     }
     public record PostView(String id, String courseId, String reservationId, String title,

@@ -1,5 +1,7 @@
 package com.smarttraveler.reservation.service;
 
+import static com.smarttraveler.domain.entity.RoomReservation.PAYMENT_TIMEOUT_REASON;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -51,8 +53,8 @@ public class ReservationExpiryJob {
             """, id);
         jdbc.update("""
             UPDATE room_reservation
-            SET status='CANCELLED', cancel_reason='결제 시간 초과', cancelled_at=NOW(), version=version+1
+            SET status='CANCELLED', cancel_reason=?, cancelled_at=NOW(), version=version+1
             WHERE reservation_id=?
-            """, id);
+            """, PAYMENT_TIMEOUT_REASON, id);
     }
 }
