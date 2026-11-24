@@ -29,3 +29,5 @@
   font: 800 12px/1 sans-serif;
   cursor: default;
 }
+
+.stay-ui:is(.stay-search-page, .stay-booking-page) { background: transparent; }

@@ -23,7 +23,7 @@ export default function HumanCourseDetail({ courses = previewCourses, reservatio
   const photos = photoAssets.length ? photoAssets : (course?.photos || []).map((name) => ({ name, dataUrl: '' }));
   const reservation = serverMode ? null : reservations.find((item) => item.id === course?.reservationId);
   const stay = course?.stay || reservation?.stay || (reservation && { name: reservation.name });
-  return <div className="human-courses"><div className="page">
+  return <div className="human-courses human-course-detail"><div className="page">
     <PageHeading kicker="휴먼 여행" listLabel="여행 목록" breadcrumb="여행 상세" title="여행 상세 보기" description="게시글 내용, 실제 방문 순서, 댓글과 좋아요를 확인합니다."><a className="button" href="#/human-courses">← 목록으로</a></PageHeading>
     {loadingDetail && <p role="status">게시글을 확인하고 있습니다.</p>}
     {detailError && <p className="note" role="alert">{detailError} <button type="button" onClick={async () => { setLoadingDetail(true); const result = await loadCourse?.(courseId); setDetailError(result?.error || ''); setLoadingDetail(false); }}>다시 시도</button></p>}

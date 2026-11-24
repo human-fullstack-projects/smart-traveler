@@ -41,7 +41,7 @@ export default function MyPage({ bookings = [], courses = [], posts = [], member
       </div>
       <div className="mp-home-actions"><a className="secondary" href={memberLink('my-profile')}>내 정보관리</a><a className="secondary" href={memberLink('my-travel-style')}>내 여행 스타일 관리</a></div>
     </Card>
-    <div className="grid three mp-home-summaries" style={{ marginTop: 23 }}>
+    <div className="grid three mp-home-summaries">
       {/* 카드 전체를 하나의 링크로 만들어 여백을 눌러도 같은 페이지로 이동한다. */}
       {summaries.map(([page, englishTitle, title, count, description]) => (
         <a key={page} className="card mp-summary-link" href={memberLink(page)} aria-labelledby={`mp-summary-${page}`}>

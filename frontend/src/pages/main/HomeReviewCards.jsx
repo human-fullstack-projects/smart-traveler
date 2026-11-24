@@ -56,7 +56,7 @@ export default function HomeReviewCards() {
   return (
     <section className="landing-recommendations" aria-labelledby="courses-title">
       <div className="landing-section-heading">
-        <h2 id="courses-title">이번 여행은 어디로 갈까요? <em>휴먼 추천 코스</em></h2>
+        <h2 id="courses-title">이번 여행은 어디로 갈까요? <em>여행자 추천 트립</em></h2>
         <a href="#/human-courses">전체 보기 →</a>
       </div>
 

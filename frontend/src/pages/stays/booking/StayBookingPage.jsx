@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../../contexts/AuthContext.jsx';
 import { createReservation, getRooms, getStay } from '../shared/stayApi.js';
 import useStayCourse, { readStayCourseId } from '../shared/useStayCourse.js';
-import { StayFooter, StayHeader } from '../shared/StayShell.jsx';
+import '../../../css/stay-shared.css';
 import { formatWon, getDefaultStayDates, getNightCount, stayTypeLabels } from '../shared/stayData.js';
 import { StayCover, StayLocation, StayOverview } from './StayDetails.jsx';
 import StayPhotoGallery from './StayPhotoGallery.jsx';
@@ -116,7 +116,6 @@ export default function StayBookingPage({ onStart, busy = false }) {
 
   return (
     <div className="stay-ui stay-booking-page">
-      <StayHeader active="booking" searchHref={backToSearch} bookingHref={window.location.hash} />
       <main className="booking-main">
         <p><a href={backToSearch}>← 숙소 검색</a></p>
         {!lodgingId && <p>숙소 검색에서 예약할 숙소를 선택해 주세요.</p>}
@@ -203,7 +202,6 @@ export default function StayBookingPage({ onStart, busy = false }) {
           </div>
         </>}
       </main>
-      <StayFooter />
     </div>
   );
 }

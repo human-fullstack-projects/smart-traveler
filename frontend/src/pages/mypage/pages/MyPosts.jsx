@@ -77,7 +77,7 @@ export default function MyPosts({ posts = [], bookings = [], courses = [], postI
     key: `post-${post.id}`, status: 'complete', title: post.title,
     post,
     region: coursesById.get(post.courseId)?.region, booking: bookingsById.get(String(post.reservationId)),
-    href: `#/my-posts/${encodeURIComponent(post.id)}`, action: '추천 글 자세히 보기',
+    href: `#/human-courses/${encodeURIComponent(post.id)}`, action: '추천 글 자세히 보기',
   }));
   const pending = pendingBookings.map(booking => {
     const course = coursesById.get(booking.courseId);

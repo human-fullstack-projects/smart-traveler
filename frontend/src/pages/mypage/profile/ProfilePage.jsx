@@ -59,7 +59,11 @@ export default function ProfilePage({ member }) {
     submitting.current = true; setBusy(true); setNotice('');
     try {
       const result = await settingsApi.saveProfile(member.memberId, { ...form, nickname: form.nickname.trim(), email: form.email.trim(), changePassword: false });
-      updateMemberProfile(member.memberId, { nickname: result.profile.nickname, email: result.profile.email });
+      updateMemberProfile(member.memberId, {
+        nickname: result.profile.nickname,
+        email: result.profile.email,
+        avatarData: result.profile.avatarData,
+      });
       if (mounted.current) { resource.accept(result.profile); setNotice(result.passwordChanged ? '내 정보와 비밀번호를 변경했습니다. 다음 로그인부터 새 비밀번호를 사용해 주세요.' : '내 정보를 저장했습니다.'); }
     } catch (error) { if (mounted.current) setNotice(error.message); }
     finally { submitting.current = false; if (mounted.current) setBusy(false); }

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { StayArtwork, StayFooter, StayHeader, StatusPill } from '../shared/StayShell.jsx';
+import { StayArtwork, StatusPill } from '../shared/StayShell.jsx';
 import { formatWon, getDefaultStayDates, stayTypeLabels } from '../shared/stayData.js';
 import { getStayRegions, searchStays } from '../shared/stayApi.js';
 import useStayCourse, { readStayCourseId } from '../shared/useStayCourse.js';
@@ -277,11 +277,9 @@ export default function StaySearchPage() {
 
   return (
     <div className="stay-ui stay-search-page">
-      <StayHeader active="search" searchHref={window.location.hash} />
       <main className="stay-search-main">
         <section className="stay-search-hero">
-          <div><span>STAY FINDER</span><h1>여행에 맞는 숙소를 찾아보세요.</h1><p>전국 숙소 중 조건에 맞는 곳을 {size}곳씩 보여 드려요. 선택한 날짜에 판매 중인 객실만 예약할 수 있어요.</p></div>
-          <StatusPill tone="info">목록 · 지도 함께 보기</StatusPill>
+          <div><span>Stay Finder</span><h1>여행에 맞는 숙소를 찾아보세요.</h1><p>전국 숙소 중 조건에 맞는 곳을 {size}곳씩 보여 드려요. 선택한 날짜에 판매 중인 객실만 예약할 수 있어요.</p></div>
         </section>
 
         {course && <p className="stay-search-notice">저장된 여행 <strong>{course.title}</strong>에 숙소를 선택하고 있어요.</p>}
@@ -335,7 +333,6 @@ export default function StaySearchPage() {
           <div className="stay-map-column"><SearchMap items={result.items} selectedId={selectedId} onSelect={setSelectedId} query={query} focus={focus} courseRoute={courseId ? courseRoute : null} /><p>별표는 현재 목록에 있는 숙소입니다.{courseId && ' 번호와 점선은 저장된 여행의 일차별 방문 순서입니다.'}</p></div>
         </div>
       </main>
-      <StayFooter />
     </div>
   );
 }
