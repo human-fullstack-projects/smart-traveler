@@ -272,6 +272,21 @@
 .human-courses .course-report-dialog::backdrop { background: #15172599; }
 .human-courses .course-report-dialog textarea { resize: vertical; }
 .human-courses .course-report-actions { justify-content: flex-end; }
+.human-courses .course-heading-actions { flex-shrink: 0; margin: 0; }
+.human-courses .course-save-action { position: relative; }
+.human-courses .course-save-action > .status {
+  position: absolute;
+  z-index: 1;
+  top: 100%;
+  margin: 6px 0 0;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface);
+  box-shadow: 0 4px 14px #20336214;
+  white-space: nowrap;
+}
+.human-courses .course-save-dialog__actions { justify-content: flex-end; }
 .human-courses .step-row { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin-bottom: 17px; color: var(--sub); font-size: 12px; }
 .human-courses .step { display: inline-flex; gap: 6px; align-items: center; border: 1px solid #DADBE2; padding: 7px 9px; border-radius: 5px; background: #fff; }
 .human-courses .step strong { color: #265AE7; }

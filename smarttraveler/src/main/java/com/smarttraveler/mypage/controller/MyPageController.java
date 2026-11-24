@@ -5,6 +5,7 @@ import com.smarttraveler.mypage.service.MyPageService;
 import com.smarttraveler.tour.service.TourPhotoService;
 import jakarta.validation.Valid;
 import java.util.List;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,6 +45,11 @@ public class MyPageController {
     @GetMapping("/courses/{id}")
     public CourseView course(Authentication auth, @RequestHeader(value = "X-MyPage-Member", required = false) Long expected, @PathVariable String id) {
         return service.course(auth, expected, id);
+    }
+    @PostMapping("/courses/human/{postId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void saveHumanItinerary(Authentication auth, @PathVariable long postId) {
+        service.saveHumanItinerary(auth, postId);
     }
     @GetMapping("/reservations/{id}")
     public BookingView booking(Authentication auth, @RequestHeader(value = "X-MyPage-Member", required = false) Long expected, @PathVariable String id) {

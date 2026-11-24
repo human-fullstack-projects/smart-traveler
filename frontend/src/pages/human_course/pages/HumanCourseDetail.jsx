@@ -2,6 +2,7 @@ import CourseActions from '../components/CourseActions';
 import CourseComments from '../components/CourseComments';
 import CoursePhotoGallery from '../components/CoursePhotoGallery';
 import CourseMap from '../components/CourseMap';
+import SaveCourseRoute from '../components/SaveCourseRoute';
 import '../../../css/human-course.css';
 import PageHeading from '../components/PageHeading';
 import { previewCourses, previewReservations } from '../data/previewData';
@@ -23,8 +24,15 @@ export default function HumanCourseDetail({ courses = previewCourses, reservatio
   const photos = photoAssets.length ? photoAssets : (course?.photos || []).map((name) => ({ name, dataUrl: '' }));
   const reservation = serverMode ? null : reservations.find((item) => item.id === course?.reservationId);
   const stay = course?.stay || reservation?.stay || (reservation && { name: reservation.name });
+  const listLink = <a className="button" href="#/human-courses">← 목록으로</a>;
+  const canSave = isAuthenticated && serverMode && !blocked && course?.plan?.length > 0;
   return <div className="human-courses human-course-detail"><div className="page">
-    <PageHeading kicker="휴먼 여행" listLabel="여행 목록" breadcrumb="여행 상세" title="여행 상세 보기" description="게시글 내용, 실제 방문 순서, 댓글과 좋아요를 확인합니다."><a className="button" href="#/human-courses">← 목록으로</a></PageHeading>
+    <PageHeading kicker="휴먼 여행" listLabel="여행 목록" breadcrumb="여행 상세" title="여행 상세 보기" description="게시글 내용, 실제 방문 순서, 댓글과 좋아요를 확인합니다.">
+      {canSave ? <div className="actions course-heading-actions">
+        <SaveCourseRoute key={course.id} postId={course.id} />
+        {listLink}
+      </div> : listLink}
+    </PageHeading>
     {loadingDetail && <p role="status">게시글을 확인하고 있습니다.</p>}
     {detailError && <p className="note" role="alert">{detailError} <button type="button" onClick={async () => { setLoadingDetail(true); const result = await loadCourse?.(courseId); setDetailError(result?.error || ''); setLoadingDetail(false); }}>다시 시도</button></p>}
     {!loadingDetail && (!course || blocked) ? <section className="panel"><h2>{blocked ? '블라인드 처리된 여행입니다.' : '여행을 찾을 수 없습니다.'}</h2><p>{blocked ? '관리자 검토로 숨김 처리되어 게시글·사진·일정·댓글을 볼 수 없습니다.' : '존재하지 않는 여행입니다.'}</p>{isAuthenticated && course?.mine && <a className="button" href={`#/human-courses/${course.id}/edit`}>내 게시글 수정하기 (숨김 상태 유지)</a>}</section> : course && !blocked ? <>

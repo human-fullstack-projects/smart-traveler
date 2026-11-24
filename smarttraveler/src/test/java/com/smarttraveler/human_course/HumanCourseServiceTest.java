@@ -6,7 +6,11 @@ import static org.mockito.Mockito.*;
 import com.smarttraveler.admin.service.HumanManagementService;
 import com.smarttraveler.auth.repository.MemberRepository;
 import com.smarttraveler.domain.entity.Member;
+import com.smarttraveler.human_course.HumanCourseDtos.Day;
+import com.smarttraveler.human_course.HumanCourseDtos.MapPlace;
 import com.smarttraveler.human_course.HumanCourseDtos.PostInput;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
@@ -21,6 +25,30 @@ import org.springframework.web.server.ResponseStatusException;
 import tools.jackson.databind.ObjectMapper;
 
 class HumanCourseServiceTest {
+    @Test void copiedRouteKeepsVisitOrderAndCoordinatesWithoutItsOriginalLodging() {
+        var beach = new MapPlace("1", 5L, "광안리", "부산 수영구", new BigDecimal("35.15"), new BigDecimal("129.12"), "course", List.of());
+        var park = new MapPlace("2", 6L, "수변공원", null, null, null, "course", List.of());
+        var stay = new MapPlace("stay-3", null, "원래 숙소", null, null, null, "stay", List.of());
+        var plan = List.of(new Day(1, List.of(), List.of(beach, stay, park), "2025-02-01"),
+                new Day(3, List.of("부산시립미술관"), List.of(), "2025-02-03"));
+        var start = LocalDate.of(2026, 12, 10);
+        var days = HumanCourseService.itineraryDays(plan, start);
+
+        assertEquals(List.of(start, start.plusDays(1), start.plusDays(2)), days.stream().map(day -> day.date()).toList());
+        assertEquals(List.of("광안리", "수변공원"), days.getFirst().places());
+        assertEquals(35.15, days.getFirst().mapPlaces().getFirst().latitude());
+        assertTrue(days.get(1).places().isEmpty());
+        assertEquals(List.of("부산시립미술관"), days.getLast().places());
+    }
+
+    @Test void itineraryLookupExcludesHiddenAndDeletedPosts() {
+        var jdbc = mock(JdbcTemplate.class);
+        var service = new HumanCourseService(jdbc, mock(ObjectMapper.class), mock(MemberRepository.class),
+                mock(HumanCoursePhotoStore.class), mock(HumanManagementService.class));
+        var error = assertThrows(ResponseStatusException.class, () -> service.itinerary(3L, LocalDate.of(2026, 12, 10)));
+        assertEquals(HttpStatus.NOT_FOUND, error.getStatusCode());
+        verify(jdbc).queryForList(contains("p.status='VISIBLE' AND p.deleted_at IS NULL"), eq(3L));
+    }
     @Test void homeReviewsIncludesGuestsAndSortsLikesThenActiveComments() {
         var jdbc = mock(JdbcTemplate.class);
         var service = new HumanCourseService(jdbc, mock(ObjectMapper.class), mock(MemberRepository.class),

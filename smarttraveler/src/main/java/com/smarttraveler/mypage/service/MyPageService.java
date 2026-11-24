@@ -1,9 +1,14 @@
 package com.smarttraveler.mypage.service;
 
+import static com.smarttraveler.mypage.dto.MyPageDtos.COURSE_REFERENCE_PATTERN;
+
 import com.smarttraveler.auth.repository.MemberRepository;
+import com.smarttraveler.human_course.HumanCourseService;
 import com.smarttraveler.mypage.dto.MyPageDtos.*;
 import com.smarttraveler.mypage.repository.MyPageRepository;
 import com.smarttraveler.tour.service.TourPhotoService.Target;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import org.springframework.http.HttpStatus;
@@ -16,9 +21,16 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 @Transactional(readOnly = true)
 public class MyPageService {
+    private static final ZoneId KOREA = ZoneId.of("Asia/Seoul");
     private final MemberRepository members;
     private final MyPageRepository data;
-    public MyPageService(MemberRepository members, MyPageRepository data) { this.members = members; this.data = data; }
+    private final HumanCourseService humanCourses;
+
+    public MyPageService(MemberRepository members, MyPageRepository data, HumanCourseService humanCourses) {
+        this.members = members;
+        this.data = data;
+        this.humanCourses = humanCourses;
+    }
 
     public long owner(Authentication auth, Long expectedMemberId) {
         if (auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken) throw denied(HttpStatus.UNAUTHORIZED);
@@ -34,12 +46,25 @@ public class MyPageService {
     }
 
     public CourseView course(Authentication auth, Long expectedMemberId, String courseId) {
-        long id = owner(auth, expectedMemberId);
-        if (!courseId.matches("(draft|course)-[1-9][0-9]{0,17}")) throw denied(HttpStatus.NOT_FOUND);
-        var course = data.course(id, courseId);
+        return course(owner(auth, expectedMemberId), courseId, LocalDate.now(KOREA).plusWeeks(1));
+    }
+
+    public CourseView course(long memberId, String courseId, LocalDate humanStartDate) {
+        if (!courseId.matches(COURSE_REFERENCE_PATTERN)) throw denied(HttpStatus.NOT_FOUND);
+        if (courseId.startsWith("human-")) return humanCourses.itinerary(Long.parseLong(courseId.substring(6)), humanStartDate);
+        var course = data.course(memberId, courseId);
         // 없는 자료와 타인 자료를 구분해 노출하지 않는다.
         if (course == null) throw denied(HttpStatus.NOT_FOUND);
         return course;
+    }
+
+    @Transactional
+    public void saveHumanItinerary(Authentication auth, long postId) {
+        long memberId = owner(auth, null);
+        var course = course(memberId, "human-" + postId, LocalDate.now(KOREA).plusWeeks(1));
+        if (!data.lockMember(memberId)) throw denied(HttpStatus.UNAUTHORIZED);
+        data.importDraft(memberId, new Draft(data.humanDraftClientId(memberId, postId), course.title(), course.region(),
+                course.startDate(), course.endDate(), course.days()));
     }
 
     public PlaceDetails placeDetails(Authentication auth, Long placeId, String name, String region) {
