@@ -1,10 +1,9 @@
 /* 숙소 찾기: 시·도/시·군·구 · 숙소 이름 · 페이지 · 지도 묶음 핀 (2026-11-19) */
-.stay-search-bar.stay-search-bar--regions { grid-template-columns: 1.15fr 1fr repeat(2, 1.05fr) .55fr .55fr auto; }
 .stay-search-bar select:disabled { color: #9aa7a2; background: #fff; }
 
-.stay-filter__keyword { display: flex; gap: 6px; margin-top: 11px; }
-.stay-filter__keyword input { min-width: 0; flex: 1; padding: 8px 9px; border: 1px solid var(--stay-line); border-radius: 8px; font-size: 12px; }
-.stay-filter__keyword button { padding: 0 10px; border: 0; border-radius: 8px; background: var(--stay-green); color: #fff; font-size: 12px; font-weight: 800; cursor: pointer; }
+.stay-filter__keyword { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px; margin-top: 11px; }
+.stay-filter__keyword input { width: 100%; min-width: 0; padding: 8px 9px; border: 1px solid var(--stay-line); border-radius: 8px; font-size: 12px; }
+.stay-filter__keyword button { padding: 0 10px; border: 0; border-radius: 8px; background: var(--stay-green); color: #fff; font-size: 12px; font-weight: 800; white-space: nowrap; cursor: pointer; }
 
 .stay-results__controls { display: flex; gap: 8px; }
 .stay-results__loading { color: #85918d; font-size: 12px; }
@@ -18,5 +17,3 @@
 .stay-kakao-map .kakao-map-marker { border: 0; cursor: pointer; font-family: inherit; }
 .stay-kakao-map .kakao-map-marker--stay { min-width: 22px; height: 22px; padding: 0 5px; border: 2px solid var(--stay-marker-border); border-radius: 11px; background: var(--stay-marker-fill); color: var(--stay-marker-text); font-size: 12px; font-weight: 900; box-shadow: 0 2px 8px #20409855; }
 .stay-kakao-map .kakao-map-marker--stay.is-selected { background: var(--stay-marker-highlight); outline: 1px solid var(--stay-marker-border); transform: scale(1.25); }
-
-@media (max-width: 1180px) { .stay-search-bar.stay-search-bar--regions { grid-template-columns: repeat(3, 1fr); } }
