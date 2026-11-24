@@ -59,6 +59,7 @@ export default function AiChatPage({
   const selectedCourseId = courseSelection?.sessionId === sessionId && courseSelection?.messageId === recommendationMessage?.id
     ? courseSelection.courseId : null;
   const saveSelectedCourse = () => saveCourse(startDateInput || null, selectedCourseId);
+  const savedCourseNumber = multipleCourses ? candidateIds.indexOf(selectedCourseId) + 1 : 1;
   const needsStartDate = courseSaveStatus === 'ask' && !lastRecommendation?.conditions?.startDate;
   const lastMessage = messages.at(-1);
   const awaitingConfirmation = !busy && lastMessage?.role === 'ASSISTANT' && lastMessage.content.includes('조건을 확인해 주세요');
@@ -107,10 +108,10 @@ export default function AiChatPage({
           </div>
         )}
         {courseSaveStatus === 'saving' && <p className="cb-status" role="status">추천 코스를 저장하고 있습니다.</p>}
-        {courseSaveStatus === 'guest-saved' && <p className="cb-status" role="status">1위 추천 코스를 보관했습니다. <a href="#/login">로그인</a>하거나 <a href="#/signup">회원가입</a> 후 로그인하면 저장된 여행으로 옮겨집니다.</p>}
+        {courseSaveStatus === 'guest-saved' && <p className="cb-status" role="status">선택한 {savedCourseNumber}번 추천 코스를 보관했습니다. <a href="#/login">로그인</a>하거나 <a href="#/signup">회원가입</a> 후 로그인하면 저장된 여행으로 옮겨집니다.</p>}
         {courseSaveStatus === 'saved' && (
           <div className="cb-save-choice" role="group" aria-label="저장 완료">
-            <p className="cb-status" role="status">1위 추천 코스를 저장했습니다. <a href="#/my-courses">저장된 여행 보기</a></p>
+            <p className="cb-status" role="status">선택한 {savedCourseNumber}번 추천 코스를 저장했습니다. <a href="#/my-courses">저장된 여행 보기</a></p>
             {savedStayHash && (
               <>
                 <span>관련 숙소 예약 페이지로 안내할게요.</span>
