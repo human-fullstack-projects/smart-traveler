@@ -14,10 +14,9 @@
 .map-place-card__text .map-place-card__warning { color: #b44642; }
 .map-place-detail { padding: 20px; margin-top: -8px; border: 1px solid #D9DAE9; border-top: 0; border-radius: 0 0 13px 13px; background: #F9F8FC; animation: place-detail-open .18s ease-out; }
 .map-place-detail__content { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 24px; align-items: start; }
-.map-place-detail__content img { display: block; width: 100%; max-height: 320px; object-fit: cover; border-radius: 10px; }
-.map-place-detail__content h4 { margin: 0 0 10px; font-size: 18px; }
+.map-place-detail .tour-photo img { display: block; max-width: 100%; max-height: 320px; object-fit: contain; border-radius: 10px; }
+.map-place-detail .tour-photo__message { margin: 0; color: #3E6CEA; }
 .map-place-detail__content .map-place-detail__description { white-space: pre-line; line-height: 1.8; color: #2549AD; }
-.map-place-detail__no-photo { display: grid; min-height: 180px; place-items: center; border-radius: 10px; background: #EEEDF3; color: #3E6CEA; }
 @keyframes place-detail-open { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
 @media (max-width: 650px) { .map-place-detail__content { grid-template-columns: 1fr; gap: 16px; } }
 @media (prefers-reduced-motion: reduce) { .map-place-detail { animation: none; } }

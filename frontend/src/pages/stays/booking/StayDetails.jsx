@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import KakaoMap from '../../../components/map/KakaoMap.jsx';
 import { loadKakaoMaps } from '../../../components/map/loadKakaoMaps.js';
 import { addressSearch, hasValidCoordinates } from '../../../components/map/resolveKakaoPlace.js';
-import StayPhotoGallery from './StayPhotoGallery.jsx';
 
 function readableText(value) {
   return String(value || '').replace(/<\/?(?:br|p)\s*\/?>/gi, '\n').replace(/<[^>]*>/g, '')
@@ -17,19 +16,6 @@ function websiteUrl(value) {
   } catch {
     return null;
   }
-}
-
-export function StayCover({ stay }) {
-  const [cover, ...extraStayPhotos] = stay.photos ?? (stay.photoUrl || stay.thumbnailUrl
-    ? [{ imageUrl: stay.photoUrl, thumbnailUrl: stay.thumbnailUrl }] : []);
-  const seenUrls = new Set(cover ? [cover.imageUrl || cover.thumbnailUrl] : []);
-  const photos = [...extraStayPhotos, ...(stay.roomPhotos ?? [])].filter((photo) => {
-    const url = photo.imageUrl || photo.thumbnailUrl;
-    if (!url || seenUrls.has(url)) return false;
-    seenUrls.add(url);
-    return true;
-  });
-  return <StayPhotoGallery title={stay.name} cover={cover} photos={photos} />;
 }
 
 export function StayOverview({ stay }) {

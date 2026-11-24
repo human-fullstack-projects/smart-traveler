@@ -1,34 +1,40 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import TourPhoto from '../media/TourPhoto';
 
 function descriptionText(value) {
   return String(value || '').replace(/<br\s*\/?\s*>/gi, '\n').replace(/<[^>]*>/g, '')
     .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'").trim();
 }
 
-export default function MapPlaceDetails({ place, region, loadDetails }) {
+export default function MapPlaceDetails({ place, region, loadDetails, loadPhotos }) {
   const [state, setState] = useState({ status: 'loading' });
-  const [attempt, setAttempt] = useState(0);
-  const [imageFailed, setImageFailed] = useState(false);
+  const placeId = state.data?.placeId ?? place.placeId;
+  const name = state.data?.name || place.name;
+  const address = state.data?.address || place.address;
+  const load = useCallback(() => loadPhotos({ placeId, name, address }, region), [loadPhotos, placeId, name, address, region]);
   useEffect(() => {
     let cancelled = false;
-    setState({ status: 'loading' }); setImageFailed(false);
+    setState({ status: 'loading' });
     loadDetails({ placeId: place.placeId, name: place.name }, region).then(data => {
       if (!cancelled) setState({ status: 'ready', data });
     }).catch(error => {
-      if (!cancelled) setState({ status: error.status === 404 ? 'missing' : 'error', error });
+      if (!cancelled) setState({ status: error.status === 401 ? 'login' : 'missing' });
     });
     return () => { cancelled = true; };
-  }, [place.placeId, place.name, region, loadDetails, attempt]);
+  }, [place.placeId, place.name, region, loadDetails]);
   if (state.status === 'loading') return <p role="status">장소 사진과 설명을 불러오는 중입니다.</p>;
-  if (state.status === 'missing') return <p>이 장소와 일치하는 상세 정보가 DB에 없습니다.</p>;
-  if (state.status === 'error') return <p role="alert">{state.error.status === 401 ? '장소 상세 정보는 로그인 후 확인해주세요.' : '장소 정보를 불러오지 못했습니다.'} <button type="button" className="text-button" onClick={() => setAttempt(value => value + 1)}>다시 시도</button></p>;
-  const detail = state.data;
-  return <div className="map-place-detail__content">
-    {detail.imageUrl && !imageFailed ? <img src={detail.imageUrl} alt={`${detail.name} 사진`} onError={() => setImageFailed(true)} /> : <div className="map-place-detail__no-photo">등록된 장소 사진이 없습니다.</div>}
-    <div><h4>{detail.name}</h4>{detail.address && <p>{detail.address}</p>}
-      <p className="map-place-detail__description">{descriptionText(detail.description) || '등록된 장소 설명이 없습니다.'}</p>
+  if (state.status === 'login') return <p>장소 상세 정보는 로그인 후 확인해주세요.</p>;
+  const detail = state.data || {};
+  const description = descriptionText(detail.description);
+  const openingHours = descriptionText(detail.openingHours);
+  const hasDetails = Boolean(description || detail.phone || openingHours);
+  return <div className={hasDetails ? 'map-place-detail__content' : undefined}>
+    <TourPhoto localUrl={detail.imageUrl} alt={`${name} 사진`} load={loadPhotos ? load : undefined}
+      missing="등록된 장소 사진이 없습니다." />
+    {hasDetails && <div>
+      {description && <p className="map-place-detail__description">{description}</p>}
       {detail.phone && <p>연락처: {detail.phone}</p>}
-      {detail.openingHours && <p>이용 시간: {descriptionText(detail.openingHours)}</p>}
-    </div>
+      {openingHours && <p>이용 시간: {openingHours}</p>}
+    </div>}
   </div>;
 }

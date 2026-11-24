@@ -19,7 +19,7 @@ function unavailable(place) {
  * Visit numbers restart each day. Lodging does not take a visit number.
  */
 export default function ItineraryMapPanel({ days = EMPTY_DAYS, center, searchRegion = '', level = 5, height = '320px', extraPlaces = EMPTY_PLACES,
-  extraTitle = '주변 숙소', previewFailure = false, sourceNote, onPlaceSelect, showIntro = true, showCategories = true, showPlaceList = true, allDaysLabel = '전체 코스', focusPlace, loadPlaceDetails, renderPlaceDetails }) {
+  extraTitle = '주변 숙소', previewFailure = false, sourceNote, onPlaceSelect, showIntro = true, showCategories = true, showPlaceList = true, allDaysLabel = '전체 코스', focusPlace, loadPlaceDetails, loadPlacePhotos, renderPlaceDetails, renderExtraPlaceDetails }) {
   const [category, setCategory] = useState('all');
   const [activeDay, setActiveDay] = useState('all');
   const [selectedId, setSelectedId] = useState(null);
@@ -87,7 +87,9 @@ export default function ItineraryMapPanel({ days = EMPTY_DAYS, center, searchReg
   const selected = selectedPosition || visibleDays.flatMap((day) => day.places).find((place) => String(place.id) === String(selectedId));
 
   function selectPlace(place) {
-    setSelectedId(current => loadPlaceDetails && current === place.id ? null : place.id);
+    const isExtra = visibleExtras.some(extra => extra.id === place.id);
+    const canCollapse = isExtra ? renderExtraPlaceDetails : loadPlaceDetails;
+    setSelectedId(current => canCollapse && current === place.id ? null : place.id);
     onPlaceSelect?.(place);
   }
 
@@ -113,10 +115,11 @@ export default function ItineraryMapPanel({ days = EMPTY_DAYS, center, searchReg
     {showPlaceList && <div className="itinerary-map__day-list">{visibleDays.map((day) => <section className="itinerary-map__day" key={day.day}>
       <h3>{day.day}일차</h3>
       {day.places.length ? <MapPlaceCards places={day.places} selectedId={selectedId} onSelect={selectPlace}
-        loadDetails={loadPlaceDetails} renderDetails={renderPlaceDetails} searchRegion={searchRegion} /> : <p>표시할 장소가 없습니다.</p>}
+        loadDetails={loadPlaceDetails} loadPhotos={loadPlacePhotos} renderDetails={renderPlaceDetails} searchRegion={searchRegion} /> : <p>표시할 장소가 없습니다.</p>}
     </section>)}</div>}
     {visibleExtras.length > 0 && <section className="itinerary-map__day itinerary-map__extras">
-      <h3>{extraTitle}</h3><MapPlaceCards places={visibleExtras} selectedId={selectedId} onSelect={selectPlace} />
+      <h3>{extraTitle}</h3><MapPlaceCards places={visibleExtras} selectedId={selectedId} onSelect={selectPlace}
+        renderDetails={renderExtraPlaceDetails} />
     </section>}
     {selected && !selectedPosition && mapStatus === 'ready' && !previewFailure && selected.locationStatus !== 'unresolved' && <p className="itinerary-map__notice" role="status">{selected.name}의 지도 위치를 확인하고 있습니다.</p>}
   </div>;

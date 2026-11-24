@@ -12,6 +12,7 @@ import com.smarttraveler.mypage.controller.MyPageController;
 import com.smarttraveler.mypage.dto.MyPageDtos.*;
 import com.smarttraveler.mypage.repository.MyPageRepository;
 import com.smarttraveler.mypage.service.MyPageService;
+import com.smarttraveler.tour.service.TourPhotoService;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -46,6 +47,7 @@ class MyPageAccessTest {
         @Bean MemberRepository members() { return mock(MemberRepository.class); }
         @Bean SuspensionRepository suspensions() { return mock(SuspensionRepository.class); }
         @Bean MyPageRepository myPageRepository() { return mock(MyPageRepository.class); }
+        @Bean TourPhotoService tourPhotoService() { return mock(TourPhotoService.class); }
         @Bean ObjectMapper mapper() { return new ObjectMapper(); }
     }
     @Autowired WebApplicationContext context;

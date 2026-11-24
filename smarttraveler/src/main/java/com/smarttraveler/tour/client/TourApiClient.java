@@ -32,6 +32,10 @@ public class TourApiClient {
     public static final String KOR_AREA = BASE + "/KorService2/areaBasedList2";
     public static final String KOR_DETAIL_COMMON = BASE + "/KorService2/detailCommon2";
     public static final String KOR_DETAIL_INTRO = BASE + "/KorService2/detailIntro2";
+    private static final String KOR_KEYWORD = BASE + "/KorService2/searchKeyword2";
+    private static final String KOR_DETAIL_IMAGE = BASE + "/KorService2/detailImage2";
+    private static final String KOR_DETAIL_INFO = BASE + "/KorService2/detailInfo2";
+    private static final Duration PHOTO_TIMEOUT = Duration.ofSeconds(4);
 
     private final HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
     private final ObjectMapper mapper = new ObjectMapper();
@@ -76,17 +80,45 @@ public class TourApiClient {
         return call(KOR_DETAIL_INTRO, Map.of("contentId", contentId, "contentTypeId", contentTypeId));
     }
 
+    public Page photoCandidates(String name, boolean lodging) {
+        var params = new LinkedHashMap<>(Map.of("keyword", name, "numOfRows", "50"));
+        if (lodging) params.put("contentTypeId", "32");
+        return callOnce(KOR_KEYWORD, params, PHOTO_TIMEOUT);
+    }
+
+    public Page photoDetails(String contentId) {
+        return photoDetails(contentId, 1, 10);
+    }
+
+    public Page photoDetails(String contentId, int page) {
+        return photoDetails(contentId, page, 100);
+    }
+
+    private Page photoDetails(String contentId, int page, int rows) {
+        return callOnce(KOR_DETAIL_IMAGE, Map.of("contentId", contentId, "imageYN", "Y", "subImageYN", "Y",
+                "pageNo", String.valueOf(page), "numOfRows", String.valueOf(rows)), PHOTO_TIMEOUT);
+    }
+
+    public Page roomPhotos(String contentId, int page) {
+        return callOnce(KOR_DETAIL_INFO, Map.of("contentId", contentId, "contentTypeId", "32",
+                "pageNo", String.valueOf(page), "numOfRows", "100"), PHOTO_TIMEOUT);
+    }
+
+    public Page photoCover(String contentId) {
+        return callOnce(KOR_DETAIL_COMMON, Map.of("contentId", contentId), PHOTO_TIMEOUT);
+    }
+
     /** 실패하면 1번 더 시도(2초 뒤). 그래도 실패하면 TourApiException. */
     Page call(String url, Map<String, String> params) {
         try {
-            return callOnce(url, params);
+            return callOnce(url, params, Duration.ofSeconds(20));
         } catch (TourApiException first) {
             try { Thread.sleep(2000); } catch (InterruptedException e) { Thread.currentThread().interrupt(); throw first; }
-            return callOnce(url, params);
+            return callOnce(url, params, Duration.ofSeconds(20));
         }
     }
 
-    private Page callOnce(String url, Map<String, String> params) {
+    private Page callOnce(String url, Map<String, String> params, Duration timeout) {
         Map<String, String> all = new LinkedHashMap<>();
         all.put("serviceKey", key());
         all.put("MobileOS", "ETC");
@@ -98,7 +130,7 @@ public class TourApiClient {
                 .collect(Collectors.joining("&"));
         HttpResponse<String> res;
         try {
-            res = http.send(HttpRequest.newBuilder(URI.create(url + "?" + query)).timeout(Duration.ofSeconds(20)).GET().build(),
+            res = http.send(HttpRequest.newBuilder(URI.create(url + "?" + query)).timeout(timeout).GET().build(),
                     HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
         } catch (IOException e) {
             throw new TourApiException("연결 실패: " + e.getClass().getSimpleName());
@@ -118,6 +150,7 @@ public class TourApiClient {
         }
         JsonNode header = root.path("response").path("header");
         String code = header.path("resultCode").asString("");
+        if ("03".equals(code) || "0003".equals(code)) return new Page(0, List.of());
         if (!"0000".equals(code)) throw new TourApiException("결과 코드 " + code + " " + header.path("resultMsg").asString(""));
         JsonNode bodyNode = root.path("response").path("body");
         int total = bodyNode.path("totalCount").asInt(0);

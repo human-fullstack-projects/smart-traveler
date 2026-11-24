@@ -7,6 +7,7 @@ import com.smarttraveler.stay.service.StaySearchService;
 import com.smarttraveler.stay.service.StayService;
 import com.smarttraveler.stay.service.StayInventoryService;
 import com.smarttraveler.stay.service.StayInventoryService.RoomOption;
+import com.smarttraveler.tour.service.TourPhotoService;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -26,6 +27,7 @@ public class StayController {
 
     private final StayInventoryService inventory;
     private final StaySearchService search;
+    private final TourPhotoService photos;
 
     @GetMapping
     public List<StayResponse> list(@RequestParam(defaultValue = "false") boolean bookable) {
@@ -83,5 +85,10 @@ public class StayController {
     @GetMapping("/{lodgingId}")
     public StayDetailResponse detail(@PathVariable Long lodgingId) {
         return stayService.get(lodgingId);
+    }
+
+    @GetMapping("/{lodgingId}/tour-photos")
+    public TourPhotoService.Gallery tourPhotos(@PathVariable Long lodgingId) {
+        return photos.lodgingGallery(stayService.requireActive(lodgingId));
     }
 }

@@ -2,7 +2,7 @@ import { useEffect, useId, useRef } from 'react';
 import MapPlaceDetails from './MapPlaceDetails';
 import './map-place-cards.css';
 
-export default function MapPlaceCards({ places, selectedId, onSelect, loadDetails, renderDetails, searchRegion }) {
+export default function MapPlaceCards({ places, selectedId, onSelect, loadDetails, loadPhotos, renderDetails, searchRegion }) {
   const prefix = useId();
   const expandedRef = useRef(null);
   useEffect(() => {
@@ -29,7 +29,7 @@ export default function MapPlaceCards({ places, selectedId, onSelect, loadDetail
     </span>
     <span className="map-place-card__arrow" aria-hidden="true">{renderDetails ? (expanded ? '▾' : '▸') : loadDetails ? (expanded ? '−' : '+') : place.locationStatus === 'unresolved' ? '!' : '→'}</span>
   </button>{expanded && <div id={detailId} className="map-place-detail" role="region" aria-label={`${place.name} 상세 정보`}>
-    {renderDetails ? renderDetails(place) : <MapPlaceDetails place={place} region={searchRegion} loadDetails={loadDetails} />}
+    {renderDetails ? renderDetails(place) : <MapPlaceDetails place={place} region={searchRegion} loadDetails={loadDetails} loadPhotos={loadPhotos} />}
   </div>}</div>;
   })}</div>;
 }

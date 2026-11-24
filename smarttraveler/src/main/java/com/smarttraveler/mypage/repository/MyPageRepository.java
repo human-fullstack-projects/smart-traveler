@@ -4,6 +4,7 @@ import static com.smarttraveler.domain.entity.RoomReservation.PAYMENT_TIMEOUT_RE
 
 import com.smarttraveler.mypage.dto.MyPageDtos.*;
 import com.smarttraveler.reservation.dto.ReservationItinerary;
+import com.smarttraveler.tour.service.TourPhotoService.Target;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -301,6 +302,23 @@ public class MyPageRepository {
                 rs.getString("image_url"),rs.getString("phone"),rs.getString("opening_hours")),args.toArray());
         // 이름만 같은 다른 장소를 임의로 보여주지 않는다.
         return matches.size()==1 ? matches.getFirst() : null;
+    }
+
+    public Target placePhotoTarget(long id, String address, String region) {
+        return jdbc.query("""
+            SELECT CASE WHEN source_provider='KTO_TOURAPI' THEN source_place_id END AS content_id,
+                   name, COALESCE(NULLIF(TRIM(address), ''), ?) AS address
+            FROM place WHERE place_id=? AND is_active=TRUE
+            """, (rs, row) -> new Target(rs.getString("content_id"), rs.getString("name"), rs.getString("address"), region, false),
+                address, id).stream().findFirst().orElse(null);
+    }
+
+    public Target lodgingPhotoTarget(long id) {
+        return jdbc.query("""
+            SELECT CASE WHEN source_provider='TOURAPI' THEN source_content_id END AS content_id, name, address
+            FROM lodging WHERE lodging_id=?
+            """, (rs, row) -> new Target(rs.getString("content_id"), rs.getString("name"), rs.getString("address"), "", true),
+                id).stream().findFirst().orElse(null);
     }
 
     private List<Day> readDays(String json) {

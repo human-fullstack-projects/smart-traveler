@@ -1,11 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '../../../contexts/AuthContext.jsx';
-import { createReservation, getRooms, getStay } from '../shared/stayApi.js';
+import { createReservation, getRooms, getStay, getStayTourPhotos } from '../shared/stayApi.js';
 import useStayCourse, { readStayCourseId } from '../shared/useStayCourse.js';
 import '../../../css/stay-shared.css';
 import { formatWon, getDefaultStayDates, getNightCount, stayTypeLabels } from '../shared/stayData.js';
-import { StayCover, StayLocation, StayOverview } from './StayDetails.jsx';
+import { StayLocation, StayOverview } from './StayDetails.jsx';
 import StayPhotoGallery from './StayPhotoGallery.jsx';
+import { buildStayGallery } from './stayPhotos.js';
 import '../../../css/stay-booking.css';
 
 export default function StayBookingPage({ onStart, busy = false }) {
@@ -20,6 +21,7 @@ export default function StayBookingPage({ onStart, busy = false }) {
   const [checkOut, setCheckOut] = useState(query.get('checkOut') || defaults.checkOut);
   const [guests, setGuests] = useState(Number(query.get('adults') || 2) + Number(query.get('children') || 0));
   const [stay, setStay] = useState(null);
+  const [tourGallery, setTourGallery] = useState(null);
   const [rooms, setRooms] = useState([]);
   const [roomId, setRoomId] = useState(null);
   const [notice, setNotice] = useState('');
@@ -36,6 +38,7 @@ export default function StayBookingPage({ onStart, busy = false }) {
   const bookerEmail = member?.email?.trim() || '';
   const room = rooms.find((item) => item.roomId === roomId && item.available !== false);
   const nights = getNightCount(checkIn, checkOut);
+  const photos = useMemo(() => buildStayGallery(stay, rooms, tourGallery?.data), [stay, rooms, tourGallery]);
 
   useEffect(() => {
     setSameAsBooker(false);
@@ -50,6 +53,16 @@ export default function StayBookingPage({ onStart, busy = false }) {
       .catch((error) => { if (active) setNotice(error.status === 404 ? '숙소를 찾을 수 없습니다.' : error.message); });
     return () => { active = false; };
   }, [lodgingId]);
+
+  useEffect(() => {
+    if (!stay?.lodgingId) return;
+    let active = true;
+    setTourGallery(null);
+    getStayTourPhotos(stay.lodgingId)
+      .then(data => { if (active) setTourGallery({ status: 'ready', data }); })
+      .catch(() => { if (active) setTourGallery({ status: 'error' }); });
+    return () => { active = false; };
+  }, [stay?.lodgingId]);
 
   useEffect(() => {
     if (!lodgingId || !nights || !guests) {
@@ -138,7 +151,8 @@ export default function StayBookingPage({ onStart, busy = false }) {
               {courseError && <p className="booking-notice" role="alert">{courseError}</p>}
             </div>}
           </header>
-          <StayCover stay={stay} />
+          <StayPhotoGallery title={stay.name} stayId={stay.lodgingId} cover={photos.cover} photos={photos.photos}
+            photoStatus={tourGallery?.status || 'loading'} />
           <div className="booking-stay-info">
             <StayOverview stay={stay} />
             <StayLocation stay={stay} courseRoute={courseId ? courseRoute : null} />
@@ -155,9 +169,9 @@ export default function StayBookingPage({ onStart, busy = false }) {
               {!loadingRooms && !nights && <p>체크인보다 늦은 체크아웃 날짜를 선택해 주세요.</p>}
               {!loadingRooms && nights > 0 && !notice && !rooms.some((item) => item.available !== false) && <p>선택한 조건에 예약할 수 있는 객실이 없습니다.</p>}
               <div className="booking-room-list">
-                {rooms.map((item) => (
+                {rooms.map((item, index) => (
                   <article key={item.roomId} className={'booking-room' + (roomId === item.roomId ? ' is-selected' : '') + (item.available === false ? ' is-sold-out' : '')}>
-                    <StayPhotoGallery title={item.name} photos={item.photos ?? []} room />
+                    <StayPhotoGallery title={item.name} photos={photos.roomGalleries[index].photos} room />
                     <div className="booking-room__body">
                       <h3>{item.name}</h3>
                       <p>최대 {item.maxCapacity}명 · {item.available === false ? '객실 없음' : `잔여 ${item.remaining}실`}</p>
