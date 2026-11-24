@@ -70,7 +70,7 @@ export default function MyCourses({ courses = [], isGuest, member, courseId, gue
       <div><span className="trip-status">{stateLabel(detail)}</span><h1>{detail.title}</h1></div>
     </header>
     <div className="trip-detail-summary"><strong>{detail.region || '여행 지역 미정'}</strong><span>{period(detail)}</span><span>총 {(detail.days || []).length}일 일정</span><span>방문 장소 {(detail.days || []).reduce((sum, day) => sum + (day.places || []).length, 0)}곳</span></div>
-    {!isGuest && <a className="trips-back trips-back-pill saved-trip-stay-link" href={`#/stays?courseId=${encodeURIComponent(detail.id)}`}>숙소 선택 →</a>}
+    {!isGuest && detail.state !== 'BOOKED' && <a className="trips-back trips-back-pill saved-trip-stay-link" href={`#/stays?courseId=${encodeURIComponent(detail.id)}`}>숙소 선택 →</a>}
     <MyCourseMap key={detail.id} course={detail} expanded title="여행 일정" hideMapControls showPlaceDetails />
     <div className="trip-detail-footer"><a className="trips-back trips-back-pill" href="#/my-courses">← 저장된 여행 목록</a></div>
   </div>;

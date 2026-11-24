@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import AccessNotice from '../components/AccessNotice';
 import MyCourseMap from '../components/MyCourseMap';
 import { myPageApi } from '../api/myPageApi';
@@ -30,16 +30,75 @@ const categoryOrder={upcoming:0,cancelled:1,past:2};
 const labels={COMPLETED:'숙박 완료',CONFIRMED:'예약',PENDING_PAYMENT:'결제 대기',CANCELLED:'예약 취소',REFUNDING:'환불 처리 중',REFUND_FAILED:'환불 실패'};
 // 연결된 일정의 대표 사진을 우선 사용한다.
 const cover = (course, booking) => course?.coverImageUrl || booking.coverImageUrl || tripCover(course?.region || booking.stay || '');
+
+function BookingItinerary({ booking, course, memberId }) {
+  const stay = booking.itinerary?.stay;
+  const extraPlaces = useMemo(() => {
+    const info = booking.stayInfo;
+    const location = (info?.regionMatched ? info : stay) || info;
+    const name = (info?.regionMatched ? booking.stay : stay?.name) || booking.stay;
+    if (!location || !name) return [];
+    return [{ id: `reserved-stay-${booking.id}`, kind: 'stay', name,
+      address: location.address, latitude: location.latitude, longitude: location.longitude }];
+  }, [booking.id, booking.stay, booking.stayInfo, stay]);
+  const hasCourse = Boolean(course || booking.courseId);
+  if (!hasCourse && !extraPlaces.length) return null;
+  const title = hasCourse ? (extraPlaces.length ? '여행 일정과 숙소 위치' : '여행 일정') : '숙소 위치';
+  return <MyCourseMap course={course} courseId={booking.courseId} memberId={memberId}
+    expanded title={title} hideMapControls showPlaceDetails extraPlaces={extraPlaces} extraTitle="예약한 숙소" />;
+}
+
+function ReservationDetail({ booking, course, memberId, badge, category }) {
+  const [cancelNotice, setCancelNotice] = useState('');
+  return <div className="mypage trips-page trip-detail-page">
+    <a className="trips-back trips-back-pill" href="#/reservations">← 내 예약 목록</a>
+    <header className="trip-detail-hero">
+      <img src={cover(course, booking)} alt="" />
+      <div><span className="trip-status">{badge}</span><h1>{course?.title || booking.stay}</h1><p>{booking.date} ~ {booking.endDate}</p></div>
+    </header>
+    <section className="card reservation-detail-layout" style={{ marginTop: 24 }}>
+      <div className="reservation-detail-info">
+        <h2>예약 상세</h2>
+        <dl>
+          <dt>예약번호</dt><dd>{booking.reservationNo}</dd>
+          <dt>예약 상태</dt><dd>{labels[booking.status] || booking.status}</dd>
+          <dt>숙소</dt><dd>{booking.stay || '지역에 맞는 숙소 정보 없음'}</dd>
+          <dt>객실</dt><dd>{booking.room || '객실 정보 미등록'}</dd>
+          <dt>숙박 기간</dt><dd>{booking.date} ~ {booking.endDate}</dd>
+          <dt>인원</dt><dd>{booking.guests}명</dd>
+          <dt>예약 금액</dt><dd>{money(booking.price)}</dd>
+        </dl>
+        <BookingStayInfo booking={booking} />
+        <div className="actions">
+          {category === 'upcoming' && <button type="button" className="reservation-cancel"
+            onClick={() => setCancelNotice('예약 취소는 숙소 또는 관리자에게 연락 주세요.')}>예약취소</button>}
+          {booking.status === 'COMPLETED' && <a className="secondary"
+            href={`#/human-courses/create?reservationId=${encodeURIComponent(booking.id)}&from=reservations`}>내 여행 추천 작성·수정</a>}
+        </div>
+        {cancelNotice && <p role="status">{cancelNotice}</p>}
+      </div>
+      <StayPhoto url={booking.stayInfo?.imageUrl} name={booking.stay} />
+    </section>
+    <BookingItinerary booking={booking} course={course} memberId={memberId} />
+    <div className="trip-detail-footer"><a className="trips-back trips-back-pill" href="#/reservations">← 내 예약 목록</a></div>
+  </div>;
+}
+
 export default function Reservations({bookings=[],courses=[],reservationId,member}) {
- const [cancelNotice,setCancelNotice]=useState('');
  const [tab,setTab]=useState('all'),[query,setQuery]=useState(''),[latest,setLatest]=useState(null),[status,setStatus]=useState('loading');
  useEffect(()=>{let cancelled=false;setLatest(null);if(!member?.memberId)return;setStatus('loading');myPageApi.load(member.memberId).then(data=>{if(cancelled)return;if(data.memberId!==member.memberId)throw new Error('Member mismatch');setLatest(data);setStatus('ready');}).catch(()=>{if(!cancelled)setStatus('error');});return()=>{cancelled=true;};},[member?.memberId,tab,reservationId]);
  const rows=(latest?.bookings??bookings).filter(isVisibleBooking), plans=latest?.courses??courses;
- const courseFor=b=>plans.find(c=>c.id===b.courseId);
+ const courseFor=b=>b.itinerary?.course ?? plans.find(c=>c.id===b.courseId);
  const today=useBookingDate();
  const category=b=>bookingCategory(b,today);
  const badge=b=>categoryLabels[category(b)];
- if(reservationId){const b=rows.find(b=>String(b.id)===String(reservationId));if(!b)return status==='loading'?<p role="status">예약을 불러오는 중입니다.</p>:<AccessNotice kind={status==='error'?'unavailable':'denied'}/>;const c=courseFor(b);return <div className="mypage trips-page trip-detail-page"><a className="trips-back trips-back-pill" href="#/reservations">← 내 예약 목록</a><header className="trip-detail-hero"><img src={cover(c, b)} alt=""/><div><span className="trip-status">{badge(b)}</span><h1>{c?.title||b.stay}</h1><p>{b.date} ~ {b.endDate}</p></div></header><section className="card reservation-detail-layout" style={{marginTop:24}}><div className="reservation-detail-info"><h2>예약 상세</h2><dl><dt>예약번호</dt><dd>{b.reservationNo}</dd><dt>예약 상태</dt><dd>{labels[b.status]||b.status}</dd><dt>숙소</dt><dd>{b.stay || "지역에 맞는 숙소 정보 없음"}</dd><dt>객실</dt><dd>{b.room || "객실 정보 미등록"}</dd><dt>숙박 기간</dt><dd>{b.date} ~ {b.endDate}</dd><dt>인원</dt><dd>{b.guests}명</dd><dt>예약 금액</dt><dd>{money(b.price)}</dd></dl><BookingStayInfo booking={b}/><div className="actions">{b.status==='PENDING_PAYMENT'&&<a className="secondary" href={`#/payments/${b.id}`}>토스 테스트 결제</a>}{category(b)==='upcoming'&&<button type="button" className="reservation-cancel" disabled={b.status==='CANCELLED'} onClick={()=>setCancelNotice('예약 취소는 숙소 또는 관리자에게 연락 주세요.')} >{b.status==='CANCELLED'?'취소된 예약':'예약취소'}</button>}{b.status==='COMPLETED'&&<a className="secondary" href={`#/human-courses/create?reservationId=${encodeURIComponent(b.id)}&from=reservations`}>내 여행 추천 작성·수정</a>}</div>{cancelNotice&&<p role="status">{cancelNotice}</p>}</div><StayPhoto key={b.id} url={b.stayInfo?.imageUrl} name={b.stay}/></section>{b.courseId&&<MyCourseMap course={c} courseId={b.courseId} memberId={member?.memberId} expanded title="여행일정" hideMapControls showPlaceDetails/>}<div className="trip-detail-footer"><a className="trips-back trips-back-pill" href="#/reservations">← 내 예약 목록</a></div></div>;}
+ if (reservationId) {
+  const booking = rows.find(row => String(row.id) === String(reservationId));
+  if (!booking) return status === 'loading' ? <p role="status">예약을 불러오는 중입니다.</p>
+    : <AccessNotice kind={status === 'error' ? 'unavailable' : 'denied'} />;
+  return <ReservationDetail key={booking.id} booking={booking} course={courseFor(booking)}
+    memberId={member?.memberId} badge={badge(booking)} category={category(booking)} />;
+ }
  const list=rows.filter(b=>(tab==='all'||category(b)===tab)&&`${courseFor(b)?.title||''} ${courseFor(b)?.region||''} ${b.stay||''} ${b.reservationNo}`.toLowerCase().includes(query.trim().toLowerCase()));
  list.sort((a, b) => {
   const firstCategory = category(a);

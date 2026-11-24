@@ -4,7 +4,7 @@ import { myPageApi } from '../api/myPageApi';
 import { mapDays } from '../data/mapDays';
 export { mapDays } from '../data/mapDays';
 
-function CourseMapContent({ course, courseId, memberId, snapshot, hideMapControls = false, focusPlace, showPlaceDetails = false }) {
+function CourseMapContent({ course, courseId, memberId, snapshot, hideMapControls = false, focusPlace, showPlaceDetails = false, extraPlaces, extraTitle }) {
   const [loaded, setLoaded] = useState(null);
   const [status, setStatus] = useState('loading');
   const [attempt, setAttempt] = useState(0);
@@ -30,9 +30,10 @@ function CourseMapContent({ course, courseId, memberId, snapshot, hideMapControl
   if (!value && courseId && memberId) return status === 'error'
     ? <p role="alert">일정 지도를 불러오지 못했습니다. <button type="button" className="text-button" onClick={() => setAttempt(n => n + 1)}>다시 시도</button></p>
     : <p role="status">지도에 표시할 일정을 불러오는 중입니다.</p>;
-  if (!days.some(day => day.places.length)) return <p className="muted">지도에 표시할 방문 장소가 없습니다.</p>;
+  if (!days.some(day => day.places.length) && !extraPlaces?.length) return <p className="muted">지도에 표시할 방문 장소가 없습니다.</p>;
   return <ItineraryMapPanel days={days} searchRegion={value?.region || course?.region || ''} height="var(--mypage-map-height, 360px)" showIntro={!hideMapControls} showCategories={!hideMapControls} focusPlace={focusPlace} loadPlaceDetails={showPlaceDetails ? myPageApi.placeDetails : undefined}
-    sourceNote="번호는 일차별 방문 순서입니다. 점선은 방문지 사이의 직선이며 실제 도로 경로가 아닙니다." />;
+    extraPlaces={extraPlaces} extraTitle={extraTitle}
+    sourceNote={days.some(day => day.places.length) ? '번호는 일차별 방문 순서입니다. 점선은 방문지 사이의 직선이며 실제 도로 경로가 아닙니다.' : undefined} />;
 }
 
 export default function MyCourseMap({ expanded = false, title = '지도로 보는 여행 일정', ...props }) {

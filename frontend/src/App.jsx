@@ -214,7 +214,7 @@ export default function App() {
   } else if (routePath === '/payments/demo' || new URLSearchParams(window.location.search).has('tossDemo')) {
     content = <TossDemoPage />;
   } else if (paymentMatch) {
-    content = member ? <TossCheckoutPage key={routePath} reservationId={paymentMatch[1]} result={paymentMatch[2]} /> : <AccessNotice kind="login" />;
+    content = member ? <TossCheckoutPage key={routePath} reservationId={paymentMatch[1]} result={paymentMatch[2]} onConfirmed={myPageStore.retry} /> : <AccessNotice kind="login" />;
   } else if (isHumanCourse) {
     content = <>
       <div className="human-courses storage-notice">
