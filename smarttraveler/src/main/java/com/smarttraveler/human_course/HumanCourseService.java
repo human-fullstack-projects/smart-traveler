@@ -3,6 +3,8 @@ package com.smarttraveler.human_course;
 import com.smarttraveler.admin.service.HumanManagementService;
 import com.smarttraveler.auth.repository.MemberRepository;
 import com.smarttraveler.human_course.HumanCourseDtos.*;
+import com.smarttraveler.mypage.dto.MyPageDtos;
+import com.smarttraveler.mypage.dto.MyPageDtos.CourseView;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.math.BigDecimal;
@@ -14,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -85,6 +88,59 @@ public class HumanCourseService {
             .toList();
     }
     public Post detail(long id, Authentication auth) { return post(id, viewer(auth), true); }
+
+    @Transactional(readOnly = true)
+    public CourseView itinerary(long postId, LocalDate startDate) {
+        var rows = jdbc.queryForList("""
+            SELECT p.title, p.course_id, p.course_snapshot, c.destination AS region, c.region_id,
+                   c.start_date, c.end_date, c.lock_version
+            FROM human_course_post p JOIN course c ON c.id=p.course_id
+            WHERE p.post_id=? AND p.status='VISIBLE' AND p.deleted_at IS NULL
+            """, postId);
+        if (rows.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "공개된 여행을 찾을 수 없습니다.");
+
+        var row = rows.getFirst();
+        var snapshot = snapshot(row);
+        String region = snapshot.region() != null && !snapshot.region().isBlank() ? snapshot.region() : string(row, "region");
+        if (region == null || region.isBlank()) region = "여행 지역 미정";
+        Long regionId = row.get("region_id") == null ? null : number(row, "region_id");
+        var days = itineraryDays(snapshot.plan(), startDate);
+        return new CourseView("human-" + postId, string(row, "title"), region, startDate, days.getLast().date(),
+                "HUMAN", days, null, regionId, null, null);
+    }
+
+    static List<MyPageDtos.Day> itineraryDays(List<Day> plan, LocalDate startDate) {
+        int length = plan.stream().mapToInt(Day::day).max().orElse(0);
+        if (length < 1 || length > 31) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "이 여행의 일정 날짜를 확인할 수 없습니다.");
+        }
+        var days = new ArrayList<MyPageDtos.Day>(length);
+        for (int index = 0; index < length; index++) {
+            days.add(new MyPageDtos.Day(startDate.plusDays(index), List.of()));
+        }
+        for (Day day : plan) {
+            if (day.day() < 1) continue;
+            LocalDate date = startDate.plusDays(day.day() - 1);
+            var points = day.places() == null ? List.<MapPlace>of() : day.places();
+            if (points.isEmpty()) {
+                var names = day.stops() == null ? List.<String>of() : day.stops().stream()
+                        .filter(Objects::nonNull).filter(name -> !name.isBlank()).toList();
+                days.set(day.day() - 1, new MyPageDtos.Day(date, names));
+                continue;
+            }
+            var visits = points.stream().filter(Objects::nonNull)
+                    .filter(point -> !"stay".equals(point.kind()) && point.name() != null && !point.name().isBlank())
+                    .map(point -> new MyPageDtos.MapPlace(point.placeId(), point.name(), point.address(),
+                            point.latitude() == null ? null : point.latitude().doubleValue(),
+                            point.longitude() == null ? null : point.longitude().doubleValue()))
+                    .toList();
+            days.set(day.day() - 1, new MyPageDtos.Day(date, visits.stream().map(MyPageDtos.MapPlace::name).toList(), visits));
+        }
+        if (days.stream().allMatch(day -> day.places().isEmpty())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "이 여행에 저장할 방문 일정이 없습니다.");
+        }
+        return List.copyOf(days);
+    }
 
     private Post post(long id, long viewer, boolean allowBlinded) {
         var rows = jdbc.queryForList("""

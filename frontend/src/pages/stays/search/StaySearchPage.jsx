@@ -78,7 +78,7 @@ function SearchMap({ items, selectedId, onSelect, query, focus, courseRoute }) {
   }
 
   return (
-    <section className="stay-kakao-map" aria-label={courseRoute ? '숙소와 저장된 여행 일정 지도' : '숙소 검색 결과 지도'}>
+    <section className="stay-kakao-map" aria-label={courseRoute ? '숙소와 여행 일정 지도' : '숙소 검색 결과 지도'}>
       <KakaoMap places={places} paths={courseRoute?.paths} level={9} selectedId={selectedId} fitPoints={places} focus={focus}
         onMarkerClick={handleMarker} onStatusChange={setMapStatus} height="100%" />
       {mapStatus === 'ready' && selectedItem && <div className="stay-kakao-map__details" role="status"><strong>{selectedItem.name}</strong><span>{selectedItem.saleable ? `1박 ${formatWon(selectedItem.minPrice)}부터` : '선택 날짜 판매 없음'}</span><a href={`#/stays/booking?${bookingQuery}`}>객실 보기 →</a></div>}
@@ -156,7 +156,7 @@ export default function StaySearchPage() {
   const today = useMemo(() => new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' }), []);
   const params = new URLSearchParams(window.location.hash.split('?')[1]);
   const courseId = readStayCourseId(params);
-  const { course, route: courseRoute, loading: courseLoading, error: courseError, retry: retryCourse } = useStayCourse(courseId);
+  const { course, route: courseRoute, loading: courseLoading, error: courseError, sourceLabel, retry: retryCourse } = useStayCourse(courseId);
   const destinationQuery = course?.region || params.get('destination') || '';
   const sidoQuery = params.get('sido') || '';
   const sigunguQuery = params.get('sigungu') || '';
@@ -353,7 +353,7 @@ export default function StaySearchPage() {
   const map = <>
     <SearchMap items={result.items} selectedId={selectedId} onSelect={setSelectedId} query={query} focus={focus}
       courseRoute={courseId ? courseRoute : null} />
-    <p className="stay-map-note">별표는 현재 목록에 있는 숙소입니다.{courseId && ' 번호와 점선은 저장된 여행의 일차별 방문 순서입니다.'}</p>
+    <p className="stay-map-note">별표는 현재 목록에 있는 숙소입니다.{courseId && ' 번호와 점선은 여행의 일차별 방문 순서입니다.'}</p>
   </>;
 
   return (
@@ -363,8 +363,8 @@ export default function StaySearchPage() {
           <div><span>Stay Finder</span><h1>여행에 맞는 숙소를 찾아보세요.</h1><p>전국 숙소 중 조건에 맞는 곳을 {size}곳씩 보여 드려요. 선택한 날짜에 판매 중인 객실만 예약할 수 있어요.</p></div>
         </section>
 
-        {course && <p className="stay-search-notice">저장된 여행 <strong>{course.title}</strong>에 숙소를 선택하고 있어요.</p>}
-        {courseLoading && <p className="stay-search-notice" role="status">저장된 여행 정보를 불러오고 있어요.</p>}
+        {course && <p className="stay-search-notice">{sourceLabel} <strong>{course.title}</strong>에 숙소를 선택하고 있어요.</p>}
+        {courseLoading && <p className="stay-search-notice" role="status">{sourceLabel} 정보를 불러오고 있어요.</p>}
         {courseError && <p className="stay-search-notice" role="alert">{courseError} <button type="button" onClick={retryCourse}>다시 시도</button> <a href="#/stays">여행 연결 없이 숙소 찾기</a></p>}
         <div className="stay-search-sticky" ref={searchBarRef} onKeyDown={event => {
           if (event.key === 'Escape' && searchExpanded && !event.defaultPrevented) {

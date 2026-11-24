@@ -16,6 +16,9 @@ export const myPageApi = {
   importCourses(memberId, courses) {
     return postJsonWithCsrf('/api/mypage/courses/import', { expectedMemberId: memberId, courses });
   },
+  saveHumanItinerary(postId) {
+    return postJsonWithCsrf(`/api/mypage/courses/human/${encodeURIComponent(postId)}`, {});
+  },
   course(memberId, id) {
     return request(`/api/mypage/courses/${encodeURIComponent(id)}`, { headers: { 'X-MyPage-Member': String(memberId) } });
   },

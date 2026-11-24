@@ -5,7 +5,7 @@ import com.smarttraveler.auth.repository.MemberRepository;
 import com.smarttraveler.domain.entity.Member;
 import com.smarttraveler.domain.entity.RoomReservation;
 import com.smarttraveler.mypage.dto.MyPageDtos.CourseView;
-import com.smarttraveler.mypage.repository.MyPageRepository;
+import com.smarttraveler.mypage.service.MyPageService;
 import com.smarttraveler.reservation.dto.CreateReservationRequest;
 import com.smarttraveler.reservation.dto.ReservationItinerary;
 import com.smarttraveler.reservation.dto.ReservationItinerary.BookedStay;
@@ -36,7 +36,7 @@ public class ReservationService {
     private final StayService stays;
     private final StayInventoryService inventory;
     private final JdbcTemplate jdbc;
-    private final MyPageRepository myPage;
+    private final MyPageService myPage;
     private final ObjectMapper mapper;
 
     @Transactional
@@ -52,11 +52,8 @@ public class ReservationService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "방문자 이름을 입력해 주세요.");
         }
         inventory.validateDates(request.checkIn(), request.checkOut());
-        CourseView course = null;
-        if (request.courseId() != null) {
-            course = myPage.course(member.getMemberId(), request.courseId());
-            if (course == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "저장된 여행을 찾을 수 없습니다.");
-        }
+        CourseView course = request.courseId() == null ? null
+                : myPage.course(member.getMemberId(), request.courseId(), request.checkIn());
         var room = rooms.findById(request.roomId())
                 .filter(item -> Boolean.TRUE.equals(item.getIsActive()))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));

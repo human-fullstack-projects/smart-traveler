@@ -18,6 +18,7 @@ export default function useStayCourse(courseId) {
   const [attempt, setAttempt] = useState(0);
   const current = result && result.courseId === courseId && result.memberId === memberId && result.attempt === attempt ? result : null;
   const course = current?.course;
+  const sourceLabel = courseId?.startsWith('human-') ? '휴먼 여행' : '저장된 여행';
 
   useEffect(() => {
     if (!courseId || !authChecked || authCheckFailed || !memberId) return;
@@ -25,19 +26,19 @@ export default function useStayCourse(courseId) {
     myPageApi.course(memberId, courseId)
       .then(course => { if (active) setResult({ courseId, memberId, attempt, course }); })
       .catch(error => {
-        const message = [403, 404].includes(error.status)
-          ? '선택한 저장된 여행을 찾을 수 없습니다.'
-          : '저장된 여행을 불러오지 못했습니다.';
+        const message = error.status === 409 ? error.message : [403, 404].includes(error.status)
+          ? `선택한 ${sourceLabel}을 찾을 수 없습니다.`
+          : `${sourceLabel}을 불러오지 못했습니다.`;
         if (active) setResult({ courseId, memberId, attempt, error: message });
       });
     return () => { active = false; };
-  }, [courseId, memberId, authChecked, authCheckFailed, attempt]);
+  }, [courseId, memberId, authChecked, authCheckFailed, attempt, sourceLabel]);
 
   const route = useCourseRoute(course);
   const loading = Boolean(courseId && !authCheckFailed && (!authChecked || (memberId && !current)));
   const error = !courseId || loading ? '' : current?.error || (authCheckFailed ? '로그인 상태를 확인하지 못했습니다.'
-    : !memberId ? '저장된 여행을 연결하려면 로그인해 주세요.' : '');
-  return { course, route, loading, error, retry: authCheckFailed ? retryAuth : () => setAttempt(value => value + 1) };
+    : !memberId ? `${sourceLabel}을 연결하려면 로그인해 주세요.` : '');
+  return { course, route, loading, error, sourceLabel, retry: authCheckFailed ? retryAuth : () => setAttempt(value => value + 1) };
 }
 
 function useCourseRoute(course) {

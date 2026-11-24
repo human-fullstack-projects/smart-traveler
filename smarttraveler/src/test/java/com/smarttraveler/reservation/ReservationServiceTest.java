@@ -20,7 +20,7 @@ import com.smarttraveler.domain.entity.RoomPayment;
 import com.smarttraveler.domain.entity.RoomReservation;
 import com.smarttraveler.mypage.dto.MyPageDtos.CourseView;
 import com.smarttraveler.mypage.dto.MyPageDtos.Day;
-import com.smarttraveler.mypage.repository.MyPageRepository;
+import com.smarttraveler.mypage.service.MyPageService;
 import com.smarttraveler.payment.repository.PaymentRepository;
 import com.smarttraveler.payment.service.TossGateway;
 import com.smarttraveler.payment.service.TossPaymentService;
@@ -34,7 +34,6 @@ import com.smarttraveler.stay.service.StayService;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.NullSource;
@@ -54,7 +53,7 @@ class ReservationServiceTest {
     private final RoomRepository rooms = mock(RoomRepository.class);
     private final StayInventoryService inventory = mock(StayInventoryService.class);
     private final StayService stays = mock(StayService.class);
-    private final MyPageRepository myPage = mock(MyPageRepository.class);
+    private final MyPageService myPage = mock(MyPageService.class);
     private final ObjectMapper mapper = new ObjectMapper();
     private final ReservationService service = new ReservationService(reservations, members, rooms, stays,
             inventory, mock(JdbcTemplate.class), myPage, mapper);
@@ -75,12 +74,12 @@ class ReservationServiceTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"course-23,23", "draft-23,"})
-    void savesOwnedCourseAndBookedStayTogether(String sourceId, Long linkedCourseId) {
+    @CsvSource({"course-23,23", "draft-23,", "human-23,"})
+    void savesSelectedRouteAndBookedStayTogether(String sourceId, Long linkedCourseId) {
         setUpReservation();
         var course = new CourseView(sourceId, "부산 여행", "부산", CHECK_IN, CHECK_OUT, "DRAFT",
                 List.of(new Day(CHECK_IN, List.of("광안리", "민락수변공원"))), null);
-        when(myPage.course(7L, sourceId)).thenReturn(course);
+        when(myPage.course(7L, sourceId, CHECK_IN)).thenReturn(course);
 
         var response = service.create(request(null, sourceId), auth);
         var saved = savedReservation();
@@ -89,13 +88,15 @@ class ReservationServiceTest {
         assertEquals("벡스코호스텔", response.itinerary().stay().name());
         assertEquals("더블룸", response.itinerary().stay().roomName());
         assertEquals(CHECK_OUT, response.itinerary().stay().checkOut());
-        verify(myPage).course(7L, sourceId);
+        verify(myPage).course(7L, sourceId, CHECK_IN);
     }
 
-    @Test
-    void rejectsMissingOrUnownedCourseBeforeHoldingInventory() {
+    @ParameterizedTest
+    @ValueSource(strings = {"course-99", "human-99"})
+    void rejectsUnavailableCourseBeforeHoldingInventory(String sourceId) {
         setUpReservation();
-        var error = assertThrows(ResponseStatusException.class, () -> service.create(request(null, "course-99"), auth));
+        when(myPage.course(7L, sourceId, CHECK_IN)).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
+        var error = assertThrows(ResponseStatusException.class, () -> service.create(request(null, sourceId), auth));
         assertEquals(HttpStatus.NOT_FOUND, error.getStatusCode());
         verify(reservations, never()).saveAndFlush(any());
         verify(inventory, never()).nights(11L, CHECK_IN, CHECK_OUT, true);
@@ -107,7 +108,7 @@ class ReservationServiceTest {
         setUpReservation();
         var course = new CourseView("course-23", "부산 여행", "부산", CHECK_IN, CHECK_OUT, "DRAFT",
                 List.of(new Day(CHECK_IN, List.of("광안리"))), null);
-        when(myPage.course(7L, course.id())).thenReturn(course);
+        when(myPage.course(7L, course.id(), CHECK_IN)).thenReturn(course);
         var created = service.create(request(null, course.id()), auth);
         var reservation = savedReservation();
         reservation.setReservationId(77L);

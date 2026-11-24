@@ -8,6 +8,8 @@ import java.util.List;
 
 /** 임시 코스와 확정 코스, 예약, 게시글을 서로 다른 자료로 전달한다. */
 public final class MyPageDtos {
+    public static final String COURSE_REFERENCE_PATTERN = "(course|draft|human)-[1-9][0-9]{0,17}";
+
     private MyPageDtos() {}
 
     public record MapPlace(Long placeId, String name, String address, Double latitude, Double longitude) {}

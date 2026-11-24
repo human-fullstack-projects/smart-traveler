@@ -8,6 +8,7 @@ import com.smarttraveler.auth.service.MemberDetailsService;
 import com.smarttraveler.auth.service.SuspensionReleaseService;
 import com.smarttraveler.chat.ChatSecurity;
 import com.smarttraveler.domain.entity.Member;
+import com.smarttraveler.human_course.HumanCourseService;
 import com.smarttraveler.mypage.controller.MyPageController;
 import com.smarttraveler.mypage.dto.MyPageDtos.*;
 import com.smarttraveler.mypage.repository.MyPageRepository;
@@ -47,18 +48,20 @@ class MyPageAccessTest {
         @Bean MemberRepository members() { return mock(MemberRepository.class); }
         @Bean SuspensionRepository suspensions() { return mock(SuspensionRepository.class); }
         @Bean MyPageRepository myPageRepository() { return mock(MyPageRepository.class); }
+        @Bean HumanCourseService humanCourseService() { return mock(HumanCourseService.class); }
         @Bean TourPhotoService tourPhotoService() { return mock(TourPhotoService.class); }
         @Bean ObjectMapper mapper() { return new ObjectMapper(); }
     }
     @Autowired WebApplicationContext context;
     @Autowired MemberRepository members;
     @Autowired MyPageRepository data;
+    @Autowired HumanCourseService humanCourses;
     @Autowired ObjectMapper mapper;
     private MockMvc mvc;
     private Member member;
 
     @BeforeEach void setup() {
-        reset(members, data);
+        reset(members, data, humanCourses);
         member = new Member(); member.setMemberId(7L); member.setLoginId("alice");
         member.setRoleCode("USER"); member.setStatus("ACTIVE"); member.setNickname("여행자");
         when(members.findByLoginId("alice")).thenReturn(Optional.of(member));
@@ -70,6 +73,28 @@ class MyPageAccessTest {
     @Test void anonymousCannotReadMyPage() throws Exception {
         mvc.perform(get("/api/mypage")).andExpect(status().isUnauthorized());
         verifyNoInteractions(data);
+    }
+    @Test void humanRoutePreviewDoesNotSaveAndSavingRequiresAuthenticationAndCsrf() throws Exception {
+        var start = LocalDate.of(2026, 12, 10);
+        var days = List.of(new Day(start, List.of("광안리"),
+                List.of(new MapPlace(31L, "광안리", "부산 수영구", 35.15, 129.12))));
+        var course = new CourseView("human-12", "부산 여행", "부산", start, start, "HUMAN", days, null);
+        when(humanCourses.itinerary(eq(12L), any(LocalDate.class))).thenReturn(course);
+
+        mvc.perform(get("/api/mypage/courses/human-12")).andExpect(status().isUnauthorized());
+        mvc.perform(post("/api/mypage/courses/human/12").with(csrf())).andExpect(status().isUnauthorized());
+        mvc.perform(post("/api/mypage/courses/human/12").with(user("alice"))).andExpect(status().isForbidden());
+        verifyNoInteractions(humanCourses, data);
+
+        mvc.perform(get("/api/mypage/courses/human-12").with(user("alice"))).andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value("human-12"))
+                .andExpect(jsonPath("$.days[0].mapPlaces[0].placeId").value(31));
+        verifyNoInteractions(data);
+
+        when(data.humanDraftClientId(7L, 12L)).thenReturn("human-course-route-12");
+        mvc.perform(post("/api/mypage/courses/human/12").with(user("alice")).with(csrf()))
+                .andExpect(status().isNoContent());
+        verify(data).importDraft(7L, new Draft("human-course-route-12", "부산 여행", "부산", start, start, days));
     }
     @Test void chatChainDoesNotShadowCustomAuthOrAdminPolicy() throws Exception {
         mvc.perform(get("/api/auth/csrf")).andExpect(status().isOk());

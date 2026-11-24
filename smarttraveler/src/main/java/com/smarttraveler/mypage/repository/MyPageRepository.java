@@ -40,6 +40,19 @@ public class MyPageRepository {
                 draft.startDate(), draft.endDate(), mapper.writeValueAsString(draft.days()));
     }
 
+    public String humanDraftClientId(long memberId, long postId) {
+        String base = "human-course-route-" + postId;
+        record SavedDraft(long id, String clientId) {}
+        var latest = jdbc.query("""
+            SELECT id, client_id FROM mypage_course_draft
+            WHERE member_id=? AND (client_id=? OR client_id LIKE CONCAT(?, '-%'))
+            ORDER BY id DESC LIMIT 1
+            """, (rs, row) -> new SavedDraft(rs.getLong("id"), rs.getString("client_id")), memberId, base, base);
+        if (latest.isEmpty()) return base;
+        var draft = latest.getFirst();
+        return bookedCourseIds(memberId).contains("draft-" + draft.id()) ? base + "-" + draft.id() : draft.clientId();
+    }
+
     public List<CourseView> courses(long memberId) {
         Set<String> bookedIds = bookedCourseIds(memberId);
         Map<String, Optional<String>> regionalPhotos = new HashMap<>();

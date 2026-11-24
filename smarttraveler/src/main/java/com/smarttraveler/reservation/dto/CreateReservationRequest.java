@@ -1,5 +1,7 @@
 package com.smarttraveler.reservation.dto;
 
+import static com.smarttraveler.mypage.dto.MyPageDtos.COURSE_REFERENCE_PATTERN;
+
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -16,5 +18,5 @@ public record CreateReservationRequest(
         @Size(max = 500) String requestMemo,
         @AssertTrue boolean agreedToPolicy,
         @Positive int expectedTotalPrice,
-        @Pattern(regexp = "(course|draft)-[1-9][0-9]{0,17}") String courseId
+        @Pattern(regexp = COURSE_REFERENCE_PATTERN) String courseId
 ) {}

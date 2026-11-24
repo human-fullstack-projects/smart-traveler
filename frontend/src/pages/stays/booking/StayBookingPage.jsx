@@ -13,7 +13,7 @@ export default function StayBookingPage({ onStart, busy = false }) {
   const query = new URLSearchParams(window.location.hash.split('?')[1]);
   const lodgingId = query.get('stay');
   const courseId = readStayCourseId(query);
-  const { course, route: courseRoute, loading: stayCourseLoading, error: stayCourseError, retry: retryStayCourse } = useStayCourse(courseId);
+  const { course, route: courseRoute, loading: stayCourseLoading, error: stayCourseError, sourceLabel, retry: retryStayCourse } = useStayCourse(courseId);
   const backToSearch = courseId ? `#/stays?courseId=${encodeURIComponent(courseId)}` : '#/stays';
   const defaults = getDefaultStayDates();
   const { member, authChecked, authCheckFailed } = useAuth();
@@ -133,9 +133,9 @@ export default function StayBookingPage({ onStart, busy = false }) {
         <p><a href={backToSearch}>← 숙소 검색</a></p>
         {!lodgingId && <p>숙소 검색에서 예약할 숙소를 선택해 주세요.</p>}
         {notice && <p className="booking-notice" role="alert">{notice}</p>}
-        {stayCourseLoading && <p className="booking-notice" role="status">저장된 여행 정보를 불러오고 있어요.</p>}
+        {stayCourseLoading && <p className="booking-notice" role="status">{sourceLabel} 정보를 불러오고 있어요.</p>}
         {stayCourseError && <p className="booking-notice" role="alert">{stayCourseError} <button type="button" onClick={retryStayCourse}>다시 시도</button></p>}
-        {course && <p>저장된 여행 <strong>{course.title}</strong>에 숙소를 선택하고 있어요.</p>}
+        {course && <p>{sourceLabel} <strong>{course.title}</strong>에 숙소를 선택하고 있어요.</p>}
         {stay && <>
           <header className="booking-title-row">
             <div>
