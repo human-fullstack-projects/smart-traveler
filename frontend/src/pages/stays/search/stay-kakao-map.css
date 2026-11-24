@@ -2,4 +2,64 @@
 .stay-kakao-map__details { position: absolute; z-index: 5; right: 12px; bottom: 12px; left: 12px; display: flex; flex-wrap: wrap; gap: 5px 12px; align-items: center; padding: 12px; border-radius: 10px; background: #fffffff0; box-shadow: 0 3px 18px #20409833; font-size: 12px; }
 .stay-kakao-map__details strong { color: #2345A3; }
 .stay-kakao-map__details a { margin-left: auto; color: #2349B0; font-weight: 800; }
-@media (max-width: 1180px) { .stay-kakao-map { height: 350px; } }
+
+.stay-map-column .stay-kakao-map {
+  height: clamp(225px, calc(100dvh - var(--stay-results-top) - 42px), 640px);
+}
+
+.stay-map-trigger {
+  position: fixed;
+  z-index: 18;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 46px;
+  padding: 0 15px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--stay-green);
+  color: #fff;
+  box-shadow: 0 5px 18px #18307345;
+}
+
+.stay-map-trigger:hover { background: var(--stay-green-dark); }
+.stay-search-page:has(.stay-map-dialog[open]) .stay-map-trigger { visibility: hidden; }
+body:has(.stay-map-dialog[open]) { overflow: hidden; }
+
+.stay-map-dialog {
+  width: min(780px, calc(100% - 24px));
+  height: min(680px, calc(100dvh - 24px));
+  max-width: none;
+  max-height: none;
+  padding: 0;
+  border: 1px solid var(--stay-line);
+  border-radius: 18px;
+  background: #fff;
+  color: var(--stay-ink);
+}
+
+.stay-map-dialog::backdrop { background: #14213d99; }
+
+.stay-map-dialog__content {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  height: 100%;
+  padding: clamp(10px, 3vw, 18px);
+}
+
+.stay-map-dialog__header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.stay-map-dialog__header h2 { margin: 0; font-size: 18px; }
+.stay-map-dialog__header button {
+  min-height: 42px;
+  padding: 0 13px;
+  border: 1px solid var(--stay-line);
+  border-radius: 9px;
+  background: #fff;
+  color: var(--stay-ink);
+}
+
+.stay-map-dialog .stay-kakao-map { height: 100%; min-height: 0; border-radius: 12px; }
+.stay-map-dialog .stay-map-note { margin: 0 2px; }

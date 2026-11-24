@@ -15,6 +15,7 @@ const AMENITY_OPTIONS = ['주차', '와이파이', '취사', '바비큐', '조�
 const PRICE_MIN = 40000;
 const PRICE_MAX = 300000; // 끝까지 올리면 「제한 없음」
 const PAGE_SIZES = [5, 10];
+const MAP_DIALOG_BREAKPOINT = '(max-width: 1180px)';
 
 function lodgingDates(checkIn, end, today) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(checkIn) || !/^\d{4}-\d{2}-\d{2}$/.test(end)) return null;
@@ -83,6 +84,30 @@ function SearchMap({ items, selectedId, onSelect, query, focus, courseRoute }) {
       {mapStatus === 'ready' && selectedItem && <div className="stay-kakao-map__details" role="status"><strong>{selectedItem.name}</strong><span>{selectedItem.saleable ? `1박 ${formatWon(selectedItem.minPrice)}부터` : '선택 날짜 판매 없음'}</span><a href={`#/stays/booking?${bookingQuery}`}>객실 보기 →</a></div>}
     </section>
   );
+}
+
+function SearchMapDialog({ open, onClose, children }) {
+  const dialog = useRef(null);
+  const pressedBackdrop = useRef(false);
+
+  useEffect(() => {
+    if (open && !dialog.current.open) dialog.current.showModal();
+  }, [open]);
+
+  return <dialog id="stay-search-map-dialog" ref={dialog} className="stay-map-dialog" aria-labelledby="stay-map-dialog-title"
+    onClose={onClose}
+    onPointerDown={event => { pressedBackdrop.current = event.target === event.currentTarget; }}
+    onClick={event => {
+      if (pressedBackdrop.current && event.target === event.currentTarget) event.currentTarget.close();
+    }}>
+    <div className="stay-map-dialog__content">
+      <header className="stay-map-dialog__header">
+        <h2 id="stay-map-dialog-title">숙소 지도</h2>
+        <button type="button" onClick={() => dialog.current.close()}>닫기</button>
+      </header>
+      {open && children}
+    </div>
+  </dialog>;
 }
 
 function StayCard({ stay, selected, query, onShow }) {
@@ -155,12 +180,58 @@ export default function StaySearchPage() {
   const [result, setResult] = useState({ items: [], total: 0, totalPages: 1 });
   const [loading, setLoading] = useState(false);
   const [notice, setNotice] = useState('');
+  const [searchError, setSearchError] = useState('');
   const [stayError, setStayError] = useState('');
   const [selectedId, setSelectedId] = useState(null);
   const [destinationCenter, setDestinationCenter] = useState(null);
   const [focus, setFocus] = useState(null);
+  const [searchExpanded, setSearchExpanded] = useState(false);
+  const [compactMap, setCompactMap] = useState(() => window.matchMedia(MAP_DIALOG_BREAKPOINT).matches);
+  const [mapOpen, setMapOpen] = useState(false);
+  const pageRef = useRef(null);
+  const searchBarRef = useRef(null);
+  const searchToggleRef = useRef(null);
   const resultsRef = useRef(null);
   const lastCriteriaKey = useRef(null);
+
+  useEffect(() => {
+    const page = pageRef.current;
+    const bar = searchBarRef.current;
+    const header = page.closest('.main-page')?.querySelector('.mp-topbar');
+    function updateOffsets() {
+      page.style.setProperty('--stay-header-height', `${header?.offsetHeight || 0}px`);
+      page.style.setProperty('--stay-search-height', `${bar.offsetHeight}px`);
+    }
+    updateOffsets();
+    if (!window.ResizeObserver) {
+      window.addEventListener('resize', updateOffsets);
+      return () => window.removeEventListener('resize', updateOffsets);
+    }
+    const observer = new ResizeObserver(updateOffsets);
+    observer.observe(bar);
+    if (header) observer.observe(header);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const viewport = window.matchMedia(MAP_DIALOG_BREAKPOINT);
+    function updateMapMode() {
+      setCompactMap(viewport.matches);
+      if (!viewport.matches) setMapOpen(false);
+    }
+    viewport.addEventListener('change', updateMapMode);
+    updateMapMode();
+    return () => viewport.removeEventListener('change', updateMapMode);
+  }, []);
+
+  useEffect(() => {
+    if (!searchExpanded) return;
+    function closeOutside(event) {
+      if (!searchBarRef.current?.contains(event.target)) setSearchExpanded(false);
+    }
+    document.addEventListener('pointerdown', closeOutside);
+    return () => document.removeEventListener('pointerdown', closeOutside);
+  }, [searchExpanded]);
 
   useEffect(() => {
     let active = true;
@@ -251,17 +322,21 @@ export default function StaySearchPage() {
     event.preventDefault();
     if (!regions || (courseId && !course)) return;
     if (!search.checkIn || !search.checkOut || search.checkOut <= search.checkIn) {
-      setNotice('체크아웃 날짜는 체크인 날짜보다 뒤여야 합니다.');
+      setSearchError('체크아웃 날짜는 체크인 날짜보다 뒤여야 합니다.');
       return;
     }
     setApplied({ ...search });
     setAppliedKeyword(keyword);
     setNotice('');
+    setSearchError('');
+    if (searchExpanded) searchToggleRef.current?.focus();
+    setSearchExpanded(false);
   }
 
   function showOnMap(stay, level) {
     setSelectedId(String(stay.lodgingId));
     if (hasValidCoordinates(stay)) setFocus((current) => ({ latitude: Number(stay.latitude), longitude: Number(stay.longitude), level, key: (current?.key || 0) + 1 }));
+    if (level && compactMap) setMapOpen(true);
   }
 
   function goPage(next) {
@@ -273,11 +348,17 @@ export default function StaySearchPage() {
   const appliedSido = applied && regions?.find((item) => String(item.regionId) === String(applied.sido));
   const appliedSigungu = appliedSido?.children.find((item) => String(item.regionId) === String(applied.sigungu));
   const regionLabel = appliedSigungu ? `${appliedSido.name} ${appliedSigungu.name}` : appliedSido?.name || '전국';
+  const summary = applied || search;
   const query = applied ? { checkIn: applied.checkIn, checkOut: applied.checkOut, adults: String(applied.adults), children: String(applied.children), ...(courseId ? { courseId } : {}) } : {};
+  const map = <>
+    <SearchMap items={result.items} selectedId={selectedId} onSelect={setSelectedId} query={query} focus={focus}
+      courseRoute={courseId ? courseRoute : null} />
+    <p className="stay-map-note">별표는 현재 목록에 있는 숙소입니다.{courseId && ' 번호와 점선은 저장된 여행의 일차별 방문 순서입니다.'}</p>
+  </>;
 
   return (
     <div className="stay-ui stay-search-page">
-      <main className="stay-search-main">
+      <div className="stay-search-main" ref={pageRef}>
         <section className="stay-search-hero">
           <div><span>Stay Finder</span><h1>여행에 맞는 숙소를 찾아보세요.</h1><p>전국 숙소 중 조건에 맞는 곳을 {size}곳씩 보여 드려요. 선택한 날짜에 판매 중인 객실만 예약할 수 있어요.</p></div>
         </section>
@@ -285,22 +366,38 @@ export default function StaySearchPage() {
         {course && <p className="stay-search-notice">저장된 여행 <strong>{course.title}</strong>에 숙소를 선택하고 있어요.</p>}
         {courseLoading && <p className="stay-search-notice" role="status">저장된 여행 정보를 불러오고 있어요.</p>}
         {courseError && <p className="stay-search-notice" role="alert">{courseError} <button type="button" onClick={retryCourse}>다시 시도</button> <a href="#/stays">여행 연결 없이 숙소 찾기</a></p>}
-        <form className="stay-search-bar stay-search-bar--regions" onSubmit={submit}>
-          <label><span>시·도</span><select value={search.sido} onChange={(event) => setSearch({ ...search, sido: event.target.value, sigungu: '' })}><option value="">전국</option>{regions?.map((item) => <option key={item.regionId} value={item.regionId}>{item.name} ({item.count.toLocaleString()})</option>)}</select></label>
-          <label><span>시·군·구</span><select value={search.sigungu} disabled={!sido?.children.length} onChange={(event) => setSearch({ ...search, sigungu: event.target.value })}><option value="">전체</option>{(sido?.children || []).map((item) => <option key={item.regionId} value={item.regionId}>{item.name} ({item.count.toLocaleString()})</option>)}</select></label>
-          <label><span>체크인</span><input type="date" min={today} value={search.checkIn} onChange={(event) => setSearch({ ...search, checkIn: event.target.value })} /></label>
-          <label><span>체크아웃</span><input type="date" min={search.checkIn || today} value={search.checkOut} onChange={(event) => setSearch({ ...search, checkOut: event.target.value })} /></label>
-          <label><span>성인</span><input type="number" min="1" max="10" value={search.adults} onChange={(event) => setSearch({ ...search, adults: Math.max(1, Number(event.target.value) || 1) })} /></label>
-          <label><span>아동</span><input type="number" min="0" max="8" value={search.children} onChange={(event) => setSearch({ ...search, children: Math.max(0, Number(event.target.value) || 0) })} /></label>
-          <button type="submit" disabled={!regions || Boolean(courseId && !course)}>숙소 검색</button>
-        </form>
+        <div className="stay-search-sticky" ref={searchBarRef} onKeyDown={event => {
+          if (event.key === 'Escape' && searchExpanded && !event.defaultPrevented) {
+            setSearchExpanded(false);
+            searchToggleRef.current?.focus();
+          }
+        }}>
+          <button className="stay-search-summary" type="button" ref={searchToggleRef} aria-expanded={searchExpanded}
+            aria-controls="stay-search-conditions" onClick={() => setSearchExpanded(open => !open)}>
+            <span className="stay-search-summary__details">
+              <strong>{regionLabel}</strong>
+              <small>{summary.checkIn.slice(5).replace('-', '.')}–{summary.checkOut.slice(5).replace('-', '.')} · {summary.adults + summary.children}명</small>
+            </span>
+            <span className="stay-search-summary__action">{searchExpanded ? '접기' : '조건 변경'}</span>
+          </button>
+          <form id="stay-search-conditions" className="stay-search-bar" data-expanded={searchExpanded} onSubmit={submit}>
+            <label><span id="stay-sido-label">시·도</span><select aria-labelledby="stay-sido-label" value={search.sido} onChange={(event) => setSearch({ ...search, sido: event.target.value, sigungu: '' })}><option value="">전국</option>{regions?.map((item) => <option key={item.regionId} value={item.regionId}>{item.name} ({item.count.toLocaleString()})</option>)}</select></label>
+            <label><span id="stay-sigungu-label">시·군·구</span><select aria-labelledby="stay-sigungu-label" value={search.sigungu} disabled={!sido?.children.length} onChange={(event) => setSearch({ ...search, sigungu: event.target.value })}><option value="">전체</option>{(sido?.children || []).map((item) => <option key={item.regionId} value={item.regionId}>{item.name} ({item.count.toLocaleString()})</option>)}</select></label>
+            <label><span>체크인</span><input type="date" min={today} value={search.checkIn} onChange={(event) => setSearch({ ...search, checkIn: event.target.value })} /></label>
+            <label><span>체크아웃</span><input type="date" min={search.checkIn || today} value={search.checkOut} onChange={(event) => setSearch({ ...search, checkOut: event.target.value })} /></label>
+            <label><span>성인</span><input type="number" min="1" max="10" value={search.adults} onChange={(event) => setSearch({ ...search, adults: Math.max(1, Number(event.target.value) || 1) })} /></label>
+            <label><span>아동</span><input type="number" min="0" max="8" value={search.children} onChange={(event) => setSearch({ ...search, children: Math.max(0, Number(event.target.value) || 0) })} /></label>
+            <button type="submit" disabled={!regions || Boolean(courseId && !course)}>숙소 검색</button>
+            {searchError && <p className="stay-search-form-error" role="alert">{searchError}</p>}
+          </form>
+        </div>
         {notice && <p className="stay-search-notice" role="status">{notice}</p>}
         {stayError && <p className="stay-search-notice" role="alert">{stayError}</p>}
 
         <div className="stay-search-layout">
           <aside className="stay-filter" aria-label="숙소 검색 필터">
             <div className="stay-filter__head"><h2>필터</h2><button type="button" onClick={() => { setTypes([]); setAmenities([]); setMaxPrice(PRICE_MAX); setBookableOnly(false); setKeyword(''); setAppliedKeyword(''); }}>초기화</button></div>
-            <fieldset><legend>숙소 이름</legend><form className="stay-filter__keyword" onSubmit={(event) => { event.preventDefault(); setAppliedKeyword(keyword); }}><input type="search" maxLength={50} placeholder="예: 호텔, 펜션 이름" value={keyword} onChange={(event) => setKeyword(event.target.value)} /><button type="submit">찾기</button></form></fieldset>
+            <fieldset><legend>숙소 이름</legend><form className="stay-filter__keyword" onSubmit={(event) => { event.preventDefault(); setAppliedKeyword(keyword); }}><input type="search" aria-label="숙소 이름" maxLength={50} placeholder="숙소 이름 입력" value={keyword} onChange={(event) => setKeyword(event.target.value)} /><button type="submit">찾기</button></form></fieldset>
             <fieldset><legend>숙소 유형</legend>{Object.entries(stayTypeLabels).map(([code, label]) => <label key={code}><input type="checkbox" checked={types.includes(code)} onChange={() => toggleFilter(code, setTypes)} />{label}</label>)}</fieldset>
             <fieldset><legend>편의시설</legend>{AMENITY_OPTIONS.map((item) => <label key={item}><input type="checkbox" checked={amenities.includes(item)} onChange={() => toggleFilter(item, setAmenities)} />{item}</label>)}</fieldset>
             <fieldset><legend>1박 최대 요금</legend><input className="stay-filter__range" type="range" min={PRICE_MIN} max={PRICE_MAX} step="10000" value={maxPrice} onChange={(event) => setMaxPrice(Number(event.target.value))} /><strong>{maxPrice >= PRICE_MAX ? '제한 없음' : `${formatWon(maxPrice)} 이하`}</strong></fieldset>
@@ -330,9 +427,20 @@ export default function StaySearchPage() {
             )}
           </section>
 
-          <div className="stay-map-column"><SearchMap items={result.items} selectedId={selectedId} onSelect={setSelectedId} query={query} focus={focus} courseRoute={courseId ? courseRoute : null} /><p>별표는 현재 목록에 있는 숙소입니다.{courseId && ' 번호와 점선은 저장된 여행의 일차별 방문 순서입니다.'}</p></div>
+          {!compactMap && <div className="stay-map-column">{map}</div>}
         </div>
-      </main>
+        {compactMap && <>
+          <button className="stay-map-trigger" type="button" aria-haspopup="dialog" aria-controls="stay-search-map-dialog"
+            onClick={() => setMapOpen(true)}>
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8"
+              strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3V6Z M9 3v15 M15 6v15" />
+            </svg>
+            지도 보기
+          </button>
+          <SearchMapDialog open={mapOpen} onClose={() => setMapOpen(false)}>{map}</SearchMapDialog>
+        </>}
+      </div>
     </div>
   );
 }
