@@ -50,7 +50,7 @@ export default function HumanCourseList({ courses = previewCourses, execute, ser
   }
 
   return <div className="human-courses human-course-list"><div className="page">
-    <PageHeading kicker="휴먼 여행" title="다른 여행자의 추천 여행" description="조건을 선택하고, 목록에서 여행을 눌러 상세 내용을 확인합니다.">{isAuthenticated && <a className="button button-primary" href="#/human-courses/create">+ 저장된 여행 작성</a>}</PageHeading>
+    <PageHeading kicker="Traveler Trip Post" title="다른 여행자의 추천 여행" description="조건을 선택하고, 목록에서 여행을 눌러 상세 내용을 확인합니다.">{isAuthenticated && <a className="button button-primary" href="#/human-courses/create">내 지난 여행 추천하기</a>}</PageHeading>
     <div className="layout human-course-list-layout">
       <aside className="panel human-course-filter-panel" aria-labelledby="human-course-filter-title"><div className="panel-heading"><h2 id="human-course-filter-title">검색 / 필터</h2>{activeFilters.length > 0 && <span className="badge">적용 조건 {activeFilters.length}개</span>}</div><CourseFilters filters={filters} regions={regions} categories={categories} onChange={changeFilters} onReset={() => changeFilters(emptyCourseFilters)} /></aside>
       <section className="panel" aria-labelledby="human-course-list-title"><div className="panel-heading human-course-results-heading"><div><h2 id="human-course-list-title" ref={resultsHeading} tabIndex={-1}>공유 여행 <span className="muted">({visible.length}건)</span></h2><p className="helper" role="status">전체 {courses.length}건 중 조건에 맞는 여행입니다.{pageCount > 1 && ` ${currentPage} / ${pageCount} 페이지`}</p></div><span className="helper">{filters.sort === 'likes' ? '좋아요 많은 순' : '최신 순'}</span></div>

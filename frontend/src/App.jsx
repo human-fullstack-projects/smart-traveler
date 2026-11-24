@@ -153,30 +153,29 @@ export default function App() {
   }
 
   if (route === '/admin' || route.startsWith('/admin/')) {
-    if (member?.roleCode === 'ADMIN') return <AdminApp route={route} member={member} onLogout={handleLogout} />;
-    return <AdminGuard member={member} checking={!authChecked} />;
+    return <>
+      {member?.roleCode === 'ADMIN'
+        ? <AdminApp route={route} member={member} onLogout={handleLogout} />
+        : <AdminGuard member={member} checking={!authChecked} />}
+      <SiteFooter />
+    </>;
   }
 
-  // if (route === '/owner') {
-  // // return <OwnerPage member={member} onLogout={handleLogout} loggingOut={loggingOut} />;
-  // return (
-  //   <OwnerAccess>
-  //     <OwnerPage member={member} onLogout={handleLogout} loggingOut={loggingOut} />
-  //   </OwnerAccess>
-  // );
-
-    if (route === '/owner' || route === '/owner/reapply') {
+  if (route === '/owner' || route === '/owner/reapply') {
     return (
-      <OwnerAccess isReapplyPage={route === '/owner/reapply'}>
-        <OwnerPage member={member} onLogout={handleLogout} loggingOut={loggingOut} />
-      </OwnerAccess>
+      <>
+        <OwnerAccess isReapplyPage={route === '/owner/reapply'}>
+          <OwnerPage member={member} onLogout={handleLogout} loggingOut={loggingOut} />
+        </OwnerAccess>
+        <SiteFooter />
+      </>
     );
-}
+  }
 
   const TopNavScreen = topNavPageRoutes[route];
   if (TopNavScreen) {
     return <div className="app-shell">
-      <SiteHeader route={route} member={member} onLogout={handleLogout} loggingOut={loggingOut} onUnavailable={(label) => setNotice(`${label} 페이지는 연결 준비 중입니다.`)} />
+      <SiteHeader member={member} onLogout={handleLogout} loggingOut={loggingOut} />
       {notice && <div className="navigation-notice" role="status">{notice}<button onClick={() => setNotice('')} aria-label="알림 닫기">×</button></div>}
       <main className="main-content">{!authChecked || redirectLoggedIn
         ? <p className="auth-checking" role="status">로그인 상태를 확인하고 있어요.</p>
@@ -250,6 +249,8 @@ export default function App() {
 
   return (
     <MainLayout member={member} loggingOut={loggingOut} onLogout={handleLogout} notice={notice} onDismissNotice={() => setNotice('')}
+      pastelBackground={Boolean(MyPageScreen) || routePath === '/stays' || routePath === '/stays/booking'
+        || routePath === '/human-courses' || HumanCourseScreen === HumanCourseDetail}
       isHome={(routePath === '/' || routePath === '/main') && !(authChecked && member?.roleCode === 'USER' && routePath !== '/my-travel-style' && survey.memberId === member.memberId && survey.status === 'needed')}>
       {authChecked && member?.roleCode === 'USER' && routePath !== '/my-travel-style' && survey.memberId === member.memberId && survey.status === 'needed'
         ? <TravelStylePage key={`survey-${member.memberId}`} member={member} surveyMode initialData={survey.data}

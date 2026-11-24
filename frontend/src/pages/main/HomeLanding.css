@@ -315,14 +315,8 @@
 /* PC: 홈 화면을 화면 높이에 맞춰 구성 */
 @media (min-width: 1024px) and (min-height: 640px) {
   .main-page:has(.home-landing) {
-    height: 100svh;
+    height: calc(100svh + 112px);
     min-height: 0;
-  }
-
-  .main-page:has(.home-landing) .mp-topbar {
-    min-height: 64px;
-    padding-top: 8px;
-    padding-bottom: 8px;
   }
 
   .main-page:has(.home-landing) .mp-main {
@@ -331,14 +325,6 @@
     padding: 12px 32px;
   }
 
-  .main-page:has(.home-landing) .mp-footer {
-    min-height: 32px;
-    padding: 4px 0;
-  }
-
-  .main-page:has(.home-landing) .mp-footer-fine {
-    display: none;
-  }
 
   .home-landing {
     flex: 1;

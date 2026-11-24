@@ -14,15 +14,6 @@ export function StayHeader({ active = 'search' }) {
   );
 }
 
-export function StayFooter() {
-  return (
-    <footer className="stay-footer">
-      <a href="#/"><strong>AI TRIP</strong></a>
-      <span>판매 가능 여부와 최종 금액은 예약 요청 시 다시 확인합니다.</span>
-    </footer>
-  );
-}
-
 export function StayArtwork({ theme, label, compact = false }) {
   return (
     <div className={`stay-art stay-art--${theme}${compact ? ' stay-art--compact' : ''}`} role="img" aria-label={label}>

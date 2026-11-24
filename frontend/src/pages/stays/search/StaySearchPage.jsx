@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { StayArtwork, StayFooter, StayHeader, StatusPill } from '../shared/StayShell.jsx';
+import { StayArtwork, StatusPill } from '../shared/StayShell.jsx';
 import { formatWon, getDefaultStayDates, stayTypeLabels, toDateInputValue } from '../shared/stayData.js';
 import { getStayMap, getStayRegions, searchStays } from '../shared/stayApi.js';
 import KakaoMap from '../../../components/map/KakaoMap.jsx';
@@ -269,11 +269,9 @@ export default function StaySearchPage() {
 
   return (
     <div className="stay-ui stay-search-page">
-      <StayHeader active="search" />
       <main className="stay-search-main">
         <section className="stay-search-hero">
-          <div><span>STAY FINDER</span><h1>여행에 맞는 숙소를 찾아보세요.</h1><p>전국 숙소 중 조건에 맞는 곳을 {size}곳씩 보여 드려요. 선택한 날짜에 판매 중인 객실만 예약할 수 있어요.</p></div>
-          <StatusPill tone="info">목록 · 지도 함께 보기</StatusPill>
+          <div><span>Stay Finder</span><h1>여행에 맞는 숙소를 찾아보세요.</h1><p>전국 숙소 중 조건에 맞는 곳을 {size}곳씩 보여 드려요. 선택한 날짜에 판매 중인 객실만 예약할 수 있어요.</p></div>
         </section>
 
         <form className="stay-search-bar stay-search-bar--regions" onSubmit={submit}>
@@ -324,7 +322,6 @@ export default function StaySearchPage() {
           <div className="stay-map-column"><SearchMap points={points} items={result.items} bounds={result.bounds} selectedId={selectedId} onSelect={selectFromMap} query={query} focus={focus} fitRequest={fitRequest} onIdle={setView} loading={mapLoading} /><p>지도는 지금 보이는 범위의 숙소를 같은 조건으로 보여 줍니다. 멀리서 보면 근처 숙소를 숫자로 묶어 보여 줍니다.</p></div>
         </div>
       </main>
-      <StayFooter />
     </div>
   );
 }

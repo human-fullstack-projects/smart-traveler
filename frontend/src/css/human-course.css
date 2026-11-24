@@ -57,6 +57,7 @@
 .human-courses :focus-visible { outline: 3px solid #9397CB; outline-offset: 2px; }
 .human-courses h1, .human-courses h2, .human-courses h3, .human-courses h4, .human-courses p { margin-top: 0; }
 .human-courses h1 { font-size: 25px; line-height: 1.3; margin-bottom: 7px; }
+.human-course-list .page-heading h1 { color: #1e3b8b; font-size: clamp(28px, 3.3vw, 44px); }
 .human-courses h2 { font-size: 17px; margin-bottom: 13px; }
 .human-courses h3 { font-size: 15px; margin-bottom: 10px; }
 .human-course-create .itinerary-title { font-size: 20px; font-weight: 700; }
@@ -82,6 +83,10 @@
 .human-courses .human-course-list-layout .course-grid { grid-template-columns: minmax(0, 1fr); }
 .human-courses .layout > * { min-width: 0; }
 .human-courses .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 7px; padding: 20px; min-width: 0; margin-bottom: 18px; }
+.human-courses:is(.human-course-list, .human-course-detail) {
+  background: transparent;
+  border-radius: 0;
+}
 .human-courses .panel > :last-child { margin-bottom: 0; }
 .human-courses .panel-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding-bottom: 13px; margin-bottom: 14px; border-bottom: 1px solid #e6e9eb; }
 .human-courses .panel-heading h2, .human-courses .panel-heading h3 { margin: 0; }

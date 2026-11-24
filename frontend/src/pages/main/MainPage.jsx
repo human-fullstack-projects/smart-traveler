@@ -389,7 +389,7 @@ export default function MainPage({ onStart, busy = false, reviewKey }) {
           여기서 시작해요.
         </h1>
         <p className="landing-description">
-          좋아하는 것을 말해 주세요. 코스는 저희가 짤게요.
+          좋아하는 것을 말해 주세요. 일정은 제가 짜드릴게요.
         </p>
 
         <form className="landing-composer" onSubmit={submit}>
