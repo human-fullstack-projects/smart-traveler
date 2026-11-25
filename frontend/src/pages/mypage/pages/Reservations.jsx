@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import TourPhoto from '../../../components/media/TourPhoto';
 import AccessNotice from '../components/AccessNotice';
+import TripPagination, { tripPage } from '../components/TripPagination';
 import MyCourseMap from '../components/MyCourseMap';
 import { myPageApi } from '../api/myPageApi';
 import { bookingCategory, isVisibleBooking } from '../data/visibleItems';
@@ -138,6 +139,7 @@ function ReservationDetail({ booking, course, memberId, today }) {
 export default function Reservations({bookings=[],courses=[],reservationId,member}) {
  const [tab,setTab]=useState('all'),[query,setQuery]=useState(''),[latest,setLatest]=useState(null),[status,setStatus]=useState('loading');
  useEffect(()=>{let cancelled=false;setLatest(null);if(!member?.memberId)return;setStatus('loading');myPageApi.load(member.memberId).then(data=>{if(cancelled)return;if(data.memberId!==member.memberId)throw new Error('Member mismatch');setLatest(data);setStatus('ready');}).catch(()=>{if(!cancelled)setStatus('error');});return()=>{cancelled=true;};},[member?.memberId,tab,reservationId]);
+ const [page,setPage]=useState(1);
  const rows=(latest?.bookings??bookings).filter(isVisibleBooking), plans=latest?.courses??courses;
  const courseFor=b=>b.itinerary?.course ?? plans.find(c=>c.id===b.courseId);
  const today=useBookingDate();
@@ -164,5 +166,8 @@ export default function Reservations({bookings=[],courses=[],reservationId,membe
   if (dateOrder !== 0) return firstCategory === 'upcoming' ? dateOrder : -dateOrder;
   return String(a.id).localeCompare(String(b.id), undefined, { numeric: true });
  });
- return <div className="mypage trips-page"><a className="trips-back trips-back-pill" href="#/mypage">← 마이페이지</a><header className="trips-heading"><div><h1>내 예약</h1><p>여행별 예약을 모아 보고, 숙소와 상세 일정을 확인하세요.</p></div></header><div className="trips-list-toolbar"><nav className="trips-filters" aria-label="예약 분류">{tabs.map(([value,label])=><button type="button" key={value} aria-pressed={tab===value} onClick={()=>setTab(value)}>{label}</button>)}</nav><div className="trips-tools"><label className="trips-search"><span className="trips-sr-only">예약 제목, 지역, 숙소 또는 예약번호 검색</span><span aria-hidden="true">⌕</span><input type="search" placeholder="내 예약 검색" value={query} onChange={e=>setQuery(e.target.value)}/></label></div></div><p className="trips-count" role="status">{list.length}개의 예약</p>{status==='loading'&&<p role="status">최신 예약을 불러오는 중입니다.</p>}{status==='error'&&<p role="alert">최신 예약을 불러오지 못했습니다. 다른 분류를 선택해 다시 시도해 주세요.</p>}{!list.length&&status==='ready'&&<p className="empty">조건에 맞는 예약이 없습니다.</p>}<div className="trips-grid">{list.map(b=>{const c=courseFor(b);return <a key={b.id} className="trip-cover-card" href={`#/reservations/${encodeURIComponent(b.id)}`}><img src={cover(c, b)} alt="" loading="lazy"/><span className="trip-status">{badge(b)}</span><div className="trip-card-copy"><span className="trip-region">{c?.region||labels[b.status]||b.status}</span><h2>{c?.title||b.stay||'나의 예약'}</h2><p>{b.date} ~ {b.endDate}<br/>{b.stay}<br/>{b.reservationNo}</p><span className="trip-card-open">예약·일정 자세히 보기 <span aria-hidden="true">↗</span></span></div></a>;})}</div></div>;
+ const pagination = tripPage(list.length, page);
+ return <div className="mypage trips-page"><header className="trips-heading"><div><h1>내 예약</h1><p>여행별 예약을 모아 보고, 숙소와 상세 일정을 확인하세요.</p></div></header><div className="trips-list-toolbar"><nav className="trips-filters" aria-label="예약 분류">{tabs.map(([value,label])=><button type="button" key={value} aria-pressed={tab===value} onClick={()=>{setTab(value);setPage(1);}}>{label}</button>)}</nav><div className="trips-tools"><label className="trips-search"><span className="trips-sr-only">예약 제목, 지역, 숙소 또는 예약번호 검색</span><span aria-hidden="true">⌕</span><input type="search" placeholder="내 예약 검색" value={query} onChange={e=>{setQuery(e.target.value);setPage(1);}}/></label><a className="trips-back trips-back-pill trips-list-back" href="#/mypage">&lt;- 마이트립페이지</a></div></div><p className="trips-count" role="status">{list.length}개의 예약</p>{status==='loading'&&<p role="status">최신 예약을 불러오는 중입니다.</p>}{status==='error'&&<p role="alert">최신 예약을 불러오지 못했습니다. 다른 분류를 선택해 다시 시도해 주세요.</p>}{!list.length&&status==='ready'&&<p className="empty">조건에 맞는 예약이 없습니다.</p>}<div className="trips-grid">{list.slice(pagination.start, pagination.end).map(b=>{const c=courseFor(b);return <a key={b.id} className="trip-cover-card" href={`#/reservations/${encodeURIComponent(b.id)}`}><img src={cover(c, b)} alt="" loading="lazy"/><span className="trip-status">{badge(b)}</span><div className="trip-card-copy"><span className="trip-region">{c?.region||labels[b.status]||b.status}</span><h2>{c?.title||b.stay||'나의 예약'}</h2><p>{b.date} ~ {b.endDate}<br/>{b.stay}<br/>{b.reservationNo}</p><span className="trip-card-open">예약·일정 자세히 보기 <span aria-hidden="true">↗</span></span></div></a>;})}</div>
+  <TripPagination {...pagination} onChange={setPage} />
+ </div>;
 }

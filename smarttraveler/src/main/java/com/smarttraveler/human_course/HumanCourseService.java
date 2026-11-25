@@ -152,6 +152,7 @@ public class HumanCourseService {
                    COALESCE(NULLIF(m.nickname,''),m.login_id) AS author,
                    r.checkin_date, r.checkout_date, l.lodging_id, l.name AS stay_name,
                    l.address AS stay_address, l.latitude AS stay_latitude, l.longitude AS stay_longitude,
+                   l.description AS stay_description,
                    (SELECT COALESCE(NULLIF(TRIM(ph.image_url),''),NULLIF(TRIM(ph.thumbnail_url),''))
                     FROM lodging_photo ph WHERE ph.lodging_id=l.lodging_id
                       AND COALESCE(NULLIF(TRIM(ph.image_url),''),NULLIF(TRIM(ph.thumbnail_url),'')) IS NOT NULL
@@ -207,7 +208,8 @@ public class HumanCourseService {
             row.get("checkin_date") + " ~ " + row.get("checkout_date"), mine, String.valueOf(row.get("reservation_id")),
             blinded ? null : new MapPlace("stay-" + row.get("lodging_id"), null, string(row, "stay_name"),
                 string(row, "stay_address"), decimal(row.get("stay_latitude")),
-                decimal(row.get("stay_longitude")), "stay", stayImageUrl == null ? List.of() : List.of(stayImageUrl)),
+                decimal(row.get("stay_longitude")), "stay", stayImageUrl == null ? List.of() : List.of(stayImageUrl),
+                string(row, "stay_description")),
             coverPhotoUrl);
     }
 
@@ -279,7 +281,7 @@ public class HumanCourseService {
                 SELECT place_name
                 FROM activity WHERE course_day_id=? ORDER BY seq
                 """, String.class, rs.getLong("id")), jdbc.query("""
-                SELECT a.id, a.place_id, a.place_name,
+                SELECT a.id, a.place_id, a.place_name, p.description,
                        COALESCE(a.address_snapshot,p.address) AS address,
                        COALESCE(a.latitude_snapshot,p.latitude) AS latitude,
                        COALESCE(a.longitude_snapshot,p.longitude) AS longitude
@@ -290,7 +292,7 @@ public class HumanCourseService {
                     return new MapPlace("activity-" + placeRs.getLong("id"), placeId,
                         placeRs.getString("place_name"), placeRs.getString("address"),
                         placeRs.getBigDecimal("latitude"), placeRs.getBigDecimal("longitude"), "course",
-                        imagesByPlace.getOrDefault(placeId, List.of()));
+                        imagesByPlace.getOrDefault(placeId, List.of()), placeRs.getString("description"));
                 },
                 rs.getLong("id")), rs.getString("visit_date")), courseId);
     }
@@ -428,7 +430,7 @@ public class HumanCourseService {
         : value instanceof BigDecimal decimal ? decimal : new BigDecimal(value.toString()); }
     private static MapPlace mapPlace(String id, Long placeId, String name, String address,
                                      BigDecimal latitude, BigDecimal longitude, String kind) {
-        return new MapPlace(id, placeId, name, address, latitude, longitude, kind, List.of());
+        return new MapPlace(id, placeId, name, address, latitude, longitude, kind, List.of(), null);
     }
     private Snapshot snapshot(Map<String, Object> row) {
         try {

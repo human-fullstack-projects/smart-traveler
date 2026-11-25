@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import ItineraryMapPanel from '../../../components/map/ItineraryMapPanel';
+import { descriptionText } from '../../../components/map/MapPlaceDetails';
 import { PlacePhoto } from './CoursePlan';
 
 const centers = {
@@ -11,8 +12,12 @@ const centers = {
 };
 const EMPTY_PLAN = [];
 
-function renderPlacePhoto(place) {
-  return <PlacePhoto key={place.id} name={place.name} imageUrls={place.imageUrls || []} emptyMessage="등록된 장소 사진이 없습니다." />;
+function renderPlaceDetails(place) {
+  const description = descriptionText(place.description);
+  return <div className={description ? 'map-place-detail__content' : undefined}>
+    <PlacePhoto key={place.id} name={place.name} imageUrls={place.imageUrls || []} emptyMessage="등록된 장소 사진이 없습니다." />
+    {description && <p className="map-place-detail__description">{description}</p>}
+  </div>;
 }
 
 export default function CourseMap({ region, plan = EMPTY_PLAN, stay, travelDates, preview = false, allDaysLabel, height = '320px' }) {
@@ -51,7 +56,7 @@ export default function CourseMap({ region, plan = EMPTY_PLAN, stay, travelDates
     showIntro={!preview}
     showCategories={false}
     showPlaceList={!preview}
-    renderPlaceDetails={preview ? undefined : renderPlacePhoto}
+    renderPlaceDetails={preview ? undefined : renderPlaceDetails}
     allDaysLabel={allDaysLabel}
     sourceNote="카카오 지도 · 주소와 장소명은 실제 장소와 다를 수 있습니다. 점선은 방문지 사이를 직선으로 잇습니다."
   />;

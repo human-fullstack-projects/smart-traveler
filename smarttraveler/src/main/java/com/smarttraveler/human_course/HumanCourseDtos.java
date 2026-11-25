@@ -7,7 +7,8 @@ public final class HumanCourseDtos {
     private HumanCourseDtos() {}
 
     public record MapPlace(String id, Long placeId, String name, String address,
-                           BigDecimal latitude, BigDecimal longitude, String kind, List<String> imageUrls) {}
+                           BigDecimal latitude, BigDecimal longitude, String kind, List<String> imageUrls,
+                           String description) {}
     public record Day(int day, List<String> stops, List<MapPlace> places, String visitDate) {}
     public record Photo(String name, String dataUrl) {}
     public record Comment(String id, String author, String text, boolean mine) {}

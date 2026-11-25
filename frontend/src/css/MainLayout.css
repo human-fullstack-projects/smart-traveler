@@ -1,8 +1,10 @@
 .main-page{min-height:100vh;max-width:1920px;margin:0 auto;display:flex;flex-direction:column;background:radial-gradient(ellipse at 85% 50%,#F5F4FA 0,transparent 47%)}
 
-body:has(.main-page.has-pastel-background),
+body:has(.main-page.has-pastel-background, .main-page .human-course-create, .auth-shell),
+.app-shell.auth-shell,
 .main-page.has-pastel-background,
-.has-pastel-background .travel-style-page { background: #eef6ff; }
+.main-page:has(.human-course-create),
+.has-pastel-background .travel-style-page { background: #f7faff; }
 
 .has-pastel-background :is(
   .stay-search-bar, .stay-filter, .stay-result-card, .stay-results__empty,
@@ -19,6 +21,7 @@ body:has(.main-page.has-pastel-background),
 .mp-brand{font-size:24px;font-weight:800;letter-spacing:-1.2px;white-space:nowrap}
 .mp-brand span{color:#0E3FC7}
 .mp-account{border:1px solid #dbe3e8;border-radius:9px;background:#fff;padding:10px 21px;color:#263a43}
+.mp-topbar .mp-account.header-desktop-login{min-height:38px;padding:6px 16px;font-size:14px;white-space:nowrap}
 .mp-topbar .menu-toggle{display:none}
 
 .header-account { position: relative; min-width: 0; }
@@ -111,13 +114,15 @@ body:has(.main-page.has-pastel-background),
 @media(max-width:900px){
   .mp-main{padding:40px 28px 40px}
 }
-@media(max-width:700px){
+@media(max-width:840px){
   .mp-topbar{min-height:56px;padding:0 16px}
   .mp-brand{font-size:21px}
   .mp-topbar .menu-toggle{display:flex}
   .mp-topbar .mp-account.header-desktop-login{display:none}
   .header-account-guest,.header-account-mobile-nav{display:block}
   .header-account-mobile-nav{border-bottom:1px solid var(--st-line)}
+}
+@media(max-width:700px){
   .mp-main{padding:34px 20px 36px}
 }
 /* 메인 첫 화면(여행 시작): 메뉴 줄 흰 바탕 · 내용이 화면 폭 전체 · 아래 바로가기 줄 숨김 → 한 화면 */

@@ -9,7 +9,7 @@ export default function HumanCourseEdit({ courses = previewCourses, courseId = 2
   useEffect(() => { if (serverMode) loadCourse?.(courseId); }, [serverMode, courseId]);
   async function submit(fields) {
     const result = await execute?.({ type: 'edit', id: courseId, fields });
-    if (result?.id && !result.error) window.location.hash = from === 'my-posts' ? `/my-posts/${result.id}` : `/human-courses/${result.id}`;
+    if (result?.id && !result.error) window.location.hash = `/human-courses/${encodeURIComponent(result.id)}`;
     return result;
   }
   const course = courses.find((item) => String(item.id) === String(courseId));

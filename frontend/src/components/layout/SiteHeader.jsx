@@ -6,14 +6,13 @@ import '../../css/MainLayout.css';
 const navigationItems = [
   { label: '여행 생성', href: '#/' },
   { label: '숙소 검색', href: '#/stays' },
-  { label: '저장된 여행', href: '#/my-courses' },
+  { label: '저장된 여행', href: '#/my-courses', requiresLogin: true },
   { label: '여행자추천트립', href: '#/human-courses' },
-  { label: '마이트립페이지', href: '#/mypage' },
 ];
 
 const accountLinks = [
   { label: '내 예약', href: '#/reservations' },
-  { label: '내 여행 스타일', href: '#/my-travel-style' },
+  { label: '내 여행 스타일 관리', href: '#/my-travel-style' },
   { label: '내 여행 추천', href: '#/my-posts' },
 ];
 
@@ -53,7 +52,7 @@ export default function SiteHeader({ member, loggingOut, onLogout }) {
   }, [menuOpen]);
 
   const renderLink = item => (
-    <a key={item.href} href={item.href} onClick={() => setMenuOpen(false)}>{item.label}</a>
+    <a key={item.href} href={!member && item.requiresLogin ? '#/login' : item.href} onClick={() => setMenuOpen(false)}>{item.label}</a>
   );
 
   return (
@@ -67,12 +66,10 @@ export default function SiteHeader({ member, loggingOut, onLogout }) {
 
       <div className="st-header-actions">
         <nav className="st-top-links" aria-label="주 메뉴">
-          {navigation.map((item) => (
-            <a key={item.label} href={item.href}>{item.label}</a>
-          ))}
+          {navigation.map(renderLink)}
         </nav>
 
-        {!member && <a className="mp-account header-desktop-login" href="#/login">로그인</a>}
+        {!member && <a className="mp-account header-desktop-login" href="#/login">로그인/회원가입</a>}
         <div className={member ? 'header-account' : 'header-account header-account-guest'} ref={account}>
           <button
             ref={toggle}
@@ -90,9 +87,12 @@ export default function SiteHeader({ member, loggingOut, onLogout }) {
             <span className="header-account-bars" aria-hidden="true" />
           </button>
           <div id="header-account-menu" className="header-account-panel" hidden={!menuOpen}>
-            {member && <a className="header-account-profile" href="#/my-profile" onClick={() => setMenuOpen(false)}>
-              <span>{accountName}</span><span aria-hidden="true">›</span>
-            </a>}
+            {member && <>
+              <a className="header-account-profile" href="#/my-profile" onClick={() => setMenuOpen(false)}>
+                <span>{accountName}</span><span aria-hidden="true">›</span>
+              </a>
+              {renderLink({ label: '마이트립페이지', href: '#/mypage' })}
+            </>}
             <nav className="header-account-mobile-nav" aria-label="주 메뉴">{navigation.map(renderLink)}</nav>
             {member ? <>
               <nav className="header-account-links" aria-label="내 계정">
@@ -104,7 +104,7 @@ export default function SiteHeader({ member, loggingOut, onLogout }) {
               <button className="header-account-logout" type="button" disabled={loggingOut} onClick={onLogout}>
                 {loggingOut ? '로그아웃 중…' : '로그아웃'}
               </button>
-            </> : <a href="#/login" onClick={() => setMenuOpen(false)}>로그인</a>}
+            </> : <a href="#/login" onClick={() => setMenuOpen(false)}>로그인/회원가입</a>}
           </div>
         </div>
       </div>

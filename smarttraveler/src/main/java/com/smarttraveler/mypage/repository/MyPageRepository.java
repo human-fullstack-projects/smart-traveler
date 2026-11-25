@@ -71,7 +71,7 @@ public class MyPageRepository {
             }, memberId));
         result.addAll(jdbc.query("""
             SELECT c.id, COALESCE(c.title, c.destination) AS title, c.destination, c.start_date, c.end_date,
-                   c.region_id, c.adults, c.children,
+                   c.region_id, c.adults, c.children, l.lodging_id, l.name AS lodging_name, l.address AS lodging_address,
                    CASE WHEN JSON_EXTRACT(c.condition_meta, '$.chat_message_id') IS NOT NULL
                         THEN 'DRAFT' ELSE c.status END AS status,
                    (SELECT image.image_url FROM course_day d
@@ -79,16 +79,25 @@ public class MyPageRepository {
                     JOIN place_image image ON image.place_id=a.place_id
                     WHERE d.course_id=c.id AND NULLIF(TRIM(image.image_url),'') IS NOT NULL
                     ORDER BY d.day_no, a.seq, a.id, image.sort_order, image.place_image_id LIMIT 1) AS itinerary_photo
-            FROM course c WHERE c.member_no=? AND c.deleted_at IS NULL AND c.is_active=TRUE ORDER BY c.id DESC
+            FROM course c
+            LEFT JOIN lodging l ON l.lodging_id = COALESCE(
+                JSON_VALUE(c.condition_meta, '$.lodging_id'),
+                CASE WHEN JSON_EXTRACT(c.condition_meta, '$.chat_message_id') IS NOT NULL
+                    THEN JSON_VALUE(c.preferences_snapshot, '$.lodgingId') END)
+            WHERE c.member_no=? AND c.deleted_at IS NULL AND c.is_active=TRUE ORDER BY c.id DESC
             """, (rs, n) -> {
                 String region = rs.getString("destination");
                 String photo = rs.getString("itinerary_photo");
                 String id = "course-" + rs.getLong("id");
+                Long lodgingId = rs.getObject("lodging_id", Long.class);
+                CourseStay stay = lodgingId == null ? null
+                    : new CourseStay(lodgingId, rs.getString("lodging_name"), rs.getString("lodging_address"));
                 return new CourseView(id, rs.getString("title"), region,
                     rs.getObject("start_date", LocalDate.class), rs.getObject("end_date", LocalDate.class),
                     bookedIds.contains(id) ? "BOOKED" : rs.getString("status"), List.of(),
                     photo != null ? photo : regionalPhoto(region, regionalPhotos),
-                    rs.getObject("region_id", Long.class), rs.getObject("adults", Integer.class), rs.getObject("children", Integer.class));
+                    rs.getObject("region_id", Long.class), rs.getObject("adults", Integer.class),
+                    rs.getObject("children", Integer.class), stay);
             }, memberId));
         return result;
     }
@@ -136,7 +145,7 @@ public class MyPageRepository {
                     return new Day(date == null ? c.startDate().plusDays(rs.getInt("day_no") - 1L) : date, places, mapPlaces);
                 }, Long.parseLong(id.substring(7)), memberId);
             return new CourseView(c.id(), c.title(), c.region(), c.startDate(), c.endDate(), c.state(), days, c.coverImageUrl(),
-                    c.regionId(), c.adults(), c.children());
+                    c.regionId(), c.adults(), c.children(), c.stay());
         }).orElse(null);
     }
 

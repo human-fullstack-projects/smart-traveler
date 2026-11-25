@@ -189,7 +189,8 @@ public class RecommendedCourseService {
         ObjectNode metadata = mapper.createObjectNode();
         if (snapshot.hasNonNull("sourceCourseId")) metadata.put("source_course_id", snapshot.path("sourceCourseId").asLong());
         else metadata.putNull("source_course_id");
-        if (snapshot.hasNonNull("lodgingId")) metadata.put("lodging_id", snapshot.path("lodgingId").asLong());
+        long lodgingId = snapshot.path("lodgingId").asLong(conditions.path("lodgingId").asLong());
+        if (lodgingId > 0) metadata.put("lodging_id", lodgingId);
         metadata.put("chat_message_id", messageId); metadata.set("itinerary", snapshot.path("itinerary"));
         Long regionId = snapshot.path("regionId").isIntegralNumber() ? snapshot.path("regionId").asLong() : null;
         Object[] values = {memberId, snapshot.path("destination").asText(), start, end,

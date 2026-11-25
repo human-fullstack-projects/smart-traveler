@@ -539,11 +539,11 @@
 }
 /* ───── 메인 첫 화면 v3 (2026-11-19 · 목업 03_제작작업/메인첫화면_20261119/목업_v3) ─────
    사진 배경 + 왼쪽 글 + 아래 휴먼 추천 코스 3개 · 메뉴 줄 아래 한 화면 · 왼쪽 끝 하나(--hero-x) */
-.home-landing.home-hero{--hero-x:clamp(24px,7.8vw,150px);--cards-h:clamp(120px,16.5vh,176px);position:relative;flex:1;width:100%;max-width:none;margin:0;padding:0;min-height:0;overflow:hidden;background:#F7F3FF;display:block}
+.home-landing.home-hero{--hero-x:clamp(24px,7.8vw,150px);--cards-h:clamp(120px,16.5vh,176px);position:relative;flex:1;width:100%;max-width:none;margin:0;padding:0;min-height:0;overflow:hidden;background:#F7FAFF;display:block}
 .home-hero .hero-bg{position:absolute;inset:0}
 .home-hero .hero-slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1.4s ease}
 .home-hero .hero-slide.is-on{opacity:1}
-.home-hero .hero-veil{position:absolute;inset:0;background:linear-gradient(90deg,#FAF7FFf5 0%,#FAF7FFe6 34%,#FAF7FF8c 52%,#FAF7FF00 70%),linear-gradient(0deg,#F7F3FFf2 0%,#F7F3FFd9 28%,#F7F3FF00 48%)}
+.home-hero .hero-veil{position:absolute;inset:0;background:linear-gradient(90deg,#F7FAFFf5 0%,#F7FAFFe6 34%,#F7FAFF8c 52%,#F7FAFF00 70%),linear-gradient(0deg,#F7FAFFf2 0%,#F7FAFFd9 28%,#F7FAFF00 48%)}
 .home-hero .landing-hero{position:absolute;left:var(--hero-x);top:clamp(28px,6vh,64px);z-index:2;width:min(1000px,calc(100% - 2*var(--hero-x)));margin:0;padding:0;text-align:left;background:none}
 .home-hero .landing-eyebrow{margin:0;font-weight:800;font-size:clamp(14px,1.1vw,21px);color:#655F76;letter-spacing:0}
 .home-hero .landing-hero h1{margin:clamp(6px,1vh,12px) 0 0;font-family:SUIT,Pretendard,sans-serif;font-weight:900;font-size:clamp(44px,min(5.8vw,10.4vh),112px);line-height:1.08;letter-spacing:-.045em;color:#29243B;text-align:left}
