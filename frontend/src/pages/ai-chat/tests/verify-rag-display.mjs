@@ -36,6 +36,7 @@ try {
   assert.equal((chat.match(/type="checkbox"[^>]*\/>코스[123]/g) || []).length, 3);
   assert.ok(chat.indexOf('코스 #3') < chat.indexOf('저장할 코스 선택'));
   assert.match(chat, /disabled="">저장하기/);
+  assert.ok(!chat.includes('저장하고 숙소 찾기'), '게스트에게는 예약 바로가기 버튼을 표시하지 않는다');
   console.log(`PASS: all three four-day courses render without truncation (${content.length} characters)`);
   const { default: MyCourses } = await server.ssrLoadModule('/src/pages/mypage/pages/MyCourses.jsx');
   const preview = renderToStaticMarkup(React.createElement(MyCourses, {
@@ -52,6 +53,7 @@ try {
   const regionHash = buildStayNavHash({ sidoId: 10, sigunguId: 25, name: '부산광역시 해운대구' }, { lodgingId: null, startDate: '2026-12-10', durationDays: 3, adults: 2, children: 1 }, 34);
   assert.ok(regionHash.startsWith('/stays?') && regionHash.includes('sido=10') && regionHash.includes('sigungu=25'));
   assert.ok(regionHash.includes('course=34') && regionHash.includes('checkIn=2026-12-10') && regionHash.includes('checkOut=2026-12-12') && regionHash.includes('adults=2') && regionHash.includes('children=1'));
+  assert.equal(buildStayNavHash(null, { lodgingId: null }, 34), '/stays?course=34');
   assert.equal(buildStayNavHash(null, { lodgingId: null }), null);
   console.log('PASS: saved course navigates to the specific lodging booking page when known, otherwise to the region search page, carrying course id · dates · headcount either way');
 

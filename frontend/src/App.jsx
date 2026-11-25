@@ -90,7 +90,8 @@ export default function App() {
   if (!returnPage.current) returnPage.current = createReturnPage(route);
   const [notice, setNotice] = useState('');
   const [survey, setSurvey] = useState({ memberId: null, status: 'idle', data: null });
-  const chat = useAiChat({ ownerKey: member?.memberId ? `member:${member.memberId}` : 'guest', ready: authChecked && !authCheckFailed, authRevision });
+  const chat = useAiChat({ ownerKey: member?.memberId ? `member:${member.memberId}` : 'guest',
+    ready: authChecked && !authCheckFailed, authRevision, memberRole: member?.roleCode });
   // 로그인·회원가입 화면에 '비로그인 상태로' 들어온 주소. 이 화면 안에서 로그인한 경우(업주 안내 화면 등)는 이동시키지 않는다.
   const guestAuthRoute = useRef(null);
   const isAuthRoute = Boolean(topNavPageRoutes[route]);
