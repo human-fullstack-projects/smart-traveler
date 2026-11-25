@@ -67,7 +67,7 @@ public class AuthSecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/place-photos/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/owner-photos/*").permitAll()
                 // 관리자 계정은 여행자 화면을 둘러보기만 한다: 예약·결제·휴먼 코스 쓰기·코스 저장·취향 저장은 여행자·업주만 (채팅 저장은 ChatSecurity)
-                .requestMatchers(HttpMethod.POST, "/api/reservations", "/api/payments/reservations/*/prepare",
+                .requestMatchers(HttpMethod.POST, "/api/reservations", "/api/reservations/*/cancel", "/api/payments/reservations/*/prepare",
                         "/api/payments/confirm", "/api/payments/reservations/*/sync").hasAnyRole("USER", "OWNER")
                 .requestMatchers(HttpMethod.POST, "/api/human-courses/reservations/*", "/api/human-courses/*/like",
                         "/api/human-courses/*/comments", "/api/human-courses/*/reports").hasAnyRole("USER", "OWNER")

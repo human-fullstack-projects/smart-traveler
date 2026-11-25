@@ -1,12 +1,15 @@
 package com.smarttraveler.reservation.controller;
 
+import com.smarttraveler.admin.service.ReservationRefundService;
 import com.smarttraveler.reservation.dto.CreateReservationRequest;
 import com.smarttraveler.reservation.dto.ReservationResponse;
 import com.smarttraveler.reservation.service.ReservationService;
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class ReservationController {
     private final ReservationService reservationService;
+    private final ReservationRefundService refunds;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -25,6 +29,15 @@ public class ReservationController {
     @GetMapping("/{reservationId}")
     public ReservationResponse detail(@PathVariable Long reservationId, Authentication auth) {
         return reservationService.get(reservationId, auth);
+    }
+
+    @PostMapping("/{reservationId}/cancel")
+    public ResponseEntity<Map<String, String>> cancel(@PathVariable Long reservationId, Authentication auth) {
+        try {
+            return ResponseEntity.ok(Map.of("status", refunds.cancelByMember(reservationId, auth.getName())));
+        } catch (IllegalStateException error) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", error.getMessage()));
+        }
     }
 
     @GetMapping("/member/{memberId}")

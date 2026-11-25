@@ -12,6 +12,7 @@ export const myPageApi = {
     return request(`/api/mypage/places/tour-photos?${query}`);
   },
   reservationTourPhotos(id) { return request(`/api/mypage/reservations/${encodeURIComponent(id)}/tour-photos`); },
+  cancelReservation(id) { return postJsonWithCsrf(`/api/reservations/${encodeURIComponent(id)}/cancel`, {}); },
   load(memberId) { return request('/api/mypage', { headers: { 'X-MyPage-Member': String(memberId) } }); },
   importCourses(memberId, courses) {
     return postJsonWithCsrf('/api/mypage/courses/import', { expectedMemberId: memberId, courses });

@@ -48,6 +48,7 @@ class AdminReadOnlyAccessTest {
     private static List<MockHttpServletRequestBuilder> blocked() {
         return List.of(
             post("/api/reservations"),
+            post("/api/reservations/1/cancel"),
             post("/api/payments/reservations/1/prepare"),
             post("/api/payments/confirm"),
             post("/api/payments/reservations/1/sync"),
