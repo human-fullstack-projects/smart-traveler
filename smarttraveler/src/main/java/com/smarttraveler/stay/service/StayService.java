@@ -1,6 +1,7 @@
 package com.smarttraveler.stay.service;
 
 import com.smarttraveler.domain.entity.Lodging;
+import com.smarttraveler.domain.entity.Region;
 import com.smarttraveler.stay.dto.StayDetailResponse;
 import com.smarttraveler.stay.dto.StayDetailResponse.Photo;
 import com.smarttraveler.stay.dto.StayResponse;
@@ -48,15 +49,23 @@ public class StayService {
             ORDER BY r.room_id, p.sort_order, p.photo_id
             """, (rs, row) -> new Photo(rs.getString("photo_url"), rs.getString("thumbnail_url")), lodgingId);
 
+        Region region = lodging.getRegion();
         return new StayDetailResponse(
             lodging.getLodgingId(), lodging.getRegionId(),
-            lodging.getRegion() == null ? null : lodging.getRegion().getFullName(),
+            region == null ? null : region.getFullName(), sidoName(region),
             lodging.getName(), lodging.getAddress(), lodging.getLodgingType(),
             lodging.getLatitude(), lodging.getLongitude(), lodging.getCheckinTime(), lodging.getCheckoutTime(),
             cover.thumbnailUrl(), cover.imageUrl(), lodging.getAddressDetail(), lodging.getZipcode(),
             lodging.getPhone(), lodging.getHomepageUrl(), lodging.getDescription(), lodging.getParkingInfo(),
             lodging.getAmenities(), lodging.getRefundPolicy(), photos, roomPhotos
         );
+    }
+
+    private static String sidoName(Region region) {
+        while (region != null && !"SIDO".equals(region.getRegionLevel())) {
+            region = region.getParentRegion();
+        }
+        return region == null ? null : region.getRegionName();
     }
 
     public Lodging requireActive(Long lodgingId) {

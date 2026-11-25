@@ -3,12 +3,13 @@ import { useAuth } from '../../../contexts/AuthContext.jsx';
 import OwnerActionNotice from '../../../components/OwnerActionNotice.jsx';
 import ItineraryPlaceList from '../../../components/map/ItineraryPlaceList.jsx';
 import { myPageApi } from '../../mypage/api/myPageApi.js';
-import { createReservation, getRooms, getStay, getStayTourPhotos } from '../shared/stayApi.js';
+import { getRooms, getStay, getStayTourPhotos } from '../shared/stayApi.js';
 import useStayCourse, { readStayCourseId } from '../shared/useStayCourse.js';
 import '../../../css/stay-shared.css';
-import { formatWon, getDefaultStayDates, getNightCount, stayTypeLabels } from '../shared/stayData.js';
+import { formatWon, getDefaultStayDates, getNightCount, getStayCourseMessage, stayTypeLabels } from '../shared/stayData.js';
 import { StayLocation, StayOverview } from './StayDetails.jsx';
 import StayPhotoGallery from './StayPhotoGallery.jsx';
+import StayReservationDialog from './StayReservationDialog.jsx';
 import { buildStayGallery } from './stayPhotos.js';
 import '../../../css/stay-booking.css';
 
@@ -30,28 +31,19 @@ export default function StayBookingPage({ onStart, busy = false }) {
   const [tourGallery, setTourGallery] = useState(null);
   const [rooms, setRooms] = useState([]);
   const [roomId, setRoomId] = useState(null);
+  const [reservationOpen, setReservationOpen] = useState(false);
   const [notice, setNotice] = useState('');
   const [loadingRooms, setLoadingRooms] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [refresh, setRefresh] = useState(0);
-  const [visitorName, setVisitorName] = useState('');
-  const [sameAsBooker, setSameAsBooker] = useState(false);
   const [startingCourse, setStartingCourse] = useState(false);
   const [courseError, setCourseError] = useState('');
   const [placeSelection, setPlaceSelection] = useState(null);
   const selectedPlaceId = placeSelection?.course === course ? placeSelection?.id : null;
   const courseInFlight = useRef(false);
-  const courseMessage = stay?.name?.trim();
-  const bookerName = member?.nickname?.trim() || member?.loginId || '';
-  const bookerEmail = member?.email?.trim() || '';
+  const courseMessage = getStayCourseMessage(stay?.sidoName, stay?.name);
   const room = rooms.find((item) => item.roomId === roomId && item.available !== false);
   const nights = getNightCount(checkIn, checkOut);
   const photos = useMemo(() => buildStayGallery(stay, rooms, tourGallery?.data), [stay, rooms, tourGallery]);
-
-  useEffect(() => {
-    setSameAsBooker(false);
-    setVisitorName('');
-  }, [member?.memberId]);
 
   useEffect(() => {
     if (!lodgingId) return;
@@ -87,10 +79,29 @@ export default function StayBookingPage({ onStart, busy = false }) {
   }, [lodgingId, checkIn, checkOut, guests, nights, refresh]);
 
   function changeCondition(setter, value) {
+    setReservationOpen(false);
     setRoomId(null);
     setRooms([]);
     setNotice('');
     setter(value);
+  }
+
+  function openReservation(selectedRoomId) {
+    if (isOwner) {
+      setOwnerNotice(true);
+      return;
+    }
+    setRoomId(selectedRoomId);
+    setNotice('');
+    setReservationOpen(true);
+  }
+
+  function reloadRoomsAfterConflict() {
+    setReservationOpen(false);
+    setRoomId(null);
+    setRooms([]);
+    setNotice('객실 재고 또는 요금이 변경되었습니다. 다시 선택해 주세요.');
+    setRefresh(value => value + 1);
   }
 
   function selectCoursePlace(place) {
@@ -103,40 +114,12 @@ export default function StayBookingPage({ onStart, busy = false }) {
     setStartingCourse(true);
     setCourseError('');
     try {
-      await onStart(courseMessage, stay.regionId ?? null, stay.lodgingId);
+      await onStart(courseMessage);
     } catch {
       setCourseError('대화를 시작하지 못했어요. 잠시 후 다시 시도해 주세요.');
     } finally {
       courseInFlight.current = false;
       setStartingCourse(false);
-    }
-  }
-
-  async function submit(event) {
-    event.preventDefault();
-    if (isOwner) { setOwnerNotice(true); return; }
-    if (!room || (courseId && !course) || !bookerEmail || (!sameAsBooker && !visitorName.trim()) || saving) return;
-    const form = new FormData(event.currentTarget);
-    setSaving(true);
-    setNotice('');
-    try {
-      const reservation = await createReservation({
-        roomId: room.roomId, checkIn, checkOut, guestCount: guests,
-        visitorName: sameAsBooker ? null : visitorName.trim(),
-        requestMemo: form.get('requestMemo'), agreedToPolicy: form.has('agreedToPolicy'),
-        expectedTotalPrice: room.totalPrice,
-        ...(course ? { courseId: course.id } : {}),
-      });
-      window.location.hash = '/payments/' + reservation.reservationId;
-    } catch (error) {
-      setNotice(error.status === 409 ? '객실 재고 또는 요금이 변경되었습니다. 다시 선택해 주세요.' : error.message);
-      if (error.status === 409) {
-        setRoomId(null);
-        setRooms([]);
-        setRefresh((value) => value + 1);
-      }
-    } finally {
-      setSaving(false);
     }
   }
 
@@ -146,7 +129,7 @@ export default function StayBookingPage({ onStart, busy = false }) {
       <main className="booking-main">
         <p><a href={backToSearch}>← 숙소 검색</a></p>
         {!lodgingId && <p>숙소 검색에서 예약할 숙소를 선택해 주세요.</p>}
-        {notice && <p className="booking-notice" role="alert">{notice}</p>}
+        {!stay && notice && <p className="booking-notice" role="alert">{notice}</p>}
         {stayCourseLoading && <p className="booking-notice" role="status">{sourceLabel} 정보를 불러오고 있어요.</p>}
         {stayCourseError && <p className="booking-notice" role="alert">{stayCourseError} <button type="button" onClick={retryStayCourse}>다시 시도</button></p>}
         {course && <p>{sourceLabel} <strong>{course.title}</strong>에 숙소를 선택하고 있어요.</p>}
@@ -167,34 +150,29 @@ export default function StayBookingPage({ onStart, busy = false }) {
           </header>
           <StayPhotoGallery title={stay.name} stayId={stay.lodgingId} cover={photos.cover} photos={photos.photos}
             photoStatus={tourGallery?.status || 'loading'} />
-          <div className="booking-stay-info">
-            <StayOverview stay={stay} />
-            <StayLocation stay={stay} courseRoute={courseId ? courseRoute : null} selectedPlaceId={selectedPlaceId}
-              onCoursePlaceSelect={course ? selectCoursePlace : undefined} />
-          </div>
           <div className="booking-layout">
-            <section className="booking-section">
+            <section className="booking-section booking-rooms">
               <h2>객실 선택</h2>
               <div className="booking-date-grid">
-                <label>체크인<input type="date" value={checkIn} disabled={saving} onChange={(event) => changeCondition(setCheckIn, event.target.value)} /></label>
-                <label>체크아웃<input type="date" value={checkOut} min={checkIn} disabled={saving} onChange={(event) => changeCondition(setCheckOut, event.target.value)} /></label>
+                <label>체크인<input type="date" value={checkIn} onChange={(event) => changeCondition(setCheckIn, event.target.value)} /></label>
+                <label>체크아웃<input type="date" value={checkOut} min={checkIn} onChange={(event) => changeCondition(setCheckOut, event.target.value)} /></label>
               </div>
-              <label className="booking-form-field">인원<input type="number" min="1" max="18" value={guests} disabled={saving} onChange={(event) => changeCondition(setGuests, Number(event.target.value))} /></label>
+              <label className="booking-form-field">인원<input type="number" min="1" max="18" value={guests} onChange={(event) => changeCondition(setGuests, Number(event.target.value))} /></label>
+              {notice && <p className="booking-notice" role="alert">{notice}</p>}
               {loadingRooms && <p role="status">객실을 조회하고 있습니다.</p>}
               {!loadingRooms && !nights && <p>체크인보다 늦은 체크아웃 날짜를 선택해 주세요.</p>}
               {!loadingRooms && nights > 0 && !notice && !rooms.some((item) => item.available !== false) && <p>선택한 조건에 예약할 수 있는 객실이 없습니다.</p>}
               <div className="booking-room-list">
                 {rooms.map((item, index) => (
-                  <article key={item.roomId} className={'booking-room' + (roomId === item.roomId ? ' is-selected' : '') + (item.available === false ? ' is-sold-out' : '')}>
+                  <article key={item.roomId} className={'booking-room' + (reservationOpen && roomId === item.roomId ? ' is-selected' : '') + (item.available === false ? ' is-sold-out' : '')}>
                     <StayPhotoGallery title={item.name} photos={photos.roomGalleries[index].photos} room />
                     <div className="booking-room__body">
                       <h3>{item.name}</h3>
                       <p>최대 {item.maxCapacity}명 · {item.available === false ? '객실 없음' : `잔여 ${item.remaining}실`}</p>
                       <div className="booking-room__bottom">
                         <strong>{item.available === false ? '객실 없음' : `${nights}박 ${formatWon(item.totalPrice)}`}</strong>
-                        {/* 피드백: 재고가 없으면 「객실 없음」으로 표시하고 선택을 막는다 */}
-                        <button type="button" disabled={saving || item.available === false} onClick={() => { setRoomId(item.roomId); setNotice(''); }}>
-                          {item.available === false ? '객실 없음' : roomId === item.roomId ? '선택됨' : '객실 선택'}
+                        <button type="button" aria-haspopup="dialog" disabled={item.available === false} onClick={() => openReservation(item.roomId)}>
+                          {item.available === false ? '객실 없음' : '객실 예약'}
                         </button>
                       </div>
                     </div>
@@ -202,38 +180,18 @@ export default function StayBookingPage({ onStart, busy = false }) {
                 ))}
               </div>
             </section>
-            <aside className="booking-sidebar">
-              <form onSubmit={submit}>
-                <h2>예약 정보</h2>
-                {room && <div className="booking-price-lines">
-                  {room.nights.map((night) => <div key={night.date}><span>{night.date}</span><strong>{formatWon(night.price)}</strong></div>)}
-                  <div className="is-total"><span>총 결제 금액</span><strong>{formatWon(room.totalPrice)}</strong></div>
-                </div>}
-                <label className="booking-form-field">예약자 이름<input value={bookerName} disabled /></label>
-                <label className="booking-form-field">연락처 (이메일)<input type="email" value={bookerEmail} disabled /></label>
-                {member && !bookerEmail && <p className="booking-contact-note">예약하려면 <a href="#/my-profile">내 정보</a>에 이메일을 등록해 주세요.</p>}
-                <label className="booking-agreement booking-same-visitor">
-                  <input type="checkbox" checked={sameAsBooker} disabled={!member || saving} onChange={(event) => {
-                    setSameAsBooker(event.target.checked);
-                    setVisitorName('');
-                  }} />예약자와 동일
-                </label>
-                <label className="booking-form-field">방문자 이름<input name="visitorName" maxLength={50} autoComplete="off"
-                  required={!sameAsBooker} value={sameAsBooker ? bookerName : visitorName}
-                  disabled={!member || sameAsBooker || saving} onChange={(event) => setVisitorName(event.target.value)} /></label>
-                <label className="booking-form-field">요청사항<textarea name="requestMemo" rows="3" maxLength="500" /></label>
-                <label className="booking-agreement"><input name="agreedToPolicy" type="checkbox" required />예약자와 방문자 정보가 숙소에 전달되며, 10분 이내에 테스트 결제를 진행해야 함을 확인했습니다.</label>
-                {isOwner ? <button className="booking-pay-button" type="button" onClick={() => setOwnerNotice(true)}>예약하고 결제하기</button> : member
-                  ? <button className="booking-pay-button" disabled={!room || !bookerEmail || saving || Boolean(courseId && !course)} type="submit">{saving ? '예약 중…' : '예약하고 결제하기'}</button>
-                  : <a className="booking-pay-button is-link" href="#/login">로그인하고 예약하기</a>}
-              </form>
-            </aside>
+            <StayOverview stay={stay} />
           </div>
+          <StayLocation stay={stay} courseRoute={courseId ? courseRoute : null} selectedPlaceId={selectedPlaceId}
+            onCoursePlaceSelect={course ? selectCoursePlace : undefined} />
           {course && courseRoute.days.some(day => day.places.length) && <section className="booking-section booking-course-itinerary itinerary-map" aria-labelledby="booking-itinerary-title">
             <h2 id="booking-itinerary-title">여행 일정</h2>
             <ItineraryPlaceList days={courseRoute.days} selectedId={selectedPlaceId} onSelect={selectCoursePlace}
               loadDetails={myPageApi.placeDetails} loadPhotos={myPageApi.placeTourPhotos} searchRegion={course.region} />
           </section>}
+          {room && !isOwner && <StayReservationDialog key={`${room.roomId}-${member?.memberId ?? 'guest'}`} open={reservationOpen} room={room}
+            member={member} checkIn={checkIn} checkOut={checkOut} guests={guests} courseId={course?.id} waitingForCourse={Boolean(courseId && !course)}
+            onClose={() => setReservationOpen(false)} onAvailabilityChanged={reloadRoomsAfterConflict} />}
         </>}
       </main>
     </div>

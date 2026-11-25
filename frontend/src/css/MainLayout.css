@@ -6,7 +6,7 @@ body:has(.main-page.has-pastel-background),
 
 .has-pastel-background :is(
   .stay-search-bar, .stay-filter, .stay-result-card, .stay-results__empty,
-  .booking-section, .booking-sidebar form, .booking-room,
+  .booking-section, .booking-room,
   .human-courses .panel, .human-courses .course-card-body,
   .mypage:not(.mp-profile-settings) .card, .trip-day, .travel-style-panel
 ) {

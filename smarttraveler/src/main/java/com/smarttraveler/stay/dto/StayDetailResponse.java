@@ -8,6 +8,7 @@ public record StayDetailResponse(
         Long lodgingId,
         Long regionId,
         String regionName,
+        String sidoName,
         String name,
         String address,
         String lodgingType,

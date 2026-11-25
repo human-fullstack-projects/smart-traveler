@@ -120,6 +120,11 @@ export const stays = [
   },
 ];
 
+export function getStayCourseMessage(sidoName, name) {
+  const stayName = name?.trim();
+  return sidoName && stayName ? `${sidoName} ${stayName}` : '';
+}
+
 export function formatWon(value) {
   return `${new Intl.NumberFormat('ko-KR').format(value)}원`;
 }

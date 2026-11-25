@@ -210,7 +210,7 @@ export default function useAiChat({ ownerKey = 'guest', ready = true, authRevisi
       ? { ...message, recommendation: { ...message.recommendation, declined: true } } : message));
   }
 
-  async function startChat(message, regionId = null, lodgingId = null) {
+  async function startChat(message, regionId) {
     if (!ready || loadedScope !== scope) return;
     const version = generation.current;
     setBusy(true);
@@ -220,7 +220,7 @@ export default function useAiChat({ ownerKey = 'guest', ready = true, authRevisi
       if (version !== generation.current) return;
       let chat;
       try {
-        chat = await chatApi.create(message, regionId, lodgingId);
+        chat = await chatApi.create(message, regionId);
       } catch (error) {
         if (error?.code === 'GUEST_AI_LIMIT') { setGuestLimitReached(true); return; }
         throw error;
