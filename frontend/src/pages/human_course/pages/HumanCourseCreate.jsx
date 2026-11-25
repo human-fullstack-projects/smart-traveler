@@ -1,7 +1,5 @@
 ﻿import { useEffect, useState } from 'react';
-import CourseForm from '../components/CourseForm';
-import CourseMap from '../components/CourseMap';
-import CoursePlan from '../components/CoursePlan';
+import RecommendationEditor from '../components/RecommendationEditor';
 import PageHeading from '../components/PageHeading';
 import { finalCourse, creationError } from '../data/courseState';
 import { clearRecommendationDraft, readRecommendationDraft, saveRecommendationDraft } from '../data/recommendationDraft';
@@ -45,38 +43,21 @@ export default function HumanCourseCreate({ reservations = [], courses = [], exe
   }
   return result;
  }
- const itineraryMap = final?.plan?.length > 0
-  ? <CourseMap key={selectedId} region={selected.region} plan={final.plan} preview allDaysLabel="전체일정" />
-  : null;
- const renderItinerary = (showMap = false) => <>
-  {showMap && itineraryMap && <div className="preview-itinerary-map">{itineraryMap}</div>}
-  <h3 className="itinerary-title">여행일정</h3>
-  {selected && <p>{[selected.region, selected.dates].filter(Boolean).join(' · ')}</p>}
-  <CoursePlan key={selectedId} plan={final?.plan} showPhotos />
- </>;
- return <div className="human-courses human-course-create"><div className="page">
+ return <div className="human-courses human-course-create human-course-editor"><div className="page">
   <PageHeading kicker="My Trips Post" title="내 여행 추천하기" description="여행 일정과 숙소를 확인하고 나의 여행 후기를 공유하세요."><a className="button" href={back}>← 목록으로</a></PageHeading>
   {notice&&<p className="status" role="alert">{notice}</p>}
-  <div className="recommendation-layout">
-   <section className="panel recommendation-trip-select"><h2>지난 여행 선택</h2>
+  <RecommendationEditor trip={selected} plan={final?.plan}
+   tripSelection={<section className="panel recommendation-trip-select"><h2>지난 여행 선택</h2>
     <label>후기를 작성할 여행<select value={selected ? selectedId : ''} onChange={e=>{setSelectedId(e.target.value);setNotice('');setDraftNotice('');}}>
      <option value="">지난 여행을 선택해주세요</option>
      {pastTrips.map(trip => <option key={trip.id} value={trip.id}>{trip.region} · {trip.name} · {trip.dates}</option>)}
     </select></label>
     {error&&<p role="alert">{error}</p>}
-   </section>
-   <div className="recommendation-itinerary">
-    <section className="panel recommendation-map"><h2>여행 지도</h2>
-     {itineraryMap || <p>{selected ? '표시할 여행지가 없습니다.' : '지난 여행을 선택하면 여행지 위치가 표시됩니다.'}</p>}
-    </section>
-    <section className="panel">{renderItinerary()}</section>
-   </div>
-   <section className="panel recommendation-review"><h2>후기 작성</h2>
-    <CourseForm key={`${member?.memberId ?? 'guest'}-${selected?.id ?? 'unselected'}`} course={draft ?? {title:selected?`${selected.region} 여행 추천`:''}}
-     disabled={!selected||!!error||!final?.plan?.length} onSubmit={submit} onSaveDraft={serverMode && member?.memberId && selected ? saveDraft : undefined}
-     cancelHref={back} serverMode={serverMode} previewContext={renderItinerary(true)}/>
-    {draftNotice && <p className="status" role="status">{draftNotice}</p>}
-   </section>
-  </div>
+   </section>}
+   formKey={`${member?.memberId ?? 'guest'}-${selected?.id ?? 'unselected'}`}
+   formProps={{ course: draft ?? { title: selected ? `${selected.region} 여행 추천` : '' },
+    disabled: !selected || !!error || !final?.plan?.length, onSubmit: submit,
+    onSaveDraft: serverMode && member?.memberId && selected ? saveDraft : undefined, cancelHref: back, serverMode }}
+   reviewNotice={draftNotice && <p className="status" role="status">{draftNotice}</p>} />
  </div></div>;
 }

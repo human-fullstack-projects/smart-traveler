@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import KakaoMap from './KakaoMap';
 import MapFallback from './MapFallback';
 import MapPlaceCards from './MapPlaceCards';
+import ItineraryPlaceList from './ItineraryPlaceList';
 import { loadKakaoMaps } from './loadKakaoMaps';
 import { hasValidCoordinates, resolveKakaoPlace } from './resolveKakaoPlace';
 import './itinerary-map-panel.css';
@@ -112,11 +113,8 @@ export default function ItineraryMapPanel({ days = EMPTY_DAYS, center, searchReg
         onMarkerClick={selectPlace} onStatusChange={setMapStatus} />}
     </div>
     {sourceNote && <p className="itinerary-map__source">{sourceNote}</p>}
-    {showPlaceList && <div className="itinerary-map__day-list">{visibleDays.map((day) => <section className="itinerary-map__day" key={day.day}>
-      <h3>{day.day}일차</h3>
-      {day.places.length ? <MapPlaceCards places={day.places} selectedId={selectedId} onSelect={selectPlace}
-        loadDetails={loadPlaceDetails} loadPhotos={loadPlacePhotos} renderDetails={renderPlaceDetails} searchRegion={searchRegion} /> : <p>표시할 장소가 없습니다.</p>}
-    </section>)}</div>}
+    {showPlaceList && <ItineraryPlaceList days={visibleDays} selectedId={selectedId} onSelect={selectPlace}
+      loadDetails={loadPlaceDetails} loadPhotos={loadPlacePhotos} renderDetails={renderPlaceDetails} searchRegion={searchRegion} />}
     {visibleExtras.length > 0 && <section className="itinerary-map__day itinerary-map__extras">
       <h3>{extraTitle}</h3><MapPlaceCards places={visibleExtras} selectedId={selectedId} onSelect={selectPlace}
         renderDetails={renderExtraPlaceDetails} />

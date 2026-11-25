@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../../../contexts/AuthContext.jsx';
 import { loadKakaoMaps } from '../../../components/map/loadKakaoMaps.js';
-import { hasValidCoordinates, resolveKakaoPlace } from '../../../components/map/resolveKakaoPlace.js';
+import { coord2Address, hasValidCoordinates, resolveKakaoPlace } from '../../../components/map/resolveKakaoPlace.js';
 import { myPageApi } from '../../mypage/api/myPageApi.js';
 import { mapDays } from '../../mypage/data/mapDays.js';
 
@@ -11,7 +11,7 @@ export function readStayCourseId(params) {
   return courseId || (/^[1-9]\d*$/.test(legacyId) ? `course-${legacyId}` : null);
 }
 
-export default function useStayCourse(courseId) {
+export default function useStayCourse(courseId, { includePlaceAddresses = false } = {}) {
   const { member, authChecked, authCheckFailed, retryAuth } = useAuth();
   const memberId = member?.memberId;
   const [result, setResult] = useState(null);
@@ -34,38 +34,49 @@ export default function useStayCourse(courseId) {
     return () => { active = false; };
   }, [courseId, memberId, authChecked, authCheckFailed, attempt, sourceLabel]);
 
-  const route = useCourseRoute(course);
+  const route = useCourseRoute(course, includePlaceAddresses);
   const loading = Boolean(courseId && !authCheckFailed && (!authChecked || (memberId && !current)));
   const error = !courseId || loading ? '' : current?.error || (authCheckFailed ? '로그인 상태를 확인하지 못했습니다.'
     : !memberId ? `${sourceLabel}을 연결하려면 로그인해 주세요.` : '');
   return { course, route, loading, error, sourceLabel, retry: authCheckFailed ? retryAuth : () => setAttempt(value => value + 1) };
 }
 
-function useCourseRoute(course) {
+function useCourseRoute(course, includePlaceAddresses) {
   const days = useMemo(() => mapDays(course?.days ?? []), [course]);
   const [resolved, setResolved] = useState(null);
 
   useEffect(() => {
-    const missing = days.flatMap(day => day.places).filter(place => !hasValidCoordinates(place));
+    const missing = days.flatMap(day => day.places)
+      .filter(place => !hasValidCoordinates(place) || (includePlaceAddresses && !place.address));
     if (!missing.length) return;
     let active = true;
-    loadKakaoMaps().then(maps => Promise.allSettled(missing.map(place => resolveKakaoPlace(maps, place, course.region))))
+    loadKakaoMaps().then(maps => Promise.allSettled(missing.map(async place => hasValidCoordinates(place)
+      ? { ...place, address: await coord2Address(maps, place) }
+      : resolveKakaoPlace(maps, place, course.region))))
+      .catch(() => [])
       .then(results => {
         if (!active) return;
-        const points = results.filter(result => result.status === 'fulfilled' && hasValidCoordinates(result.value))
-          .map(result => [result.value.id, result.value]);
-        setResolved({ days, byId: new Map(points) });
-      }).catch(() => {});
+        const byId = new Map(missing.map((place, index) => {
+          const result = results[index];
+          const point = result?.status === 'fulfilled' ? result.value : place;
+          return [place.id, { ...point, locationStatus: hasValidCoordinates(point) ? 'ready' : 'unresolved',
+            addressStatus: point.address ? 'provided' : 'unavailable' }];
+        }));
+        setResolved({ days, byId });
+      });
     return () => { active = false; };
-  }, [course, days]);
+  }, [course, days, includePlaceAddresses]);
 
   return useMemo(() => {
     const byId = resolved?.days === days ? resolved.byId : null;
-    const paths = days.map(day => ({
-      dashed: true,
-      points: day.places.map((place, index) => ({ ...(byId?.get(place.id) || place), markerLabel: `${day.day}-${index + 1}` }))
-        .filter(hasValidCoordinates),
+    const numberedDays = days.map(day => ({
+      ...day,
+      places: day.places.map((place, index) => {
+        const label = `${day.day}-${index + 1}`;
+        return { ...(byId?.get(place.id) || place), markerLabel: label, badgeLabel: label };
+      }),
     }));
-    return { paths, places: paths.flatMap(path => path.points) };
+    const paths = numberedDays.map(day => ({ dashed: true, points: day.places.filter(hasValidCoordinates) }));
+    return { days: numberedDays, paths, places: paths.flatMap(path => path.points) };
   }, [days, resolved]);
 }

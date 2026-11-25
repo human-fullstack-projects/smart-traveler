@@ -252,6 +252,12 @@ button.booking-room-photo { cursor: zoom-in; }
 
 .booking-stay-map > * { position: absolute; inset: 0; }
 
+.stay-ui .booking-stay-map .kakao-map-marker--course { cursor: pointer; }
+.booking-stay-map .kakao-map-marker.is-selected { outline: 3px solid #f7bb45; outline-offset: 2px; transform: scale(1.1); }
+
+.booking-course-itinerary { margin-top: 28px; }
+.booking-course-itinerary > h2 { margin: 0; }
+
 .booking-stay-map > p {
   display: grid;
   place-items: center;

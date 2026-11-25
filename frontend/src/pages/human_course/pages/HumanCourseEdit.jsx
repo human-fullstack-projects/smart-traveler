@@ -1,28 +1,32 @@
-import { useEffect, useState } from 'react';
-import CourseForm from '../components/CourseForm';
+import { useEffect } from 'react';
 import '../../../css/human-course.css';
-import CoursePlan from '../components/CoursePlan';
 import PageHeading from '../components/PageHeading';
+import RecommendationEditor from '../components/RecommendationEditor';
 import { previewCourses } from '../data/previewData';
 
 export default function HumanCourseEdit({ courses = previewCourses, courseId = 2, execute, serverMode, loadCourse, from, reservations = [] }) {
   const back = ['reservations', 'my-posts'].includes(from) ? `#/${from}` : '#/human-courses';
-  const [notice, setNotice] = useState('');
   useEffect(() => { if (serverMode) loadCourse?.(courseId); }, [serverMode, courseId]);
   async function submit(fields) {
     const result = await execute?.({ type: 'edit', id: courseId, fields });
-    if (result?.error) setNotice(result.error);
-    else if (result?.id) window.location.hash = from === 'my-posts' ? `/my-posts/${result.id}` : `/human-courses/${result.id}`;
+    if (result?.id && !result.error) window.location.hash = from === 'my-posts' ? `/my-posts/${result.id}` : `/human-courses/${result.id}`;
     return result;
   }
   const course = courses.find((item) => String(item.id) === String(courseId));
   const reservation = reservations.find(item => String(item.id) === String(course?.reservationId));
-  return <div className="human-courses"><div className="page">
-    <PageHeading breadcrumb="작성 코스 수정" title="저장된 여행 수정" description="제목, 여행 후기, 첨부 사진 등 게시글 정보를 수정할 수 있습니다."><a className="button" href={back}>← {course ? '상세로 돌아가기' : '목록으로'}</a></PageHeading>
-    {notice && <p className="status" role="status">{notice}</p>}
-    {!course?.mine ? <section className="panel"><h2>수정할 수 없습니다</h2><p>{course ? '다른 사람의 코스는 수정할 수 없습니다.' : '해당 코스를 찾지 못했습니다.'}</p></section> : <div className="layout wide-left">
-      <section className="panel"><div className="panel-heading"><h2>기존 코스 정보 수정</h2><span className="badge">내 게시글</span></div><p className="note">게시글 ID: {course.id} | 연결 예약: {course.reservationId || '없음(샘플)'} | 최종 코스 v{course.courseVersion}</p>{course.visibility === 'BLINDED' && <p className="note">블라인드 상태: 수정해도 자동 공개되지 않습니다.</p>}<CourseForm key={course.id} course={course} mode="edit" onSubmit={submit} cancelHref={back} serverMode={serverMode} /></section>
-      <aside><section className="panel"><div className="panel-heading"><h2>연결된 여행 일정</h2><span className="badge badge-neutral">수정 불가</span></div><p className="form-help">게시글을 수정해도 여행 일정과 연결 예약 정보는 그대로 유지됩니다.</p><p><strong>{reservation?.name}</strong> {reservation?.dates}</p><CoursePlan plan={course.plan} version={course.courseVersion} /></section><section className="panel sidebar-hint"><h3>수정 흐름</h3><ol><li>기존 글을 입력란에 표시</li><li>제목 / 후기 / 사진명 변경</li><li>기존 글 ID 그대로 유지</li><li>상세 페이지로 돌아가 확인</li></ol></section></aside>
-    </div>}
+  const trip = { region: course?.region, dates: course?.travelDates || reservation?.dates };
+  const tripLabel = [trip.region, course?.stay?.name || reservation?.name, trip.dates].filter(Boolean).join(' · ');
+
+  return <div className="human-courses human-course-editor"><div className="page">
+    <PageHeading kicker="My Trips Post" title="여행 추천 수정하기" description="여행 후기를 수정하고 변경 내용을 저장하세요."><a className="button" href={back}>← 목록으로</a></PageHeading>
+    {!course?.mine ? <section className="panel"><h2>수정할 수 없습니다</h2><p>{course ? '다른 사람의 글은 수정할 수 없습니다.' : '해당 글을 찾지 못했습니다.'}</p></section> : <>
+      {course.visibility === 'BLINDED' && <p className="note">수정 후에도 숨김 상태가 유지됩니다.</p>}
+      <RecommendationEditor trip={trip} plan={course.plan}
+        tripSelection={<section className="panel recommendation-trip-select"><h2>연결된 여행</h2>
+          <label>후기를 수정할 여행<select disabled><option>{tripLabel || '연결된 여행 정보 없음'}</option></select></label>
+        </section>}
+        formKey={`${Boolean(serverMode)}-${course.id}`}
+        formProps={{ course, mode: 'edit', onSubmit: submit, cancelHref: back, serverMode }} />
+    </>}
   </div></div>;
 }
