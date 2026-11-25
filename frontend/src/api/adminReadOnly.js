@@ -8,6 +8,7 @@ export function isAdminViewer() { return adminViewer; }
 
 const BLOCKED = [
   ['POST', /^\/api\/reservations$/],
+  ['POST', /^\/api\/reservations\/[^/]+\/cancel$/],
   ['POST', /^\/api\/payments\/reservations\/[^/]+\/(prepare|sync)$/],
   ['POST', /^\/api\/payments\/confirm$/],
   ['POST', /^\/api\/human-courses\/reservations\/[^/]+$/],
