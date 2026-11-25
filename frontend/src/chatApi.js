@@ -1,3 +1,4 @@
+import { blockAdminAction } from './api/adminReadOnly';
 // 서버 세션의 CSRF 토큰을 함께 보내고 인증 쿠키는 브라우저가 관리한다.
 let guestCourseStorage = Promise.resolve();
 // 창을 닫을 때는 토큰을 새로 받을 시간이 없어서 마지막으로 받은 토큰을 쓴다.
@@ -11,6 +12,7 @@ async function csrf() {
   return lastToken;
 }
 async function request(path, options = {}) {
+  blockAdminAction(`/api/chat${path}`, options.method);
   const headers = { ...options.headers };
   if (options.method && options.method !== 'GET') {
     const token = await csrf();

@@ -128,3 +128,15 @@ header.mp-topbar{background:#fff;flex-shrink:0}
 }
 .main-page.is-home .mp-body,.main-page.is-home .mp-content{min-height:0}
 .main-page.is-home .mp-main{max-width:none;padding:0;display:flex;min-height:0}
+
+/* 관리자 계정 둘러보기 안내 (관리자만 보임) */
+.admin-readonly-banner {
+  margin: 0;
+  padding: 10px 24px;
+  background: #eef2ff;
+  border-bottom: 1px solid #d6dcf5;
+  color: #1e2a5a;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+}
