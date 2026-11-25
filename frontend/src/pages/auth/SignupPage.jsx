@@ -56,7 +56,7 @@ function Field({ name, label, form, errors, onChange, type = 'text', placeholder
 }
 
 export default function SignupPage({ onLogin, guestCourseCount = 0 }) {
-  const [role, setRole] = useState('USER');
+  const [role, setRole] = useState(null);
   const [form, setForm] = useState(EMPTY);
   const [errors, setErrors] = useState({});
   const [terms, setTerms] = useState([]);
@@ -70,6 +70,7 @@ export default function SignupPage({ onLogin, guestCourseCount = 0 }) {
   const [verified, setVerified] = useState(null); // 시연용 본인인증 결과(가입 때 이름·번호를 서버에 저장)
   const [identityOpen, setIdentityOpen] = useState(false);
   const inFlight = useRef(false);
+  const signupTitle = useRef(null);
   const closeTerm = useCallback(() => setOpenTerm(null), []);
   const agreeTerm = useCallback(() => {
     if (openTerm) setAgreed((current) => ({ ...current, [openTerm.termsId]: true }));
@@ -78,13 +79,25 @@ export default function SignupPage({ onLogin, guestCourseCount = 0 }) {
 
   useEffect(() => { getTerms().then((list) => { setTerms(list || []); setTermsState((list || []).length ? 'ok' : 'empty'); }).catch(() => setTermsState('error')); }, []);
 
+  useEffect(() => {
+    if (role) signupTitle.current?.focus();
+  }, [role]);
+
+  function chooseRole(value) {
+    setRole(value);
+    setErrors({});
+    setNotice('');
+    setAgreed({});
+    setVerified(null);
+  }
+
   const onChange = (name, value) => { setForm((f) => ({ ...f, [name]: value })); setErrors((e) => ({ ...e, [name]: '' })); setNotice(''); };
   const allAgreed = terms.length > 0 && terms.every((t) => agreed[t.termsId]);
   const toggleAll = () => { const v = !allAgreed; setAgreed(Object.fromEntries(terms.map((t) => [t.termsId, v]))); };
 
   async function submit(event) {
     event.preventDefault();
-    if (inFlight.current) return;
+    if (!role || inFlight.current) return;
     const e = check(role, form);
     setErrors(e);
     if (Object.keys(e).length) { setNotice('입력한 내용을 확인해주세요.'); return; }
@@ -130,6 +143,30 @@ export default function SignupPage({ onLogin, guestCourseCount = 0 }) {
     </div></section></div>;
   }
 
+  if (!role) {
+    return <div className="st-page auth-page">
+      <section className="auth-wrap wide" aria-labelledby="signup-choice-title">
+        <a className="auth-back" href="#/login">← 로그인으로</a>
+        <div className="st-panel">
+          <div className="auth-head">
+            <p className="auth-kicker">JOIN AI TRIP</p>
+            <h1 id="signup-choice-title" className="st-h2">회원가입</h1>
+            <p>어떤 회원으로 함께할까요?</p>
+          </div>
+          <div className="auth-roles auth-signup-choices" role="group" aria-label="가입 유형 선택">
+            <button type="button" className="auth-role" onClick={() => chooseRole('USER')}>
+              <strong>일반 사용자</strong><span>AI로 여행을 계획하고 숙소를 예약해요</span>
+            </button>
+            <button type="button" className="auth-role" onClick={() => chooseRole('OWNER')}>
+              <strong>숙박업주</strong><span>숙소와 객실을 등록하고 예약을 관리해요</span>
+            </button>
+          </div>
+          <p className="auth-foot">이미 회원이신가요? <a href="#/login">로그인</a></p>
+        </div>
+      </section>
+    </div>;
+  }
+
   const p = { form, errors, onChange };
   return (
     <div className="st-page auth-page">
@@ -138,18 +175,13 @@ export default function SignupPage({ onLogin, guestCourseCount = 0 }) {
         <div className="st-panel">
           <div className="auth-head">
             <p className="auth-kicker">JOIN AI TRIP</p>
-            <h1 id="signup-title" className="st-h2">회원가입</h1>
-            <p>가입 유형을 고르고 정보를 입력해주세요.</p>
+            <h1 ref={signupTitle} tabIndex={-1} id="signup-title" className="st-h2">{role === 'OWNER' ? '숙박업주 회원가입' : '일반 사용자 회원가입'}</h1>
+            <p>{role === 'OWNER' ? '사업자 정보를 입력해주세요. 가입 후 관리자 승인이 필요해요.' : '정보를 입력하고 나만의 여행을 시작해보세요.'}</p>
             {guestCourseCount > 0 && <p className="st-note">보관한 여행 코스 {guestCourseCount}건이 있습니다. 여행자 가입 완료 후 자동 로그인하여 계정에 연결하고, 가입 전에 보던 페이지로 돌아갑니다. 숙박업주는 가입 후 로그인하면 연결됩니다.</p>}
           </div>
+          <button type="button" className="auth-change-role" disabled={busy} onClick={() => chooseRole(null)}>← 가입 유형 다시 선택</button>
           <form className="auth-form" onSubmit={submit} noValidate aria-busy={busy}>
             <p className="auth-required-legend"><span className="auth-required" aria-hidden="true">*</span> 표시는 꼭 입력해야 해요</p>
-            <div className="auth-roles" role="group" aria-label="가입 유형">
-              <button type="button" className="auth-role" aria-pressed={role === 'USER'} onClick={() => setRole('USER')}>
-                <strong>여행자</strong><span>AI 코스 추천과 숙소 예약</span></button>
-              <button type="button" className="auth-role" aria-pressed={role === 'OWNER'} onClick={() => setRole('OWNER')}>
-                <strong>숙박업주</strong><span>내 숙소를 여행자에게 알리기 · 관리자 승인 필요</span></button>
-            </div>
             <p className="auth-section-title">기본 정보</p>
             <div className="auth-row">
               <Field {...p} name="loginId" label="아이디" placeholder="영문·숫자·밑줄 4~50자" autoComplete="username" />

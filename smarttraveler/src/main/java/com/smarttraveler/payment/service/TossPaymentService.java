@@ -183,9 +183,13 @@ public class TossPaymentService {
     }
 
     private RoomReservation ownedReservation(Long id, Authentication auth) {
+        var account = members.findByLoginId(auth.getName())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+        if ("OWNER".equals(account.getRoleCode())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "결제는 일반 사용자 계정으로 이용해주세요.");
+        }
         if (!lockReservation(id)) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        Long memberId = members.findByLoginId(auth.getName())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED)).getMemberId();
+        Long memberId = account.getMemberId();
         RoomReservation reservation = reservations.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "예약을 찾을 수 없습니다."));
         if (!memberId.equals(reservation.getMemberId())) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "예약을 찾을 수 없습니다.");

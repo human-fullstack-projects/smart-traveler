@@ -25,6 +25,25 @@ import org.springframework.web.server.ResponseStatusException;
 import tools.jackson.databind.ObjectMapper;
 
 class HumanCourseServiceTest {
+    @Test void ownerCannotPublishAReviewEvenWithAReservationId() {
+        var jdbc = mock(JdbcTemplate.class);
+        var members = mock(MemberRepository.class);
+        var auth = mock(Authentication.class);
+        var owner = new Member();
+        owner.setMemberId(7L);
+        owner.setRoleCode("OWNER");
+        owner.setStatus("ACTIVE");
+        when(auth.getName()).thenReturn("owner");
+        when(auth.isAuthenticated()).thenReturn(true);
+        when(members.findByLoginId("owner")).thenReturn(Optional.of(owner));
+        var service = new HumanCourseService(jdbc, mock(ObjectMapper.class), members,
+                mock(HumanCoursePhotoStore.class), mock(HumanManagementService.class));
+
+        var error = assertThrows(ResponseStatusException.class, () -> service.create(auth, 77L, null));
+
+        assertEquals(HttpStatus.FORBIDDEN, error.getStatusCode());
+        verifyNoInteractions(jdbc);
+    }
     @Test void copiedRouteKeepsVisitOrderAndCoordinatesWithoutItsOriginalLodging() {
         var beach = new MapPlace("1", 5L, "광안리", "부산 수영구", new BigDecimal("35.15"), new BigDecimal("129.12"), "course", List.of());
         var park = new MapPlace("2", 6L, "수변공원", null, null, null, "course", List.of());
@@ -49,7 +68,7 @@ class HumanCourseServiceTest {
         assertEquals(HttpStatus.NOT_FOUND, error.getStatusCode());
         verify(jdbc).queryForList(contains("p.status='VISIBLE' AND p.deleted_at IS NULL"), eq(3L));
     }
-    @Test void homeReviewsIncludesGuestsAndSortsLikesThenActiveComments() {
+    @Test void homeReviewsRequiresMainExposureAndSortsLikesThenActiveCommentsForGuests() {
         var jdbc = mock(JdbcTemplate.class);
         var service = new HumanCourseService(jdbc, mock(ObjectMapper.class), mock(MemberRepository.class),
             mock(HumanCoursePhotoStore.class), mock(HumanManagementService.class));
@@ -59,6 +78,8 @@ class HumanCourseServiceTest {
         String query = sql.getValue();
         assertTrue(query.contains("p.status = 'VISIBLE'"));
         assertTrue(query.contains("p.deleted_at IS NULL"));
+        assertTrue(query.contains("EXISTS ("));
+        assertTrue(query.contains("e.post_id = p.post_id AND e.scope = 'MAIN' AND e.region = ''"));
         assertTrue(query.contains("co.deleted_at IS NULL"));
         assertTrue(query.indexOf("human_course_like") < query.indexOf("human_course_comment"));
         assertTrue(query.contains("p.created_at DESC, p.post_id DESC"));

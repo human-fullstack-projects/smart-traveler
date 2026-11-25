@@ -35,6 +35,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -58,6 +59,37 @@ class ReservationServiceTest {
     private final ReservationService service = new ReservationService(reservations, members, rooms, stays,
             inventory, mock(JdbcTemplate.class), myPage, mapper);
     private final Authentication auth = mock(Authentication.class);
+
+    @Test
+    void ownerCannotCreateReservationOrHoldInventory() {
+        when(auth.getName()).thenReturn("owner");
+        var owner = new Member();
+        owner.setRoleCode("OWNER");
+        when(members.findByLoginId("owner")).thenReturn(Optional.of(owner));
+
+        var error = assertThrows(ResponseStatusException.class, () -> service.create(request(null, null), auth));
+
+        assertEquals(HttpStatus.FORBIDDEN, error.getStatusCode());
+        org.mockito.Mockito.verifyNoInteractions(reservations, inventory, stays, rooms);
+    }
+
+    @Test
+    void ownerCannotPreparePaymentEvenForAnExistingReservation() {
+        when(auth.getName()).thenReturn("owner");
+        var owner = new Member();
+        owner.setRoleCode("OWNER");
+        when(members.findByLoginId("owner")).thenReturn(Optional.of(owner));
+        var jdbc = mock(JdbcTemplate.class);
+        var payments = mock(PaymentRepository.class);
+        var gateway = mock(TossGateway.class);
+        var paymentService = new TossPaymentService(payments, reservations, members, jdbc, gateway,
+                mock(TossWebhookVerifier.class), mapper, "test_gck_local");
+
+        var error = assertThrows(ResponseStatusException.class, () -> paymentService.prepare(77L, auth));
+
+        assertEquals(HttpStatus.FORBIDDEN, error.getStatusCode());
+        org.mockito.Mockito.verifyNoInteractions(jdbc, payments, reservations, gateway);
+    }
 
     @ParameterizedTest
     @NullSource

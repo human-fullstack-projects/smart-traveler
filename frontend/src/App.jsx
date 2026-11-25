@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import OwnerActionNotice from './components/OwnerActionNotice.jsx';
 import HomePage, { Intro, PanelHeader } from './pages/home/HomePage';
 import LoginPage from './pages/auth/LoginPage';
 import SignupPage from './pages/auth/SignupPage';
@@ -196,7 +197,9 @@ export default function App() {
   const isChat = routePath === '/chat';
 
   let content;
-  if (MyPageScreen) {
+  if (authChecked && member?.roleCode === 'OWNER' && (paymentMatch || routePath === '/human-courses/create')) {
+    content = <OwnerActionNotice key={routePath} action={paymentMatch ? '예약·결제' : '후기 작성'} />;
+  } else if (MyPageScreen) {
     const access = routeAccess(routePath, { member, authChecked, authCheckFailed });
     const needsTravelData = !['/mypage', '/my-profile', '/my-travel-style'].includes(routePath);
     const blocked = access !== 'allowed' ? access : needsTravelData && ['login', 'denied', 'unavailable'].includes(myPageStore.status) ? myPageStore.status : null;
