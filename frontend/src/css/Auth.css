@@ -28,6 +28,11 @@
 .auth-role strong { font-size: 16px; }
 .auth-role span { color: var(--st-muted); font-size: 13px; }
 .auth-role[aria-pressed="true"] { border-color: var(--st-teal); color: var(--st-teal); }
+.auth-signup-choices .auth-role { padding: 24px; gap: 12px; border: 1px solid var(--st-line); border-radius: 16px; background: var(--st-paper, #fff); }
+.auth-signup-choices .auth-role:hover { border-color: var(--st-teal); color: var(--st-teal); }
+.auth-signup-choices .auth-role:focus-visible { outline: 2px solid var(--st-teal); outline-offset: 4px; }
+.auth-change-role { margin-bottom: 20px; padding: 8px 0; border: 0; background: transparent; color: var(--st-teal); font: inherit; cursor: pointer; }
+.auth-change-role:disabled { opacity: .6; cursor: default; }
 .auth-section-title { margin: 6px 0 -4px; color: var(--st-teal); font-weight: 700; font-size: 14px; }
 .auth-terms { display: grid; gap: 8px; padding: 14px 16px; border: 1px solid var(--st-line); border-radius: var(--st-radius-s); background: var(--st-surface); }
 .auth-terms label { display: flex; gap: 10px; align-items: center; font-size: 15px; cursor: pointer; }

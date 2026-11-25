@@ -3,7 +3,7 @@ import { settingsApi } from '../../pages/mypage/api/settingsApi';
 import useMemberResource from '../../pages/mypage/hooks/useMemberResource';
 import '../../css/MainLayout.css';
 
-const navigation = [
+const navigationItems = [
   { label: '여행 생성', href: '#/' },
   { label: '숙소 검색', href: '#/stays' },
   { label: '저장된 여행', href: '#/my-courses' },
@@ -18,6 +18,11 @@ const accountLinks = [
 ];
 
 export default function SiteHeader({ member, loggingOut, onLogout }) {
+  const navigation = navigationItems.map((item) =>
+    member?.roleCode === 'OWNER' && item.href === '#/mypage'
+      ? { label: '업주 대시보드', href: '#/owner' }
+      : item
+  );
   const [menuOpen, setMenuOpen] = useState(false);
   const account = useRef(null);
   const toggle = useRef(null);

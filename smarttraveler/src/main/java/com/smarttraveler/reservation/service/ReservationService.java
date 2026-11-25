@@ -42,6 +42,9 @@ public class ReservationService {
     @Transactional
     public ReservationResponse create(CreateReservationRequest request, Authentication auth) {
         Member member = member(auth);
+        if ("OWNER".equals(member.getRoleCode())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "예약은 일반 사용자 계정으로 이용해주세요.");
+        }
         String bookerName = member.getNickname() == null || member.getNickname().isBlank()
                 ? member.getLoginId() : member.getNickname().strip();
         if (member.getEmail() == null || member.getEmail().isBlank()) {

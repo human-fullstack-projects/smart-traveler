@@ -76,6 +76,10 @@ public class HumanCourseService {
             FROM human_course_post p
             WHERE p.status = 'VISIBLE'
               AND p.deleted_at IS NULL
+              AND EXISTS (
+                  SELECT 1 FROM admin_human_exposure e
+                  WHERE e.post_id = p.post_id AND e.scope = 'MAIN' AND e.region = ''
+              )
             ORDER BY (SELECT COUNT(*) FROM human_course_like l WHERE l.post_id = p.post_id) DESC,
                      (SELECT COUNT(*) FROM human_course_comment co
                       WHERE co.post_id = p.post_id AND co.deleted_at IS NULL) DESC,
@@ -294,6 +298,10 @@ public class HumanCourseService {
     @Transactional
     public IdResult create(Authentication auth, long reservationId, PostInput input) {
         long owner = member(auth);
+        var account = members.findByLoginId(auth.getName()).orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+        if ("OWNER".equals(account.getRoleCode())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "후기 작성은 일반 사용자 계정으로 이용해주세요.");
+        }
         validate(input);
         var rows = jdbc.queryForList("SELECT reservation_id FROM room_reservation WHERE reservation_id=? AND member_id=? FOR UPDATE", reservationId, owner);
         if (rows.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "예약을 찾을 수 없습니다.");

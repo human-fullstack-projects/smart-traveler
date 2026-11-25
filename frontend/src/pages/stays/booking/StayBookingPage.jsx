@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '../../../contexts/AuthContext.jsx';
+import OwnerActionNotice from '../../../components/OwnerActionNotice.jsx';
 import ItineraryPlaceList from '../../../components/map/ItineraryPlaceList.jsx';
 import { myPageApi } from '../../mypage/api/myPageApi.js';
 import { createReservation, getRooms, getStay, getStayTourPhotos } from '../shared/stayApi.js';
@@ -20,6 +21,8 @@ export default function StayBookingPage({ onStart, busy = false }) {
   const backToSearch = courseId ? `#/stays?courseId=${encodeURIComponent(courseId)}` : '#/stays';
   const defaults = getDefaultStayDates();
   const { member, authChecked, authCheckFailed } = useAuth();
+  const isOwner = member?.roleCode === 'OWNER';
+  const [ownerNotice, setOwnerNotice] = useState(false);
   const [checkIn, setCheckIn] = useState(query.get('checkIn') || defaults.checkIn);
   const [checkOut, setCheckOut] = useState(query.get('checkOut') || defaults.checkOut);
   const [guests, setGuests] = useState(Number(query.get('adults') || 2) + Number(query.get('children') || 0));
@@ -111,6 +114,7 @@ export default function StayBookingPage({ onStart, busy = false }) {
 
   async function submit(event) {
     event.preventDefault();
+    if (isOwner) { setOwnerNotice(true); return; }
     if (!room || (courseId && !course) || !bookerEmail || (!sameAsBooker && !visitorName.trim()) || saving) return;
     const form = new FormData(event.currentTarget);
     setSaving(true);
@@ -138,6 +142,7 @@ export default function StayBookingPage({ onStart, busy = false }) {
 
   return (
     <div className="stay-ui stay-booking-page">
+      {ownerNotice && isOwner && <OwnerActionNotice />}
       <main className="booking-main">
         <p><a href={backToSearch}>← 숙소 검색</a></p>
         {!lodgingId && <p>숙소 검색에서 예약할 숙소를 선택해 주세요.</p>}
@@ -218,7 +223,7 @@ export default function StayBookingPage({ onStart, busy = false }) {
                   disabled={!member || sameAsBooker || saving} onChange={(event) => setVisitorName(event.target.value)} /></label>
                 <label className="booking-form-field">요청사항<textarea name="requestMemo" rows="3" maxLength="500" /></label>
                 <label className="booking-agreement"><input name="agreedToPolicy" type="checkbox" required />예약자와 방문자 정보가 숙소에 전달되며, 10분 이내에 테스트 결제를 진행해야 함을 확인했습니다.</label>
-                {member
+                {isOwner ? <button className="booking-pay-button" type="button" onClick={() => setOwnerNotice(true)}>예약하고 결제하기</button> : member
                   ? <button className="booking-pay-button" disabled={!room || !bookerEmail || saving || Boolean(courseId && !course)} type="submit">{saving ? '예약 중…' : '예약하고 결제하기'}</button>
                   : <a className="booking-pay-button is-link" href="#/login">로그인하고 예약하기</a>}
               </form>

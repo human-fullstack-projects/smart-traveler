@@ -384,7 +384,7 @@ export default function MainPage({ onStart, busy = false, reviewKey }) {
       <header className="landing-hero">
         <p className="landing-eyebrow">계획은 짧게, 여행은 길게.</p>
         <h1>
-          <span className="hero-line1">다음 <span className="hero-accent">여행,</span><img className="hero-hotel" src="/images/hero/hotel_3d.png" alt="" /></span>
+          <span className="hero-line1">다음 <span className="hero-accent">여행,</span></span>
           <br />
           여기서 시작해요.
         </h1>
