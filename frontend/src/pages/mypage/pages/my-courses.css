@@ -44,6 +44,9 @@ html:has(.my-posts-list) { scrollbar-gutter: stable; }
 .reservation-stay-photo .tour-photo__message { margin: 0; color: #556474; }
 .mypage .reservation-cancel { border: 1px solid #b82e3c; border-radius: 9px; padding: 11px 20px; background: #c93645; color: #fff; font-weight: 700; cursor: pointer; }
 .mypage .reservation-cancel:not(:disabled):hover { background: #ab2533; }
+.mypage .reservation-cancel-dialog { width: min(440px, calc(100% - 32px)); border: 1px solid #e6e7eb; border-radius: 16px; padding: 24px; }
+.mypage .reservation-cancel-dialog::backdrop { background: #17213980; }
+.mypage .reservation-cancel-dialog .actions { justify-content: flex-end; }
 @media (max-width: 750px) { .reservation-detail-layout { grid-template-columns: 1fr; gap: 20px; } }
 .trip-detail-hero { position: relative; isolation: isolate; overflow: hidden; border-radius: 24px; min-height: 320px; display: flex; align-items: flex-end; padding: 34px; color: white; }
 .trip-detail-hero h1 { font-size: clamp(26px, 4vw, 40px); line-height: 1.35; margin: 14px 0 8px; }

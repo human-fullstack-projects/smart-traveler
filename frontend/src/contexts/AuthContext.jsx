@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { setAdminViewer } from '../api/adminReadOnly';
 import { getCurrentMember, logout as logoutRequest } from '../api/auth';
 import { chatApi } from '../chatApi';
 
@@ -96,6 +97,10 @@ export function AuthProvider({ children }) {
       setCourseTransfer({ memberId: null, status: 'idle' });
       chatApi.guestCourse().then(result => { if (current()) setGuestCourse(result.course); })
         .catch(() => { if (current()) setGuestCourse(null); });
+    } else if (member.roleCode === 'ADMIN') {
+      // 관리자 계정은 둘러보기만 해서 비회원 임시 코스를 가져오지 않는다.
+      setGuestCourse(null);
+      setCourseTransfer({ memberId: member.memberId, status: 'idle' });
     } else {
       const memberId = member.memberId;
       setGuestCourse(null);
@@ -148,6 +153,7 @@ export function AuthProvider({ children }) {
 
   // AuthContext.Provider-전역 저장소에 연결하는 도구
   //value : 전역 저장소에 저장되는 데이터
+  setAdminViewer(member?.roleCode === 'ADMIN');
   return (
     <AuthContext.Provider value={{ member, authChecked, authCheckFailed, loggingOut, authRevision, retryAuth, updateMemberProfile, login, logout,
       guestCourse: !member && authChecked && !authCheckFailed ? guestCourse : null }}>

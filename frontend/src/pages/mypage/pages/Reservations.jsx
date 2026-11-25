@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import TourPhoto from '../../../components/media/TourPhoto';
 import AccessNotice from '../components/AccessNotice';
 import MyCourseMap from '../components/MyCourseMap';
@@ -50,8 +50,16 @@ function BookingItinerary({ booking, course, memberId, loadStayPhotos }) {
     renderExtraPlaceDetails={place => <StayPhoto url={booking.stayInfo?.imageUrl} name={place.name} load={loadStayPhotos} />} />;
 }
 
-function ReservationDetail({ booking, course, memberId, badge, category }) {
-  const [cancelNotice, setCancelNotice] = useState('');
+function ReservationDetail({ booking, course, memberId, today }) {
+  const cancelDialog = useRef(null);
+  const cancellationInFlight = useRef(false);
+  const [cancelling, setCancelling] = useState(false);
+  const [cancelResult, setCancelResult] = useState(null);
+  const [cancelError, setCancelError] = useState('');
+  const bookingStatus = cancelResult ?? booking.status;
+  const badge = categoryLabels[bookingCategory({ ...booking, status: bookingStatus }, today)];
+  const canRetry = bookingStatus === 'REFUND_FAILED' || bookingStatus === 'REFUNDING';
+  const canCancel = canRetry || (bookingStatus === 'CONFIRMED' && booking.date >= today);
   const loadStayPhotos = useMemo(() => {
     let photos;
     return () => photos ??= myPageApi.reservationTourPhotos(booking.id).catch(error => {
@@ -59,6 +67,23 @@ function ReservationDetail({ booking, course, memberId, badge, category }) {
       throw error;
     });
   }, [booking.id]);
+
+  async function cancelReservation() {
+    if (cancellationInFlight.current || !canCancel) return;
+    cancellationInFlight.current = true;
+    setCancelling(true);
+    setCancelError('');
+    try {
+      const result = await myPageApi.cancelReservation(booking.id);
+      setCancelResult(result.status);
+      cancelDialog.current?.close();
+    } catch (error) {
+      setCancelError(error.message || '예약을 취소하지 못했어요. 다시 시도해 주세요.');
+    } finally {
+      cancellationInFlight.current = false;
+      setCancelling(false);
+    }
+  }
   return <div className="mypage trips-page trip-detail-page">
     <a className="trips-back trips-back-pill" href="#/reservations">← 내 예약 목록</a>
     <header className="trip-detail-hero">
@@ -70,7 +95,7 @@ function ReservationDetail({ booking, course, memberId, badge, category }) {
         <h2>예약 상세</h2>
         <dl>
           <dt>예약번호</dt><dd>{booking.reservationNo}</dd>
-          <dt>예약 상태</dt><dd>{labels[booking.status] || booking.status}</dd>
+          <dt>예약 상태</dt><dd>{labels[bookingStatus] || bookingStatus}</dd>
           <dt>숙소</dt><dd>{booking.stay || '지역에 맞는 숙소 정보 없음'}</dd>
           <dt>객실</dt><dd>{booking.room || '객실 정보 미등록'}</dd>
           <dt>숙박 기간</dt><dd>{booking.date} ~ {booking.endDate}</dd>
@@ -79,12 +104,27 @@ function ReservationDetail({ booking, course, memberId, badge, category }) {
         </dl>
         <BookingStayInfo booking={booking} />
         <div className="actions">
-          {category === 'upcoming' && <button type="button" className="reservation-cancel"
-            onClick={() => setCancelNotice('예약 취소는 숙소 또는 관리자에게 연락 주세요.')}>예약취소</button>}
-          {booking.status === 'COMPLETED' && <a className="secondary"
+          {canCancel && <button type="button" className="reservation-cancel" onClick={() => {
+            setCancelError('');
+            cancelDialog.current.showModal();
+          }}>{canRetry ? '환불 다시 시도' : '예약취소'}</button>}
+          {bookingStatus === 'COMPLETED' && <a className="secondary"
             href={`#/human-courses/create?reservationId=${encodeURIComponent(booking.id)}&from=reservations`}>내 여행 추천 작성·수정</a>}
         </div>
-        {cancelNotice && <p role="status">{cancelNotice}</p>}
+        {cancelResult === 'CANCELLED' && <p role="status">예약을 취소했고 토스 테스트 결제를 전액 환불했어요.</p>}
+        {cancelResult === 'REFUND_FAILED' && <p role="alert">토스 환불에 실패했어요. 환불을 다시 시도해 주세요.</p>}
+        <dialog ref={cancelDialog} className="reservation-cancel-dialog" aria-labelledby="reservation-cancel-title"
+          onCancel={event => { if (cancellationInFlight.current) event.preventDefault(); }}>
+          <h2 id="reservation-cancel-title">예약을 취소할까요?</h2>
+          <p>예약을 취소하면 토스 테스트 결제 금액 {money(booking.price)}이 전액 환불됩니다.</p>
+          {cancelError && <p role="alert">{cancelError}</p>}
+          <div className="actions">
+            <button type="button" className="secondary" disabled={cancelling} onClick={() => cancelDialog.current.close()}>돌아가기</button>
+            <button type="button" className="reservation-cancel" disabled={cancelling} onClick={cancelReservation}>
+              {cancelling ? '환불 처리 중…' : '예약 취소 및 환불'}
+            </button>
+          </div>
+        </dialog>
       </div>
       <aside className="reservation-stay-photo"><h3>숙소 사진</h3>
         <StayPhoto url={booking.stayInfo?.imageUrl} name={booking.stay} load={loadStayPhotos} />
@@ -108,7 +148,7 @@ export default function Reservations({bookings=[],courses=[],reservationId,membe
   if (!booking) return status === 'loading' ? <p role="status">예약을 불러오는 중입니다.</p>
     : <AccessNotice kind={status === 'error' ? 'unavailable' : 'denied'} />;
   return <ReservationDetail key={booking.id} booking={booking} course={courseFor(booking)}
-    memberId={member?.memberId} badge={badge(booking)} category={category(booking)} />;
+    memberId={member?.memberId} today={today} />;
  }
  const list=rows.filter(b=>(tab==='all'||category(b)===tab)&&`${courseFor(b)?.title||''} ${courseFor(b)?.region||''} ${b.stay||''} ${b.reservationNo}`.toLowerCase().includes(query.trim().toLowerCase()));
  list.sort((a, b) => {
