@@ -8,7 +8,7 @@ import PageHeading from '../components/PageHeading';
 import { previewCourses, previewReservations } from '../data/previewData';
 import { useEffect, useState } from 'react';
 
-export default function HumanCourseDetail({ courses = previewCourses, reservations = previewReservations, courseId = 1, execute, serverMode, loadCourse, isAuthenticated = false }) {
+export default function HumanCourseDetail({ courses = previewCourses, reservations = previewReservations, courseId = 1, execute, serverMode, loadCourse, member, isAuthenticated = false }) {
   const [detailError, setDetailError] = useState('');
   const [loadingDetail, setLoadingDetail] = useState(false);
   useEffect(() => {
@@ -24,13 +24,15 @@ export default function HumanCourseDetail({ courses = previewCourses, reservatio
   const photos = photoAssets.length ? photoAssets : (course?.photos || []).map((name) => ({ name, dataUrl: '' }));
   const reservation = serverMode ? null : reservations.find((item) => item.id === course?.reservationId);
   const stay = course?.stay || reservation?.stay || (reservation && { name: reservation.name });
-  const listLink = <a className="button" href="#/human-courses">← 목록으로</a>;
+  const listLink = <a className="button" href="#/human-courses">← 여행자 추천 트립으로</a>;
+  const canOpenMyPosts = isAuthenticated && member?.roleCode === 'USER';
   const canSave = isAuthenticated && serverMode && !blocked && course?.plan?.length > 0;
   return <div className="human-courses human-course-detail"><div className="page">
     <PageHeading kicker="휴먼 여행" listLabel="여행 목록" breadcrumb="여행 상세" title="여행 상세 보기" description="게시글 내용, 실제 방문 순서, 댓글과 좋아요를 확인합니다.">
-      {canSave ? <div className="actions course-heading-actions">
-        <SaveCourseRoute key={course.id} postId={course.id} />
+      {canSave || canOpenMyPosts ? <div className="actions course-heading-actions">
+        {canSave && <SaveCourseRoute key={course.id} postId={course.id} />}
         {listLink}
+        {canOpenMyPosts && <a className="button" href="#/my-posts">{'<- 내 추천 여행으로'}</a>}
       </div> : listLink}
     </PageHeading>
     {loadingDetail && <p role="status">게시글을 확인하고 있습니다.</p>}

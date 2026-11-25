@@ -1,5 +1,6 @@
 /* 로그인·회원가입 화면 (공유 CSS st-common.css 변수만 사용) */
 .auth-page { display: flex; justify-content: center; min-height: 100vh; padding: 64px 32px 80px; background: var(--st-bg); }
+.auth-shell .auth-page { background: transparent; }
 .auth-wrap { width: min(100%, 760px); min-width: 0; }
 .auth-wrap.wide { width: min(100%, 1040px); }
 .auth-page .st-panel { padding: 40px 48px; }

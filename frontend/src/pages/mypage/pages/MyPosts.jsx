@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getCourse } from '../../human_course/api/humanCourses';
 import { readRecommendationDraft } from '../../human_course/data/recommendationDraft';
-import AccessNotice from '../components/AccessNotice';
-import Card from '../components/Card';
-import MyCourseMap from '../components/MyCourseMap';
+import TripPagination, { tripPage } from '../components/TripPagination';
 import { recommendationTrips } from '../data/visibleItems';
 import useBookingDate from '../hooks/useBookingDate';
 import tripCover from '../utils/tripCover';
@@ -38,40 +36,13 @@ function PostCover({ post, fallback, loading }) {
   return <img src={coverImageUrl || loadedCover || fallback} alt="" loading={loading} />;
 }
 
-export default function MyPosts({ posts = [], bookings = [], courses = [], postId, member }) {
+export default function MyPosts({ posts = [], bookings = [], courses = [], member }) {
   const [tab, setTab] = useState('all');
   const [query, setQuery] = useState('');
+  const [page, setPage] = useState(1);
   const today = useBookingDate();
   const { bookingsById, published: eligiblePosts, pending: pendingBookings } = recommendationTrips(bookings, posts, today);
   const coursesById = new Map(courses.map(course => [course.id, course]));
-
-  if (postId) {
-    const post = eligiblePosts.find(item => String(item.id) === String(postId));
-    if (!post) return <AccessNotice />;
-    const booking = bookingsById.get(String(post.reservationId));
-    const course = coursesById.get(post.courseId);
-    const id = encodeURIComponent(post.id);
-    return <div className="mypage trips-page trip-detail-page">
-      <a className="trips-back trips-back-pill" href="#/my-posts">← 내 여행 추천 목록</a>
-      <header className="trip-detail-hero">
-        <PostCover key={post.id} post={post} fallback={tripCover(course?.region || booking?.stay || post.title)} />
-        <div><span className="trip-status">{labels.complete}</span><h1>{post.title}</h1>
-          {booking && <p>{booking.date} ~ {booking.endDate}</p>}
-        </div>
-      </header>
-      <Card>
-        <h2>여행 후기</h2>
-        <p className="chat-text">{post.body}</p>
-        <div className="actions">
-          <a href={`#/human-courses/${id}`}>공개 화면</a>
-          <a href={`#/human-courses/${id}/edit?from=my-posts`}>글 수정</a>
-          {booking && <a href={`#/reservations/${encodeURIComponent(booking.id)}`}>연결 예약</a>}
-        </div>
-      </Card>
-      <MyCourseMap snapshot={post.courseSnapshot} courseId={post.courseId} memberId={member?.memberId} expanded />
-      <div className="trip-detail-footer"><a className="trips-back trips-back-pill" href="#/my-posts">← 내 여행 추천 목록</a></div>
-    </div>;
-  }
 
   const published = eligiblePosts.map(post => ({
     key: `post-${post.id}`, status: 'complete', title: post.title,
@@ -100,28 +71,29 @@ export default function MyPosts({ posts = [], bookings = [], courses = [], postI
     return secondDate.localeCompare(firstDate);
   });
 
+  const pagination = tripPage(list.length, page);
   return <div className="mypage trips-page my-posts-list">
-    <a className="trips-back trips-back-pill" href="#/mypage">← 마이페이지</a>
     <header className="trips-heading">
       <div><h1>내 여행 추천</h1><p>완료한 여행의 추천 글을 작성하고 관리하세요.</p></div>
     </header>
     <div className="trips-list-toolbar">
       <nav className="trips-filters" aria-label="여행 추천 작성 상태">
         {tabs.map(([value, label]) => <button type="button" key={value}
-          aria-pressed={tab === value} onClick={() => setTab(value)}>{label}</button>)}
+          aria-pressed={tab === value} onClick={() => { setTab(value); setPage(1); }}>{label}</button>)}
       </nav>
       <div className="trips-tools">
         <label className="trips-search">
           <span className="trips-sr-only">제목, 지역, 숙소 또는 예약번호 검색</span>
           <span aria-hidden="true">⌕</span>
-          <input type="search" placeholder="내 여행 추천 검색" value={query} onChange={event => setQuery(event.target.value)} />
+          <input type="search" placeholder="내 여행 추천 검색" value={query} onChange={event => { setQuery(event.target.value); setPage(1); }} />
         </label>
+        <a className="trips-back trips-back-pill trips-list-back" href="#/mypage">&lt;- 마이트립페이지</a>
       </div>
     </div>
     <p className="trips-count" role="status">{list.length}개의 여행</p>
     {!list.length && <p className="empty">조건에 맞는 여행이 없습니다.</p>}
     <div className="trips-grid">
-      {list.map(({ key, status, title, region, booking, href, action, post }) => {
+      {list.slice(pagination.start, pagination.end).map(({ key, status, title, region, booking, href, action, post }) => {
         const fallback = tripCover(region || booking?.stay || title);
         return <a key={key} className="trip-cover-card" href={href}>
           {/* 작성 완료 카드도 상세 화면과 같은 순서로 대표 사진을 고른다. */}
@@ -136,5 +108,6 @@ export default function MyPosts({ posts = [], bookings = [], courses = [], postI
         </a>;
       })}
     </div>
+    <TripPagination {...pagination} onChange={setPage} />
   </div>;
 }

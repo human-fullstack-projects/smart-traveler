@@ -36,7 +36,7 @@ export default function SaveCourseRoute({ postId }) {
   }
 
   return <div className="course-save-action">
-    <button type="button" className="primary" aria-haspopup="dialog" onClick={open}>여행 저장</button>
+    <button type="button" className="primary" aria-haspopup="dialog" onClick={open}>이 여행 저장</button>
     <p className="status" role="status">{saved ? '여행 경로를 저장했어요.' : ''}</p>
     <dialog ref={dialog} className="course-report-dialog" aria-labelledby="course-save-title"
       onCancel={event => { if (saving) event.preventDefault(); }}>

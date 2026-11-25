@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import TripPagination, { tripPage } from '../components/TripPagination';
 import Card from '../components/Card';
 import AccessNotice from '../components/AccessNotice';
 import MyCourseMap from '../components/MyCourseMap';
@@ -32,6 +33,7 @@ export default function MyCourses({ courses = [], isGuest, member, courseId, gue
   const [detail, setDetail] = useState(null);
   const [detailStatus, setDetailStatus] = useState('loading');
   const [query, setQuery] = useState('');
+  const [page, setPage] = useState(1);
   const [latestCourses, setLatestCourses] = useState(null);
   const [listStatus, setListStatus] = useState('ready');
   useEffect(() => {
@@ -71,6 +73,17 @@ export default function MyCourses({ courses = [], isGuest, member, courseId, gue
     </header>
     <div className="trip-detail-summary"><strong>{detail.region || '여행 지역 미정'}</strong><span>{period(detail)}</span><span>총 {(detail.days || []).length}일 일정</span><span>방문 장소 {(detail.days || []).reduce((sum, day) => sum + (day.places || []).length, 0)}곳</span></div>
     {!isGuest && detail.state !== 'BOOKED' && <a className="trips-back trips-back-pill saved-trip-stay-link" href={`#/stays?courseId=${encodeURIComponent(detail.id)}`}>숙소 선택 →</a>}
+    {detail.stay && <section className="saved-trip-stay-link" aria-labelledby="saved-trip-stay-title">
+      <h2 id="saved-trip-stay-title">선택한 숙소</h2>
+      <a className="trips-back trips-back-pill" href={`#/stays/booking?${new URLSearchParams({
+        stay: detail.stay.lodgingId,
+        courseId: detail.id,
+        ...(detail.endDate > detail.startDate ? { checkIn: detail.startDate, checkOut: detail.endDate } : {}),
+        adults: detail.adults ?? 2,
+        children: detail.children ?? 0,
+      })}`}>{detail.stay.name} →</a>
+      {detail.stay.address && <p>{detail.stay.address}</p>}
+    </section>}
     <MyCourseMap key={detail.id} course={detail} expanded title="여행 일정" hideMapControls showPlaceDetails />
     <div className="trip-detail-footer"><a className="trips-back trips-back-pill" href="#/my-courses">← 저장된 여행 목록</a></div>
   </div>;
@@ -81,24 +94,28 @@ export default function MyCourses({ courses = [], isGuest, member, courseId, gue
   });
   const shownGuestCourse = isGuest && guestRecommendedCourse
     && `${guestRecommendedCourse.title} ${guestRecommendedCourse.destination}`.toLowerCase().includes(query.trim().toLowerCase());
+  const guestCount = Number(Boolean(shownGuestCourse));
+  const total = filtered.length + guestCount;
+  const pagination = tripPage(total, page);
+  const pageCourses = filtered.slice(Math.max(0, pagination.start - guestCount), pagination.end - guestCount);
   return <div className="mypage trips-page">
-    <a className="trips-back trips-back-pill" href="#/mypage">← 마이페이지</a>
     <header className="trips-heading trips-heading--saved"><h1>저장된 여행</h1><div className="trips-description-search"><p>{isGuest ? '비회원의 저장된 여행은 새로고침하거나 사이트를 떠나면 삭제됩니다.' : '저장된 여행을 모아보고, 여행을 예약해보세요.'}</p>
-      <div className="trips-tools"><label className="trips-search"><span className="trips-sr-only">여행 제목 또는 지역 검색</span><span aria-hidden="true">⌕</span><input type="search" placeholder="내 여행 검색" value={query} onChange={event => setQuery(event.target.value)} /></label></div>
+      <div className="trips-tools"><label className="trips-search"><span className="trips-sr-only">여행 제목 또는 지역 검색</span><span aria-hidden="true">⌕</span><input type="search" placeholder="내 여행 검색" value={query} onChange={event => { setQuery(event.target.value); setPage(1); }} /></label><a className="trips-back trips-back-pill trips-list-back" href="#/mypage">&lt;- 마이트립페이지</a></div>
     </div></header>
-    <p className="trips-count" role="status">{filtered.length + Number(Boolean(shownGuestCourse))}개의 여행</p>
+    <p className="trips-count" role="status">{total}개의 여행</p>
     {!isGuest && listStatus === 'loading' && <p role="status" className="muted">최신 여행 일정을 불러오는 중입니다.</p>}
     {!isGuest && listStatus === 'error' && <p role="alert">최신 여행 일정을 불러오지 못했습니다. 서버 연결을 확인한 뒤 화면을 새로고침해 주세요.</p>}
-    {shownGuestCourse && <Card>
+    {shownGuestCourse && pagination.currentPage === 1 && <Card>
       <span className="pill">비회원 추천 코스</span>
       <h2><a href="#/login">{guestRecommendedCourse.title}</a></h2>
       <p>{guestRecommendedCourse.destination} · {guestRecommendedCourse.startDate}부터 {guestRecommendedCourse.durationDays}일</p>
       <p><a href="#/login">로그인 후 내 코스에 저장</a> · <a href={`#/stays?destination=${encodeURIComponent(guestRecommendedCourse.destination ?? '')}`}>숙소 찾기</a></p>
     </Card>}
     {!shownGuestCourse && !filtered.length && (isGuest || listStatus === 'ready') && <p className="empty">{visibleCourses.length ? '조건에 맞는 여행 일정이 없습니다.' : '저장된 여행 일정이 없습니다.'}</p>}
-    <div className="trips-grid">{filtered.map(course => <div key={course.id}><a className="trip-cover-card" href={`#/my-courses/${encodeURIComponent(course.id)}`}>
+    <div className="trips-grid">{pageCourses.map(course => <div key={course.id}><a className="trip-cover-card" href={`#/my-courses/${encodeURIComponent(course.id)}`}>
       <img src={cover(course)} alt="" loading="lazy" /><span className="trip-status">{stateLabel(course)}</span>
       <div className="trip-card-copy"><span className="trip-region">{course.region || '나의 여행'}</span><h2>{course.title}</h2><p>{period(course)}</p><span className="trip-card-open">일정 자세히 보기 <span aria-hidden="true">↗</span></span></div>
     </a></div>)}</div>
+    <TripPagination {...pagination} onChange={setPage} />
   </div>;
 }

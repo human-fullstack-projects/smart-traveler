@@ -85,6 +85,11 @@ export default function App() {
   const humanCourses = useHumanCourses(member);
   //window.location.hash : 현재 url의 해시부분 (예:#/mypage)
   const [route, setRoute] = useState(window.location.hash.slice(1) || '/');
+  const legacyPost = route.match(/^\/my-posts\/([^/?]+)\/?(?:\?.*)?$/);
+  const publicPostPath = legacyPost ? `/human-courses/${legacyPost[1]}` : null;
+  useEffect(() => {
+    if (publicPostPath) window.location.replace(`#${publicPostPath}`);
+  }, [publicPostPath]);
   const returnPage = useRef(null);
   if (!returnPage.current) returnPage.current = createReturnPage(route);
   const [notice, setNotice] = useState('');
@@ -174,7 +179,7 @@ export default function App() {
 
   const TopNavScreen = topNavPageRoutes[route];
   if (TopNavScreen) {
-    return <div className="app-shell">
+    return <div className="app-shell auth-shell">
       <SiteHeader member={member} onLogout={handleLogout} loggingOut={loggingOut} />
       {notice && <div className="navigation-notice" role="status">{notice}<button onClick={() => setNotice('')} aria-label="알림 닫기">×</button></div>}
       <main className="main-content">{!authChecked || redirectLoggedIn
@@ -184,12 +189,11 @@ export default function App() {
     </div>;
   }
 
-  const routePath = (route.split('?')[0].replace(/\/$/, '')) || '/';
+  const routePath = publicPostPath || route.split('?')[0].replace(/\/$/, '') || '/';
   const myCourseMatch = routePath.match(/^\/my-courses\/([^/]+)$/);
   const reservationMatch = routePath.match(/^\/reservations\/([^/]+)$/);
   const paymentMatch = routePath.match(/^\/payments\/(\d+)(?:\/(success|failure))?$/);
-  const myPostMatch = routePath.match(/^\/my-posts\/([^/]+)$/);
-  const MyPageScreen = myPageRoutes[routePath] || (myCourseMatch ? MyCourses : reservationMatch ? Reservations : myPostMatch ? MyPosts : null);
+  const MyPageScreen = myPageRoutes[routePath] || (myCourseMatch ? MyCourses : reservationMatch ? Reservations : null);
   const isHumanCourse = routePath === '/human-courses' || routePath.startsWith('/human-courses/');
   const courseMatch = routePath.match(/^\/human-courses\/([^/]+)(\/edit)?$/);
   const HumanCourseScreen = humanCourseRoutes[routePath] || (courseMatch ? (courseMatch[2] ? HumanCourseEdit : HumanCourseDetail) : null);
@@ -208,7 +212,7 @@ export default function App() {
       {blocked ? <AccessNotice kind={blocked} onRetry={blocked === 'unavailable' ? retryAuth : undefined} /> : needsTravelData && ['checking', 'loading'].includes(myPageStore.status)
         ? <p role="status">내 자료를 불러오고 있습니다.</p>
         : needsTravelData && myPageStore.status === 'error' ? <p role="alert">자료를 불러오지 못했습니다. 위의 다시 불러오기 버튼으로 재시도해 주세요.</p>
-        : <MyPageScreen key={`${member?.memberId || 'guest'}-${routePath}`} {...myPageStore} guestRecommendedCourse={guestCourse} courseId={myCourseMatch?.[1]} reservationId={reservationMatch?.[1]} postId={myPostMatch?.[1]}
+        : <MyPageScreen key={`${member?.memberId || 'guest'}-${routePath}`} {...myPageStore} guestRecommendedCourse={guestCourse} courseId={myCourseMatch?.[1]} reservationId={reservationMatch?.[1]}
             onSaved={routePath === '/my-travel-style' ? () => setSurvey({ memberId: member.memberId, status: 'done', data: null }) : undefined} />}
     </>;
   } else if (routePath === '/payments/demo' || new URLSearchParams(window.location.search).has('tossDemo')) {
@@ -249,7 +253,7 @@ export default function App() {
 
   return (
     <MainLayout member={member} loggingOut={loggingOut} onLogout={handleLogout} notice={notice} onDismissNotice={() => setNotice('')}
-      pastelBackground={Boolean(MyPageScreen) || routePath === '/stays' || routePath === '/stays/booking'
+      pastelBackground={isChat || Boolean(MyPageScreen) || routePath === '/stays' || routePath === '/stays/booking'
         || routePath === '/human-courses' || HumanCourseScreen === HumanCourseDetail}
       isHome={(routePath === '/' || routePath === '/main') && !(authChecked && member?.roleCode === 'USER' && routePath !== '/my-travel-style' && survey.memberId === member.memberId && survey.status === 'needed')}>
       {authChecked && member?.roleCode === 'USER' && routePath !== '/my-travel-style' && survey.memberId === member.memberId && survey.status === 'needed'

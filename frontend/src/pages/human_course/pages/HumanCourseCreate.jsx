@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react';
+﻿import { useEffect, useRef, useState } from 'react';
 import CourseForm from '../components/CourseForm';
 import CourseMap from '../components/CourseMap';
 import CoursePlan from '../components/CoursePlan';
@@ -13,6 +13,7 @@ export default function HumanCourseCreate({ reservations = [], courses = [], exe
  const [selectedId,setSelectedId]=useState(String(reservationId));
  const [notice,setNotice]=useState('');
  const [draftNotice,setDraftNotice]=useState('');
+ const publishing = useRef(false);
  const source=['reservations','my-posts'].includes(from)?from:'human-courses';
  const back=`#/${source}`;
  useEffect(()=>{refresh?.();},[]);
@@ -24,7 +25,7 @@ export default function HumanCourseCreate({ reservations = [], courses = [], exe
  const selected=pastTrips.find(r=>String(r.id)===selectedId);
  const final=finalCourse(selected);
  const existingId=selected && (selected.existingPostId || courses.find(c=>c.mine&&String(c.reservationId)===selectedId)?.id);
- useEffect(()=>{if(existingId) window.location.hash=`/human-courses/${existingId}/edit?from=${source}`;},[existingId,source]);
+ useEffect(()=>{if(existingId && !publishing.current) window.location.hash=`/human-courses/${existingId}/edit?from=${source}`;},[existingId,source]);
  const error=selected ? serverMode ? selected.eligibilityError : creationError({courses},selected) : '';
  const draft=readRecommendationDraft(member?.memberId,selectedId);
  function saveDraft(fields) {
@@ -37,12 +38,15 @@ export default function HumanCourseCreate({ reservations = [], courses = [], exe
  }
  async function submit(fields){
   if(!serverMode){const result={error:'서버에 연결한 뒤 등록해주세요.'};setNotice(result.error);return result;}
+  publishing.current = true;
   const result=await execute?.({type:'create',reservationId:selectedId,fields});
   if(result?.error)setNotice(result.error);
   else if(result?.id){
    if(member?.memberId)clearRecommendationDraft(member.memberId,selectedId);
-   window.location.hash=source==='my-posts'?`/my-posts/${result.id}`:`/human-courses/${result.id}`;
+   window.location.replace(`#/human-courses/${encodeURIComponent(result.id)}`);
+   return result;
   }
+  publishing.current = false;
   return result;
  }
  const itineraryMap = final?.plan?.length > 0

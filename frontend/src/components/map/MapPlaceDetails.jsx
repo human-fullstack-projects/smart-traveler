@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import TourPhoto from '../media/TourPhoto';
 
-function descriptionText(value) {
+export function descriptionText(value) {
   return String(value || '').replace(/<br\s*\/?\s*>/gi, '\n').replace(/<[^>]*>/g, '')
     .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'").trim();
 }

@@ -26,9 +26,9 @@ import tools.jackson.databind.ObjectMapper;
 
 class HumanCourseServiceTest {
     @Test void copiedRouteKeepsVisitOrderAndCoordinatesWithoutItsOriginalLodging() {
-        var beach = new MapPlace("1", 5L, "광안리", "부산 수영구", new BigDecimal("35.15"), new BigDecimal("129.12"), "course", List.of());
-        var park = new MapPlace("2", 6L, "수변공원", null, null, null, "course", List.of());
-        var stay = new MapPlace("stay-3", null, "원래 숙소", null, null, null, "stay", List.of());
+        var beach = new MapPlace("1", 5L, "광안리", "부산 수영구", new BigDecimal("35.15"), new BigDecimal("129.12"), "course", List.of(), null);
+        var park = new MapPlace("2", 6L, "수변공원", null, null, null, "course", List.of(), null);
+        var stay = new MapPlace("stay-3", null, "원래 숙소", null, null, null, "stay", List.of(), null);
         var plan = List.of(new Day(1, List.of(), List.of(beach, stay, park), "2025-02-01"),
                 new Day(3, List.of("부산시립미술관"), List.of(), "2025-02-03"));
         var start = LocalDate.of(2026, 12, 10);
