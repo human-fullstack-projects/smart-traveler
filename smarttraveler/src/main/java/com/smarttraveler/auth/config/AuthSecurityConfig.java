@@ -66,6 +66,15 @@ public class AuthSecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/human-courses", "/api/human-courses/*", "/api/human-courses/photos/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/place-photos/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/owner-photos/*").permitAll()
+                // 관리자 계정은 여행자 화면을 둘러보기만 한다: 예약·결제·휴먼 코스 쓰기·코스 저장·취향 저장은 여행자·업주만 (채팅 저장은 ChatSecurity)
+                .requestMatchers(HttpMethod.POST, "/api/reservations", "/api/payments/reservations/*/prepare",
+                        "/api/payments/confirm", "/api/payments/reservations/*/sync").hasAnyRole("USER", "OWNER")
+                .requestMatchers(HttpMethod.POST, "/api/human-courses/reservations/*", "/api/human-courses/*/like",
+                        "/api/human-courses/*/comments", "/api/human-courses/*/reports").hasAnyRole("USER", "OWNER")
+                .requestMatchers(HttpMethod.PUT, "/api/human-courses/*").hasAnyRole("USER", "OWNER")
+                .requestMatchers(HttpMethod.DELETE, "/api/human-courses/*", "/api/human-courses/*/comments/*").hasAnyRole("USER", "OWNER")
+                .requestMatchers(HttpMethod.POST, "/api/mypage/courses/human/*", "/api/mypage/courses/import").hasAnyRole("USER", "OWNER")
+                .requestMatchers(HttpMethod.PUT, "/api/mypage/preferences").hasAnyRole("USER", "OWNER")
                 .requestMatchers("/admin", "/admin/**", "/api/admin", "/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/", "/login", "/403", "/error", "/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
                 .anyRequest().authenticated());
@@ -74,8 +83,15 @@ public class AuthSecurityConfig {
         http.exceptionHandling(errors -> errors
                 .authenticationEntryPoint((request, response, exception) ->
                         json(response, 401, "{\"message\":\"로그인이 필요합니다.\"}"))
-                .accessDeniedHandler((request, response, exception) ->
-                        json(response, 403, "{\"message\":\"요청을 확인할 수 없습니다. 새로고침 후 다시 시도해주세요.\"}")));
+                .accessDeniedHandler((request, response, exception) -> {
+                    var current = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+                    boolean admin = current != null && current.getAuthorities().stream().anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+                    if (admin && !(exception instanceof org.springframework.security.web.csrf.CsrfException)) {
+                        json(response, 403, "{\"message\":\"관리자는 권한이 없어요.\"}");
+                        return;
+                    }
+                    json(response, 403, "{\"message\":\"요청을 확인할 수 없습니다. 새로고침 후 다시 시도해주세요.\"}");
+                }));
         http.formLogin(form -> form
                 .loginPage("/login")
                 .loginProcessingUrl("/api/auth/login")

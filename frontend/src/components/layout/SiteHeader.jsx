@@ -52,6 +52,7 @@ export default function SiteHeader({ member, loggingOut, onLogout }) {
   );
 
   return (
+    <>
     <header className="mp-topbar">
       <div className="mp-topbar-left">
         <a className="mp-brand st-brand brand-mark" href="#/main" aria-label="AI TRIP 홈">
@@ -103,5 +104,11 @@ export default function SiteHeader({ member, loggingOut, onLogout }) {
         </div>
       </div>
     </header>
+    {member?.roleCode === 'ADMIN' && (
+      <p className="admin-readonly-banner" role="status">
+        관리자 계정으로 둘러보는 중이에요 · 예약·결제, 휴먼 추천 코스 좋아요·댓글·신고·글쓰기, 코스 저장, 취향 저장은 할 수 없어요.
+      </p>
+    )}
+    </>
   );
 }

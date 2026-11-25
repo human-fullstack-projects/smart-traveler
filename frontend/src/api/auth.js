@@ -1,6 +1,8 @@
 import { waitForGuestCourseStorage } from '../chatApi';
+import { blockAdminAction } from './adminReadOnly';
 
 async function request(path, options = {}) {
+  blockAdminAction(path, options.method);
   let response;
   try {
     response = await fetch(path, { credentials: 'same-origin', cache: 'no-store', ...options });
