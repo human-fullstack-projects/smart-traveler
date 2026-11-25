@@ -47,7 +47,7 @@ export function StayOverview({ stay }) {
   </section>;
 }
 
-export function StayLocation({ stay, courseRoute }) {
+export function StayLocation({ stay, courseRoute, selectedPlaceId, onCoursePlaceSelect }) {
   const [addressLocation, setAddressLocation] = useState(null);
   const hasCoordinates = hasValidCoordinates(stay);
   const address = stay.address?.trim();
@@ -73,13 +73,18 @@ export function StayLocation({ stay, courseRoute }) {
   }, [stay, address, addressLocation, hasCoordinates]);
   const locating = !hasCoordinates && address && addressLocation?.address !== address;
   const mapPlaces = useMemo(() => courseRoute ? [...places, ...courseRoute.places] : places, [places, courseRoute]);
+  const selectedPlace = courseRoute?.places.find(place => place.id === selectedPlaceId);
+  const focus = selectedPlace && { ...selectedPlace, key: selectedPlace };
 
   return <section className="booking-section booking-stay-location" aria-labelledby="booking-location-title">
     <h2 id="booking-location-title">{courseRoute ? '여행 일정과 숙소 위치' : '숙소 위치'}</h2>
     {address && <p className="booking-stay-address">{[address, stay.addressDetail, stay.zipcode && `(${stay.zipcode})`].filter(Boolean).join(' ')}</p>}
     <div className="booking-stay-map">
       {mapPlaces.length > 0
-        ? <KakaoMap places={mapPlaces} paths={courseRoute?.paths} fitPoints={courseRoute ? mapPlaces : undefined} level={4} height="100%" />
+        ? <KakaoMap places={mapPlaces} paths={courseRoute?.paths} fitPoints={courseRoute && !selectedPlace ? mapPlaces : undefined}
+          center={selectedPlace} focus={focus} selectedId={selectedPlaceId} level={4} height="100%" onMarkerClick={place => {
+            if (place.kind === 'course') onCoursePlaceSelect?.(place);
+          }} />
         : <p role={locating ? 'status' : undefined}>{locating ? '숙소 위치를 확인하고 있습니다.' : '지도에 표시할 숙소 위치를 확인하지 못했습니다.'}</p>}
     </div>
   </section>;

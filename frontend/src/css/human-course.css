@@ -16,9 +16,9 @@
   color-scheme: light;
 }
 
-.human-courses.human-course-create { background: transparent; border-radius: 0; }
+.human-courses.human-course-editor { background: transparent; border-radius: 0; }
 
-.mp-main:has(> .human-course-create) {
+.mp-main:has(> .human-course-editor) {
   max-width: none;
   padding-inline: clamp(32px, 8vw, 128px);
 }
@@ -28,20 +28,20 @@
   padding-inline: clamp(14px, 3vw, 48px);
 }
 
-.human-courses.human-course-create .page { max-width: none; padding-inline: 0; }
+.human-courses.human-course-editor .page { max-width: none; padding-inline: 0; }
 .human-course-list .page { max-width: none; }
 
 @media (min-width: 1024px) {
-  .human-course-create .recommendation-layout {
+  .human-course-editor .recommendation-layout {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
     grid-template-rows: auto 1fr;
     column-gap: 24px;
     align-items: start;
   }
-  .human-course-create .recommendation-itinerary { grid-column: 1; grid-row: 1 / 3; }
-  .human-course-create .recommendation-trip-select { grid-column: 2; grid-row: 1; }
-  .human-course-create .recommendation-review { grid-column: 2; grid-row: 2; }
+  .human-course-editor .recommendation-itinerary { grid-column: 1; grid-row: 1 / 3; }
+  .human-course-editor .recommendation-trip-select { grid-column: 2; grid-row: 1; }
+  .human-course-editor .recommendation-review { grid-column: 2; grid-row: 2; }
 }
 
 .human-courses *, .human-courses *::before, .human-courses *::after { box-sizing: border-box; }
@@ -60,13 +60,13 @@
 .human-course-list .page-heading h1 { color: #1e3b8b; font-size: clamp(28px, 3.3vw, 44px); }
 .human-courses h2 { font-size: 17px; margin-bottom: 13px; }
 .human-courses h3 { font-size: 15px; margin-bottom: 10px; }
-.human-course-create .itinerary-title { font-size: 20px; font-weight: 700; }
-.human-course-create .preview-itinerary-map { margin-bottom: 18px; isolation: isolate; }
-.human-course-create .preview-itinerary-map .itinerary-map__days { padding-top: 16px; }
-.human-course-create .recommendation-map .itinerary-map__frame,
-.human-course-create .recommendation-map .itinerary-map__source { width: 86%; margin-inline: auto; }
-.human-course-create .preview-itinerary-map .itinerary-map__frame,
-.human-course-create .preview-itinerary-map .itinerary-map__source { width: 74%; margin-inline: auto; }
+.human-course-editor .itinerary-title { font-size: 20px; font-weight: 700; }
+.human-course-editor .preview-itinerary-map { margin-bottom: 18px; isolation: isolate; }
+.human-course-editor .preview-itinerary-map .itinerary-map__days { padding-top: 16px; }
+.human-course-editor .recommendation-map .itinerary-map__frame,
+.human-course-editor .recommendation-map .itinerary-map__source { width: 86%; margin-inline: auto; }
+.human-course-editor .preview-itinerary-map .itinerary-map__frame,
+.human-course-editor .preview-itinerary-map .itinerary-map__source { width: 74%; margin-inline: auto; }
 .human-courses .course-detail-map .itinerary-map__frame,
 .human-courses .course-detail-map .itinerary-map__source { width: 94%; margin-inline: auto; }
 .human-courses h4 { margin-bottom: 8px; font-size: 14px; }
@@ -99,7 +99,7 @@
 .human-courses .field > label { display: block; color: #36454e; font-size: 13px; font-weight: 650; }
 .human-courses input[type=text], .human-courses input[type=search], .human-courses input[type=file], .human-courses select, .human-courses textarea { display: block; width: 100%; min-width: 0; margin-top: 6px; padding: 10px 11px; color: var(--text); background: #fff; border: 1px solid #cbd3d7; border-radius: 5px; font-size: 14px; }
 .human-courses input[type=file] { padding: 8px; overflow: hidden; }
-.human-course-create .photo-attachment {
+.human-course-editor .photo-attachment {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -110,7 +110,7 @@
   border: 1px solid #cbd3d7;
   border-radius: 5px;
 }
-.human-course-create input[type=file].attachment-file-input {
+.human-course-editor input[type=file].attachment-file-input {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -119,12 +119,12 @@
   border: 0;
   clip-path: inset(50%);
 }
-.human-course-create .attachment-file-input:focus-visible + .attachment-file-button { outline: 3px solid #9397CB; outline-offset: 2px; }
-.human-course-create .attachment-file-text { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.human-course-create .attachment-thumbnails { display: flex; flex-wrap: wrap; max-width: 100%; gap: 10px; padding: 6px 6px 0 0; }
-.human-course-create .attachment-thumbnails img { display: block; width: 64px; height: 64px; object-fit: cover; border-radius: 4px; }
-.human-course-create .attachment-thumbnail { position: relative; }
-.human-course-create .attachment-thumbnail button.attachment-remove {
+.human-course-editor .attachment-file-input:focus-visible + .attachment-file-button { outline: 3px solid #9397CB; outline-offset: 2px; }
+.human-course-editor .attachment-file-text { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.human-course-editor .attachment-thumbnails { display: flex; flex-wrap: wrap; max-width: 100%; gap: 10px; padding: 6px 6px 0 0; }
+.human-course-editor .attachment-thumbnails img { display: block; width: 64px; height: 64px; object-fit: cover; border-radius: 4px; }
+.human-course-editor .attachment-thumbnail { position: relative; }
+.human-course-editor .attachment-thumbnail button.attachment-remove {
   position: absolute;
   top: -6px;
   right: -6px;
@@ -138,15 +138,15 @@
   font-size: 15px;
   line-height: 1;
 }
-.human-course-create .attachment-thumbnail button.attachment-remove:hover:not(:disabled) { background: #8f1d15; border-color: #fff; }
-.human-course-create .attachment-thumbnail button.attachment-remove:disabled { opacity: 0.55; }
+.human-course-editor .attachment-thumbnail button.attachment-remove:hover:not(:disabled) { background: #8f1d15; border-color: #fff; }
+.human-course-editor .attachment-thumbnail button.attachment-remove:disabled { opacity: 0.55; }
 .human-courses textarea { resize: vertical; min-height: 100px; }
-.human-course-create textarea.review-input { overflow-y: hidden; resize: none; }
+.human-course-editor textarea.review-input { overflow-y: hidden; resize: none; }
 .human-courses input[type=radio] { accent-color: var(--accent); flex-shrink: 0; }
 .human-courses .field-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 13px; }
 .human-courses .actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .human-courses .actions > * { min-width: 0; }
-.human-course-create .course-form-actions { justify-content: flex-end; }
+.human-course-editor .course-form-actions { justify-content: flex-end; }
 .human-courses .human-course-filter-panel { padding-bottom: 16px; }
 .human-courses .human-course-filter-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0 13px; }
 .human-courses .human-course-filter-grid :is(input, select) { height: 44px; }
@@ -235,7 +235,7 @@
 .human-courses .plan-stops { margin: 0; padding-left: 22px; }
 .human-courses .plan-stops li { padding: 7px 0; border-bottom: 1px solid #edf0f1; }
 .human-courses .plan-stops li:last-child { padding-bottom: 0; border-bottom: 0; }
-.human-course-create .recommendation-itinerary .plan-stops li { padding-block: 20px; }
+.human-course-editor .recommendation-itinerary .plan-stops li { padding-block: 20px; }
 .human-courses .plan-stop-content:has(> .plan-place-photo) {
   display: grid;
   grid-template-columns: 24% minmax(0, 1fr);
@@ -243,8 +243,8 @@
   gap: 16px;
 }
 .human-courses .plan-place-photo { display: block; width: min(100%, 480px); aspect-ratio: 4 / 3; object-fit: cover; border-radius: 5px; }
-.human-course-create .recommendation-itinerary .plan-place-photo { width: min(92%, 440px); }
-.human-course-create .recommendation-preview .plan-place-photo { width: min(90%, 360px); }
+.human-course-editor .recommendation-itinerary .plan-place-photo { width: min(92%, 440px); }
+.human-course-editor .recommendation-preview .plan-place-photo { width: min(90%, 360px); }
 .human-courses .comment-list { margin: 0 0 18px; padding: 0; list-style: none; }
 .human-courses .comment-list li { padding: 13px 0; border-bottom: 1px solid #e9edef; display: flex; justify-content: space-between; gap: 12px; align-items: start; }
 .human-courses .comment-list li > * { min-width: 0; }

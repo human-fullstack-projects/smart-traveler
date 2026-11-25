@@ -45,7 +45,7 @@ export default function CourseForm({ course = {}, mode = 'create', onSubmit, onS
     });
     observer.observe(input);
     return () => observer.disconnect();
-  }, [editing]);
+  }, []);
   const [preview, setPreview] = useState(() => ({
     title: course.title || '', category: course.category || '', companion: course.companion || '',
     body: course.body || '',
@@ -56,26 +56,24 @@ export default function CourseForm({ course = {}, mode = 'create', onSubmit, onS
   const [reading, setReading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const photoRequest = useRef(0);
-  const visiblePhotos = selectedPhotos || course.photoAssets || (course.photos || []).map((name) => ({ name }));
+  const existingPhotos = course.photoAssets?.length ? course.photoAssets : (course.photos || []).map((name) => ({ name }));
+  const visiblePhotos = selectedPhotos || existingPhotos;
 
   async function changePhotos(event) {
     const request = ++photoRequest.current;
     const input = event.currentTarget;
     const files = Array.from(input.files || []);
-    const previousPhotos = editing ? [] : selectedPhotos || [];
-    if (!editing) input.value = '';
+    const previousPhotos = selectedPhotos || [];
+    input.value = '';
     setPhotoError('');
     if (!files.length) {
-      if (editing) setSelectedPhotos(null);
       setReading(false);
       return;
     }
     if (previousPhotos.length + files.length > MAX_PHOTOS || files.some((file) => !isImageFile(file))
         || files.some((file) => file.size > MAX_FILE_BYTES)
         || [...previousPhotos, ...files].reduce((total, photo) => total + photo.size, 0) > MAX_TOTAL_BYTES) {
-      if (editing) setSelectedPhotos(null);
       setReading(false);
-      input.value = '';
       setPhotoError('JPG·PNG·WebP·GIF 사진을 최대 5개 선택해주세요. 파일당 5MB, 전체 25MB까지 첨부할 수 있습니다.');
       return;
     }
@@ -84,16 +82,15 @@ export default function CourseForm({ course = {}, mode = 'create', onSubmit, onS
       const photos = await Promise.all(files.map(readImage));
       if (request === photoRequest.current) setSelectedPhotos([...previousPhotos, ...photos]);
     } catch (error) {
-      if (request === photoRequest.current) {
-        if (editing) setSelectedPhotos(null);
-        input.value = '';
-        setPhotoError(error.message);
-      }
+      if (request === photoRequest.current) setPhotoError(error.message);
     } finally { if (request === photoRequest.current) setReading(false); }
   }
 
   function removePhoto(index) {
-    setSelectedPhotos(photos => photos.filter((_, photoIndex) => photoIndex !== index));
+    setSelectedPhotos(photos => {
+      const remaining = photos.filter((_, photoIndex) => photoIndex !== index);
+      return remaining.length ? remaining : null;
+    });
     setPhotoError('');
   }
 
@@ -125,37 +122,32 @@ export default function CourseForm({ course = {}, mode = 'create', onSubmit, onS
     });
   }}>
     <fieldset disabled={disabled}>
-      {editing && <legend>기존 코스 정보 수정</legend>}
       <div className="field"><label>게시글 제목 *<input name="title" type="text" maxLength={80} required defaultValue={course.title || ''} placeholder="예: 부산 맛집과 바다 여행 코스" /></label></div>
       <div className="field-row">
         <div className="field"><label>여행 유형 *<select name="category" required defaultValue={course.category || ''}><option value="">선택</option>{['맛집', '문화', '힐링', '액티비티'].map((value) => <option key={value}>{value}</option>)}</select></label></div>
         <div className="field"><label>동행 유형 *<select name="companion" required defaultValue={course.companion || ''}><option value="">선택</option>{['혼자', '친구', '연인', '가족'].map((value) => <option key={value}>{value}</option>)}</select></label></div>
       </div>
-      <div className="field"><label>여행 후기 *<textarea name="body" rows={editing ? 6 : 20} maxLength={2000} required defaultValue={course.body || ''}
-        ref={editing ? null : reviewInput} className={editing ? undefined : 'review-input'}
-        onInput={editing ? undefined : event => resizeReview(event.currentTarget)} /></label></div>
-      {editing && <p className="note">기존 사진: {course.photos?.length ? course.photos.join(', ') : '없음'} · 새 사진을 선택하지 않으면 그대로 유지됩니다.</p>}
+      <div className="field"><label>여행 후기 *<textarea name="body" rows={20} maxLength={2000} required defaultValue={course.body || ''}
+        ref={reviewInput} className="review-input" onInput={event => resizeReview(event.currentTarget)} /></label></div>
       <div className="field">
-        <label htmlFor={photoInputId}>{editing ? '사진 변경 (선택 시 교체)' : '사진 첨부'}</label>
+        <label htmlFor={photoInputId}>사진 첨부</label>
         <div className="photo-attachment">
-          <input id={photoInputId} name="photos" type="file" className={editing ? undefined : 'attachment-file-input'}
-            accept="image/jpeg,image/png,image/webp,image/gif" multiple disabled={!editing && reading} onChange={changePhotos} aria-describedby="photo-help" />
-          {!editing && <>
-            <label className="button attachment-file-button" htmlFor={photoInputId} aria-hidden="true">파일 선택</label>
-            <span className="attachment-file-text">{selectedPhotos?.length > 0
-              ? (selectedPhotos.length === 1 ? selectedPhotos[0].name : `파일 ${selectedPhotos.length}개`)
-              : '선택한 파일 없음'}</span>
-          </>}
-          {!editing && selectedPhotos?.length > 0 && <div className="attachment-thumbnails">
-            {selectedPhotos.map((photo, index) => <div className="attachment-thumbnail" key={index}>
+          <input id={photoInputId} name="photos" type="file" className="attachment-file-input"
+            accept="image/jpeg,image/png,image/webp,image/gif" multiple disabled={reading || submitting} onChange={changePhotos} aria-describedby="photo-help" />
+          <label className="button attachment-file-button" htmlFor={photoInputId} aria-hidden="true">파일 선택</label>
+          <span className="attachment-file-text">{visiblePhotos.length === 0 ? '선택한 파일 없음'
+            : visiblePhotos.length === 1 ? visiblePhotos[0].name : `파일 ${visiblePhotos.length}개`}</span>
+          {visiblePhotos.some(photo => photo.dataUrl) && <div className="attachment-thumbnails">
+            {visiblePhotos.map((photo, index) => photo.dataUrl && <div className="attachment-thumbnail" key={index}>
               <img src={photo.dataUrl} alt={`첨부 사진 ${index + 1}: ${photo.name}`} />
-              <button type="button" className="attachment-remove" disabled={reading || submitting}
-                aria-label={`첨부 사진 ${index + 1} 제거: ${photo.name}`} onClick={() => removePhoto(index)}>×</button>
+              {selectedPhotos && <button type="button" className="attachment-remove" disabled={reading || submitting}
+                aria-label={`첨부 사진 ${index + 1} 제거: ${photo.name}`} onClick={() => removePhoto(index)}>×</button>}
             </div>)}
           </div>}
         </div>
       </div>
-      <p className="form-help" id="photo-help">JPG·PNG·WebP·GIF 사진은 최대 5개, 파일당 5MB, 전체 25MB까지 {serverMode ? '서버에 저장됩니다.' : '선택할 수 있습니다. 브라우저 저장 공간에 따라 저장이 제한될 수 있습니다.'}</p>
+      <p className="form-help" id="photo-help">JPG·PNG·WebP·GIF 사진은 최대 5개, 파일당 5MB, 전체 25MB까지 {serverMode ? '서버에 저장됩니다.' : '선택할 수 있습니다. 브라우저 저장 공간에 따라 저장이 제한될 수 있습니다.'}
+        {editing && existingPhotos.length > 0 && ' 새 사진을 첨부하면 기존 사진이 교체됩니다.'}</p>
       {photoError && <p className="form-error" role="alert">{photoError}</p>}
       {reading && <p role="status">사진을 읽고 있습니다.</p>}
       {submitting && <p role="status">게시글을 저장하고 있습니다.</p>}
@@ -166,7 +158,7 @@ export default function CourseForm({ course = {}, mode = 'create', onSubmit, onS
         <p className="writing-sample">{preview.body.trim() || '여행 후기를 입력해주세요'}</p>
         {pending && previewContext}
         {submitError && <p role="alert">{submitError}</p>}
-        <div className="actions recommendation-preview-actions"><button type="button" disabled={submitting} onClick={() => { dialog.current?.close(); setPending(null); }}>수정</button><button className="primary" type="button" disabled={submitting} onClick={async () => { setSubmitting(true); try { const result = await onSubmit?.(pending); if (result?.error) setSubmitError(result.error); else { dialog.current?.close(); setPending(null); } } finally { setSubmitting(false); } }}>{submitting ? '등록 중…' : editing ? '수정 저장' : '등록'}</button></div>
+        <div className="actions recommendation-preview-actions"><button type="button" disabled={submitting} onClick={() => { dialog.current?.close(); setPending(null); }}>수정</button><button className="primary" type="button" disabled={submitting} onClick={async () => { setSubmitting(true); try { const result = await onSubmit?.(pending); if (result?.error) setSubmitError(result.error); else { dialog.current?.close(); setPending(null); } } finally { setSubmitting(false); } }}>{editing ? (submitting ? '저장 중…' : '수정 저장') : (submitting ? '등록 중…' : '등록')}</button></div>
       </dialog>
       <div className="actions course-form-actions"><button className="primary" type="submit" disabled={!onSubmit || reading || submitting || (editing && Boolean(photoError))}>{editing ? '수정 저장하기' : '등록'}</button>
         {onSaveDraft && <button type="button" disabled={submitting} onClick={() => onSaveDraft(preview)}>임시저장</button>}

@@ -39,7 +39,7 @@ export function addressSearch(maps, address) {
   });
 }
 
-function coord2Address(maps, place) {
+export function coord2Address(maps, place) {
   return new Promise((resolve) => {
     new maps.services.Geocoder().coord2Address(Number(place.longitude), Number(place.latitude), (results, status) => {
       resolve(status === maps.services.Status.OK ? addressOf(results?.[0]) : '');

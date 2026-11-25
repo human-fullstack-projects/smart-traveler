@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '../../../contexts/AuthContext.jsx';
+import ItineraryPlaceList from '../../../components/map/ItineraryPlaceList.jsx';
+import { myPageApi } from '../../mypage/api/myPageApi.js';
 import { createReservation, getRooms, getStay, getStayTourPhotos } from '../shared/stayApi.js';
 import useStayCourse, { readStayCourseId } from '../shared/useStayCourse.js';
 import '../../../css/stay-shared.css';
@@ -13,7 +15,8 @@ export default function StayBookingPage({ onStart, busy = false }) {
   const query = new URLSearchParams(window.location.hash.split('?')[1]);
   const lodgingId = query.get('stay');
   const courseId = readStayCourseId(query);
-  const { course, route: courseRoute, loading: stayCourseLoading, error: stayCourseError, sourceLabel, retry: retryStayCourse } = useStayCourse(courseId);
+  const { course, route: courseRoute, loading: stayCourseLoading, error: stayCourseError, sourceLabel, retry: retryStayCourse } =
+    useStayCourse(courseId, { includePlaceAddresses: true });
   const backToSearch = courseId ? `#/stays?courseId=${encodeURIComponent(courseId)}` : '#/stays';
   const defaults = getDefaultStayDates();
   const { member, authChecked, authCheckFailed } = useAuth();
@@ -32,6 +35,8 @@ export default function StayBookingPage({ onStart, busy = false }) {
   const [sameAsBooker, setSameAsBooker] = useState(false);
   const [startingCourse, setStartingCourse] = useState(false);
   const [courseError, setCourseError] = useState('');
+  const [placeSelection, setPlaceSelection] = useState(null);
+  const selectedPlaceId = placeSelection?.course === course ? placeSelection?.id : null;
   const courseInFlight = useRef(false);
   const courseMessage = stay?.name?.trim();
   const bookerName = member?.nickname?.trim() || member?.loginId || '';
@@ -83,6 +88,10 @@ export default function StayBookingPage({ onStart, busy = false }) {
     setRooms([]);
     setNotice('');
     setter(value);
+  }
+
+  function selectCoursePlace(place) {
+    setPlaceSelection(current => current?.course === course && current?.id === place.id ? null : { course, id: place.id });
   }
 
   async function startCourse() {
@@ -155,7 +164,8 @@ export default function StayBookingPage({ onStart, busy = false }) {
             photoStatus={tourGallery?.status || 'loading'} />
           <div className="booking-stay-info">
             <StayOverview stay={stay} />
-            <StayLocation stay={stay} courseRoute={courseId ? courseRoute : null} />
+            <StayLocation stay={stay} courseRoute={courseId ? courseRoute : null} selectedPlaceId={selectedPlaceId}
+              onCoursePlaceSelect={course ? selectCoursePlace : undefined} />
           </div>
           <div className="booking-layout">
             <section className="booking-section">
@@ -214,6 +224,11 @@ export default function StayBookingPage({ onStart, busy = false }) {
               </form>
             </aside>
           </div>
+          {course && courseRoute.days.some(day => day.places.length) && <section className="booking-section booking-course-itinerary itinerary-map" aria-labelledby="booking-itinerary-title">
+            <h2 id="booking-itinerary-title">여행 일정</h2>
+            <ItineraryPlaceList days={courseRoute.days} selectedId={selectedPlaceId} onSelect={selectCoursePlace}
+              loadDetails={myPageApi.placeDetails} loadPhotos={myPageApi.placeTourPhotos} searchRegion={course.region} />
+          </section>}
         </>}
       </main>
     </div>
