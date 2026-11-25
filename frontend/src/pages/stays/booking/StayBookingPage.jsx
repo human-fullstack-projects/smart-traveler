@@ -6,7 +6,7 @@ import { myPageApi } from '../../mypage/api/myPageApi.js';
 import { createReservation, getRooms, getStay, getStayTourPhotos } from '../shared/stayApi.js';
 import useStayCourse, { readStayCourseId } from '../shared/useStayCourse.js';
 import '../../../css/stay-shared.css';
-import { formatWon, getDefaultStayDates, getNightCount, stayTypeLabels } from '../shared/stayData.js';
+import { formatWon, getDefaultStayDates, getNightCount, getStayCourseMessage, stayTypeLabels } from '../shared/stayData.js';
 import { StayLocation, StayOverview } from './StayDetails.jsx';
 import StayPhotoGallery from './StayPhotoGallery.jsx';
 import { buildStayGallery } from './stayPhotos.js';
@@ -41,7 +41,7 @@ export default function StayBookingPage({ onStart, busy = false }) {
   const [placeSelection, setPlaceSelection] = useState(null);
   const selectedPlaceId = placeSelection?.course === course ? placeSelection?.id : null;
   const courseInFlight = useRef(false);
-  const courseMessage = stay?.name?.trim();
+  const courseMessage = getStayCourseMessage(stay?.sidoName, stay?.name);
   const bookerName = member?.nickname?.trim() || member?.loginId || '';
   const bookerEmail = member?.email?.trim() || '';
   const room = rooms.find((item) => item.roomId === roomId && item.available !== false);
@@ -103,7 +103,7 @@ export default function StayBookingPage({ onStart, busy = false }) {
     setStartingCourse(true);
     setCourseError('');
     try {
-      await onStart(courseMessage, stay.regionId ?? null, stay.lodgingId);
+      await onStart(courseMessage);
     } catch {
       setCourseError('대화를 시작하지 못했어요. 잠시 후 다시 시도해 주세요.');
     } finally {
