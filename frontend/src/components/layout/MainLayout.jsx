@@ -2,13 +2,13 @@ import { useState } from 'react';
 import SiteHeader from './SiteHeader';
 import SiteFooter from './SiteFooter';
 
-export default function MainLayout({ children, member, loggingOut, onLogout, notice, onDismissNotice, isHome = false, pastelBackground = false }) {
+export default function MainLayout({ children, member, loggingOut, onLogout, notice, onDismissNotice, isHome = false, isChat = false, pastelBackground = false }) {
   const [globalNotice, setGlobalNotice] = useState('');
 
   const banner = notice || globalNotice;
 
   return (
-    <div className={`main-page${isHome ? ' is-home' : ''}${pastelBackground ? ' has-pastel-background' : ''}`}>
+    <div className={`main-page${isHome ? ' is-home' : ''}${isChat ? ' is-chat' : ''}${pastelBackground ? ' has-pastel-background' : ''}`}>
       <SiteHeader member={member} loggingOut={loggingOut} onLogout={onLogout} />
 
       {banner && (

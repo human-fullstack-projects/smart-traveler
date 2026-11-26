@@ -149,6 +149,14 @@ header.mp-topbar{background:#fff;flex-shrink:0}
 .main-page.is-home .mp-body,.main-page.is-home .mp-content{min-height:0}
 .main-page.is-home .mp-main{max-width:none;padding:0;display:flex;min-height:0}
 
+/* #/chat: 데스크톱 2단 레이아웃에서는 채팅창(.cb-messages)만 스크롤되게 하고 페이지 전체 스크롤은 막는다. */
+@media(min-width:851px){
+  .main-page.is-chat{height:100vh;overflow:hidden}
+  .main-page.is-chat .mp-body,
+  .main-page.is-chat .mp-content,
+  .main-page.is-chat .mp-main{min-height:0;overflow:hidden}
+}
+
 /* 관리자 계정 둘러보기 안내 (관리자만 보임) */
 .admin-readonly-banner {
   margin: 0;

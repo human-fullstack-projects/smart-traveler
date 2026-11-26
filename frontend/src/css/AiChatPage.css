@@ -51,6 +51,14 @@
 .cb-region-list button:hover{background:#F2F0F8}
 .cb-region-picker button:disabled{opacity:.5;cursor:default}
 
+/* 데스크톱: 채팅창·조건 패널이 (헤더·푸터를 뺀) 남은 높이를 정확히 채우게 하고,
+   조건 패널이 길어지면 페이지가 아니라 패널 안에서만 스크롤되게 한다. */
+@media(min-width:851px){
+  .cb-page{height:100%;align-items:stretch}
+  .cb-chat{height:100%}
+  .cb-side{position:static;height:100%;overflow-y:auto}
+}
+
 @media(max-width:850px){
   .cb-page{grid-template-columns:1fr}
   .cb-side{position:static;order:-1}
