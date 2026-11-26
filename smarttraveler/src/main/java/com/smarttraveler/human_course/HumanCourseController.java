@@ -52,8 +52,9 @@ public class HumanCourseController {
 
     @PutMapping("/{id}")
     public IdResult edit(@PathVariable long id, Authentication auth, @RequestBody PostInput input,
-                         @RequestParam(defaultValue = "false") boolean republish) {
-        return service.edit(auth, id, input, republish);
+                         @RequestParam(defaultValue = "false") boolean republish,
+                         @RequestParam(required = false) Long reservationId) {
+        return service.edit(auth, id, input, republish, reservationId);
     }
 
     @DeleteMapping("/{id}")

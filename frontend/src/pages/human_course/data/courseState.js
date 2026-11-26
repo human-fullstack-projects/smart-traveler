@@ -75,6 +75,14 @@ export function transition(current, action) {
     if ((course.visibility === 'DRAFT' && !action.republish) || (course.visibility === 'BLINDED' && action.republish)) return fail('게시 상태가 변경됐습니다.');
     const fields = postFields(action.fields);
     if (!fields) return fail('필수 항목·글자 수·사진 개수를 확인해주세요.');
+    if (action.reservationId && String(action.reservationId) !== String(course.reservationId)) {
+      const reservation = state.reservations.find(item => String(item.id) === String(action.reservationId));
+      const error = creationError(state, reservation);
+      if (error) return fail(error);
+      const itinerary = finalCourse(reservation);
+      Object.assign(course, { reservationId: reservation.id, region: reservation.region, travelDates: reservation.dates,
+        plan: itinerary.plan, courseVersion: itinerary.version });
+    }
     Object.assign(course, fields);
     if (course.visibility === 'DRAFT') course.visibility = 'PUBLIC';
     return { state, id: course.id };

@@ -50,7 +50,10 @@ class HumanCourseDraftDatabaseTest {
             SELECT r.member_id,r.course_id,r.room_id,?,'테스트','000-0000-0000',
                 r.checkin_date,r.checkout_date,r.guest_count,r.total_price,'COMPLETED'
             FROM room_reservation r JOIN members m ON m.member_id=r.member_id
-            WHERE r.status='COMPLETED' AND r.course_id IS NOT NULL AND m.status='ACTIVE'
+            JOIN course c ON c.id=r.course_id AND c.member_no=r.member_id
+            WHERE r.status='COMPLETED' AND m.status='ACTIVE' AND r.checkout_date < CURRENT_DATE
+              AND c.status='done' AND c.is_active=TRUE AND c.deleted_at IS NULL
+              AND EXISTS (SELECT 1 FROM course_day d JOIN activity a ON a.course_day_id=d.id WHERE d.course_id=c.id)
               AND m.deleted_at IS NULL AND m.role_code='USER'
             ORDER BY r.reservation_id LIMIT 1
             """, reservationNo), "검증에는 코스가 연결된 완료 예약 한 건이 필요합니다.");
@@ -58,9 +61,18 @@ class HumanCourseDraftDatabaseTest {
         long reservationId = ((Number) reservation.get("reservation_id")).longValue();
         long memberId = ((Number) reservation.get("member_id")).longValue();
         long courseId = ((Number) reservation.get("course_id")).longValue();
+        String replacementNo = "TEST-DRAFT-" + UUID.randomUUID();
         jdbc.update("""
-            INSERT INTO human_course_post(reservation_id,author_id,course_id,title,category,companion_type,content,status,course_snapshot)
-            VALUES (?,?,?,'검증 제목','문화','친구','기존 후기','VISIBLE','{"version":1,"plan":[]}')
+            INSERT INTO room_reservation(member_id,course_id,room_id,reservation_no,booker_name,booker_phone,
+                checkin_date,checkout_date,guest_count,total_price,status)
+            SELECT member_id,course_id,room_id,?,booker_name,booker_phone,
+                DATE_SUB(checkin_date, INTERVAL 1 DAY),DATE_SUB(checkout_date, INTERVAL 1 DAY),guest_count,total_price,status
+            FROM room_reservation WHERE reservation_id=?
+            """, replacementNo, reservationId);
+        long replacementId = jdbc.queryForObject("SELECT reservation_id FROM room_reservation WHERE reservation_no=?", Long.class, replacementNo);
+        jdbc.update("""
+            INSERT INTO human_course_post(reservation_id,author_id,course_id,title,category,companion_type,summary,content,status,course_snapshot)
+            VALUES (?,?,?,'검증 제목','문화','친구','기존 소개','기존 후기','VISIBLE','{"version":1,"plan":[]}')
             """, reservationId, memberId, courseId);
         long postId = jdbc.queryForObject("SELECT post_id FROM human_course_post WHERE reservation_id=?", Long.class, reservationId);
         jdbc.update("INSERT INTO human_course_like(post_id,member_id,created_at) VALUES (?,?,NOW())", postId, memberId);
@@ -90,13 +102,17 @@ class HumanCourseDraftDatabaseTest {
         assertEquals(HttpStatus.NOT_FOUND, assertThrows(ResponseStatusException.class, () -> service.detail(postId, null)).getStatusCode());
 
         var edited = new PostInput("수정 제목", "힐링", "가족", null, "수정한 여행 후기", List.of(), false);
-        assertEquals(postId, service.edit(auth, postId, edited, true).id());
+        assertEquals(postId, service.edit(auth, postId, edited, true, replacementId).id());
         var published = service.detail(postId, null);
         assertEquals("PUBLIC", published.visibility());
         assertEquals(edited.title(), published.title());
         assertEquals(edited.body(), published.body());
+        assertEquals(edited.body(), published.summary());
         assertEquals(edited.category(), published.category());
         assertEquals(edited.companion(), published.companion());
+        assertEquals(Long.toString(replacementId), published.reservationId());
+        assertNotEquals(before.travelDates(), published.travelDates());
+        assertFalse(published.plan().isEmpty());
         assertEquals(draft.comments().getFirst().id(), published.comments().getFirst().id());
         assertEquals(draft.comments().getFirst().text(), published.comments().getFirst().text());
         assertEquals(draft.likes(), published.likes());

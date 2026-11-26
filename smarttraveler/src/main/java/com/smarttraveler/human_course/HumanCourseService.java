@@ -321,14 +321,9 @@ public class HumanCourseService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "후기 작성은 일반 사용자 계정으로 이용해주세요.");
         }
         validate(input);
-        var rows = jdbc.queryForList("SELECT reservation_id FROM room_reservation WHERE reservation_id=? AND member_id=? FOR UPDATE", reservationId, owner);
-        if (rows.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "예약을 찾을 수 없습니다.");
-        Reservation reservation = reservations(auth).stream().filter(r -> r.id().equals(String.valueOf(reservationId)))
-            .findFirst().orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        if (!reservation.eligibilityError().isEmpty()) throw new ResponseStatusException(HttpStatus.CONFLICT, reservation.eligibilityError());
+        Reservation reservation = requireEligibleReservation(auth, reservationId, owner);
         long courseId = jdbc.queryForObject("SELECT course_id FROM room_reservation WHERE reservation_id=?", Long.class, reservationId);
-        Snapshot snapshot = new Snapshot(reservation.region(), reservation.dates().substring(0, 10),
-            reservation.dates().substring(reservation.dates().length() - 10), reservation.courseVersion(), reservation.plan());
+        Snapshot snapshot = reservationSnapshot(reservation);
         var key = new GeneratedKeyHolder();
         jdbc.update(connection -> {
             PreparedStatement statement = connection.prepareStatement("""
@@ -347,16 +342,41 @@ public class HumanCourseService {
         return new IdResult(id);
     }
 
+    private Reservation requireEligibleReservation(Authentication auth, long reservationId, long owner) {
+        var rows = jdbc.queryForList("SELECT reservation_id FROM room_reservation WHERE reservation_id=? AND member_id=? FOR UPDATE", reservationId, owner);
+        if (rows.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "예약을 찾을 수 없습니다.");
+        Reservation reservation = reservations(auth).stream().filter(r -> r.id().equals(String.valueOf(reservationId)))
+            .findFirst().orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        if (!reservation.eligibilityError().isEmpty()) throw new ResponseStatusException(HttpStatus.CONFLICT, reservation.eligibilityError());
+        return reservation;
+    }
+
+    private static Snapshot reservationSnapshot(Reservation reservation) {
+        return new Snapshot(reservation.region(), reservation.dates().substring(0, 10),
+            reservation.dates().substring(reservation.dates().length() - 10), reservation.courseVersion(), reservation.plan());
+    }
+
     @Transactional
     public IdResult edit(Authentication auth, long id, PostInput input, boolean republish) {
+        return edit(auth, id, input, republish, null);
+    }
+
+    @Transactional
+    public IdResult edit(Authentication auth, long id, PostInput input, boolean republish, Long reservationId) {
         long owner = member(auth);
         validate(input);
-        var rows = jdbc.queryForList("SELECT author_id,status FROM human_course_post WHERE post_id=? AND deleted_at IS NULL FOR UPDATE", id);
+        var rows = jdbc.queryForList("SELECT author_id,status,reservation_id FROM human_course_post WHERE post_id=? AND deleted_at IS NULL FOR UPDATE", id);
         if (rows.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         if (number(rows.getFirst(), "author_id") != owner) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         String status = string(rows.getFirst(), "status");
         if (("DRAFT".equals(status) && !republish) || ("BLINDED".equals(status) && republish)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "게시 상태가 변경됐습니다. 화면을 새로고침해 주세요.");
+        }
+        if (reservationId != null && reservationId != number(rows.getFirst(), "reservation_id")) {
+            Reservation replacement = requireEligibleReservation(auth, reservationId, owner);
+            long replacementCourseId = jdbc.queryForObject("SELECT course_id FROM room_reservation WHERE reservation_id=?", Long.class, reservationId);
+            jdbc.update("UPDATE human_course_post SET reservation_id=?,course_id=?,course_snapshot=?,summary=NULL WHERE post_id=?",
+                reservationId, replacementCourseId, mapper.writeValueAsString(reservationSnapshot(replacement)), id);
         }
         jdbc.update("""
             UPDATE human_course_post SET title=?,category=?,summary=COALESCE(?,summary),companion_type=?,content=?,
