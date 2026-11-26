@@ -62,6 +62,13 @@ public class HumanCourseService {
         return member(auth);
     }
 
+    private void rejectOwnerAction(Authentication auth, String action) {
+        var account = members.findByLoginId(auth.getName()).orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+        if ("OWNER".equals(account.getRoleCode())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, action + "은 일반 사용자 계정으로 이용해주세요.");
+        }
+    }
+
     @Transactional(readOnly = true)
     public List<Post> list(Authentication auth) {
         long viewer = viewer(auth);
@@ -365,6 +372,7 @@ public class HumanCourseService {
     @Transactional
     public Post like(Authentication auth, long id) {
         long owner = member(auth);
+        rejectOwnerAction(auth, "좋아요");
         requireVisible(id);
         int removed = jdbc.update("DELETE FROM human_course_like WHERE post_id=? AND member_id=?", id, owner);
         if (removed == 0) jdbc.update("INSERT INTO human_course_like(post_id,member_id,created_at) VALUES (?,?,NOW())", id, owner);
@@ -374,6 +382,7 @@ public class HumanCourseService {
     @Transactional
     public Post comment(Authentication auth, long id, CommentInput input) {
         long owner = member(auth);
+        rejectOwnerAction(auth, "댓글 작성");
         requireVisible(id);
         String text = input == null || input.text() == null ? "" : input.text().trim();
         if (text.isEmpty() || text.length() > 300) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "댓글은 1~300자로 입력해주세요.");
