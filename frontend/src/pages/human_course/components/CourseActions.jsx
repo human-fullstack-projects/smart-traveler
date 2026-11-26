@@ -1,8 +1,13 @@
 import { useRef, useState } from 'react';
+import { useAuth } from '../../../contexts/AuthContext.jsx';
+import OwnerActionNotice from '../../../components/OwnerActionNotice.jsx';
 
 const reportReasons = ['광고·홍보', '욕설·비방', '부적절한 내용', '기타'];
 
 export default function CourseActions({ course, execute }) {
+  const { member } = useAuth();
+  const isOwner = member?.roleCode === 'OWNER';
+  const [ownerNotice, setOwnerNotice] = useState(false);
   const [notice, setNotice] = useState('');
   const [deleting, setDeleting] = useState(false);
   const [liking, setLiking] = useState(false);
@@ -11,6 +16,7 @@ export default function CourseActions({ course, execute }) {
   const reportDialog = useRef(null);
 
   async function changeLike() {
+    if (isOwner) { setOwnerNotice(true); return; }
     if (liking) return;
     setLiking(true);
     setNotice('');
@@ -47,8 +53,9 @@ export default function CourseActions({ course, execute }) {
   }
 
   return <section className="panel"><div className="panel-heading"><h2>게시글 기능</h2></div>
+    {ownerNotice && <OwnerActionNotice action="좋아요" onClose={() => setOwnerNotice(false)} />}
     <div className="actions">
-      <button className="primary" type="button" onClick={changeLike} disabled={course.mine || liking} aria-pressed={course.likedByMe} aria-busy={liking}>{liking ? '처리 중…' : course.likedByMe ? '좋아요 취소' : '좋아요 누르기'}</button>
+      <button className="primary" type="button" onClick={changeLike} disabled={(!isOwner && course.mine) || liking} aria-haspopup={isOwner ? 'dialog' : undefined} aria-pressed={course.likedByMe} aria-busy={liking}>{liking ? '처리 중…' : course.likedByMe ? '좋아요 취소' : '좋아요 누르기'}</button>
       <span className="muted" aria-live="polite">좋아요 {course.likes}개</span>
       {!course.reportedByMe && <button type="button" aria-haspopup="dialog" onClick={openReport} disabled={course.mine || liking}>게시글 신고</button>}
     </div>

@@ -97,10 +97,13 @@ public class AdminDataService {
         Map<Long, Boolean> featured = new HashMap<>();
         jdbc.queryForList("SELECT post_id FROM admin_human_exposure WHERE scope='MAIN'")
             .forEach(row -> featured.put(((Number) row.get("post_id")).longValue(), true));
+        Map<Long, Long> likes = countByPost("SELECT post_id, COUNT(*) AS n FROM human_course_like GROUP BY post_id");
+        Map<Long, Long> comments = countByPost("SELECT post_id, COUNT(*) AS n FROM human_course_comment WHERE deleted_at IS NULL GROUP BY post_id");
         return humanCourses.findAllWithCourse().stream()
             .map(post -> new HumanCourseView(post,
                 post.getCourse() == null ? null : post.getCourse().getDestination(),
-                featured.getOrDefault(post.getPostId(), false), post.getAuthor()))
+                featured.getOrDefault(post.getPostId(), false), post.getAuthor(),
+                likes.getOrDefault(post.getPostId(), 0L), comments.getOrDefault(post.getPostId(), 0L)))
             .toList();
     }
     @Transactional(readOnly = true)
@@ -374,6 +377,12 @@ public class AdminDataService {
         h.setNote(reason);
         h.setCreatedAt(LocalDateTime.now());
         humanActions.save(h);
+    }
+
+    private Map<Long, Long> countByPost(String sql) {
+        Map<Long, Long> counts = new HashMap<>();
+        jdbc.queryForList(sql).forEach(row -> counts.put(((Number) row.get("post_id")).longValue(), ((Number) row.get("n")).longValue()));
+        return counts;
     }
 
     private HumanCourseView enrichHumanCourse(HumanCoursePost post) {

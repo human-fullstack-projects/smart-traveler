@@ -25,6 +25,49 @@ import org.springframework.web.server.ResponseStatusException;
 import tools.jackson.databind.ObjectMapper;
 
 class HumanCourseServiceTest {
+    @Test void ownerCannotLikeOrCommentAndNoPostDataIsChanged() {
+        var jdbc = mock(JdbcTemplate.class);
+        var members = mock(MemberRepository.class);
+        var auth = mock(Authentication.class);
+        var owner = new Member();
+        owner.setMemberId(7L);
+        owner.setRoleCode("OWNER");
+        owner.setStatus("ACTIVE");
+        when(auth.getName()).thenReturn("owner");
+        when(auth.isAuthenticated()).thenReturn(true);
+        when(members.findByLoginId("owner")).thenReturn(Optional.of(owner));
+        var service = new HumanCourseService(jdbc, mock(ObjectMapper.class), members,
+                mock(HumanCoursePhotoStore.class), mock(HumanManagementService.class));
+
+        assertEquals(HttpStatus.FORBIDDEN,
+                assertThrows(ResponseStatusException.class, () -> service.like(auth, 77L)).getStatusCode());
+        assertEquals(HttpStatus.FORBIDDEN,
+                assertThrows(ResponseStatusException.class, () -> service.comment(auth, 77L, null)).getStatusCode());
+        verifyNoInteractions(jdbc);
+    }
+
+    @Test void ordinaryUserCanReachLikeAndCommentPostValidation() {
+        var jdbc = mock(JdbcTemplate.class);
+        var members = mock(MemberRepository.class);
+        var auth = mock(Authentication.class);
+        var user = new Member();
+        user.setMemberId(8L);
+        user.setRoleCode("USER");
+        user.setStatus("ACTIVE");
+        when(auth.getName()).thenReturn("user");
+        when(auth.isAuthenticated()).thenReturn(true);
+        when(members.findByLoginId("user")).thenReturn(Optional.of(user));
+        var service = new HumanCourseService(jdbc, mock(ObjectMapper.class), members,
+                mock(HumanCoursePhotoStore.class), mock(HumanManagementService.class));
+
+        // The post does not exist; ordinary users must get 404, not the owner-only 403.
+        assertEquals(HttpStatus.NOT_FOUND,
+                assertThrows(ResponseStatusException.class, () -> service.like(auth, 77L)).getStatusCode());
+        assertEquals(HttpStatus.NOT_FOUND,
+                assertThrows(ResponseStatusException.class, () -> service.comment(auth, 77L, null)).getStatusCode());
+        verify(jdbc, times(2)).queryForList(contains("status='VISIBLE'"), eq(77L));
+    }
+
     @Test void ownerCannotPublishAReviewEvenWithAReservationId() {
         var jdbc = mock(JdbcTemplate.class);
         var members = mock(MemberRepository.class);

@@ -20,7 +20,7 @@ const accountLinks = [
 export default function SiteHeader({ member, loggingOut, onLogout }) {
   const navigation = navigationItems.map((item) =>
     member?.roleCode === 'OWNER' && item.href === '#/mypage'
-      ? { label: '업주 대시보드', href: '#/owner' }
+      ? { label: '업주 센터', href: '#/owner', className: 'header-owner-dashboard' }
       : item
   );
   const [menuOpen, setMenuOpen] = useState(false);
@@ -53,7 +53,7 @@ export default function SiteHeader({ member, loggingOut, onLogout }) {
   }, [menuOpen]);
 
   const renderLink = item => (
-    <a key={item.href} href={item.href} onClick={() => setMenuOpen(false)}>{item.label}</a>
+    <a key={item.href} href={item.href} className={item.className} onClick={() => setMenuOpen(false)}>{item.label}</a>
   );
 
   return (
@@ -68,7 +68,7 @@ export default function SiteHeader({ member, loggingOut, onLogout }) {
       <div className="st-header-actions">
         <nav className="st-top-links" aria-label="주 메뉴">
           {navigation.map((item) => (
-            <a key={item.label} href={item.href}>{item.label}</a>
+            <a key={item.label} href={item.href} className={item.className}>{item.label}</a>
           ))}
         </nav>
 
