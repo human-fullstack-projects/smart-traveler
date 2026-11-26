@@ -30,12 +30,7 @@ public class RecommendedCourseService {
     /** 추천 코스를 메시지에 붙여 둔다. 저장은 화면의 [저장하기]를 눌렀을 때만 한다(피드백: 저장하기 Y/N). */
     public void record(long sessionId, long messageId, long sourceId) {
         String json = jdbc.queryForObject("SELECT conditions_json FROM chat_session_conditions WHERE session_id=?", String.class, sessionId);
-        record(sessionId, messageId, sourceId, (ObjectNode) mapper.readTree(json));
-    }
-
-    /** used = 추천에 실제로 쓴 조건(말하지 않은 값은 기본값을 채운 사본). */
-    public void record(long sessionId, long messageId, long sourceId, ObjectNode used) {
-        record(sessionId, messageId, sourceId, used, List.of(sourceId));
+        record(sessionId, messageId, sourceId, (ObjectNode) mapper.readTree(json), List.of(sourceId));
     }
 
     /** candidateIds = 함께 보여준 추천 코스 전체(1위부터), 화면에서 저장할 코스를 고를 때 쓴다. */
@@ -123,16 +118,6 @@ public class RecommendedCourseService {
     }
 
     public record SavedResult(long courseId, Long sidoId, Long sigunguId, String regionName) {}
-
-    @Transactional
-    public SavedResult save(long memberId, long sessionId, long messageId) {
-        return save(memberId, sessionId, messageId, null);
-    }
-
-    @Transactional
-    public SavedResult save(long memberId, long sessionId, long messageId, String startDateOverride) {
-        return save(memberId, sessionId, messageId, startDateOverride, null);
-    }
 
     @Transactional
     public SavedResult save(long memberId, long sessionId, long messageId, String startDateOverride, Long chosenCourseId) {

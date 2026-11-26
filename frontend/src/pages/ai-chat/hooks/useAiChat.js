@@ -44,13 +44,7 @@ export function buildStayNavHash(region, usedConditions, courseId) {
     if (!params.has('adults')) params.set('adults', '1');
     return `/stays/booking?${params.toString()}`;
   }
-  return region || courseId ? buildStaySearchHash(region ?? {}, usedConditions, courseId) : null;
-}
-
-function savedRecommendationStayHash(recommendation) {
-  if (!recommendation?.savedCourseId) return null;
-  const region = recommendation.region ?? { name: recommendation.destination };
-  return buildStayNavHash(region, recommendation.conditions, recommendation.savedCourseId);
+  return region ? buildStaySearchHash(region, usedConditions, courseId) : null;
 }
 
 function parse(chat) {
@@ -61,7 +55,7 @@ function parse(chat) {
 }
 
 /** AI 코스 챗봇의 대화 state를 관리한다. #/ai-course, #/chat이 같은 상태를 공유하도록 App 최상단에서 한 번만 호출한다. */
-export default function useAiChat({ ownerKey = 'guest', ready = true, authRevision = 0, memberRole } = {}) {
+export default function useAiChat({ ownerKey = 'guest', ready = true, authRevision = 0 } = {}) {
   const scope = `${ready ? ownerKey : 'checking'}:${authRevision}`;
   const activeScope = useRef(scope);
   const generation = useRef(0);
@@ -79,6 +73,7 @@ export default function useAiChat({ ownerKey = 'guest', ready = true, authRevisi
   const [loadError, setLoadError] = useState('');
   const [saveStatus, setSaveStatus] = useState('saved');
   const [courseSaveStatus, setCourseSaveStatus] = useState('');
+  const [savedStayHash, setSavedStayHash] = useState(null);
   const [guestLimitReached, setGuestLimitReached] = useState(false);
   const savingCourses = useRef(new Set());
   const saveQueue = useRef(Promise.resolve());
@@ -87,10 +82,6 @@ export default function useAiChat({ ownerKey = 'guest', ready = true, authRevisi
   const currentConditions = useRef({ conditions: createEmptyConditions(), confirmed: false });
   const sessionRef = useRef(null);
   sessionRef.current = loadedScope === scope && ready ? sessionId : null;
-  const lastRecommendation = messages.findLast(message => message.recommendation);
-  const canBookRecommendedCourse = ready && loadedScope === scope && ownerKey !== 'guest'
-    && memberRole !== 'ADMIN' && memberRole !== 'OWNER';
-  const savedStayHash = canBookRecommendedCourse ? savedRecommendationStayHash(lastRecommendation?.recommendation) : null;
 
   // 대화 저장 시점: 다른 페이지로 갈 때 · 창/탭을 닫을 때 (새 대화는 resetChat에서).
   // 서버가 메시지를 모아 두었다가 이때 DB에 한 번에 쓴다. 인터넷이 끊기면 저장되지 않을 수 있다.
@@ -152,23 +143,22 @@ export default function useAiChat({ ownerKey = 'guest', ready = true, authRevisi
     return () => { cancelled = true; };
   }, [scope, ownerKey, ready]);
 
+  // 추천 코스 저장은 자동으로 하지 않고, 화면의 [저장하기] / [안 할게요] 버튼으로 정한다 (피드백: 저장하기 Y/N).
   // 마지막 추천이 이미 저장(또는 비회원 보관)돼 있으면 그 상태를 보여 준다.
   useEffect(() => {
     if (!ready || loadedScope !== scope || !sessionId) return;
-    const last = lastRecommendation;
+    const last = messages.filter(message => message.recommendation).at(-1);
     if (!last) { setCourseSaveStatus(''); return; }
     if (last.recommendation.savedCourseId) setCourseSaveStatus('saved');
     else if (last.recommendation.guestStored) setCourseSaveStatus('guest-saved');
     else if (last.recommendation.declined) setCourseSaveStatus('declined');
     else setCourseSaveStatus(previous => (previous === 'saving' || previous === 'error' || previous === 'duplicate') ? previous : 'ask');
-  }, [lastRecommendation, sessionId, scope, ready, loadedScope]);
+  }, [messages, sessionId, scope, ready, loadedScope]);
 
-  async function saveCourse(startDate = null, chosenCourseId = null, { openStays = false } = {}) {
-    const last = lastRecommendation;
+  async function saveCourse(startDate = null, chosenCourseId = null) {
+    const last = messages.filter(message => message.recommendation).at(-1);
     if (!last || !sessionId || savingCourses.current.has(last.id) || (last.recommendation.candidateCourseIds?.length > 1 && !chosenCourseId)) return;
-    if (openStays && !canBookRecommendedCourse) return;
     const version = generation.current;
-    const entryHash = window.location.hash;
     savingCourses.current.add(last.id);
     setCourseSaveStatus('saving');
     try {
@@ -181,20 +171,10 @@ export default function useAiChat({ ownerKey = 'guest', ready = true, authRevisi
       } else {
         const result = await chatApi.saveRecommendedCourse(sessionId, last.id, startDate, chosenCourseId);
         if (version !== generation.current) return;
-        const recommendation = {
-          ...last.recommendation,
-          savedCourseId: result.courseId,
-          sourceCourseId: chosenCourseId ?? last.recommendation.sourceCourseId,
-          region: result.region,
-          conditions: { ...last.recommendation.conditions, startDate: last.recommendation.conditions?.startDate || startDate },
-        };
         setMessages(previous => previous.map(message => message.id === last.id
-          ? { ...message, recommendation } : message));
+          ? { ...message, recommendation: { ...message.recommendation, savedCourseId: result.courseId } } : message));
         window.dispatchEvent(new Event('smart-travel-courses-updated'));
-        if (openStays && window.location.hash === entryHash) {
-          const stayHash = savedRecommendationStayHash(recommendation);
-          if (stayHash) window.location.hash = stayHash;
-        }
+        setSavedStayHash(buildStayNavHash(result.region, { ...last.recommendation.conditions, startDate: last.recommendation.conditions?.startDate || startDate }, result.courseId));
       }
     } catch (error) {
       if (version === generation.current) setCourseSaveStatus(error?.status === 409 ? 'duplicate' : 'error');
@@ -204,13 +184,17 @@ export default function useAiChat({ ownerKey = 'guest', ready = true, authRevisi
   }
 
   function skipCourse() {
-    const last = lastRecommendation;
+    const last = messages.filter(message => message.recommendation).at(-1);
     if (!last) return;
     setMessages(previous => previous.map(message => message.id === last.id
       ? { ...message, recommendation: { ...message.recommendation, declined: true } } : message));
   }
 
-  async function startChat(message, regionId) {
+  function goToStayPage() {
+    if (savedStayHash) window.location.hash = savedStayHash;
+  }
+
+  async function startChat(message, regionId = null, lodgingId = null) {
     if (!ready || loadedScope !== scope) return;
     const version = generation.current;
     setBusy(true);
@@ -220,7 +204,7 @@ export default function useAiChat({ ownerKey = 'guest', ready = true, authRevisi
       if (version !== generation.current) return;
       let chat;
       try {
-        chat = await chatApi.create(message, regionId);
+        chat = await chatApi.create(message, regionId, lodgingId);
       } catch (error) {
         if (error?.code === 'GUEST_AI_LIMIT') { setGuestLimitReached(true); return; }
         throw error;
@@ -298,12 +282,12 @@ export default function useAiChat({ ownerKey = 'guest', ready = true, authRevisi
     loadError,
     saveStatus,
     courseSaveStatus: loadedScope === scope ? courseSaveStatus : '',
-    savedStayHash,
-    canBookRecommendedCourse,
+    savedStayHash: loadedScope === scope ? savedStayHash : null,
     guestLimitReached,
     dismissGuestLimit: () => setGuestLimitReached(false),
     saveCourse,
     skipCourse,
+    goToStayPage,
     startChat,
     selectRegion: (region) => {
       const message = `${region.fullName} 지역으로 여행할게요.`;

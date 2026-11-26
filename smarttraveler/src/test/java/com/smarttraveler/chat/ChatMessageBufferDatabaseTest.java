@@ -48,7 +48,7 @@ class ChatMessageBufferDatabaseTest {
     }
 
     private void aiSays(String text) {
-        when(ai.process(anyString(), anyString(), any(), anyList(), anyList(), anyMap())).thenReturn(new PythonAiClient.Result(text, false));
+        when(ai.process(anyString(), anyList())).thenReturn(new PythonAiClient.Result(text));
     }
     private JsonNode post(MockHttpSession browser, String path, String content) throws Exception {
         var request = org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/api/chat" + path).session(browser).with(csrf());
@@ -77,8 +77,8 @@ class ChatMessageBufferDatabaseTest {
 
         aiSays("몇 명이 가세요?");
         post(browser, "/sessions/" + chat + "/messages", "12월 10일에 가요");
-        // 저장 전 메시지(챗봇의 마지막 질문)도 다음 답의 문맥으로 쓴다.
-        verify(ai).process(eq("12월 10일에 가요"), eq("언제 출발하세요?"), any(), anyList(), anyList(), anyMap());
+        // ai-server는 메시지 한 건만 받는다(이전 질문 문맥을 따로 넘기지 않는다).
+        verify(ai).process(eq("12월 10일에 가요"), eq(List.of()));
         assertEquals(0, saved(chat));
 
         var before = texts(mapper.readTree(mvc.perform(get("/api/chat/sessions/" + chat).session(browser))
@@ -94,8 +94,7 @@ class ChatMessageBufferDatabaseTest {
 
         aiSays("교통수단은요?");
         JsonNode next = post(browser, "/sessions/" + chat + "/messages", "2명이요");
-        // 저장된 뒤에는 DB의 마지막 질문을 문맥으로 쓴다.
-        verify(ai).process(eq("2명이요"), eq("몇 명이 가세요?"), any(), anyList(), anyList(), anyMap());
+        verify(ai).process(eq("2명이요"), eq(List.of()));
         assertEquals(7, next.path("messages").size());
         assertEquals(5, saved(chat));
     }
@@ -105,7 +104,7 @@ class ChatMessageBufferDatabaseTest {
         aiSays("언제 출발하세요?");
         long chat = post(browser, "/sessions", "제주 여행").path("id").asLong();
         chats.add(chat);
-        when(ai.process(anyString(), anyString(), any(), anyList(), anyList(), anyMap())).thenThrow(new IllegalStateException("AI 서버 오류"));
+        when(ai.process(anyString(), anyList())).thenThrow(new IllegalStateException("AI 서버 오류"));
         int code;
         try {
             code = mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders

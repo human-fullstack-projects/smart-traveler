@@ -209,6 +209,7 @@ replay_pid*
 
 ### ai-server (Chroma) ###
 ai-server/chroma_data/
+ai-server/data/
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
