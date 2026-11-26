@@ -143,3 +143,11 @@
 /* 관광지 사진 등록 (11-23) */
 .adm-photo-upload { color: var(--st-blue, #3466F2); font-weight: 700; text-decoration: underline; cursor: pointer; }
 .adm-photo-upload.busy { color: var(--st-muted); cursor: progress; text-decoration: none; }
+
+/* 휴먼 추천 코스: 표 → 코스 상세 → 여행자 화면을 위아래로 (11-26) */
+.adm .adm-stack { display: grid; gap: 18px; }
+.adm .adm-stack > * { min-width: 0; }
+.adm-sortbar { display: flex; align-items: center; gap: 8px; }
+.adm-sort { border: 1px solid var(--st-line); background: #fff; color: var(--st-ink); border-radius: 999px; padding: 6px 14px; font-size: 13px; cursor: pointer; }
+.adm-sort.on { background: var(--st-teal); border-color: var(--st-teal); color: #fff; font-weight: 700; }
+.adm-user-view .human-courses .page { max-width: none; padding: 18px; }

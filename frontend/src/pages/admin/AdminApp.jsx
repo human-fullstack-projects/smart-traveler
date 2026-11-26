@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import '../../css/Admin.css';
 import { adminGet, adminPost } from '../../api/admin';
+import CoursePhotoGallery from '../human_course/components/CoursePhotoGallery';
+import CourseMap from '../human_course/components/CourseMap';
+import CourseComments from '../human_course/components/CourseComments';
+import '../../css/human-course.css';
 
 // 관리자 페이지 (ADM-01~19) — 서버 /api/admin (M55) 을 부르는 React 화면
 
@@ -378,8 +382,14 @@ function HumanCourses({ onChanged }) {
   const [picks, reloadPicks] = useLoad(() => adminGet('/human-monthly-picks', { month }), [month]);
   const [sel, setSel] = useState(null);
   const [detail, reloadDetail] = useLoad(() => (sel ? adminGet(`/human-courses/${sel}`) : Promise.resolve(null)), [sel]);
+  // 여행자가 보는 코스 화면 그대로(사진·후기·지도·댓글) · 블라인드 글도 관리자는 봄 (11-26 동업자)
+  const [view, reloadView] = useLoad(() => (sel ? adminGet(`/human-courses/${sel}/view`) : Promise.resolve(null)), [sel]);
+  const [sort, setSort] = useState('recent');
   const [reason, setReason] = useState('');
-  const [msg, run] = useAction(() => { reload(); reloadAllPosts(); reloadReports(); reloadComments(); reloadDetail(); reloadExposures(); reloadPopular(); reloadPicks(); onChanged?.(); });
+  const [msg, run] = useAction(() => { reload(); reloadAllPosts(); reloadReports(); reloadComments(); reloadDetail(); reloadView(); reloadExposures(); reloadPopular(); reloadPicks(); onChanged?.(); });
+  const time = (r) => new Date(r.createdAt || 0).getTime();
+  const sorters = { recent: (a, b) => time(b) - time(a), likes: (a, b) => (b.likeCount || 0) - (a.likeCount || 0) || time(b) - time(a), comments: (a, b) => (b.commentCount || 0) - (a.commentCount || 0) || time(b) - time(a) };
+  const sortedList = list.data ? [...list.data].sort(sorters[sort]) : list.data;
   const c = detail.data?.post;
   const featured = c?.featured;
   const visiblePosts = (allPosts.data || []).filter((p) => p.status === 'VISIBLE' && !p.deletedAt);
@@ -395,10 +405,14 @@ function HumanCourses({ onChanged }) {
       <Tabs value={tab} onChange={pickTab} items={[['courses', '휴먼 추천 코스', list.data?.length], ['comments', '댓글', comments.data?.length], ['reports', '신고', reports.data?.length], ['exposure', '노출 관리', exposures.data?.length], ['monthly', '월간 인기', picks.data?.length]]} />
     </div>
     <Msg msg={msg || ([list, comments, exposures, popular, picks].find((s) => s.error)?.error && { text: [list, comments, exposures, popular, picks].find((s) => s.error).error })} />
-    {(tab === 'courses' || tab === 'reports') && <div className="adm-split">
+    {(tab === 'courses' || tab === 'reports') && <div className="adm-stack">
+      {tab === 'courses' && <div className="adm-sortbar" role="group" aria-label="정렬">
+        <span className="st-note">정렬</span>
+        {[['recent', '최신순'], ['likes', '좋아요순'], ['comments', '댓글순']].map(([k, label]) => <button key={k} type="button" className={`adm-sort${sort === k ? ' on' : ''}`} aria-pressed={sort === k} onClick={() => setSort(k)}>{label}</button>)}
+      </div>}
       {tab === 'courses'
-        ? <Table title="휴먼 추천 코스" rows={list.data} rowKey="id" selected={sel} onSelect={setSel} empty="아직 등록된 휴먼 추천 코스가 없어요."
-          columns={[['제목', (r) => r.title], ['지역', (r) => show(r.region)], ['작성자', (r) => show(r.authorNickname || r.memberId)], ['작성일', (r) => date(r.createdAt).slice(0, 10)], ['메인', (r) => (r.featured ? '노출' : '—')], ['상태', (r) => <Pill v={r.status} />]]} />
+        ? <Table title="휴먼 추천 코스" rows={sortedList} rowKey="id" selected={sel} onSelect={setSel} empty="아직 등록된 휴먼 추천 코스가 없어요."
+          columns={[['제목', (r) => r.title], ['지역', (r) => show(r.region)], ['작성자', (r) => show(r.authorNickname || r.memberId)], ['작성일', (r) => date(r.createdAt).slice(0, 10)], ['좋아요', (r) => r.likeCount ?? 0], ['댓글', (r) => r.commentCount ?? 0], ['메인', (r) => (r.featured ? '노출' : '—')], ['상태', (r) => <Pill v={r.status} />]]} />
         : <Table title="신고" rows={reports.data} rowKey="id" onSelect={(id) => { const r = reports.data.find((x) => x.id === id); if (r) setSel(r.courseId); }} empty="접수된 신고가 없어요."
           columns={[['코스', (r) => show(r.courseId)], ['신고자', (r) => show(r.reporterNickname || r.reporterId)], ['사유', (r) => show(r.reason)], ['신고일', (r) => date(r.createdAt).slice(0, 10)], ['상태', (r) => <Pill v={r.status} />]]} />}
       <Detail title="코스 상세">{!c ? <Pick /> : <>
@@ -414,6 +428,7 @@ function HumanCourses({ onChanged }) {
           <button className="st-btn st-btn-line" onClick={() => run(() => adminPost('/human-exposures', { postId: sel, scope: 'MAIN', selected: !featured }), featured ? '메인 노출을 해제했어요.' : '메인에 노출했어요.')}>{featured ? '메인 노출 해제' : '메인 노출 지정'}</button>
         </div>
       </>}</Detail>
+      {c && <AdminCourseView course={view.data} error={view.error} />}
     </div>}
     {tab === 'comments' && <Table title="댓글 목록" rows={comments.data} rowKey="commentId" empty="조건에 맞는 댓글이 없어요."
       columns={[['코스', (r) => r.postTitle], ['작성자', (r) => show(r.authorNickname || r.authorId)], ['지역', (r) => show(r.region)], ['내용', (r) => r.content], ['작성일', (r) => date(r.createdAt)], ['삭제', (r) => r.deleted ? '삭제됨' : '—']]} />}
@@ -434,6 +449,26 @@ function HumanCourses({ onChanged }) {
       </div>
     </>}
   </>;
+}
+
+/* 여행자가 보는 코스 상세 그대로 (보기만 · 좋아요·저장·댓글 쓰기 없음) */
+function AdminCourseView({ course, error }) {
+  if (error) return <div className="adm-card"><p className="adm-empty">{error}</p></div>;
+  if (!course) return <div className="adm-card"><p className="adm-empty">여행자 화면을 불러오는 중…</p></div>;
+  const photos = course.photoAssets?.length ? course.photoAssets : (course.photos || []).map((name) => ({ name, dataUrl: '' }));
+  return <div className="adm-card adm-user-view">
+    <h2 className="adm-card-title">여행자 화면 <span className="st-note">여행자가 보는 모습 그대로{course.visibility === 'BLINDED' ? ' · 블라인드 글(여행자에게는 숨김)' : ''}</span></h2>
+    <div className="human-courses human-course-detail"><div className="page">
+      <article className="panel"><div className="article-intro"><p className="small-kicker">여행 정보</p><h2>{course.title}</h2><dl className="detail-meta"><div><dt>작성자</dt><dd>{course.author}</dd></div><div><dt>지역</dt><dd>{course.region}</dd></div><div><dt>여행 기간</dt><dd>{course.travelDates || '미등록'}</dd></div><div><dt>여행 유형</dt><dd>{course.category}</dd></div><div><dt>동행</dt><dd>{course.companion}</dd></div><div><dt>작성일</dt><dd><time dateTime={course.createdAt}>{course.createdAt}</time></dd></div><div><dt>좋아요</dt><dd>{course.likes ?? 0}</dd></div></dl></div>
+        <CoursePhotoGallery key={course.id} title={course.title} photos={photos} />
+        <hr className="divider" /><h3>여행 후기</h3><p className="course-review-text">{course.body}</p>
+      </article>
+      <section className="panel course-detail-map"><div className="panel-heading"><h2>지역 지도</h2></div>
+        <CourseMap region={course.region} plan={course.plan} stay={course.stay} travelDates={course.travelDates} allDaysLabel="전체 일정" height="clamp(350px, 40vw, 380px)" />
+      </section>
+      <CourseComments course={course} isAuthenticated={false} />
+    </div></div>
+  </div>;
 }
 
 /* ---------- AI 코스 (ADM-16~18) ---------- */
