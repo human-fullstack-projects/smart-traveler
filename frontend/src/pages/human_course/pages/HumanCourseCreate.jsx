@@ -1,7 +1,7 @@
 ﻿import { useEffect, useRef, useState } from 'react';
 import RecommendationEditor from '../components/RecommendationEditor';
 import PageHeading from '../components/PageHeading';
-import { finalCourse, creationError, findRecommendationPostId, isPastRecommendationTrip } from '../data/courseState';
+import { finalCourse, creationError, findRecommendationPostId, isSelectableRecommendationTrip } from '../data/courseState';
 import { clearRecommendationDraft, readRecommendationDraft, saveRecommendationDraft } from '../data/recommendationDraft';
 import useBookingDate from '../../mypage/hooks/useBookingDate';
 import '../../../css/human-course.css';
@@ -15,8 +15,8 @@ export default function HumanCourseCreate({ reservations = [], courses = [], exe
  const back=`#/${source}`;
  useEffect(()=>{refresh?.();},[]);
  const today=useBookingDate();
- const pastTrips=reservations.filter(reservation=>isPastRecommendationTrip(reservation,today));
- const selected=pastTrips.find(r=>String(r.id)===selectedId);
+ const selectableTrips=reservations.filter(reservation=>isSelectableRecommendationTrip(reservation,today,serverMode,courses));
+ const selected=selectableTrips.find(r=>String(r.id)===selectedId);
  const final=finalCourse(selected);
  const existingId=findRecommendationPostId(selected,courses);
  useEffect(()=>{if(existingId && !publishing.current) window.location.hash=`/human-courses/${encodeURIComponent(existingId)}/edit?from=${source}`;},[existingId,source]);
@@ -50,7 +50,7 @@ export default function HumanCourseCreate({ reservations = [], courses = [], exe
    tripSelection={<section className="panel recommendation-trip-select"><h2>지난 여행 선택</h2>
     <label>후기를 작성할 여행<select value={selected ? selectedId : ''} onChange={e=>{setSelectedId(e.target.value);setNotice('');setDraftNotice('');}}>
      <option value="">지난 여행을 선택해주세요</option>
-     {pastTrips.map(trip => <option key={trip.id} value={trip.id}>{trip.region} · {trip.name} · {trip.dates}</option>)}
+     {selectableTrips.map(trip => <option key={trip.id} value={trip.id}>{trip.region} · {trip.name} · {trip.dates}</option>)}
     </select></label>
     {error&&<p role="alert">{error}</p>}
    </section>}
