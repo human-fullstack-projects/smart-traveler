@@ -14,8 +14,8 @@ const MENU = [
   { path: '/admin/lodgings', label: '숙소 관리' },
   { path: '/admin/members', label: '회원 관리' },
   { path: '/admin/owners', label: '업주 회원 관리', badge: 'pendingOwners' },
-  { path: '/admin/human-courses', label: '휴먼 추천 코스', badge: 'openReports' },
-  { path: '/admin/ai-courses', label: 'AI 코스 추천' },
+  { path: '/admin/human-courses', label: '여행자 추천 트립', badge: 'openReports' },
+  { path: '/admin/ai-courses', label: 'AI 여행 추천' },
   { path: '/admin/tour-data', label: '관광지 데이터' },
 ];
 
