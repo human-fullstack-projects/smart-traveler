@@ -95,18 +95,36 @@ function OwnerLodgingStatus({ lodgings, error }) {
 }
 
 function Dashboard({ onNavigate, lodgings, lodgingError }) {
-  const [newReservationCount, setNewReservationCount] = useState(0);
-  const [todaySummary, setTodaySummary] = useState({ checkIn: 0, checkOut: 0 });
+  const [newReservationCount, setNewReservationCount] = useState(null);
+  const [todaySummary, setTodaySummary] = useState(null);
+  const [summaryErrors, setSummaryErrors] = useState({});
+  const [summaryLoading, setSummaryLoading] = useState(true);
+  const [summaryReload, setSummaryReload] = useState(0);
 
   useEffect(() => {
-    request('/api/owner/reservations/new-count').then(setNewReservationCount);
-    request('/api/owner/reservations/today-summary').then(setTodaySummary);
-  }, []);
+    let active = true;
+    setSummaryLoading(true);
+    setSummaryErrors({});
+    Promise.allSettled([
+      request('/api/owner/reservations/new-count'),
+      request('/api/owner/reservations/today-summary'),
+    ]).then(([count, summary]) => {
+      if (!active) return;
+      setNewReservationCount(count.status === 'fulfilled' ? count.value : null);
+      setTodaySummary(summary.status === 'fulfilled' ? summary.value : null);
+      setSummaryErrors({
+        count: count.status === 'rejected',
+        summary: summary.status === 'rejected',
+      });
+      setSummaryLoading(false);
+    });
+    return () => { active = false; };
+  }, [summaryReload]);
 
   const metrics = [
-    { label: '오늘 체크인', value: todaySummary.checkIn },
-    { label: '오늘 체크아웃', value: todaySummary.checkOut },
-    { label: '신규 예약', value: newReservationCount },
+    { label: '오늘 체크인', value: todaySummary?.checkIn, error: summaryErrors.summary },
+    { label: '오늘 체크아웃', value: todaySummary?.checkOut, error: summaryErrors.summary },
+    { label: '신규 예약', value: newReservationCount, error: summaryErrors.count },
   ];
 
   return (
@@ -114,7 +132,7 @@ function Dashboard({ onNavigate, lodgings, lodgingError }) {
       <header className="owner-overview-heading">
         <div>
           <h1>업장 현황</h1>
-          <p>2026년 11월 4일 기준 예시 데이터</p>
+          <p>오늘의 예약 현황</p>
         </div>
         <button
           type="button"
@@ -125,16 +143,24 @@ function Dashboard({ onNavigate, lodgings, lodgingError }) {
         </button>
       </header>
 
-      <section className="owner-overview-metrics" aria-label="예약 요약">
-        {metrics.map(({ label, value }) => (
+      <section className="owner-overview-metrics" aria-label="예약 요약" aria-busy={summaryLoading}>
+        {metrics.map(({ label, value, error }) => (
           <article key={label} className="owner-overview-card">
             <h2>{label}</h2>
             <p className="owner-overview-number">
-              {value}<span>건</span>
+              {summaryLoading ? '조회 중' : error ? '확인 불가' : <>{value}<span>건</span></>}
             </p>
+            {!summaryLoading && !error && value === 0 && <p>해당하는 예약이 없습니다.</p>}
           </article>
         ))}
       </section>
+      {!summaryLoading && (summaryErrors.count || summaryErrors.summary) && (
+        <div className="owner-summary-error" role="alert">
+          <p>일부 예약 현황을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.</p>
+          <button type="button" className="owner-overview-action owner-overview-action--line"
+            onClick={() => setSummaryReload(previous => previous + 1)}>다시 불러오기</button>
+        </div>
+      )}
 
       <section className="owner-overview-card owner-overview-status">
         <div>
@@ -956,7 +982,7 @@ export default function OwnerPage({ member, onLogout, loggingOut }) {
       />
       <div className="owner-shell">
         <aside className="owner-sidebar"><div className="owner-sidebar__status"><span>PARTNER STATUS</span><strong>업주 승인 완료</strong><small>본인 업장만 조회·수정 가능</small></div><nav aria-label="업주센터 메뉴">{tabs.map((tab) => <button type="button" key={tab.id} className={activeTab === tab.id ? 'is-active' : ''} onClick={() => { setActiveTab(tab.id); setToast(''); }}><i aria-hidden="true">{tab.id === 'dashboard' ? '▦' : tab.id === 'reservations' ? '▤' : tab.id === 'property' ? '⌂' : '₩'}</i>{tab.label}</button>)}</nav><div className="owner-sidebar__help"><strong>도움이 필요하신가요?</strong><span>파트너 운영 가이드를 확인하세요.</span><button type="button">운영 가이드</button></div></aside>
-        <main className="owner-main">{toast && <div className="owner-toast" role="status">{toast}<button type="button" aria-label="알림 닫기" onClick={() => setToast('')}>×</button></div>}{view}<p className="owner-demo-caption">숙소·예약 현황·객실·판매 수량은 서버에 연결되어 있어요. 대시보드 숫자는 아직 예시 데이터예요.</p></main>
+        <main className="owner-main">{toast && <div className="owner-toast" role="status">{toast}<button type="button" aria-label="알림 닫기" onClick={() => setToast('')}>×</button></div>}{view}<p className="owner-demo-caption">숙소·예약 현황·객실·판매 수량은 서버에서 조회합니다. 조회에 실패한 항목은 오류 안내를 확인해 주세요.</p></main>
       </div>
     </div>
   );
