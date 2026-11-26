@@ -129,7 +129,7 @@ function Detail({ title, children }) {
   return <div className="adm-card"><h2 className="adm-card-title">{title}</h2><div className="adm-detail">{children}</div></div>;
 }
 const DL = ({ items }) => <dl className="adm-dl">{items.map(([k, v]) => [<dt key={`${k}t`}>{k}</dt>, <dd key={`${k}d`}>{v}</dd>])}</dl>;
-const Pick = () => <p className="adm-empty">왼쪽 목록에서 하나를 고르면 자세한 내용이 나와요.</p>;
+const Pick = ({ where = '왼쪽' }) => <p className="adm-empty">{where} 목록에서 하나를 고르면 자세한 내용이 나와요.</p>;
 
 function useAction(after) {
   const [msg, setMsg] = useState(null);
@@ -146,7 +146,7 @@ function Filters({ fields, value, onChange, children }) {
   return <div className="adm-filters">{children}{fields.map(([name, label, options]) => <label key={name} className="st-field">{label}
     {options ? <select className="st-input" value={value[name] || ''} onChange={(e) => onChange({ ...value, [name]: e.target.value })}>
       <option value="">전체</option>{options.map((o) => <option key={o} value={o}>{label === '운영 상태' && o === 'SUSPENDED' ? '운영중지' : o === 'true' ? '신고 있음' : o === 'false' ? '신고 없음' : o === 'NONE' ? '신고 없음' : LABEL[o] || o}</option>)}</select>
-      : <input className="st-input" type={name === 'from' || name === 'to' ? 'date' : name === 'postId' ? 'number' : 'text'} value={value[name] || ''} placeholder="검색어" onChange={(e) => onChange({ ...value, [name]: e.target.value })} />}
+      : <input className="st-input" type={name === 'from' || name === 'to' || name === 'date' ? 'date' : name === 'postId' ? 'number' : 'text'} value={value[name] || ''} placeholder="검색어" onChange={(e) => onChange({ ...value, [name]: e.target.value })} />}
   </label>)}</div>;
 }
 
@@ -373,7 +373,9 @@ function HumanCourses({ onChanged }) {
   const [exposureRegion, setExposureRegion] = useState('');
   const [exposurePostId, setExposurePostId] = useState('');
   const [month, setMonth] = useState(new Date().toISOString().slice(0, 7));
-  const [list, reload] = useLoad(() => adminGet('/human-courses', f), [JSON.stringify(f), searchNo]);
+  // 작성일 한 칸 = 그날 하루(from=to) (11-26 동업자)
+  const courseQuery = ({ date, ...rest }) => (date ? { ...rest, from: date, to: date } : rest);
+  const [list, reload] = useLoad(() => adminGet('/human-courses', courseQuery(f)), [JSON.stringify(f), searchNo]);
   const [allPosts, reloadAllPosts] = useLoad(() => adminGet('/human-courses'), []);
   const [reports, reloadReports] = useLoad(() => adminGet('/human-reports'), []);
   const [comments, reloadComments] = useLoad(() => adminGet('/human-comments', commentFilters), [JSON.stringify(commentFilters), searchNo]);
@@ -395,7 +397,7 @@ function HumanCourses({ onChanged }) {
   const visiblePosts = (allPosts.data || []).filter((p) => p.status === 'VISIBLE' && !p.deletedAt);
   return <>
     <div className="adm-search-first">
-      {filterTab === 'courses' && <Filters fields={[['status', '게시 상태', ['VISIBLE', 'BLINDED', 'DELETED']], ['reported', '신고 여부', ['true', 'false']], ['reportStatus', '신고 처리', ['PENDING', 'RESOLVED', 'DISMISSED', 'NONE']], ['region', '지역'], ['from', '작성 시작일'], ['to', '작성 종료일'], ['query', '제목']]} value={draft} onChange={setDraft} />}
+      {filterTab === 'courses' && <Filters fields={[['status', '게시 상태', ['VISIBLE', 'BLINDED', 'DELETED']], ['reported', '신고 여부', ['true', 'false']], ['reportStatus', '신고 처리', ['PENDING', 'RESOLVED', 'DISMISSED', 'NONE']], ['region', '지역'], ['date', '작성일'], ['query', '제목']]} value={draft} onChange={setDraft} />}
       {filterTab === 'comments' && <Filters fields={[['region', '지역'], ['from', '작성 시작일'], ['to', '작성 종료일'], ['query', '내용·작성자'], ['postId', '코스 번호']]} value={commentDraft} onChange={setCommentDraft} />}
       <p className={`st-note adm-search-hint${dirty ? ' dirty' : ''}`}>{dirty
         ? `조건이 바뀌었어요. 아래 「${filterTab === 'courses' ? '휴먼 추천 코스' : '댓글'}」를 눌러야 검색돼요.`
@@ -415,7 +417,7 @@ function HumanCourses({ onChanged }) {
           columns={[['제목', (r) => r.title], ['지역', (r) => show(r.region)], ['작성자', (r) => show(r.authorNickname || r.memberId)], ['작성일', (r) => date(r.createdAt).slice(0, 10)], ['좋아요', (r) => r.likeCount ?? 0], ['댓글', (r) => r.commentCount ?? 0], ['메인', (r) => (r.featured ? '노출' : '—')], ['상태', (r) => <Pill v={r.status} />]]} />
         : <Table title="신고" rows={reports.data} rowKey="id" onSelect={(id) => { const r = reports.data.find((x) => x.id === id); if (r) setSel(r.courseId); }} empty="접수된 신고가 없어요."
           columns={[['코스', (r) => show(r.courseId)], ['신고자', (r) => show(r.reporterNickname || r.reporterId)], ['사유', (r) => show(r.reason)], ['신고일', (r) => date(r.createdAt).slice(0, 10)], ['상태', (r) => <Pill v={r.status} />]]} />}
-      <Detail title="코스 상세">{!c ? <Pick /> : <>
+      <Detail title="코스 상세">{!c ? <Pick where="위" /> : <>
         <DL items={[['제목', c.title], ['상태', <Pill v={c.status} />], ['작성자', show(c.authorNickname || c.memberId)], ['연결 코스', show(c.courseId)], ['지역', show(c.region)], ['작성일', date(c.createdAt)], ['메인 노출', featured ? '추천 중' : '아님']]} />
         <p className="adm-sub">내용</p><p className="adm-clamp">{show(c.content)}</p>
         <MiniList title="신고" rows={detail.data.reports} empty="신고 없음"
