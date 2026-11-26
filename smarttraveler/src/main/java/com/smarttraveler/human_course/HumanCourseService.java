@@ -153,7 +153,13 @@ public class HumanCourseService {
         return List.copyOf(days);
     }
 
-    private Post post(long id, long viewer, boolean allowBlinded) {
+    // 관리자 화면용: 블라인드 글도 내용·사진·일정·댓글까지 그대로 보여 줌 (여행자 화면은 그대로 숨김)
+    @Transactional(readOnly = true)
+    public Post adminView(long id) { return post(id, -1, true, true); }
+
+    private Post post(long id, long viewer, boolean allowBlinded) { return post(id, viewer, allowBlinded, false); }
+
+    private Post post(long id, long viewer, boolean allowBlinded, boolean reveal) {
         var rows = jdbc.queryForList("""
             SELECT p.*, c.destination AS region, c.start_date, c.end_date, c.lock_version,
                    COALESCE(NULLIF(m.nickname,''),m.login_id) AS author,
@@ -175,16 +181,17 @@ public class HumanCourseService {
         Map<String, Object> row = rows.getFirst();
         boolean mine = number(row, "author_id") == viewer;
         boolean blinded = "BLINDED".equals(row.get("status"));
+        boolean hidden = blinded && !reveal;
         if (blinded && !allowBlinded) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         Snapshot snapshot = snapshot(row);
         // 이 서버에서 실제로 열리는 사진만 보여 줌 (옛 사진은 올린 PC 폴더에만 있어 다른 PC에선 깨짐)
-        List<String> urls = blinded ? List.of() : jdbc.queryForList("SELECT image_url FROM human_course_photo WHERE post_id=? ORDER BY sort_order, photo_id", String.class, id)
+        List<String> urls = hidden ? List.of() : jdbc.queryForList("SELECT image_url FROM human_course_photo WHERE post_id=? ORDER BY sort_order, photo_id", String.class, id)
             .stream().filter(photos::exists).toList();
         List<Photo> photoAssets = new ArrayList<>();
         for (int index = 0; index < urls.size(); index++) photoAssets.add(new Photo("사진 " + (index + 1), urls.get(index)));
         String stayImageUrl = string(row, "stay_image_url");
         String coverPhotoUrl = null;
-        if (!blinded) {
+        if (!hidden) {
             coverPhotoUrl = urls.isEmpty() ? null : urls.getFirst();
             if (coverPhotoUrl == null) {
                 List<String> placePhotos = jdbc.queryForList("""
@@ -197,22 +204,22 @@ public class HumanCourseService {
                 coverPhotoUrl = placePhotos.isEmpty() ? stayImageUrl : placePhotos.getFirst();
             }
         }
-        List<Comment> comments = blinded ? List.of() : jdbc.query("""
+        List<Comment> comments = hidden ? List.of() : jdbc.query("""
             SELECT co.comment_id, co.content, co.author_id, COALESCE(NULLIF(m.nickname,''),m.login_id) AS author
             FROM human_course_comment co JOIN members m ON m.member_id=co.author_id
             WHERE co.post_id=? AND co.deleted_at IS NULL ORDER BY co.created_at, co.comment_id
             """, (rs, n) -> new Comment(String.valueOf(rs.getLong("comment_id")), rs.getString("author"),
                 rs.getString("content"), rs.getLong("author_id") == viewer), id);
-        String body = blinded ? "" : string(row, "content");
+        String body = hidden ? "" : string(row, "content");
         return new Post(id, string(row, "title"), string(row, "author"), string(row, "region"),
             string(row, "category") == null ? "미분류" : string(row, "category"), string(row, "companion_type"),
             string(row, "summary") == null ? body.substring(0, Math.min(150, body.length())) : string(row, "summary"),
             body, photoAssets.stream().map(Photo::name).toList(), photoAssets,
-            blinded ? List.of() : snapshot.plan(), number(row, "likes"), truthy(row.get("liked")),
+            hidden ? List.of() : snapshot.plan(), number(row, "likes"), truthy(row.get("liked")),
             truthy(row.get("reported")), comments, row.get("created_at").toString().substring(0, 10),
             blinded ? "BLINDED" : "PUBLIC", snapshot.version(),
             row.get("checkin_date") + " ~ " + row.get("checkout_date"), mine, String.valueOf(row.get("reservation_id")),
-            blinded ? null : new MapPlace("stay-" + row.get("lodging_id"), null, string(row, "stay_name"),
+            hidden ? null : new MapPlace("stay-" + row.get("lodging_id"), null, string(row, "stay_name"),
                 string(row, "stay_address"), decimal(row.get("stay_latitude")),
                 decimal(row.get("stay_longitude")), "stay", stayImageUrl == null ? List.of() : List.of(stayImageUrl)),
             coverPhotoUrl);
@@ -476,10 +483,12 @@ public class HumanCourseService {
     @Transactional(readOnly = true)
     public void requirePhotoReadable(String name, Authentication auth) {
         long viewer = viewer(auth);
+        // 관리자는 블라인드 글 사진도 봄 (관리자 휴먼 추천 코스 화면)
+        boolean admin = auth != null && auth.getAuthorities().stream().anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
         String url = "/api/human-courses/photos/" + name;
         if (jdbc.queryForList("""
             SELECT ph.photo_id FROM human_course_photo ph JOIN human_course_post p ON p.post_id=ph.post_id
-            WHERE ph.image_url=? AND p.deleted_at IS NULL AND (p.status='VISIBLE' OR (p.status='BLINDED' AND p.author_id=?))
-            """, url, viewer).isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            WHERE ph.image_url=? AND p.deleted_at IS NULL AND (p.status='VISIBLE' OR (p.status='BLINDED' AND (p.author_id=? OR ?)))
+            """, url, viewer, admin).isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 }

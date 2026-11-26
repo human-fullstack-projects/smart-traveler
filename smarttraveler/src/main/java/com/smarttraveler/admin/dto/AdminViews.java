@@ -48,8 +48,11 @@ public final class AdminViews {
         private final Long id, memberId, courseId, reservationId;
         private final String title, content, courseSnapshot, status, destination, region, summary, authorNickname;
         private final Boolean featured;
+        private final long likeCount, commentCount;
         private final LocalDateTime createdAt, updatedAt, deletedAt;
-        public HumanCourseView(HumanCoursePost post, String destination, Boolean featured, Member author) {
+        public HumanCourseView(HumanCoursePost post, String destination, Boolean featured, Member author) { this(post, destination, featured, author, 0, 0); }
+        public HumanCourseView(HumanCoursePost post, String destination, Boolean featured, Member author, long likeCount, long commentCount) {
+            this.likeCount = likeCount; this.commentCount = commentCount;
             this.id = post.getPostId(); this.memberId = post.getAuthorId();
             this.courseId = post.getCourseId(); this.reservationId = post.getReservationId();
             this.title = post.getTitle(); this.content = post.getContent();
