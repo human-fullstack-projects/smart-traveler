@@ -1,9 +1,21 @@
 import { previewData } from './previewData';
+import { isPastRecommendationBooking } from '../../mypage/data/visibleItems';
 
 export const DEMO_NOW = '2026-10-26T12:00:00+09:00';
 export const USER = '나(샘플 사용자)';
 export const statusNames = { COMPLETED: '숙박 완료', CANCELED: '취소된 예약', UPCOMING: '숙박 예정', CONFIRMED: '예약 확정 / 숙박완료 전환 전' };
 export const freshState = () => structuredClone(previewData);
+export function isPastRecommendationTrip(reservation, today) {
+  const endDate = reservation.checkoutAt?.slice(0, 10) || reservation.dates?.split(' ~ ')[1];
+  return isPastRecommendationBooking({ ...reservation, endDate }, today);
+}
+
+export function findRecommendationPostId(reservation, courses) {
+  if (!reservation) return undefined;
+  return reservation.existingPostId
+    ?? courses.find(course => course.mine && String(course.reservationId) === String(reservation.id))?.id;
+}
+
 export function finalCourse(reservation) {
   if (!reservation?.itineraryFinal) return null;
   return [...(reservation.versions || [{ version: reservation.courseVersion, plan: reservation.plan }])].sort((a, b) => b.version - a.version)[0];
