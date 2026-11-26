@@ -97,18 +97,6 @@ public class ChatMessageBuffer {
         return result;
     }
 
-    /** 챗봇의 마지막 질문(다음 답을 만들 때 문맥으로 씀). */
-    public String lastAssistant(long sessionId) {
-        Chat chat = chats.get(sessionId);
-        if (chat != null) synchronized (chat) {
-            for (int i = chat.pending.size() - 1; i >= 0; i--)
-                if ("ASSISTANT".equals(chat.pending.get(i).role)) return chat.pending.get(i).content;
-        }
-        List<String> last = jdbc.query("SELECT content FROM chat_messages WHERE session_id = ? AND sender_role = 'ASSISTANT' ORDER BY message_id DESC LIMIT 1",
-            (rs, row) -> rs.getString(1), sessionId);
-        return last.isEmpty() ? "" : last.getFirst();
-    }
-
     /** 임시 번호가 이미 저장됐으면 실제 번호로 바꾼다. 모르는 임시 번호면 그대로 돌려준다. */
     public long resolve(long sessionId, long messageId) {
         if (!isTemp(messageId)) return messageId;

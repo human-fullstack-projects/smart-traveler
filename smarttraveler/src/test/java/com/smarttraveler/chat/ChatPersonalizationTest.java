@@ -84,7 +84,7 @@ class ChatPersonalizationTest {
         var session = new MockHttpSession();
         login("first", 7);
         when(preferences.find(7, List.of())).thenReturn(new Preferences(7, "relaxed", "normal", List.of(), List.of(), true));
-        when(dialogue.processResult(anyLong(), anyString(), anyMap())).thenReturn(new PythonAiClient.Result("다음 질문", false));
+        when(dialogue.processResult(anyLong(), anyString(), anyMap())).thenReturn(new PythonAiClient.Result("다음 질문"));
         doAnswer(call -> { call.getArgument(1, KeyHolder.class).getKeyList().add(Map.of("id", 1L)); return 1; })
             .when(jdbc).update(any(PreparedStatementCreator.class), any(KeyHolder.class));
         when(jdbc.queryForObject(anyString(), eq(Integer.class), eq(1L), anyString())).thenReturn(1);

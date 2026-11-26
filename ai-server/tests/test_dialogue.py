@@ -1,231 +1,223 @@
+"""app.dialogue(/internal/dialogue의 1회성 조회·추천, research/chat_test.py 포팅)에 대한 테스트."""
+import json
+
 from fastapi.testclient import TestClient
-from app.graph import ADULTS, CHECK, CLARIFY, EDIT, GUIDE, INTRO, LEGACY_CHECK, DATE, REGION, build_graph, requests_recommendation
-from app.schemas import ExtractedConditions
-from app import main
+
+from app import dialogue, main
 
 
-def extracted(**changes):
-    values = dict(regionName=None, startDate=None, durationDays=None, adults=None, children=None, companionType=None, transportType=None, preferences=None, lodgingName=None)
-    values.update(changes)
-    return ExtractedConditions(**values)
+def _matches(metadata, where):
+    if where is None:
+        return True
+    if "$and" in where:
+        return all(_matches(metadata, clause) for clause in where["$and"])
+    (key, cond), = where.items()
+    if isinstance(cond, dict):
+        if "$in" in cond:
+            return metadata.get(key) in cond["$in"]
+        if "$nin" in cond:
+            return metadata.get(key) not in cond["$nin"]
+        raise AssertionError(f"unsupported operator: {cond}")
+    return metadata.get(key) == cond
 
 
-def test_조건_병합과_질문_분기():
-    graph = build_graph(lambda state: extracted(regionName="부산", durationDays=3, companionType="FRIENDS"))
-    result = graph.invoke({"message": "친구와 부산 2박 3일", "previousQuestion": "", "conditions": {"regionId": None, "regionName": "", "adults": 2, "preferences": ["바다"]}})
-    assert result["changes"]["regionName"] == "부산"
-    assert result["merged"]["adults"] == 2
-    assert result["merged"]["preferences"] == ["바다"]
-    assert result["question"] == DATE
+class FakeCollection:
+    def __init__(self, items):
+        self.items = items  # list[(course_id, document, metadata)]
+
+    def get(self, include=None):
+        return {"metadatas": [meta for _, _, meta in self.items]}
+
+    def query(self, query_embeddings, n_results, where=None):
+        matched = [item for item in self.items if _matches(item[2], where)][:n_results]
+        ids = [str(cid) for cid, _, _ in matched]
+        return {
+            "ids": [ids],
+            "documents": [[doc for _, doc, _ in matched]],
+            "metadatas": [[meta for _, _, meta in matched]],
+            "distances": [[round(0.1 * i, 3) for i in range(len(matched))]],
+        }
 
 
-def test_빈값은_추측하지_않고_지역부터_질문():
-    graph = build_graph(lambda state: extracted())
-    result = graph.invoke({"message": "여행 가고 싶어", "previousQuestion": "", "conditions": {"regionId": None}})
-    assert result["changes"] == {}
-    assert result["question"] == REGION
+def meta(course_id, destination="부산광역시 해운대구", **overrides):
+    base = {"course_id": course_id, "destination": destination}
+    base.update(overrides)
+    return base
 
 
-def test_잘못된_날짜와_숫자는_기존값을_보존():
-    graph = build_graph(lambda state: extracted(startDate="2026-02-30", durationDays=99, adults=-1))
-    result = graph.invoke({"message": "바꿔줘", "previousQuestion": "", "conditions": {"regionName": "부산", "startDate": "2026-12-10", "durationDays": 3}})
-    assert result["merged"]["startDate"] == "2026-12-10"
-    assert result["merged"]["durationDays"] == 3
-    assert result["question"] == ADULTS
+class FakeToolCallClient:
+    """extract_slots가 기대하는 OpenAI function-calling 응답 모양을 흉내낸다."""
+    def __init__(self, arguments):
+        self._arguments = arguments
+        self.chat = self
+        self.completions = self
+
+    def create(self, **kwargs):
+        call = type("Call", (), {"function": type("Fn", (), {"arguments": json.dumps(self._arguments)})()})
+        message = type("Msg", (), {"tool_calls": [call]})()
+        choice = type("Choice", (), {"message": message})()
+        return type("Resp", (), {"choices": [choice]})()
 
 
-def test_모든_필수값이_있으면_확인_안내():
-    graph = build_graph(lambda state: extracted())
-    conditions = dict(regionName="부산", startDate="2026-12-10", durationDays=3, adults=2, children=0, companionType="FRIENDS", transportType="CAR", flowType="COURSE_FIRST")
-    result = graph.invoke({"message": "좋아요", "previousQuestion": "", "conditions": conditions})
-    assert result["question"] == CHECK
+def test_extract_slots_parses_function_call_arguments():
+    client = FakeToolCallClient({"destination": "부산", "residual_text": "바다 보고 싶어"})
+    assert dialogue.extract_slots("부산 바다 보고 싶어", client=client) == {
+        "destination": "부산", "residual_text": "바다 보고 싶어"}
 
 
-def test_지역이_바뀌면_이전_지역번호_사용_금지():
-    graph = build_graph(lambda state: extracted(regionName="제주"))
-    result = graph.invoke({"message": "제주로 바꿔줘", "previousQuestion": "", "conditions": {"regionName": "부산", "regionId": 1}})
-    assert result["merged"]["regionId"] is None
+def test_handle_uses_extracted_slots_and_residual_text_as_query(monkeypatch):
+    # region_themes("바다")는 끝까지 완화되지 않는 조건이라, 메타데이터에도 일치하는
+    # region_theme_sea 플래그가 있어야 한다(실제 색인 문서와 동일한 모양).
+    collection = FakeCollection([(1356, "부산 해운대 코스 문서", meta(1356, region_theme_sea=True))])
+    client = FakeToolCallClient({
+        "destination": "해운대", "region_themes": ["바다"], "purpose_theme": "맛집",
+        "duration_days": 2, "companion_type": "FRIENDS", "transport_type": "CAR",
+        "residual_text": "조용하고 한적한 곳",
+    })
+    captured = {}
+
+    def fake_embed(text):
+        captured["query_text"] = text
+        return [0.0]
+
+    detail = {"destination": "부산광역시 해운대구", "start_date": "2026-12-10", "end_date": "2026-12-11",
+              "adults": 2, "children": 0, "companion_type": "FRIENDS", "transport_type": "CAR",
+              "itinerary": [{"day_no": 1, "visits": [{"place_name": "해운대해수욕장"}]}]}
+    monkeypatch.setattr(dialogue.db, "connect", lambda: "CONN")
+    monkeypatch.setattr(dialogue.db, "fetch_course_detail", lambda conn, course_id: detail)
+
+    message, course_id, course_ids = dialogue.handle(
+        "해운대에서 조용하고 한적한 곳으로 2박3일 친구랑 자동차로 맛집 다니고 싶어",
+        collection=collection, embed_fn=fake_embed, client=client,
+    )
+
+    assert course_id == 1356 and course_ids == [1356]
+    assert captured["query_text"] == "조용하고 한적한 곳"
+    assert "해운대해수욕장" in message
+    assert "코스 #1356" in message
 
 
-def test_API_모의_AI_결과(monkeypatch):
-    monkeypatch.setattr(main, "graph", build_graph(lambda state: extracted(regionName="부산")))
-    response = TestClient(main.app).post("/internal/dialogue", json={"message": "부산", "previousQuestion": "", "conditions": {}})
+def test_handle_excludes_given_course_ids(monkeypatch):
+    collection = FakeCollection([(1, "a", meta(1)), (2, "b", meta(2))])
+    client = FakeToolCallClient({"residual_text": "부산 아무 코스나"})
+    monkeypatch.setattr(dialogue.db, "connect", lambda: "CONN")
+    monkeypatch.setattr(dialogue.db, "fetch_course_detail", lambda conn, course_id: None)
+
+    _message, course_id, course_ids = dialogue.handle(
+        "부산 아무 코스나", excluded_course_ids=[1], collection=collection, embed_fn=lambda t: [0.0], client=client)
+
+    assert course_id == 2 and course_ids == [2]
+
+
+def test_handle_returns_not_found_message_without_touching_db(monkeypatch):
+    collection = FakeCollection([])
+    client = FakeToolCallClient({"residual_text": "아무것도 없음"})
+
+    def fail_connect():
+        raise AssertionError("결과가 없으면 DB에 연결하지 않아야 한다")
+
+    monkeypatch.setattr(dialogue.db, "connect", fail_connect)
+
+    message, course_id, course_ids = dialogue.handle(
+        "존재하지않는 지역 여행", collection=collection, embed_fn=lambda t: [0.0], client=client)
+
+    assert course_id is None and course_ids is None
+    assert "찾지 못했어요" in message
+
+
+def test_handle_falls_back_to_full_message_when_extraction_fails(monkeypatch):
+    collection = FakeCollection([(1, "doc", meta(1))])
+    captured = {}
+
+    class BrokenClient:
+        chat = None
+
+    def fake_embed(text):
+        captured["query_text"] = text
+        return [0.0]
+
+    monkeypatch.setattr(dialogue.db, "connect", lambda: "CONN")
+    monkeypatch.setattr(dialogue.db, "fetch_course_detail", lambda conn, course_id: None)
+
+    dialogue.handle("부산 가자", collection=collection, embed_fn=fake_embed, client=BrokenClient())
+    assert captured["query_text"] == "부산 가자"
+
+
+def test_handle_returns_off_topic_guidance_without_searching(monkeypatch):
+    client = FakeToolCallClient({"residual_text": "오늘 점심 뭐 먹지", "is_travel_request": False})
+
+    def fail_embed(text):
+        raise AssertionError("여행과 무관하면 임베딩/검색을 하지 않아야 한다")
+
+    def fail_connect():
+        raise AssertionError("여행과 무관하면 DB에 연결하지 않아야 한다")
+
+    monkeypatch.setattr(dialogue.db, "connect", fail_connect)
+
+    message, course_id, course_ids = dialogue.handle(
+        "오늘 점심 뭐 먹지", collection=FakeCollection([]), embed_fn=fail_embed, client=client)
+
+    assert message == dialogue.OFF_TOPIC_REPLY
+    assert course_id is None and course_ids is None
+
+
+def test_handle_treats_extraction_failure_as_travel_request(monkeypatch):
+    # 추출 자체가 실패한 경우(네트워크/파싱 오류)는 "여행과 무관함"과 다른 문제이므로 차단하지 않는다.
+    collection = FakeCollection([(1, "doc", meta(1))])
+
+    class BrokenClient:
+        chat = None
+
+    monkeypatch.setattr(dialogue.db, "connect", lambda: "CONN")
+    monkeypatch.setattr(dialogue.db, "fetch_course_detail", lambda conn, course_id: None)
+
+    message, course_id, _course_ids = dialogue.handle(
+        "부산 가자", collection=collection, embed_fn=lambda t: [0.0], client=BrokenClient())
+
+    assert message != dialogue.OFF_TOPIC_REPLY
+    assert course_id == 1
+
+
+def test_api_returns_recommendation(monkeypatch):
+    monkeypatch.setattr(main.dialogue, "handle", lambda message, excluded: ("추천 메시지", 11, [11, 12]))
+    response = TestClient(main.app).post("/internal/dialogue", json={"message": "부산 여행"})
     assert response.status_code == 200
-    assert response.json() == {"changes": {"regionName": "부산"}, "question": DATE, "confirmed": False}
+    assert response.json() == {"message": "추천 메시지", "recommendedCourseId": 11, "recommendedCourseIds": [11, 12]}
 
 
-def test_AI_오류는_민감정보_없이_503(monkeypatch):
-    def fail(state):
-        raise RuntimeError("secret user message")
-    monkeypatch.setattr(main, "graph", build_graph(fail))
-    response = TestClient(main.app).post("/internal/dialogue", json={"message": "부산", "conditions": {}})
+def test_api_rejects_blank_message():
+    response = TestClient(main.app).post("/internal/dialogue", json={"message": ""})
+    assert response.status_code == 422
+
+
+def test_api_hides_internal_error_detail(monkeypatch):
+    def fail(message, excluded):
+        raise RuntimeError("secret detail")
+    monkeypatch.setattr(main.dialogue, "handle", fail)
+    response = TestClient(main.app).post("/internal/dialogue", json={"message": "부산 여행"})
     assert response.status_code == 503
     assert "secret" not in response.text
 
 
-def test_LangChain_OpenAI_요청을_실제_네트워크_없이_검증(monkeypatch):
-    import json
-    import httpx2
-    from langchain_openai import ChatOpenAI
-    from app import graph as graph_module
+def test_api_defaults_excluded_course_ids_to_empty_list(monkeypatch):
+    captured = {}
 
-    requests = []
-    def openai_mock(request):
-        requests.append(json.loads(request.content))
-        body = {"regionName": "부산", "startDate": None, "durationDays": 3, "adults": None, "children": None, "companionType": "FRIENDS", "transportType": None, "preferences": None, "lodgingName": None}
-        return httpx2.Response(200, json={"id": "resp_test", "object": "response", "created_at": 1730000000, "status": "completed", "model": "gpt-4o-mini", "output": [{"type": "message", "id": "msg_test", "status": "completed", "role": "assistant", "content": [{"type": "output_text", "text": json.dumps(body, ensure_ascii=False), "annotations": []}]}], "tools": [], "tool_choice": "auto", "parallel_tool_calls": False})
-    client = httpx2.Client(transport=httpx2.MockTransport(openai_mock))
-    monkeypatch.setenv("OPENAI_API_KEY", "test-key")
-    monkeypatch.setattr(graph_module, "ChatOpenAI", lambda **kwargs: ChatOpenAI(**kwargs, http_client=client))
-    result = graph_module.build_graph().invoke({"message": "친구와 부산 2박 3일", "previousQuestion": "", "conditions": {}})
-    assert result["changes"]["regionName"] == "부산"
-    assert result["question"] == DATE
-    assert requests[0]["store"] is False
-    assert requests[0]["text"]["format"]["type"] == "json_schema"
-    assert requests[0]["text"]["format"]["strict"] is True
+    def fake_handle(message, excluded):
+        captured["excluded"] = excluded
+        return "메시지", None, None
+
+    monkeypatch.setattr(main.dialogue, "handle", fake_handle)
+    TestClient(main.app).post("/internal/dialogue", json={"message": "부산 여행"})
+    assert captured["excluded"] == []
 
 
-def complete_conditions():
-    return dict(regionName="부산", startDate="2026-12-10", durationDays=3, adults=2, children=0, companionType="FRIENDS", transportType="CAR", flowType="COURSE_FIRST", preferences=[])
+def test_api_passes_excluded_course_ids_through(monkeypatch):
+    captured = {}
 
+    def fake_handle(message, excluded):
+        captured["excluded"] = excluded
+        return "메시지", None, None
 
-def test_확인후_저장된_관광지를_추천한다():
-    candidates = [{"placeId": 1, "name": "해변", "address": "부산"}]
-    graph = build_graph(lambda state: extracted(), lambda state: "저장된 관광지: " + state["candidates"][0]["name"])
-    result = graph.invoke({"message": "확인했어", "previousQuestion": CHECK, "conditions": complete_conditions(), "candidates": candidates})
-    assert "해변" in result["question"] and result["confirmed"] is True
-
-
-def test_후보가_없으면_없는_장소를_만들지_않는다():
-    graph = build_graph(lambda state: extracted())
-    result = graph.invoke({"message": "여행지 추천해줘", "previousQuestion": CHECK, "conditions": complete_conditions(), "candidates": []})
-    assert "관광지 가져오기" in result["question"] and result["confirmed"] is True
-
-
-def test_조건이_바뀌면_추천보다_재확인을_먼저한다():
-    graph = build_graph(lambda state: extracted(regionName="제주"), lambda state: "잘못된 추천")
-    result = graph.invoke({"message": "제주로 바꿔서 추천해줘", "previousQuestion": CHECK, "conditions": complete_conditions(), "candidates": [{"placeId":1, "name":"부산", "address":"부산"}]})
-    assert result["question"] == CHECK and not result.get("confirmed", False)
-
-
-def test_부정문은_추천_요청이_아니다():
-    assert not requests_recommendation("아직 추천하지마", CHECK)
-    assert not requests_recommendation("확인 안 했어", CHECK)
-    assert requests_recommendation("수정할 거 없는데 이제 여행지 추천해줘", CHECK)
-
-
-def test_추천은_후보에_없는_ID를_거절한다(monkeypatch):
-    import pytest
-    from app import graph as graph_module
-    from app.schemas import PlaceRecommendations, SelectedPlace
-    class FakeModel:
-        def __init__(self, **kwargs): pass
-        def with_structured_output(self, *args, **kwargs): return self
-        def invoke(self, messages): return PlaceRecommendations(places=[SelectedPlace(placeId=999)])
-    monkeypatch.setenv("OPENAI_API_KEY", "test")
-    monkeypatch.setattr(graph_module, "ChatOpenAI", FakeModel)
-    state = {"candidates": [{"placeId": 1, "name": "해변", "address": "부산"}], "merged": complete_conditions()}
-    with pytest.raises(ValueError): graph_module.recommend_with_openai(state)
-
-
-def test_추천명과_주소는_DB_후보에서_사용한다(monkeypatch):
-    from app import graph as graph_module
-    from app.schemas import PlaceRecommendations, SelectedPlace
-    class FakeModel:
-        def __init__(self, **kwargs): pass
-        def with_structured_output(self, *args, **kwargs): return self
-        def invoke(self, messages): return PlaceRecommendations(places=[SelectedPlace(placeId=1)])
-    monkeypatch.setenv("OPENAI_API_KEY", "test")
-    monkeypatch.setattr(graph_module, "ChatOpenAI", FakeModel)
-    state = {"candidates": [{"placeId": 1, "name": "실제 후보", "address": "부산"}], "merged": complete_conditions()}
-    output = graph_module.recommend_with_openai(state)
-    assert "실제 후보" in output and "부산" in output
-
-
-def test_관광지_추천의_OpenAI_요청_형식(monkeypatch):
-    import json
-    import httpx2
-    from langchain_openai import ChatOpenAI
-    from app import graph as graph_module
-    requests = []
-    def respond(request):
-        requests.append(json.loads(request.content))
-        body = {"places": [{"placeId": 1}]}
-        return httpx2.Response(200, json={"id":"resp_test", "object":"response", "created_at":1730000000, "status":"completed", "model":"gpt-4o-mini", "output":[{"type":"message", "id":"msg_test", "status":"completed", "role":"assistant", "content":[{"type":"output_text", "text":json.dumps(body), "annotations":[]}]}], "tools":[], "tool_choice":"auto", "parallel_tool_calls":False})
-    client = httpx2.Client(transport=httpx2.MockTransport(respond))
-    monkeypatch.setenv("OPENAI_API_KEY", "test-key")
-    monkeypatch.setattr(graph_module, "ChatOpenAI", lambda **kwargs: ChatOpenAI(**kwargs, http_client=client))
-    output = graph_module.recommend_with_openai({"candidates":[{"placeId":1,"name":"실제 후보","address":"부산"}], "merged":complete_conditions()})
-    assert "실제 후보" in output
-    assert requests[0]["store"] is False
-    assert requests[0]["text"]["format"]["type"] == "json_schema"
-
-
-def test_확인_안내에_답변_방법을_표시한다():
-    graph = build_graph(lambda state: extracted())
-    result = graph.invoke({"message": "조건 다 말했어", "previousQuestion": "", "conditions": complete_conditions()})
-    assert "맞다" in result["question"] and "아니다" in result["question"]
-
-
-def test_기존_확인_메시지와_여러_긍정_답변을_지원한다():
-    graph = build_graph(lambda state: extracted(), lambda state: "관광지 추천 결과")
-    for previous in (LEGACY_CHECK, CHECK, CLARIFY, EDIT):
-        for message in ("확인했어", "맞아요", "그대로 해주세요", "수정할 거 없어요", "수정할 거 없는데"):
-            result = graph.invoke({"message": message, "previousQuestion": previous, "conditions": complete_conditions()})
-            assert result["question"] == "관광지 추천 결과" and result["confirmed"]
-
-
-def test_모호한_답변에는_확인방법을_안내한다():
-    graph = build_graph(lambda state: extracted(), lambda state: "잘못된 추천")
-    result = graph.invoke({"message": "잘 모르겠어", "previousQuestion": CHECK, "conditions": complete_conditions()})
-    assert result["question"] == CLARIFY and not result.get("confirmed", False)
-    assert "맞다" in result["question"]
-
-
-def test_수정_요청은_추천하지_않고_수정내용을_묻는다():
-    graph = build_graph(lambda state: extracted(), lambda state: "잘못된 추천")
-    result = graph.invoke({"message": "날짜를 바꾸고 싶어", "previousQuestion": CHECK, "conditions": complete_conditions()})
-    assert result["question"] == EDIT and not result.get("confirmed", False)
-    assert not requests_recommendation("추천 말고 수정할게", CHECK)
-    assert not requests_recommendation("확인 안 했어", CHECK)
-
-
-def test_맞다_좋다도_확인으로_인식한다():
-    assert requests_recommendation("맞다", CHECK)
-    assert requests_recommendation("좋다", CHECK)
-
-
-def test_아니다는_수정질문으로_안내한다():
-    graph = build_graph(lambda state: extracted(), lambda state: "잘못된 추천")
-    result = graph.invoke({"message": "아니다", "previousQuestion": CHECK, "conditions": complete_conditions()})
-    assert result["question"] == EDIT and not result.get("confirmed", False)
-
-
-def test_첫_메시지에_요소가_하나도_없으면_유도질문을_한다():
-    graph = build_graph(lambda state: extracted())
-    result = graph.invoke({"message": "여행 가고 싶어", "previousQuestion": INTRO, "conditions": {}})
-    assert result["question"] == GUIDE
-
-
-def test_첫_메시지에_일부_요소만_있으면_나머지를_모아서_묻는다():
-    graph = build_graph(lambda state: extracted(regionName="부산", durationDays=2))
-    result = graph.invoke({"message": "부산으로 2일", "previousQuestion": INTRO, "conditions": {}})
-    assert "출발 날짜 정보" in result["question"] and "교통 수단 정보" in result["question"]
-    assert "여행 지역 정보" not in result["question"] and "여행 기간 정보" not in result["question"]
-
-
-def test_첫_메시지에_모든_요소가_있으면_바로_확인질문():
-    graph = build_graph(lambda state: extracted(regionName="부산", startDate="2026-12-10", durationDays=3, adults=2, children=0, companionType="FRIENDS", transportType="CAR"))
-    result = graph.invoke({"message": "부산, 2026-12-10 출발 2박3일, 친구 성인2명, 자동차", "previousQuestion": INTRO, "conditions": {}})
-    assert result["question"] == CHECK
-
-
-def test_API_모호한_답변_후_확인하면_추천한다(monkeypatch):
-    graph = build_graph(lambda state: extracted(), lambda state: "관광지 추천 결과")
-    monkeypatch.setattr(main, "graph", graph)
-    client = TestClient(main.app)
-    first = client.post("/internal/dialogue", json={"message": "잘 모르겠어", "previousQuestion": CHECK, "conditions": complete_conditions()})
-    assert first.status_code == 200 and first.json()["question"] == CLARIFY
-    second = client.post("/internal/dialogue", json={"message": "맞아요", "previousQuestion": first.json()["question"], "conditions": complete_conditions(), "candidates": [{"placeId": 1, "name": "후보", "address": "부산"}]})
-    assert second.status_code == 200 and second.json()["question"] == "관광지 추천 결과"
-    assert second.json()["confirmed"] is True
+    monkeypatch.setattr(main.dialogue, "handle", fake_handle)
+    TestClient(main.app).post("/internal/dialogue", json={"message": "부산 여행", "excludedCourseIds": [1, 2]})
+    assert captured["excluded"] == [1, 2]

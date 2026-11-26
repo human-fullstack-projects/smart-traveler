@@ -1,4 +1,3 @@
-import { blockAdminAction } from './api/adminReadOnly';
 // 서버 세션의 CSRF 토큰을 함께 보내고 인증 쿠키는 브라우저가 관리한다.
 let guestCourseStorage = Promise.resolve();
 // 창을 닫을 때는 토큰을 새로 받을 시간이 없어서 마지막으로 받은 토큰을 쓴다.
@@ -12,7 +11,6 @@ async function csrf() {
   return lastToken;
 }
 async function request(path, options = {}) {
-  blockAdminAction(`/api/chat${path}`, options.method);
   const headers = { ...options.headers };
   if (options.method && options.method !== 'GET') {
     const token = await csrf();
@@ -41,15 +39,8 @@ export const chatApi = {
   },
   saveRecommendedCourse: (id, messageId, startDate, courseId) => request(`/sessions/${encodeURIComponent(id)}/recommendations/${encodeURIComponent(messageId)}/save`,
     { method: 'POST', body: JSON.stringify({ startDate, courseId }) }),
-  tourPlaces: (province, district, page) => {
-    const query = new URLSearchParams({ province, page: String(page) });
-    if (district) query.set('district', district);
-    return request(`/tour/places?${query}`, { method: 'POST' });
-  },
-  create: (content, regionId) => request('/sessions', {
-    method: 'POST',
-    body: JSON.stringify({ content, regionId }),
-  }),
+  create: (content, regionId = null, lodgingId = null) => request('/sessions',
+    { method: 'POST', body: JSON.stringify({ content, regionId, lodgingId }) }),
   load: (id) => request(`/sessions/${encodeURIComponent(id)}`),
   send: (id, content, regionId = null) => request(`/sessions/${encodeURIComponent(id)}/messages`, { method: 'POST', body: JSON.stringify({ content, regionId }) }),
   // 모아 둔 대화를 DB에 저장한다(대화 종료·다른 페이지 이동).
