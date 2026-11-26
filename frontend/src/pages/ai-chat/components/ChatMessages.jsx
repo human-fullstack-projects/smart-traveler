@@ -15,16 +15,26 @@ function renderContent(content) {
 
 export default function ChatMessages({ messages, busy }) {
   const end = useRef(null);
-  // 새 메시지가 오면 맨 아래로 스크롤
-  useEffect(() => { end.current?.scrollIntoView({ block: 'end' }); }, [messages.length, busy]);
+  const questionRef = useRef(null);
+  const lastMessage = messages.at(-1);
+  const lastUserIndex = messages.reduce((acc, item, index) => item.role === 'USER' ? index : acc, -1);
+  // 답변이 막 도착했으면 방금 보낸 질문의 시작 부분이 보이도록, 아직 작성 중이면 맨 아래로 스크롤한다.
+  useEffect(() => {
+    if (!busy && lastMessage?.role !== 'USER') questionRef.current?.scrollIntoView({ block: 'start' });
+    else end.current?.scrollIntoView({ block: 'end' });
+  }, [messages.length, busy]);
 
   return (
     <div className="cb-messages" aria-live="polite">
       {messages.length === 0 && !busy && (
         <p className="cb-status">어떤 여행을 계획하고 있는지 이야기해 주세요.</p>
       )}
-      {messages.map((item) => (
-        <div key={item.id} className={item.role === 'USER' ? 'cb-msg user' : 'cb-msg bot'}>
+      {messages.map((item, index) => (
+        <div
+          key={item.id}
+          ref={index === lastUserIndex ? questionRef : null}
+          className={item.role === 'USER' ? 'cb-msg user' : 'cb-msg bot'}
+        >
           <span className="ac-visually-hidden">{item.role === 'USER' ? '나: ' : '플래너: '}</span>
           {renderContent(item.content)}
         </div>

@@ -97,6 +97,26 @@ body:has(.main-page.has-pastel-background, .main-page .human-course-create, .aut
 .header-account-logout { color: #b42318; }
 .header-account-logout:disabled { opacity: .6; cursor: wait; }
 
+.mp-topbar :is(.st-top-links, .header-account-panel) a.header-owner-dashboard {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 11px 16px;
+  border: 1px solid #4264ff;
+  border-radius: 10px;
+  background: #4264ff;
+  color: #fff;
+  font-weight: 800;
+  box-shadow: 0 4px 12px #4264ff26;
+}
+.mp-topbar :is(.st-top-links, .header-account-panel) a.header-owner-dashboard:hover {
+  border-color: #2949d6;
+  background: #2949d6;
+  color: #fff;
+}
+.mp-topbar a.header-owner-dashboard:focus-visible { outline: 3px solid #aab9ff; outline-offset: 3px; }
+.header-account-panel a.header-owner-dashboard { margin-block: 6px; }
+
 .mp-global-notice{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:14px 24px 0;padding:12px 18px;background:#F0EEF8;border:1px solid #CDCFE7;border-radius:10px;color:#2549AD;font-size:13px}
 .mp-global-notice button{border:0;background:none;color:inherit;font-size:17px;line-height:1;padding:0}
 
@@ -133,6 +153,14 @@ header.mp-topbar{background:#fff;flex-shrink:0}
 }
 .main-page.is-home .mp-body,.main-page.is-home .mp-content{min-height:0}
 .main-page.is-home .mp-main{max-width:none;padding:0;display:flex;min-height:0}
+
+/* #/chat: 데스크톱 2단 레이아웃에서는 채팅창(.cb-messages)만 스크롤되게 하고 페이지 전체 스크롤은 막는다. */
+@media(min-width:851px){
+  .main-page.is-chat{height:100vh;overflow:hidden}
+  .main-page.is-chat .mp-body,
+  .main-page.is-chat .mp-content,
+  .main-page.is-chat .mp-main{min-height:0;overflow:hidden}
+}
 
 /* 관리자 계정 둘러보기 안내 (관리자만 보임) */
 .admin-readonly-banner {

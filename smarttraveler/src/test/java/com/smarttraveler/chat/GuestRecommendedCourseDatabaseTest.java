@@ -39,7 +39,6 @@ class GuestRecommendedCourseDatabaseTest {
     @Autowired JdbcTemplate jdbc;
     @Autowired ChatMessageBuffer buffer;
     @Autowired ObjectMapper mapper;
-    @Autowired StoredCourseCandidates candidates;
     @Autowired WebApplicationContext context;
     @Autowired com.smarttraveler.auth.repository.MemberRepository members;
     @Autowired com.smarttraveler.auth.service.SocialSessionLogin socialLogin;
@@ -71,9 +70,19 @@ class GuestRecommendedCourseDatabaseTest {
         }
     }
 
+    private long seedCourseId(String destinationPrefix, int duration) {
+        return jdbc.queryForObject("""
+            SELECT c.id FROM course c
+            WHERE c.destination LIKE CONCAT(?, '%') AND c.status='done' AND c.is_active=1 AND c.deleted_at IS NULL
+              AND DATEDIFF(c.end_date, c.start_date) + 1 = ?
+              AND JSON_UNQUOTE(JSON_EXTRACT(c.condition_meta, '$.seed_batch')) IN ('smart-traveler-rag-1000-v1','smart-traveler-rag-2000-v1')
+            ORDER BY c.id LIMIT 1
+            """, Long.class, destinationPrefix, duration);
+    }
+
     Trip recommend() throws Exception {
         var browser = new MockHttpSession();
-        when(ai.process(anyString(), anyString(), any(), anyList(), anyList(), anyMap())).thenReturn(new PythonAiClient.Result("조건을 알려주세요", false));
+        when(ai.process(anyString(), anyList())).thenReturn(new PythonAiClient.Result("조건을 알려주세요"));
         var created = mvc.perform(post("/api/chat/sessions").session(browser).with(csrf()).contentType("application/json")
             .content("{\"content\":\"부산 여행\"}")).andExpect(status().isOk()).andReturn();
         long id = mapper.readTree(created.getResponse().getContentAsString()).path("id").asLong();
@@ -83,8 +92,9 @@ class GuestRecommendedCourseDatabaseTest {
         conditions.put("adults", 2); conditions.put("children", 0); conditions.put("companionType", "FRIENDS"); conditions.put("transportType", "CAR");
         conditions.put("flowType", "COURSE_FIRST"); conditions.putArray("preferences"); conditions.putArray("fixedEvents");
         jdbc.update("UPDATE chat_session_conditions SET conditions_json=?,confirmed=TRUE WHERE session_id=?", mapper.writeValueAsString(conditions), id);
-        long source = ((Number) candidates.find(conditions).getFirst().get("courseId")).longValue();
-        when(ai.process(anyString(), anyString(), any(), anyList(), anyList(), anyMap())).thenReturn(new PythonAiClient.Result("추천 1 · 코스 #" + source, true, source));
+        long source = seedCourseId("부산", 2);
+        when(ai.process(anyString(), anyList()))
+            .thenReturn(new PythonAiClient.Result("추천 1 · 코스 #" + source, source, List.of(source)));
         var result = mvc.perform(post("/api/chat/sessions/" + id + "/messages").session(browser).with(csrf()).contentType("application/json")
             .content("{\"content\":\"추천해줘\"}")).andExpect(status().isOk()).andReturn();
         var messages = mapper.readTree(result.getResponse().getContentAsString()).path("messages");

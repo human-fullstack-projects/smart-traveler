@@ -24,7 +24,9 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-/** Opt in against the seeded local test DB. Reads only; never creates test accounts. */
+/** Opt in against the seeded local test DB. Reads only; never creates test accounts.
+ * 코스 후보 검색(벡터DB+RDB)은 이제 ai-server가 직접 하므로, 이 감사 테스트는 스프링에 남아 있는
+ * StoredCourseCandidates.findCourse(저장 스냅샷 재조회)의 구조 유효성만 검증한다. */
 @EnabledIfEnvironmentVariable(named = "RAG_DB_AUDIT", matches = "true")
 @SpringBootTest(properties = {"COURSE_RAG_ENABLED=true", "spring.jpa.hibernate.ddl-auto=validate"})
 class RagDatabaseAuditTest {
@@ -35,21 +37,31 @@ class RagDatabaseAuditTest {
     @Autowired com.smarttraveler.mypage.repository.MyPageRepository myPage;
     @MockitoBean PythonAiClient ai;
 
-    @Test void busanOneToFourDaysUseOnlyValidSeedCourses() throws Exception {
+    private Long seedCourseId(String destinationPrefix, int duration) {
+        return jdbc.queryForObject("""
+            SELECT c.id FROM course c
+            WHERE c.destination LIKE CONCAT(?, '%') AND c.status='done' AND c.is_active=1 AND c.deleted_at IS NULL
+              AND DATEDIFF(c.end_date, c.start_date) + 1 = ?
+              AND JSON_UNQUOTE(JSON_EXTRACT(c.condition_meta, '$.seed_batch')) IN ('smart-traveler-rag-1000-v1','smart-traveler-rag-2000-v1')
+            ORDER BY c.id LIMIT 1
+            """, Long.class, destinationPrefix, duration);
+    }
+
+    @Test void busanOneToFourDaysHaveValidSeedCourseStructure() throws Exception {
         assertEquals(1000, jdbc.queryForObject("SELECT COUNT(*) FROM course WHERE JSON_UNQUOTE(JSON_EXTRACT(condition_meta, '$.seed_batch'))='smart-traveler-rag-1000-v1'", Integer.class));
         Map<String, List<Map<String, Object>>> snapshots = new LinkedHashMap<>();
         for (int duration = 1; duration <= 4; duration++) {
-            var conditions = mapper.createObjectNode();
-            conditions.put("regionName", "부산"); conditions.put("durationDays", duration);
-            var rows = courses.find(conditions);
-            assertFalse(rows.isEmpty(), "부산 " + duration + "일 후보");
-            Map<Object, java.util.Set<Integer>> days = new LinkedHashMap<>();
+            Long courseId = seedCourseId("부산", duration);
+            assertNotNull(courseId, "부산 " + duration + "일 후보");
+            var rows = courses.findCourse(courseId, duration);
+            assertFalse(rows.isEmpty(), "부산 " + duration + "일 코스 #" + courseId);
+            java.util.Set<Integer> days = new java.util.HashSet<>();
             for (var row : rows) {
                 assertNotNull(row.get("placeId")); assertNotNull(row.get("seq"));
                 assertTrue(row.get("landscapes") instanceof List);
-                days.computeIfAbsent(row.get("courseId"), key -> new java.util.HashSet<>()).add((Integer) row.get("dayNo"));
+                days.add((Integer) row.get("dayNo"));
             }
-            for (var actual : days.values()) assertEquals(duration, actual.size());
+            assertEquals(duration, days.size());
             snapshots.put(Integer.toString(duration), rows);
         }
         Path snapshot = Path.of("build", "rag-audit-candidates.json");
@@ -57,23 +69,18 @@ class RagDatabaseAuditTest {
     }
 
     @Test @Transactional
-    void realSavedPreferencesAndAccountBoundariesThroughSecurityChain() throws Exception {
+    void accountBoundariesThroughSecurityChain() throws Exception {
+        // savedPreferences는 더 이상 ai-server에 전달되지 않지만(1회성 질의에는 반영할 자리가
+        // 없다), 비회원·회원 세션 간 대화 접근 경계는 여전히 중요하므로 그 부분만 검증한다.
         var members = jdbc.queryForList("""
             SELECT member_id, login_id FROM members m
             WHERE login_id LIKE 'rag_seed_test_%' AND status='ACTIVE' AND deleted_at IS NULL
-            AND NOT EXISTS (SELECT 1 FROM member_preference p WHERE p.member_no=m.member_id)
-            AND NOT EXISTS (SELECT 1 FROM member_preference_tag t WHERE t.member_no=m.member_id)
             ORDER BY member_id LIMIT 2
             """);
-        assertEquals(2, members.size(), "Two unconfigured seed accounts are needed; fixture writes roll back");
-        long first = ((Number) members.getFirst().get("member_id")).longValue();
-        long second = ((Number) members.getLast().get("member_id")).longValue();
+        assertEquals(2, members.size(), "Two seed accounts are needed");
         String firstLogin = members.getFirst().get("login_id").toString();
         String secondLogin = members.getLast().get("login_id").toString();
-        saveFixture(first, "relaxed", "장소:야외", "선호지역:바다");
-        saveFixture(second, "packed", "장소:실내", "선호지역:도시");
-        when(ai.process(anyString(), anyString(), any(), anyList(), anyList(), anyMap()))
-            .thenReturn(new PythonAiClient.Result("여행 조건을 입력해 주세요", false));
+        when(ai.process(anyString(), anyList())).thenReturn(new PythonAiClient.Result("여행 조건을 입력해 주세요"));
         var mvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
         var session = new MockHttpSession();
         String body = "{\"content\":\"부산 여행\"}";
@@ -94,11 +101,8 @@ class RagDatabaseAuditTest {
             .contentType("application/json").content(body)).andExpect(status().isOk());
         mvc.perform(post("/api/chat/sessions/" + firstId + "/messages").session(session).with(user(secondLogin)).with(csrf())
             .contentType("application/json").content(body)).andExpect(status().isNotFound());
-        verify(ai).process(anyString(), anyString(), any(), anyList(), anyList(), eq(Map.of()));
-        verify(ai).process(anyString(), anyString(), any(), anyList(), anyList(),
-            eq(Map.of("pace", "relaxed", "environment", "outdoor", "landscapes", List.of("sea"))));
-        verify(ai, times(2)).process(anyString(), anyString(), any(), anyList(), anyList(),
-            eq(Map.of("pace", "packed", "environment", "indoor", "landscapes", List.of("city"))));
+        // 성공한 호출(비회원 생성·회원1 생성·회원2 생성·회원2 추가 메시지) 수만큼만 ai-server를 불렀는지 확인한다.
+        verify(ai, times(4)).process(eq("부산 여행"), eq(List.of()));
     }
 
     private void saveFixture(long member, String pace, String environment, String landscape) {
@@ -142,7 +146,7 @@ class RagDatabaseAuditTest {
         String login = member.get("login_id").toString();
         var mvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
         var session = new MockHttpSession();
-        when(ai.process(anyString(), anyString(), any(), anyList(), anyList(), anyMap())).thenReturn(new PythonAiClient.Result("조건을 알려주세요", false));
+        when(ai.process(anyString(), anyList())).thenReturn(new PythonAiClient.Result("조건을 알려주세요"));
         var created = mvc.perform(post("/api/chat/sessions").session(session).with(user(login)).with(csrf()).contentType("application/json")
             .content("{\"content\":\"부산 여행\"}")).andExpect(status().isOk()).andReturn();
         long sessionId = mapper.readTree(created.getResponse().getContentAsString()).path("id").asLong();
@@ -151,9 +155,10 @@ class RagDatabaseAuditTest {
         conditions.put("adults", 2); conditions.put("children", 0); conditions.put("companionType", "FRIENDS"); conditions.put("transportType", "CAR");
         conditions.put("flowType", "COURSE_FIRST"); conditions.putArray("preferences"); conditions.putArray("fixedEvents");
         jdbc.update("UPDATE chat_session_conditions SET conditions_json=?,confirmed=TRUE WHERE session_id=?", mapper.writeValueAsString(conditions), sessionId);
-        long sourceId = ((Number) courses.find(conditions).getFirst().get("courseId")).longValue();
+        long sourceId = seedCourseId("부산", 2);
         long originalOwner = jdbc.queryForObject("SELECT member_no FROM course WHERE id=?", Long.class, sourceId);
-        when(ai.process(anyString(), anyString(), any(), anyList(), anyList(), anyMap())).thenReturn(new PythonAiClient.Result("추천 1 · 코스 #" + sourceId, true, sourceId));
+        when(ai.process(anyString(), anyList()))
+            .thenReturn(new PythonAiClient.Result("추천 1 · 코스 #" + sourceId, sourceId, List.of(sourceId)));
         int before = jdbc.queryForObject("SELECT COUNT(*) FROM course WHERE member_no=?", Integer.class, memberId);
         var recommended = mvc.perform(post("/api/chat/sessions/" + sessionId + "/messages").session(session).with(user(login)).with(csrf())
             .contentType("application/json").content("{\"content\":\"추천해줘\"}")).andExpect(status().isOk()).andReturn();

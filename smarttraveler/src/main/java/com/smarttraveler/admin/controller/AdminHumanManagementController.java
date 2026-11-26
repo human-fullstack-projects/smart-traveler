@@ -1,6 +1,7 @@
 package com.smarttraveler.admin.controller;
 
 import com.smarttraveler.admin.service.HumanManagementService;
+import com.smarttraveler.human_course.HumanCourseService;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -14,7 +15,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/admin")
 public class AdminHumanManagementController {
     private final HumanManagementService service;
-    public AdminHumanManagementController(HumanManagementService service) { this.service=service; }
+    private final HumanCourseService humanCourses;
+    public AdminHumanManagementController(HumanManagementService service, HumanCourseService humanCourses) { this.service=service; this.humanCourses=humanCourses; }
+
+    // 여행자가 보는 코스 상세 그대로(사진·후기·일정·댓글) · 블라인드 글도 보임
+    @GetMapping("/human-courses/{id}/view")
+    public com.smarttraveler.human_course.HumanCourseDtos.Post courseView(@PathVariable long id) { return humanCourses.adminView(id); }
 
     @GetMapping("/human-comments")
     public List<HumanManagementService.CommentCard> comments(@RequestParam(required=false) String region,

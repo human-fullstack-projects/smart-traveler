@@ -4,7 +4,7 @@ import useMemberResource from '../../pages/mypage/hooks/useMemberResource';
 import '../../css/MainLayout.css';
 
 const navigationItems = [
-  { label: '여행 생성', href: '#/' },
+  { label: '여행 생성', href: '#/chat' },
   { label: '숙소 검색', href: '#/stays' },
   { label: '저장된 여행', href: '#/my-courses', requiresLogin: true },
   { label: '여행자추천트립', href: '#/human-courses' },
@@ -17,11 +17,9 @@ const accountLinks = [
 ];
 
 export default function SiteHeader({ member, loggingOut, onLogout }) {
-  const navigation = navigationItems.map((item) =>
-    member?.roleCode === 'OWNER' && item.href === '#/mypage'
-      ? { label: '업주 대시보드', href: '#/owner' }
-      : item
-  );
+  const navigation = member?.roleCode === 'OWNER'
+    ? [...navigationItems, { label: '업주 센터', href: '#/owner', className: 'header-owner-dashboard' }]
+    : navigationItems;
   const [menuOpen, setMenuOpen] = useState(false);
   const account = useRef(null);
   const toggle = useRef(null);
@@ -52,7 +50,7 @@ export default function SiteHeader({ member, loggingOut, onLogout }) {
   }, [menuOpen]);
 
   const renderLink = item => (
-    <a key={item.href} href={!member && item.requiresLogin ? '#/login' : item.href} onClick={() => setMenuOpen(false)}>{item.label}</a>
+    <a key={item.href} href={!member && item.requiresLogin ? '#/login' : item.href} className={item.className} onClick={() => setMenuOpen(false)}>{item.label}</a>
   );
 
   return (
