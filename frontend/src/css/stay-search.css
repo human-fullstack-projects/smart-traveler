@@ -21,6 +21,8 @@
   top: calc(var(--stay-header-height) + var(--stay-sticky-gap));
 }
 
+.stay-search-notice + .stay-search-sticky { margin-top: 10px; }
+
 .stay-search-summary { display: none; }
 
 .stay-search-bar :is(input, select, button):focus-visible { outline-offset: -3px; }
