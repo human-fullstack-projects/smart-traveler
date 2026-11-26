@@ -129,7 +129,7 @@ body:has(.main-page.has-pastel-background, .main-page .human-course-create, .aut
   padding-top:clamp(60px, calc(6vh + 36px), 88px);
   padding-bottom:clamp(12px, 3vh, 28px);
 }
-.footer.site-footer{min-height:112px;padding-block:44px;line-height:20px;flex-shrink:0}
+.footer.site-footer{min-height:82px;padding-block:30px;line-height:20px;flex-shrink:0;background:#fff}
 
 @media(max-width:900px){
   .mp-main{padding:40px 28px 40px}
@@ -146,7 +146,7 @@ body:has(.main-page.has-pastel-background, .main-page .human-course-create, .aut
   .mp-main{padding:34px 20px 36px}
 }
 /* 메인 첫 화면(여행 시작): 메뉴 줄 흰 바탕 · 내용이 화면 폭 전체 · 아래 바로가기 줄 숨김 → 한 화면 */
-.main-page.is-home{min-height:100vh;background:#fff}
+.main-page.is-home{min-height:100svh;background:#fff}
 header.mp-topbar{background:#fff;flex-shrink:0}
 @media (min-width:1024px) and (min-height:640px){
   header.mp-topbar{min-height:64px;padding-top:8px;padding-bottom:8px}

@@ -22,7 +22,7 @@ export default function MyPage({ bookings = [], courses = [], posts = [], member
   const summaries = [
     ['my-courses', 'Saved Trips', '저장된 여행', courses.filter(isSavedCourse).length, '예약 없이 저장된 여행'],
     ['reservations', 'My Bookings', '내 예약', bookings.filter(isVisibleBooking).length, '내 예약과 결제 상태'],
-    ['my-posts', 'My Trips Post', '내 여행 추천', recommendations.published.length + recommendations.pending.length, '내 지난 여행 추천'],
+    ['my-posts', 'My Trips Post', '내 여행 추천', recommendations.existingPosts.length + recommendations.pending.length, '내 지난 여행 추천'],
   ];
   return <div className="mypage mp-home">
     <div className="hero">

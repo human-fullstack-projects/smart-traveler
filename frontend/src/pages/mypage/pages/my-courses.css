@@ -9,6 +9,8 @@ html:has(.my-posts-list) { scrollbar-gutter: stable; }
 .trips-list-back { flex-shrink: 0; margin: 0 0 0 auto; white-space: nowrap; }
 .trip-detail-footer { display: flex; justify-content: flex-end; margin-top: 28px; }
 .trip-detail-footer .trips-back { margin-bottom: 0; }
+.saved-trip-actions { justify-content: space-between; align-items: center; gap: 8px; }
+.saved-trip-actions .trips-back { text-align: center; }
 .trips-pagination { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 28px; font-size: 14px; }
 .trips-pagination button { padding: 8px 16px; border: 1px solid var(--st-line); border-radius: 8px; background: #fff; color: var(--st-ink); }
 .trips-pagination button:hover:not(:disabled) { background: var(--st-aqua); }

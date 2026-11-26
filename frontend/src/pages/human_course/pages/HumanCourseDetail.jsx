@@ -19,7 +19,9 @@ export default function HumanCourseDetail({ courses = previewCourses, reservatio
     return () => { active = false; };
   }, [serverMode, courseId]);
   const course = courses.find((item) => String(item.id) === String(courseId));
-  const blocked = course?.visibility === 'BLINDED';
+  const blinded = course?.visibility === 'BLINDED';
+  const draft = course?.visibility === 'DRAFT';
+  const blocked = blinded || draft;
   const photoAssets = course?.photoAssets || [];
   const photos = photoAssets.length ? photoAssets : (course?.photos || []).map((name) => ({ name, dataUrl: '' }));
   const reservation = serverMode ? null : reservations.find((item) => item.id === course?.reservationId);
@@ -37,7 +39,11 @@ export default function HumanCourseDetail({ courses = previewCourses, reservatio
     </PageHeading>
     {loadingDetail && <p role="status">게시글을 확인하고 있습니다.</p>}
     {detailError && <p className="note" role="alert">{detailError} <button type="button" onClick={async () => { setLoadingDetail(true); const result = await loadCourse?.(courseId); setDetailError(result?.error || ''); setLoadingDetail(false); }}>다시 시도</button></p>}
-    {!loadingDetail && (!course || blocked) ? <section className="panel"><h2>{blocked ? '블라인드 처리된 여행입니다.' : '여행을 찾을 수 없습니다.'}</h2><p>{blocked ? '관리자 검토로 숨김 처리되어 게시글·사진·일정·댓글을 볼 수 없습니다.' : '존재하지 않는 여행입니다.'}</p>{isAuthenticated && course?.mine && <a className="button" href={`#/human-courses/${course.id}/edit`}>수정하기</a>}</section> : course && !blocked ? <>
+    {!loadingDetail && (!course || blocked) ? <section className="panel">
+      <h2>{blinded ? '블라인드 처리된 여행입니다.' : draft && course.mine ? '작성 중인 여행입니다.' : '여행을 찾을 수 없습니다.'}</h2>
+      {blinded && <p>관리자 검토로 숨김 처리되어 게시글·사진·일정·댓글을 볼 수 없습니다.</p>}
+      {isAuthenticated && course?.mine && <a className="button" href={`#/human-courses/${course.id}/edit${draft ? '?from=my-posts' : ''}`}>{draft ? '이어서 작성하기' : '수정하기'}</a>}
+    </section> : course && !blocked ? <>
       <article className="panel"><div className="article-intro"><p className="small-kicker">여행 정보</p><h2>{course.title}</h2><dl className="detail-meta"><div><dt>작성자</dt><dd>{course.author}</dd></div><div><dt>지역</dt><dd>{course.region}</dd></div><div><dt>여행 기간</dt><dd>{course.travelDates || '미등록'}</dd></div><div><dt>여행 유형</dt><dd>{course.category}</dd></div><div><dt>동행</dt><dd>{course.companion}</dd></div><div><dt>작성일</dt><dd><time dateTime={course.createdAt}>{course.createdAt}</time></dd></div></dl></div>
         <CoursePhotoGallery key={course.id} title={course.title} photos={photos} />
         <hr className="divider" /><h3>여행 후기</h3><p className="course-review-text">{course.body}</p>
@@ -45,8 +51,8 @@ export default function HumanCourseDetail({ courses = previewCourses, reservatio
       <section className="panel course-detail-map"><div className="panel-heading"><h2>지역 지도</h2></div>
         <CourseMap region={course.region} plan={course.plan} stay={stay} travelDates={course.travelDates} allDaysLabel="전체 일정" height="clamp(350px, 40vw, 380px)" />
       </section>
-      <CourseComments course={course} execute={execute} isAuthenticated={isAuthenticated} />
-      {isAuthenticated && <CourseActions key={course.id} course={course} execute={execute} />}
+      <CourseComments course={course} execute={execute} isAuthenticated={isAuthenticated} isOwner={member?.roleCode === 'OWNER'} />
+      {isAuthenticated && <CourseActions key={course.id} course={course} execute={execute} isOwner={member?.roleCode === 'OWNER'} />}
     </> : null}
   </div></div>;
 }

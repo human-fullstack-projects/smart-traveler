@@ -1,11 +1,8 @@
 import { useState } from 'react';
-import { useAuth } from '../../../contexts/AuthContext.jsx';
 import OwnerActionNotice from '../../../components/OwnerActionNotice.jsx';
 import { USER } from '../data/courseState';
 
-export default function CourseComments({ course, execute, isAuthenticated = false }) {
-  const { member } = useAuth();
-  const isOwner = member?.roleCode === 'OWNER';
+export default function CourseComments({ course, execute, isAuthenticated = false, isOwner = false }) {
   const [ownerNotice, setOwnerNotice] = useState(false);
   const [text, setText] = useState('');
   const [notice, setNotice] = useState('');

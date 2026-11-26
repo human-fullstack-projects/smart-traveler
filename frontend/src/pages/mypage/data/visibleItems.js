@@ -15,8 +15,8 @@ export function isPastRecommendationBooking(booking, today) {
 export function recommendationTrips(bookings, posts, today) {
   const pastBookings = bookings.filter(booking => isPastRecommendationBooking(booking, today));
   const bookingsById = new Map(pastBookings.map(booking => [String(booking.id), booking]));
-  const published = posts.filter(post => bookingsById.has(String(post.reservationId)));
-  const publishedIds = new Set(published.map(post => String(post.reservationId)));
-  const pending = pastBookings.filter(booking => !publishedIds.has(String(booking.id)));
-  return { bookingsById, published, pending };
+  const existingPosts = posts.filter(post => post.status === 'DRAFT' || bookingsById.has(String(post.reservationId)));
+  const reservationIdsWithPosts = new Set(existingPosts.map(post => String(post.reservationId)));
+  const pending = pastBookings.filter(booking => !reservationIdsWithPosts.has(String(booking.id)));
+  return { bookingsById, existingPosts, pending };
 }

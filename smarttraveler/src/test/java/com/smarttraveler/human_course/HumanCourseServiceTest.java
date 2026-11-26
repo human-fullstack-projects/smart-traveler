@@ -68,6 +68,41 @@ class HumanCourseServiceTest {
         verify(jdbc, times(2)).queryForList(contains("status='VISIBLE'"), eq(77L));
     }
 
+    @Test void unpublishKeepsThePostAndRequiresExplicitRepublication() {
+        var jdbc = mock(JdbcTemplate.class);
+        var members = mock(MemberRepository.class);
+        var management = mock(HumanManagementService.class);
+        var auth = mock(Authentication.class);
+        var author = new Member();
+        author.setMemberId(7L);
+        author.setStatus("ACTIVE");
+        when(auth.getName()).thenReturn("author");
+        when(auth.isAuthenticated()).thenReturn(true);
+        when(members.findByLoginId("author")).thenReturn(Optional.of(author));
+        when(jdbc.queryForList(contains("author_id=? AND deleted_at IS NULL FOR UPDATE"), eq(77L), eq(7L)))
+            .thenReturn(List.of(Map.of("status", "VISIBLE")), List.of(Map.of("status", "DRAFT")));
+        when(jdbc.queryForList(contains("WHERE p.post_id=?"), eq(-1L), eq(-1L), eq(77L)))
+            .thenReturn(List.of(Map.of("author_id", 7L, "status", "DRAFT")));
+        when(jdbc.queryForList(contains("SELECT author_id,status"), eq(77L)))
+            .thenReturn(List.of(Map.of("author_id", 7L, "status", "DRAFT")));
+        var service = new HumanCourseService(jdbc, mock(ObjectMapper.class), members,
+            mock(HumanCoursePhotoStore.class), management);
+
+        assertEquals(77L, service.unpublish(auth, 77L).id());
+        assertEquals(77L, service.unpublish(auth, 77L).id());
+        verify(jdbc).update(contains("SET status='DRAFT'"), eq(77L));
+        verify(management).clearSelections(77L);
+        assertEquals(HttpStatus.NOT_FOUND, assertThrows(ResponseStatusException.class,
+            () -> service.detail(77L, null)).getStatusCode());
+
+        var input = new PostInput("제목", "문화", "친구", "소개", "후기", List.of(), false);
+        assertEquals(HttpStatus.CONFLICT, assertThrows(ResponseStatusException.class,
+            () -> service.edit(auth, 77L, input, false)).getStatusCode());
+        assertEquals(77L, service.edit(auth, 77L, input, true).id());
+        verify(jdbc).update(contains("SET title=?"), eq("제목"), eq("문화"), eq("소개"),
+            eq("친구"), eq("후기"), eq("VISIBLE"), eq(77L));
+    }
+
     @Test void ownerCannotPublishAReviewEvenWithAReservationId() {
         var jdbc = mock(JdbcTemplate.class);
         var members = mock(MemberRepository.class);

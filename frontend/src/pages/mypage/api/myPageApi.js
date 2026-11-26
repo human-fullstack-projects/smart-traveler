@@ -23,4 +23,7 @@ export const myPageApi = {
   course(memberId, id) {
     return request(`/api/mypage/courses/${encodeURIComponent(id)}`, { headers: { 'X-MyPage-Member': String(memberId) } });
   },
+  booking(memberId, id) {
+    return request(`/api/mypage/reservations/${encodeURIComponent(id)}`, { headers: { 'X-MyPage-Member': String(memberId) } });
+  },
 };

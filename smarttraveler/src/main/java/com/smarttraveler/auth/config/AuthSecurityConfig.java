@@ -70,7 +70,7 @@ public class AuthSecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/reservations", "/api/reservations/*/cancel", "/api/payments/reservations/*/prepare",
                         "/api/payments/confirm", "/api/payments/reservations/*/sync").hasAnyRole("USER", "OWNER")
                 .requestMatchers(HttpMethod.POST, "/api/human-courses/reservations/*", "/api/human-courses/*/like",
-                        "/api/human-courses/*/comments", "/api/human-courses/*/reports").hasAnyRole("USER", "OWNER")
+                        "/api/human-courses/*/comments", "/api/human-courses/*/reports", "/api/human-courses/*/unpublish").hasAnyRole("USER", "OWNER")
                 .requestMatchers(HttpMethod.PUT, "/api/human-courses/*").hasAnyRole("USER", "OWNER")
                 .requestMatchers(HttpMethod.DELETE, "/api/human-courses/*", "/api/human-courses/*/comments/*").hasAnyRole("USER", "OWNER")
                 .requestMatchers(HttpMethod.POST, "/api/mypage/courses/human/*", "/api/mypage/courses/import").hasAnyRole("USER", "OWNER")

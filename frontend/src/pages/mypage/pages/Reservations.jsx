@@ -14,9 +14,17 @@ function StayPhoto({ url, name, load }) {
   return <TourPhoto localUrl={url} load={load} alt={`${name || '숙소'} 사진`}
     missing="등록된 숙소 사진이 없습니다." />;
 }
-function BookingStayInfo({ booking }) {
+function rebookingHref(booking) {
+  const lodgingId = booking.stayInfo?.id ?? booking.itinerary?.stay?.lodgingId;
+  return lodgingId ? `#/stays/booking?${new URLSearchParams({
+    stay: lodgingId, rebookReservationId: booking.id, adults: booking.guests,
+  })}` : null;
+}
+
+function BookingStayInfo({ booking, rebookHref }) {
  const stay = booking.stayInfo;
- if (!stay) return <p className="note">지역에 맞는 숙소 정보를 찾지 못했습니다.</p>;
+ const rebook = rebookHref && <a className="trips-back trips-back-pill saved-trip-stay-link" href={rebookHref}>다시 예약하기</a>;
+ if (!stay) return <><p className="note">지역에 맞는 숙소 정보를 찾지 못했습니다.</p>{rebook}</>;
  return <div className="reservation-stay-info">
   {stay.regionMatched && <p className="note">여행 지역에 맞춘 숙소 데이터입니다. 기존 예약의 일정과 금액은 유지됩니다.</p>}
   <dl>{stay.address && <><dt>숙소 주소</dt><dd>{stay.address}</dd></>}
@@ -24,6 +32,7 @@ function BookingStayInfo({ booking }) {
    {stay.checkinTime && <><dt>체크인 / 체크아웃</dt><dd>{stay.checkinTime.slice(0,5)} / {stay.checkoutTime?.slice(0,5) || '미등록'}</dd></>}
   </dl>
   {stay.description && <p className="chat-text">{stay.description}</p>}
+  {rebook}
  </div>;
 }
 const tabs=[['all','전체 예약'],['upcoming','예약된 여행'],['past','지난 여행'],['cancelled','취소된 여행']];
@@ -58,7 +67,9 @@ function ReservationDetail({ booking, course, memberId, today }) {
   const [cancelResult, setCancelResult] = useState(null);
   const [cancelError, setCancelError] = useState('');
   const bookingStatus = cancelResult ?? booking.status;
-  const badge = categoryLabels[bookingCategory({ ...booking, status: bookingStatus }, today)];
+  const category = bookingCategory({ ...booking, status: bookingStatus }, today);
+  const badge = categoryLabels[category];
+  const rebookHref = rebookingHref(booking);
   const canRetry = bookingStatus === 'REFUND_FAILED' || bookingStatus === 'REFUNDING';
   const canCancel = canRetry || (bookingStatus === 'CONFIRMED' && booking.date >= today);
   const loadStayPhotos = useMemo(() => {
@@ -103,7 +114,7 @@ function ReservationDetail({ booking, course, memberId, today }) {
           <dt>인원</dt><dd>{booking.guests}명</dd>
           <dt>예약 금액</dt><dd>{money(booking.price)}</dd>
         </dl>
-        <BookingStayInfo booking={booking} />
+        <BookingStayInfo booking={booking} rebookHref={category === 'cancelled' ? rebookHref : null} />
         <div className="actions">
           {canCancel && <button type="button" className="reservation-cancel" onClick={() => {
             setCancelError('');
@@ -111,6 +122,7 @@ function ReservationDetail({ booking, course, memberId, today }) {
           }}>{canRetry ? '환불 다시 시도' : '예약취소'}</button>}
           {bookingStatus === 'COMPLETED' && <a className="secondary"
             href={`#/human-courses/create?reservationId=${encodeURIComponent(booking.id)}&from=reservations`}>내 여행 추천 작성·수정</a>}
+          {category === 'past' && rebookHref && <a className="secondary" href={rebookHref}>재예약</a>}
         </div>
         {cancelResult === 'CANCELLED' && <p role="status">예약을 취소했고 토스 테스트 결제를 전액 환불했어요.</p>}
         {cancelResult === 'REFUND_FAILED' && <p role="alert">토스 환불에 실패했어요. 환불을 다시 시도해 주세요.</p>}

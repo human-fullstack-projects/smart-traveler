@@ -29,7 +29,7 @@ function postFields(input) {
 export function filterCourses(courses, filters = {}) {
   const normalize = (value) => String(value ?? '').trim().toLocaleLowerCase('ko-KR');
   const keyword = normalize(filters.keyword);
-  const result = courses.filter((course) => course.visibility !== 'BLINDED'
+  const result = courses.filter((course) => !['BLINDED', 'DRAFT'].includes(course.visibility)
     && (!filters.region || course.region === filters.region)
     && (!filters.category || course.category === filters.category)
     && (!filters.companion || course.companion === filters.companion)
@@ -63,12 +63,20 @@ export function transition(current, action) {
   }
   const course = state.courses.find((c) => String(c.id) === String(action.id));
   if (!course) return fail('게시글을 찾을 수 없습니다.');
+  if (action.type === 'unpublish') {
+    if (!course.mine || !['PUBLIC', 'DRAFT'].includes(course.visibility)) return fail('내 공개 게시글만 내릴 수 있습니다.');
+    course.visibility = 'DRAFT';
+    return { state, id: course.id };
+  }
+  if (course.visibility === 'DRAFT' && !['edit', 'delete'].includes(action.type)) return fail('내려간 게시글입니다.');
   if (action.type === 'moderate') { course.visibility = course.visibility === 'BLINDED' ? 'PUBLIC' : 'BLINDED'; return { state }; }
   if (action.type === 'edit') {
     if (!course.mine) return fail('본인 게시글만 수정할 수 있습니다.');
+    if ((course.visibility === 'DRAFT' && !action.republish) || (course.visibility === 'BLINDED' && action.republish)) return fail('게시 상태가 변경됐습니다.');
     const fields = postFields(action.fields);
     if (!fields) return fail('필수 항목·글자 수·사진 개수를 확인해주세요.');
     Object.assign(course, fields);
+    if (course.visibility === 'DRAFT') course.visibility = 'PUBLIC';
     return { state, id: course.id };
   }
   if (action.type === 'delete') {
