@@ -15,7 +15,7 @@
 .cb-send:disabled{opacity:.45}
 
 /* 상태 B: 대화 + 조건 패널 */
-.cb-page{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:20px;max-width:1120px;margin:0 auto;align-items:start}
+.cb-page{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;max-width:1120px;margin:0 auto;align-items:start}
 .cb-chat{display:flex;flex-direction:column;height:calc(100vh - 200px);min-height:480px;padding:20px 24px;background:#fff;border:1px solid #E0E1EA;border-radius:22px}
 .cb-chat-head{display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:1px solid #EEEDF2}
 .cb-new{border:0;background:none;color:#0D3DC4;font-size:13px;font-weight:700}
@@ -27,7 +27,6 @@
 .cb-msg.user{align-self:flex-end;padding:10px 16px;border-radius:16px;background:#E8E4F3}
 .cb-typing{color:#517AEC;font-size:13px}
 
-.cb-side{position:sticky;top:90px;display:grid;gap:12px}
 .cb-generate{width:100%;padding:13px;border:0;border-radius:12px;background:#1241C3;color:#fff;font-weight:700}
 .cb-generate:disabled{background:#C9CAD8;cursor:not-allowed}
 
@@ -37,6 +36,7 @@
 .cb-confirm-no{background:#F2F0F8;color:#2B5DE7;border:1px solid #E0E1EA}
 .cb-save-choice{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;padding:6px 0;font-size:13px;font-weight:700;color:#29243B}
 .cb-save-choice button{padding:9px 20px;border:0;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer}
+.cb-start-date{flex-basis:100%;display:flex;justify-content:center}
 .cb-msg a{color:#2B5DE7;font-weight:700;text-decoration:underline}
 
 .cb-status{text-align:center;color:#4874EB;font-size:13px}
@@ -51,16 +51,12 @@
 .cb-region-list button:hover{background:#F2F0F8}
 .cb-region-picker button:disabled{opacity:.5;cursor:default}
 
-/* 데스크톱: 채팅창·조건 패널이 (헤더·푸터를 뺀) 남은 높이를 정확히 채우게 하고,
-   조건 패널이 길어지면 페이지가 아니라 패널 안에서만 스크롤되게 한다. */
+/* 데스크톱: 채팅창이 (헤더·푸터를 뺀) 남은 높이를 정확히 채운다. */
 @media(min-width:851px){
   .cb-page{height:100%;align-items:stretch}
   .cb-chat{height:100%}
-  .cb-side{position:static;height:100%;overflow-y:auto}
 }
 
 @media(max-width:850px){
-  .cb-page{grid-template-columns:1fr}
-  .cb-side{position:static;order:-1}
   .cb-chat{height:auto;min-height:60vh}
 }

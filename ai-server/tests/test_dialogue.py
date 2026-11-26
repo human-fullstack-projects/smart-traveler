@@ -94,7 +94,8 @@ def test_handle_uses_extracted_slots_and_residual_text_as_query(monkeypatch):
     assert course_id == 1356 and course_ids == [1356]
     assert captured["query_text"] == "조용하고 한적한 곳"
     assert "해운대해수욕장" in message
-    assert "코스 #1356" in message
+    assert "1번 일정 부산광역시 해운대구" in message
+    assert "코스 #" not in message
 
 
 def test_handle_excludes_given_course_ids(monkeypatch):

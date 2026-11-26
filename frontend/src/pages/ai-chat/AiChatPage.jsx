@@ -2,8 +2,6 @@ import { useState } from 'react';
 import ChatStart from './components/ChatStart';
 import ChatMessages from './components/ChatMessages';
 import ChatComposer from './components/ChatComposer';
-import CourseRegionPicker from './components/CourseRegionPicker';
-import TravelConditions from '../../TravelConditions.jsx';
 import { CHAT_INTRO } from './chatIntro';
 import '../../css/AiChatPage.css';
 
@@ -21,14 +19,10 @@ export default function AiChatPage({
   saveCourse,
   skipCourse,
   goToStayPage,
-  conditions,
-  conditionsConfirmed,
   startChat,
   selectRegion,
   sendMessage,
   resetChat,
-  changeConditions,
-  confirmConditions,
   retrySave,
 }) {
   const [startDateInput, setStartDateInput] = useState('');
@@ -93,13 +87,13 @@ export default function AiChatPage({
                       onChange={(event) => setCourseSelection({
                         sessionId, messageId: recommendationMessage.id, courseId: event.target.checked ? courseId : null,
                       })} />
-                    코스{index + 1}
+                    {index + 1}번 일정
                   </label>
                 ))}
               </div>
             ) : <span>추천 코스를 저장할까요?</span>}
             {needsStartDate && (
-              <label>출발일 <input type="date" value={startDateInput} onChange={(event) => setStartDateInput(event.target.value)} /></label>
+              <label className="cb-start-date">출발일 <input type="date" value={startDateInput} onChange={(event) => setStartDateInput(event.target.value)} /></label>
             )}
             <button type="button" className="cb-confirm-yes"
               disabled={(multipleCourses && !selectedCourseId) || (needsStartDate && !startDateInput)}
@@ -130,18 +124,6 @@ export default function AiChatPage({
           </p>
         )}
       </div>
-      <aside className="cb-side">
-        <CourseRegionPicker busy={busy || saveStatus === 'saving'} onSelect={selectRegion} />
-        <fieldset className="condition-controls" disabled={busy}>
-          <TravelConditions
-            conditions={conditions}
-            confirmed={conditionsConfirmed}
-            onChange={changeConditions}
-            onConfirm={confirmConditions}
-          />
-        </fieldset>
-        <p className="cb-status">지역이나 함께 갈 사람처럼 조건을 하나만 말해도 바로 추천해 드려요.</p>
-      </aside>
     </section>
   );
 }

@@ -4,7 +4,7 @@ import useMemberResource from '../../pages/mypage/hooks/useMemberResource';
 import '../../css/MainLayout.css';
 
 const navigationItems = [
-  { label: '여행 생성', href: '#/' },
+  { label: '여행 생성', href: '#/chat' },
   { label: '숙소 검색', href: '#/stays' },
   { label: '저장된 여행', href: '#/my-courses' },
   { label: '여행자추천트립', href: '#/human-courses' },

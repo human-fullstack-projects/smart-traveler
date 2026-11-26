@@ -123,7 +123,7 @@ def _format_itinerary_brief(detail):
     for day in detail["itinerary"]:
         places = ", ".join(v.get("place_name", "") for v in day.get("visits", []))
         lines.append(f"{day.get('day_no')}일차 {places}")
-    return " ".join(lines)
+    return "\n".join(lines)
 
 
 def handle(message, excluded_course_ids=None, n_results=5, conn=None, collection=None, embed_fn=None, client=None):
@@ -163,13 +163,15 @@ def handle(message, excluded_course_ids=None, n_results=5, conn=None, collection
     ), 1):
         detail = db.fetch_course_detail(conn, course_id)
         details[course_id] = detail
-        lines.append(f"{rank}번 일정 {meta.get('destination', '')} (코스 #{course_id})")
+        if rank > 1:
+            lines.append("")
+        lines.append(f"· {rank}번 일정 {meta.get('destination', '')}")
         lines.append(_format_itinerary_brief(detail) if detail else doc[:80])
 
     top_course_id = course_ids[0]
     detail = details.get(top_course_id)
     if detail:
-        lines.append(f"\n[추천하는 코스 - 코스 #{top_course_id}]")
+        lines.append(f"\n[추천하는 일정]")
         lines.append(_format_itinerary(detail))
 
     lines.append("\n" + OFF_TOPIC_REPLY)
