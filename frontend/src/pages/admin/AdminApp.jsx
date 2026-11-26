@@ -604,18 +604,23 @@ export default function AdminApp({ route, member, onLogout }) {
     '/admin/members': <Members key="members" onChanged={loadStats} />, '/admin/owners': <Members key="owners" ownerMode onChanged={loadStats} />, '/admin/human-courses': <HumanCourses onChanged={loadStats} />,
     '/admin/ai-courses': <AiCourses />, '/admin/tour-data': <TourData /> }[path];
   return <div className="st-page adm">
+    <header className="adm-top">
+      <div className="adm-top-brand">
+        <a className="brand-mark" href="#/admin" aria-label="AI TRIP 관리자"><img className="brand-logo" src="/images/brand/ait_pin.svg" alt="" /><span className="brand-word"><b>AI</b> TRIP</span></a>
+        <span className="adm-top-tag">ADMIN</span>
+      </div>
+      <div className="adm-top-right">
+        <span>{member?.nickname || member?.loginId}님 (관리자)</span>
+        <a href="#/">메인으로</a>
+        <button type="button" onClick={onLogout}>로그아웃</button>
+      </div>
+    </header>
     <aside className="adm-side" aria-label="관리자 메뉴">
-      <a className="adm-logo brand-mark is-small on-dark" href="#/admin" aria-label="AI TRIP 관리자"><img className="brand-logo" src="/images/brand/ait_pin.svg" alt="" /><span className="brand-word"><b>AI</b> TRIP</span><small>ADMIN</small></a>
       {MENU.map((m) => <a key={m.path} href={`#${m.path}`} aria-current={path === m.path ? 'page' : undefined}>{m.label}
         {m.badge && stats?.[m.badge] > 0 && <span className="adm-badge">{stats[m.badge]}</span>}</a>)}
-      <div className="adm-side-foot">{member?.nickname || member?.loginId} 님 (관리자)
-      </div>
     </aside>
     <main className="adm-main">
-      <div className="adm-head"><div><h1>{title}</h1><p>{sub}</p></div><div className="adm-head-actions">
-        <a className="st-btn st-btn-line" href="#/">메인으로</a>
-        <button className="st-btn st-btn-line" type="button" onClick={onLogout}>로그아웃</button>
-      </div></div>
+      <div className="adm-head"><div><h1>{title}</h1><p>{sub}</p></div></div>
       {page}
     </main>
   </div>;
