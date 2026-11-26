@@ -122,7 +122,7 @@ export const stays = [
 
 export function getStayCourseMessage(sidoName, name) {
   const stayName = name?.trim();
-  return sidoName && stayName ? `${sidoName} ${stayName}` : '';
+  return sidoName && stayName ? `${sidoName} ${stayName} 추천` : '';
 }
 
 export function formatWon(value) {
