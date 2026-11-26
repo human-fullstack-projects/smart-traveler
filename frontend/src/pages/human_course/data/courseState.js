@@ -29,6 +29,13 @@ export function creationError(state, reservation) {
   if (state.courses.some((course) => course.reservationId === reservation.id)) return '이미 작성한 코스가 있습니다. 기존 글을 수정해주세요.';
   return '';
 }
+
+export function isSelectableRecommendationTrip(reservation, today, serverMode, courses) {
+  if (isPastRecommendationTrip(reservation, today)) return true;
+  if (!finalCourse(reservation)?.plan?.length) return false;
+  return serverMode ? reservation.eligibilityError === '' : !creationError({ courses }, reservation);
+}
+
 function postFields(input) {
   const fields = { title: String(input.title || '').trim(), body: String(input.body || '').trim(), category: input.category, companion: input.companion, photos: input.photos || [], photoAssets: input.photoAssets || [] };
   if (!fields.title || fields.title.length > 80 || !fields.body || fields.body.length > 2000) return null;
