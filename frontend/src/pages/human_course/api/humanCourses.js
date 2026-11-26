@@ -15,7 +15,12 @@ export const listCourses = () => request(base);
 export const getCourse = (id) => request(`${base}/${encodeURIComponent(id)}`);
 export const listEligibleReservations = () => request(`${base}/eligibility`);
 export const createCourse = (reservationId, fields) => change(`/reservations/${encodeURIComponent(reservationId)}`, 'POST', fields);
-export const editCourse = (id, fields, republish) => change(`/${encodeURIComponent(id)}${republish ? '?republish=true' : ''}`, 'PUT', fields);
+export function editCourse(id, fields, republish, reservationId) {
+  const query = new URLSearchParams();
+  if (republish) query.set('republish', 'true');
+  if (reservationId) query.set('reservationId', reservationId);
+  return change(`/${encodeURIComponent(id)}${query.size ? `?${query}` : ''}`, 'PUT', fields);
+}
 export const deleteCourse = (id) => change(`/${encodeURIComponent(id)}`, 'DELETE');
 export const unpublishCourse = (id) => change(`/${encodeURIComponent(id)}/unpublish`, 'POST');
 export const likeCourse = (id) => change(`/${encodeURIComponent(id)}/like`, 'POST');

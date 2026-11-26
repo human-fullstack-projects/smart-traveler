@@ -5,6 +5,7 @@ import AccessNotice from '../components/AccessNotice';
 import MyCourseMap from '../components/MyCourseMap';
 import { myPageApi } from '../api/myPageApi';
 import { isSavedCourse as isDraft } from '../data/visibleItems';
+import useBookingDate from '../hooks/useBookingDate';
 import palace from '../profile/avatars/palace.png';
 import beach from '../profile/avatars/beach.png';
 import mountain from '../profile/avatars/mountain.png';
@@ -28,6 +29,7 @@ const cover = course => {
   return village;
 };
 const period = course => `${course.startDate || '날짜 미정'} ~ ${course.endDate || '날짜 미정'}`;
+const startDateGroup = (date, today) => !date ? 2 : date >= today ? 0 : 1;
 
 export default function MyCourses({ courses = [], isGuest, member, courseId, guestRecommendedCourse }) {
   const [detail, setDetail] = useState(null);
@@ -36,6 +38,7 @@ export default function MyCourses({ courses = [], isGuest, member, courseId, gue
   const [page, setPage] = useState(1);
   const [latestCourses, setLatestCourses] = useState(null);
   const [listStatus, setListStatus] = useState('ready');
+  const today = useBookingDate();
   useEffect(() => {
     let cancelled = false;
     setLatestCourses(null);
@@ -93,6 +96,14 @@ export default function MyCourses({ courses = [], isGuest, member, courseId, gue
   const visibleCourses = latestCourses ?? courses;
   const filtered = visibleCourses.filter(course => {
     return isDraft(course) && `${course.title} ${course.region}`.toLowerCase().includes(query.trim().toLowerCase());
+  });
+  filtered.sort((first, second) => {
+    const firstGroup = startDateGroup(first.startDate, today);
+    const secondGroup = startDateGroup(second.startDate, today);
+    if (firstGroup !== secondGroup) return firstGroup - secondGroup;
+    if (firstGroup === 2) return 0;
+    const dateOrder = first.startDate.localeCompare(second.startDate);
+    return firstGroup === 0 ? dateOrder : -dateOrder;
   });
   const shownGuestCourse = isGuest && guestRecommendedCourse
     && `${guestRecommendedCourse.title} ${guestRecommendedCourse.destination}`.toLowerCase().includes(query.trim().toLowerCase());
