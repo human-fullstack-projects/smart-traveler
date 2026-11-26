@@ -1,9 +1,8 @@
 ﻿import { useEffect, useRef, useState } from 'react';
 import RecommendationEditor from '../components/RecommendationEditor';
 import PageHeading from '../components/PageHeading';
-import { finalCourse, creationError } from '../data/courseState';
+import { finalCourse, creationError, findRecommendationPostId, isPastRecommendationTrip } from '../data/courseState';
 import { clearRecommendationDraft, readRecommendationDraft, saveRecommendationDraft } from '../data/recommendationDraft';
-import { isPastRecommendationBooking } from '../../mypage/data/visibleItems';
 import useBookingDate from '../../mypage/hooks/useBookingDate';
 import '../../../css/human-course.css';
 
@@ -16,14 +15,11 @@ export default function HumanCourseCreate({ reservations = [], courses = [], exe
  const back=`#/${source}`;
  useEffect(()=>{refresh?.();},[]);
  const today=useBookingDate();
- const pastTrips=reservations.filter(reservation=>{
-  const endDate=reservation.checkoutAt?.slice(0,10) || reservation.dates?.split(' ~ ')[1];
-  return isPastRecommendationBooking({...reservation,endDate},today);
- });
+ const pastTrips=reservations.filter(reservation=>isPastRecommendationTrip(reservation,today));
  const selected=pastTrips.find(r=>String(r.id)===selectedId);
  const final=finalCourse(selected);
- const existingId=selected && (selected.existingPostId || courses.find(c=>c.mine&&String(c.reservationId)===selectedId)?.id);
- useEffect(()=>{if(existingId && !publishing.current) window.location.hash=`/human-courses/${existingId}/edit?from=${source}`;},[existingId,source]);
+ const existingId=findRecommendationPostId(selected,courses);
+ useEffect(()=>{if(existingId && !publishing.current) window.location.hash=`/human-courses/${encodeURIComponent(existingId)}/edit?from=${source}`;},[existingId,source]);
  const error=selected ? serverMode ? selected.eligibilityError : creationError({courses},selected) : '';
  const draft=readRecommendationDraft(member?.memberId,selectedId);
  function saveDraft(fields) {
@@ -47,7 +43,7 @@ export default function HumanCourseCreate({ reservations = [], courses = [], exe
   publishing.current = false;
   return result;
  }
- return <div className="human-courses human-course-create human-course-editor"><div className="page">
+ return <div className="human-courses human-course-editor"><div className="page">
   <PageHeading kicker="My Trips Post" title="내 여행 추천하기" description="여행 일정과 숙소를 확인하고 나의 여행 후기를 공유하세요."><a className="button" href={back}>← 목록으로</a></PageHeading>
   {notice&&<p className="status" role="alert">{notice}</p>}
   <RecommendationEditor trip={selected} plan={final?.plan}

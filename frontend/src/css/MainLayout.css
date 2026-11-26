@@ -1,9 +1,9 @@
 .main-page{min-height:100vh;max-width:1920px;margin:0 auto;display:flex;flex-direction:column;background:radial-gradient(ellipse at 85% 50%,#F5F4FA 0,transparent 47%)}
 
-body:has(.main-page.has-pastel-background, .main-page .human-course-create, .auth-shell),
+body:has(.main-page.has-pastel-background, .main-page .human-course-editor, .auth-shell),
 .app-shell.auth-shell,
 .main-page.has-pastel-background,
-.main-page:has(.human-course-create),
+.main-page:has(.human-course-editor),
 .has-pastel-background .travel-style-page { background: #f7faff; }
 
 .has-pastel-background :is(

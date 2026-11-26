@@ -179,6 +179,18 @@ public class HumanManagementService {
         action(postId,login,selected ? "MONTHLY_PICK" : "MONTHLY_UNPICK",month);
     }
 
+    // 관리자 댓글 삭제 = 여행자 삭제와 같은 소프트 삭제(deleted_at) · 처리 이력 남김 (11-26)
+    @Transactional
+    public void deleteComment(Long commentId, String reason, String login) {
+        List<Long> posts = jdbc.queryForList(
+            "SELECT post_id FROM human_course_comment WHERE comment_id=? AND deleted_at IS NULL", Long.class, commentId);
+        int n = posts.isEmpty() ? 0 : jdbc.update(
+            "UPDATE human_course_comment SET deleted_at=NOW() WHERE comment_id=? AND deleted_at IS NULL", commentId);
+        if (n == 0) throw new IllegalArgumentException("이미 삭제됐거나 없는 댓글입니다.");
+        String note = "댓글 #" + commentId + (reason == null || reason.isBlank() ? "" : " · " + reason.trim());
+        action(posts.get(0), login, "COMMENT_DELETE", note.length() > 255 ? note.substring(0, 255) : note);
+    }
+
     private void action(Long postId,String login,String type,String note) {
         jdbc.update("""
             INSERT INTO admin_human_action_history(course_id,admin_id,action,note,created_at)
