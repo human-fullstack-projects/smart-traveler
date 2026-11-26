@@ -20,7 +20,7 @@ const accountLinks = [
 export default function SiteHeader({ member, loggingOut, onLogout }) {
   const navigation = navigationItems.map((item) =>
     member?.roleCode === 'OWNER' && item.href === '#/mypage'
-      ? { label: '업주 대시보드', href: '#/owner', className: 'header-owner-dashboard' }
+      ? { label: '업주 센터', href: '#/owner', className: 'header-owner-dashboard' }
       : item
   );
   const [menuOpen, setMenuOpen] = useState(false);
