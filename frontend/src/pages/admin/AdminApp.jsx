@@ -596,6 +596,8 @@ const TITLES = {
 
 export default function AdminApp({ route, member, onLogout }) {
   const [stats, setStats] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  useEffect(() => setMenuOpen(false), [route]);
   const loadStats = useCallback(() => { adminGet('').then(setStats).catch(() => {}); }, []);
   useEffect(loadStats, [loadStats, route]);
   const path = TITLES[route] ? route : '/admin';
@@ -616,8 +618,12 @@ export default function AdminApp({ route, member, onLogout }) {
       </div>
     </header>
     <aside className="adm-side" aria-label="관리자 메뉴">
-      {MENU.map((m) => <a key={m.path} href={`#${m.path}`} aria-current={path === m.path ? 'page' : undefined}>{m.label}
-        {m.badge && stats?.[m.badge] > 0 && <span className="adm-badge">{stats[m.badge]}</span>}</a>)}
+      <button type="button" className="adm-mobile-menu-toggle" aria-controls="admin-navigation" aria-expanded={menuOpen}
+        onClick={() => setMenuOpen(open => !open)}>관리 메뉴 {menuOpen ? '닫기' : '열기'}</button>
+      <nav id="admin-navigation" className="adm-navigation" data-open={menuOpen} aria-label="관리 메뉴">
+        {MENU.map((m) => <a key={m.path} href={`#${m.path}`} aria-current={path === m.path ? 'page' : undefined} onClick={() => setMenuOpen(false)}>{m.label}
+          {m.badge && stats?.[m.badge] > 0 && <span className="adm-badge">{stats[m.badge]}</span>}</a>)}
+      </nav>
     </aside>
     <main className="adm-main">
       <div className="adm-head"><div><h1>{title}</h1><p>{sub}</p></div></div>

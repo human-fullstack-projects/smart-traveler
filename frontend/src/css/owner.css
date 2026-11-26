@@ -725,3 +725,25 @@
 .owner-page .owner-main > :is(.owner-view, .owner-overview) { max-width: 1200px; }
 .owner-page :is(.owner-view__title, .owner-overview-heading) h1 { color: var(--st-title); font-size: 30px; }
 @media (max-width: 760px) { .owner-page .owner-topbar__inner { padding: 0 16px; } .owner-page .owner-shell { grid-template-columns: 1fr; } .owner-page .owner-sidebar { top: 64px; height: auto; border-right: 0; } }
+
+/* Narrow screens keep inventory controls inside the panel. */
+.owner-stock-range .owner-season-row > label { min-width: 0; }
+.owner-stock-range .owner-season-row input { min-width: 0; max-width: 100%; }
+.owner-stock-selects label { min-width: 0; max-width: 100%; }
+.owner-stock-selects select { min-width: 0; max-width: 100%; width: 100%; }
+@media (max-width: 760px) {
+  .owner-overview-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .owner-overview-heading { flex-wrap: wrap; }
+  .owner-stock-selects label { flex: 1 1 100%; }
+  .owner-stock-range .owner-season-row { grid-template-columns: minmax(0, 1fr); }
+  .owner-stock-range .owner-season-row > span { display: none; }
+  .owner-stock-range .owner-season-row button { width: 100%; }
+  .owner-page .owner-stock-pills { grid-template-columns: repeat(auto-fit, minmax(64px, 1fr)); }
+  .owner-photos .owner-panel__head { flex-wrap: wrap; }
+}
+@media (max-width: 480px) {
+  .owner-overview-metrics { grid-template-columns: minmax(0, 1fr); }
+  .owner-sidebar nav { min-width: 0; flex-wrap: wrap; }
+  .owner-sidebar nav button { flex: 1 1 calc(50% - 8px); }
+  .owner-room-input { grid-template-columns: minmax(0, 1fr); }
+}
