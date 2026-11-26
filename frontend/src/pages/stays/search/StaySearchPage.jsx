@@ -174,6 +174,7 @@ export default function StaySearchPage({ guestCourses }) {
   const [maxPrice, setMaxPrice] = useState(PRICE_MAX);
   const [appliedMaxPrice, setAppliedMaxPrice] = useState(PRICE_MAX);
   const [bookableOnly, setBookableOnly] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [sort, setSort] = useState('distance');
   const [size, setSize] = useState(10);
   const [page, setPage] = useState(0);
@@ -397,11 +398,15 @@ export default function StaySearchPage({ guestCourses }) {
         <div className="stay-search-layout">
           <aside className="stay-filter" aria-label="숙소 검색 필터">
             <div className="stay-filter__head"><h2>필터</h2><button type="button" onClick={() => { setTypes([]); setAmenities([]); setMaxPrice(PRICE_MAX); setBookableOnly(false); setKeyword(''); setAppliedKeyword(''); }}>초기화</button></div>
+            <button className="stay-filter__toggle" type="button" aria-controls="stay-filter-fields" aria-expanded={filtersOpen}
+              onClick={() => setFiltersOpen(open => !open)}>{filtersOpen ? '필터 접기' : '필터 열기'}</button>
+            <div id="stay-filter-fields" className="stay-filter__fields" data-expanded={filtersOpen}>
             <fieldset><legend>숙소 이름</legend><form className="stay-filter__keyword" onSubmit={(event) => { event.preventDefault(); setAppliedKeyword(keyword); }}><input type="search" aria-label="숙소 이름" maxLength={50} placeholder="숙소 이름 입력" value={keyword} onChange={(event) => setKeyword(event.target.value)} /><button type="submit">찾기</button></form></fieldset>
             <fieldset><legend>숙소 유형</legend>{Object.entries(stayTypeLabels).map(([code, label]) => <label key={code}><input type="checkbox" checked={types.includes(code)} onChange={() => toggleFilter(code, setTypes)} />{label}</label>)}</fieldset>
             <fieldset><legend>편의시설</legend>{AMENITY_OPTIONS.map((item) => <label key={item}><input type="checkbox" checked={amenities.includes(item)} onChange={() => toggleFilter(item, setAmenities)} />{item}</label>)}</fieldset>
             <fieldset><legend>1박 최대 요금</legend><input className="stay-filter__range" type="range" min={PRICE_MIN} max={PRICE_MAX} step="10000" value={maxPrice} onChange={(event) => setMaxPrice(Number(event.target.value))} /><strong>{maxPrice >= PRICE_MAX ? '제한 없음' : `${formatWon(maxPrice)} 이하`}</strong></fieldset>
             <label className="stay-filter__switch"><input type="checkbox" checked={bookableOnly} onChange={(event) => setBookableOnly(event.target.checked)} /><span />예약 가능 숙소만</label>
+            </div>
           </aside>
 
           <section className="stay-results" aria-label="숙소 검색 결과" ref={resultsRef}>

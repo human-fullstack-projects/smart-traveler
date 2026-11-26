@@ -78,7 +78,7 @@
 @media (max-width: 800px) { .adm { grid-template-columns: 1fr; } .adm-side { position: static; height: auto; } .adm-stats { grid-template-columns: 1fr 1fr; } .adm-main { padding: 20px; } }
 /* 페이지 나누기 */
 .adm-pager { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 10px 14px; border-top: 1px solid var(--st-line); }
-.adm-pages { display: flex; gap: 4px; }
+.adm-pages { display: flex; flex-wrap: wrap; gap: 4px; min-width: 0; max-width: 100%; }
 .adm-pages button { min-width: 34px; height: 34px; padding: 0 8px; border: 1px solid var(--st-line); border-radius: 8px; background: var(--st-surface); color: var(--st-ink); font-family: var(--st-font-body); font-weight: 700; font-size: 14px; cursor: pointer; }
 .adm-pages button:hover:not(:disabled) { border-color: var(--st-teal); color: var(--st-teal); }
 .adm-pages button[aria-current="page"] { border-color: var(--st-aqua); background: var(--st-aqua); color: var(--st-ink); }
@@ -91,7 +91,7 @@
 .adm-head h1 { font-size: 30px; }
 .adm-toolbar { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
 .adm-toolbar .adm-filters { margin-bottom: 0; }
-.adm-tabs { display: inline-flex; gap: 4px; padding: 4px; border-radius: 12px; background: var(--st-surface); border: 1px solid var(--st-line); }
+.adm-tabs { display: inline-flex; flex-wrap: wrap; gap: 4px; max-width: 100%; padding: 4px; border-radius: 12px; background: var(--st-surface); border: 1px solid var(--st-line); }
 .adm-tabs button { display: inline-flex; align-items: center; gap: 8px; min-height: 38px; padding: 6px 16px; border: 0; border-radius: 9px; background: transparent; color: var(--st-muted); font-family: var(--st-font-body); font-weight: 700; font-size: 14px; cursor: pointer; }
 .adm-tabs button[aria-selected="true"] { background: var(--st-aqua); color: var(--st-ink); }
 .adm-tab-count { min-width: 22px; padding: 1px 7px; border-radius: 999px; background: #DDE8FA; color: var(--st-teal); font-size: 12px; }

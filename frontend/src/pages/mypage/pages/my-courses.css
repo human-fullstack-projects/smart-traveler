@@ -92,6 +92,16 @@ html:has(.my-posts-list) { scrollbar-gutter: stable; }
 .trip-day ol { list-style: none; padding: 0; margin: 24px 0 0; }
 .trip-day li { display: flex; align-items: center; gap: 16px; padding: 14px 0; border-top: 1px solid #f0f1f3; }
 .trip-day li > span { color: #0E3FC7; background: #F0EDF8; border-radius: 50%; width: 34px; height: 34px; display: grid; place-items: center; font-size: 12px; flex-shrink: 0; }
-@media (max-width: 1000px) { .trips-heading { align-items: flex-start; flex-direction: column; } .trips-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; } }
+@media (max-width: 1000px) { .trips-heading { align-items: flex-start; flex-direction: column; } .trips-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; } }
 @media (max-width: 750px) { .trips-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .trip-card-copy h2 { font-size: 20px; } }
 @media (max-width: 500px) { .trips-tools { flex-wrap: wrap; width: 100%; } .mypage .trips-search { flex: 1; } .mypage .trips-search input { width: 100%; } .trips-grid { grid-template-columns: 1fr; } .trip-cover-card { aspect-ratio: 4 / 5; } .trips-filters button { padding: 8px 11px; font-size: 13px; } .trip-detail-hero { padding: 24px; } .trip-day { padding: 18px; } }
+
+.trips-grid > * { min-width: 0; }
+.trips-grid .trip-cover-card { min-width: 0; width: 100%; }
+.trip-card-copy { overflow-wrap: anywhere; }
+.trips-pagination { flex-wrap: wrap; }
+@media (max-width: 750px) {
+  .trips-tools:has(> .trips-list-back) { flex-wrap: wrap; }
+  .trips-tools, .trips-tools .trips-search { max-width: 100%; }
+  .trips-filters { max-width: 100%; border-radius: 16px; }
+}
