@@ -158,12 +158,12 @@ def handle(message, excluded_course_ids=None, n_results=5, conn=None, collection
     lines = [f"검색 결과 ({len(course_ids)}건)"]
     conn = conn or db.connect()
     details = {}
-    for course_id, doc, meta, _dist in zip(
+    for rank, (course_id, doc, meta, _dist) in enumerate(zip(
         course_ids, result["documents"][0], result["metadatas"][0], result["distances"][0]
-    ):
+    ), 1):
         detail = db.fetch_course_detail(conn, course_id)
         details[course_id] = detail
-        lines.append(f"● {meta.get('destination', '')} (코스 #{course_id})")
+        lines.append(f"{rank}번 일정 {meta.get('destination', '')} (코스 #{course_id})")
         lines.append(_format_itinerary_brief(detail) if detail else doc[:80])
 
     top_course_id = course_ids[0]
@@ -172,4 +172,5 @@ def handle(message, excluded_course_ids=None, n_results=5, conn=None, collection
         lines.append(f"\n[추천하는 코스 - 코스 #{top_course_id}]")
         lines.append(_format_itinerary(detail))
 
+    lines.append("\n" + OFF_TOPIC_REPLY)
     return "\n".join(lines), top_course_id, course_ids
