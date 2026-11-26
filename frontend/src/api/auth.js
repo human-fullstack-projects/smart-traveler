@@ -1,5 +1,5 @@
-import { waitForGuestCourseStorage } from '../chatApi';
-import { blockAdminAction } from './adminReadOnly';
+import { waitForGuestCourseStorage } from '../chatApi.js';
+import { blockAdminAction } from './adminReadOnly.js';
 
 async function request(path, options = {}) {
   blockAdminAction(path, options.method);
@@ -20,7 +20,7 @@ async function request(path, options = {}) {
     error.status = response.status;
     throw error;
   }
-  if (response.status !== 204 && !body) throw new Error('서버 응답을 확인할 수 없어요. API 연결 설정을 확인해주세요.');
+  if (response.status !== 204 && body == null) throw new Error('서버 응답을 확인할 수 없어요. API 연결 설정을 확인해주세요.');
   return body;
 }
 

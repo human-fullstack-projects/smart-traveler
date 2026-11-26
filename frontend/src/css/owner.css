@@ -60,6 +60,21 @@
   line-height: 1.6;
 }
 
+.owner-summary-error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 16px;
+  border-radius: 12px;
+  background: #fff3f2;
+  color: #89302f;
+}
+
+.owner-summary-error p { margin: 0; }
+
 .owner-overview-metrics {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
