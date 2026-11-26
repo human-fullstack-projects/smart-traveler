@@ -51,13 +51,17 @@ public class HumanCourseController {
     }
 
     @PutMapping("/{id}")
-    public IdResult edit(@PathVariable long id, Authentication auth, @RequestBody PostInput input) {
-        return service.edit(auth, id, input);
+    public IdResult edit(@PathVariable long id, Authentication auth, @RequestBody PostInput input,
+                         @RequestParam(defaultValue = "false") boolean republish) {
+        return service.edit(auth, id, input, republish);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable long id, Authentication auth) { service.delete(auth, id); }
+
+    @PostMapping("/{id}/unpublish")
+    public IdResult unpublish(@PathVariable long id, Authentication auth) { return service.unpublish(auth, id); }
 
     @PostMapping("/{id}/like")
     public Post like(@PathVariable long id, Authentication auth) { return service.like(auth, id); }

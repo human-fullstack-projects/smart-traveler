@@ -25,13 +25,14 @@ function resizeReview(input) {
   input.style.height = `${input.scrollHeight + borderHeight}px`;
 }
 
-export default function CourseForm({ course = {}, mode = 'create', onSubmit, onSaveDraft, cancelHref, disabled = false, serverMode = false, previewContext }) {
+export default function CourseForm({ course = {}, mode = 'create', republishing = false, onSubmit, onSaveDraft, cancelHref, disabled = false, serverMode = false, previewContext }) {
   const [submitError, setSubmitError] = useState('');
   const [pending, setPending] = useState(null);
   const dialog = useRef(null);
   const reviewInput = useRef(null);
   useEffect(() => { if (pending && !dialog.current?.open) dialog.current?.showModal(); }, [pending]);
   const editing = mode === 'edit';
+  const submitLabel = republishing ? '다시 게시하기' : editing ? '수정 저장하기' : '등록';
   useEffect(() => {
     const input = reviewInput.current;
     if (!input) return;
@@ -158,9 +159,9 @@ export default function CourseForm({ course = {}, mode = 'create', onSubmit, onS
         <p className="writing-sample">{preview.body.trim() || '여행 후기를 입력해주세요'}</p>
         {pending && previewContext}
         {submitError && <p role="alert">{submitError}</p>}
-        <div className="actions recommendation-preview-actions"><button type="button" disabled={submitting} onClick={() => { dialog.current?.close(); setPending(null); }}>수정</button><button className="primary" type="button" disabled={submitting} onClick={async () => { setSubmitting(true); try { const result = await onSubmit?.(pending); if (result?.error) setSubmitError(result.error); else { dialog.current?.close(); setPending(null); } } finally { setSubmitting(false); } }}>{editing ? (submitting ? '저장 중…' : '수정 저장') : (submitting ? '등록 중…' : '등록')}</button></div>
+        <div className="actions recommendation-preview-actions"><button type="button" disabled={submitting} onClick={() => { dialog.current?.close(); setPending(null); }}>수정</button><button className="primary" type="button" disabled={submitting} onClick={async () => { setSubmitting(true); try { const result = await onSubmit?.(pending); if (result?.error) setSubmitError(result.error); else { dialog.current?.close(); setPending(null); } } finally { setSubmitting(false); } }}>{republishing ? (submitting ? '게시 중…' : submitLabel) : editing ? (submitting ? '저장 중…' : '수정 저장') : (submitting ? '등록 중…' : '등록')}</button></div>
       </dialog>
-      <div className="actions course-form-actions"><button className="primary" type="submit" disabled={!onSubmit || reading || submitting || (editing && Boolean(photoError))}>{editing ? '수정 저장하기' : '등록'}</button>
+      <div className="actions course-form-actions"><button className="primary" type="submit" disabled={!onSubmit || reading || submitting || (editing && Boolean(photoError))}>{submitLabel}</button>
         {onSaveDraft && <button type="button" disabled={submitting} onClick={() => onSaveDraft(preview)}>임시저장</button>}
         {cancelHref && <a href={cancelHref} className="button">목록으로</a>}</div>
     </fieldset>

@@ -11,6 +11,7 @@ const navigationItems = [
 ];
 
 const accountLinks = [
+  { label: '마이트립페이지', href: '#/mypage' },
   { label: '내 예약', href: '#/reservations' },
   { label: '내 여행 스타일 관리', href: '#/my-travel-style' },
   { label: '내 여행 추천', href: '#/my-posts' },
@@ -87,12 +88,11 @@ export default function SiteHeader({ member, loggingOut, onLogout }) {
             <span className="header-account-bars" aria-hidden="true" />
           </button>
           <div id="header-account-menu" className="header-account-panel" hidden={!menuOpen}>
-            {member && <>
+            {member && (
               <a className="header-account-profile" href="#/my-profile" onClick={() => setMenuOpen(false)}>
                 <span>{accountName}</span><span aria-hidden="true">›</span>
               </a>
-              {renderLink({ label: '마이트립페이지', href: '#/mypage' })}
-            </>}
+            )}
             <nav className="header-account-mobile-nav" aria-label="주 메뉴">{navigation.map(renderLink)}</nav>
             {member ? <>
               <nav className="header-account-links" aria-label="내 계정">

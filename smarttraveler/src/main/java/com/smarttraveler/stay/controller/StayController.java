@@ -1,5 +1,7 @@
 package com.smarttraveler.stay.controller;
 
+import com.smarttraveler.mypage.dto.MyPageDtos.PlaceDetails;
+import com.smarttraveler.mypage.service.MyPageService;
 import com.smarttraveler.stay.dto.StayDetailResponse;
 import com.smarttraveler.stay.dto.StayResponse;
 import com.smarttraveler.stay.dto.StaySearchDtos;
@@ -28,6 +30,7 @@ public class StayController {
     private final StayInventoryService inventory;
     private final StaySearchService search;
     private final TourPhotoService photos;
+    private final MyPageService myPage;
 
     @GetMapping
     public List<StayResponse> list(@RequestParam(defaultValue = "false") boolean bookable) {
@@ -65,6 +68,13 @@ public class StayController {
     @GetMapping("/regions")
     public List<StaySearchDtos.Region> regions() {
         return search.regions();
+    }
+
+    @GetMapping("/itinerary-place")
+    public PlaceDetails itineraryPlace(@RequestParam(required = false) Long placeId,
+                                       @RequestParam(defaultValue = "") String name,
+                                       @RequestParam(defaultValue = "") String region) {
+        return myPage.placeDetails(placeId, name, region);
     }
 
     private static StaySearchService.Query query(Long sido, Long sigungu, List<String> types, List<String> amenities, String keyword,

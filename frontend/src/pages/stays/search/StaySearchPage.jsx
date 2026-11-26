@@ -151,12 +151,12 @@ function StayCard({ stay, selected, query, onShow }) {
   );
 }
 
-export default function StaySearchPage() {
+export default function StaySearchPage({ guestCourses }) {
   const defaultDates = useMemo(() => getDefaultStayDates(), []);
   const today = useMemo(() => new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' }), []);
   const params = new URLSearchParams(window.location.hash.split('?')[1]);
   const courseId = readStayCourseId(params);
-  const { course, route: courseRoute, loading: courseLoading, error: courseError, sourceLabel, retry: retryCourse } = useStayCourse(courseId);
+  const { course, route: courseRoute, loading: courseLoading, error: courseError, sourceLabel, retry: retryCourse } = useStayCourse(courseId, { guestCourses });
   const destinationQuery = course?.region || params.get('destination') || '';
   const sidoQuery = params.get('sido') || '';
   const sigunguQuery = params.get('sigungu') || '';

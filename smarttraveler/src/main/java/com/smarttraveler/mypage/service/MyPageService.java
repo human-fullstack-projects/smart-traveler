@@ -69,6 +69,10 @@ public class MyPageService {
 
     public PlaceDetails placeDetails(Authentication auth, Long placeId, String name, String region) {
         owner(auth, null);
+        return placeDetails(placeId, name, region);
+    }
+
+    public PlaceDetails placeDetails(Long placeId, String name, String region) {
         validatePlace(placeId, name, region);
         var place = data.placeDetails(placeId,name.trim(),region.trim());
         if (place==null) throw denied(HttpStatus.NOT_FOUND);

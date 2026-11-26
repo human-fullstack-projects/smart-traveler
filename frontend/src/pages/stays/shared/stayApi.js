@@ -21,3 +21,8 @@ const searchQuery = (params) => {
 };
 export const searchStays = (params) => request('/api/stays/search?' + searchQuery(params));
 export const getStayRegions = () => request('/api/stays/regions');
+export const getStayItineraryPlace = (place, region) => request('/api/stays/itinerary-place?' + searchQuery({
+  placeId: place.placeId,
+  name: place.name,
+  region,
+}));

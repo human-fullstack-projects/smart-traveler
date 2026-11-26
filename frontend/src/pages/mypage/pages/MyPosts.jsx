@@ -41,15 +41,19 @@ export default function MyPosts({ posts = [], bookings = [], courses = [], membe
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(1);
   const today = useBookingDate();
-  const { bookingsById, published: eligiblePosts, pending: pendingBookings } = recommendationTrips(bookings, posts, today);
+  const { bookingsById, existingPosts, pending: pendingBookings } = recommendationTrips(bookings, posts, today);
   const coursesById = new Map(courses.map(course => [course.id, course]));
 
-  const published = eligiblePosts.map(post => ({
-    key: `post-${post.id}`, status: 'complete', title: post.title,
-    post,
-    region: coursesById.get(post.courseId)?.region, booking: bookingsById.get(String(post.reservationId)),
-    href: `#/human-courses/${encodeURIComponent(post.id)}`, action: '추천 글 자세히 보기',
-  }));
+  const postCards = existingPosts.map(post => {
+    const draft = post.status === 'DRAFT';
+    const detailHref = `#/human-courses/${encodeURIComponent(post.id)}`;
+    return {
+      key: `post-${post.id}`, status: draft ? 'draft' : 'complete', title: post.title,
+      post, region: coursesById.get(post.courseId)?.region, booking: bookingsById.get(String(post.reservationId)),
+      href: draft ? `${detailHref}/edit?from=my-posts` : detailHref,
+      action: draft ? '이어서 작성하기' : '추천 글 자세히 보기',
+    };
+  });
   const pending = pendingBookings.map(booking => {
     const course = coursesById.get(booking.courseId);
     const draft = readRecommendationDraft(member?.memberId, booking.id);
@@ -61,7 +65,7 @@ export default function MyPosts({ posts = [], bookings = [], courses = [], membe
     };
   });
   const search = query.trim().toLowerCase();
-  const list = [...published, ...pending].filter(item =>
+  const list = [...postCards, ...pending].filter(item =>
     (tab === 'all' || item.status === tab)
     && [item.title, item.region, item.booking?.stay, item.booking?.reservationNo].join(' ').toLowerCase().includes(search)
   );

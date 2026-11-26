@@ -314,11 +314,6 @@
 
 /* PC: 홈 화면을 화면 높이에 맞춰 구성 */
 @media (min-width: 1024px) and (min-height: 640px) {
-  .main-page:has(.home-landing) {
-    height: calc(100svh + 112px);
-    min-height: 0;
-  }
-
   .main-page:has(.home-landing) .mp-main {
     display: flex;
     min-height: 0;
@@ -539,16 +534,16 @@
 }
 /* ───── 메인 첫 화면 v3 (2026-11-19 · 목업 03_제작작업/메인첫화면_20261119/목업_v3) ─────
    사진 배경 + 왼쪽 글 + 아래 휴먼 추천 코스 3개 · 메뉴 줄 아래 한 화면 · 왼쪽 끝 하나(--hero-x) */
-.home-landing.home-hero{--hero-x:clamp(24px,7.8vw,150px);--cards-h:clamp(120px,16.5vh,176px);position:relative;flex:1;width:100%;max-width:none;margin:0;padding:0;min-height:0;overflow:hidden;background:#F7FAFF;display:block}
+.home-landing.home-hero{--hero-x:clamp(24px,7.8vw,150px);--cards-h:clamp(108px,15svh,160px);position:relative;flex:1;width:100%;max-width:none;margin:0;padding:clamp(18px,4svh,48px) var(--hero-x) 40px;min-height:0;overflow:hidden;background:#F7FAFF;display:flex;flex-direction:column;gap:clamp(14px,3svh,32px)}
 .home-hero .hero-bg{position:absolute;inset:0}
 .home-hero .hero-slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1.4s ease}
 .home-hero .hero-slide.is-on{opacity:1}
 .home-hero .hero-veil{position:absolute;inset:0;background:linear-gradient(90deg,#F7FAFFf5 0%,#F7FAFFe6 34%,#F7FAFF8c 52%,#F7FAFF00 70%),linear-gradient(0deg,#F7FAFFf2 0%,#F7FAFFd9 28%,#F7FAFF00 48%)}
-.home-hero .landing-hero{position:absolute;left:var(--hero-x);top:clamp(28px,6vh,64px);z-index:2;width:min(1000px,calc(100% - 2*var(--hero-x)));margin:0;padding:0;text-align:left;background:none}
+.home-hero .landing-hero{position:relative;z-index:2;width:min(1000px,100%);margin:0;padding:0;text-align:left;background:none}
 .home-hero .landing-eyebrow{margin:0;font-weight:800;font-size:clamp(14px,1.1vw,21px);color:#655F76;letter-spacing:0}
-.home-hero .landing-hero h1{margin:clamp(6px,1vh,12px) 0 0;font-family:SUIT,Pretendard,sans-serif;font-weight:900;font-size:clamp(44px,min(5.8vw,10.4vh),112px);line-height:1.08;letter-spacing:-.045em;color:#29243B;text-align:left}
-.home-hero .hero-line1{display:inline-flex;align-items:flex-end;gap:.2em}
-.home-hero .hero-accent{background:linear-gradient(90deg,#3466F2,#9A8CFF);-webkit-background-clip:text;background-clip:text;color:transparent;padding-right:.04em}
+.home-hero .landing-hero h1{margin:clamp(6px,1vh,12px) 0 0;font-family:SUIT,Pretendard,sans-serif;font-weight:900;font-size:clamp(34px,min(5.2vw,8.6svh),98px);line-height:1.08;letter-spacing:-.045em;color:#29243B;text-align:left}
+.home-hero .hero-line1{display:inline-flex;align-items:baseline;gap:.2em}
+.home-hero .hero-accent{background:linear-gradient(90deg,#3466F2,#9A8CFF);-webkit-background-clip:text;background-clip:text;color:transparent;padding-inline-end:.14em;padding-block-end:.12em}
 .home-hero .landing-description{margin:clamp(10px,2vh,22px) 0 0;font-size:clamp(15px,1.2vw,23px);color:#655F76;text-align:left}
 .home-hero .landing-composer{display:flex;align-items:center;gap:12px;width:min(820px,100%);margin:clamp(14px,2.6vh,28px) 0 0;padding:10px 10px 10px 24px;background:#fff;border:1.5px solid #E3DCF3;border-radius:20px;box-shadow:0 14px 34px #4b3c8a17;min-height:0}
 .home-hero .landing-composer:focus-within{border-color:#9A8CFF;box-shadow:0 0 0 4px #9a8cff2e,0 14px 34px #4b3c8a17}
@@ -560,7 +555,7 @@
 .home-hero .landing-quick-actions button{background:#ffffffd9;border:1px solid #E3DCF3;border-radius:999px;padding:7px 16px;font-size:14px;font-weight:700;color:#4A4560;cursor:pointer}
 .home-hero .landing-quick-actions button:hover:not(:disabled){border-color:#9A8CFF;color:#3466F2}
 /* 휴먼 추천 코스 3개: 화면 아래 기준 */
-.home-hero .hero-courses{position:absolute;left:var(--hero-x);right:var(--hero-x);bottom:clamp(40px,8vh,96px);z-index:2}
+.home-hero .hero-courses{position:relative;z-index:2;margin-top:calc(30px + clamp(8px,2svh,20px))}
 .home-hero .landing-recommendations{margin:0;padding:0;max-width:none}
 .home-hero .landing-section-heading{display:flex;align-items:baseline;justify-content:space-between;margin:0 0 14px}
 .home-hero .landing-section-heading h2{margin:0;font-family:SUIT,Pretendard,sans-serif;font-weight:900;font-size:clamp(20px,1.6vw,30px);letter-spacing:-.03em;color:#29243B}
@@ -584,5 +579,9 @@
 .home-hero .hero-devtools[open]{background:#fff;border:1px solid #E3DCF3;border-radius:14px;padding:10px;box-shadow:0 12px 30px #0002;width:min(560px,90vw)}
 .home-hero .hero-devtools[open] summary{margin-bottom:8px}
 @media(max-width:900px){
-  .home-hero .landing-course-grid{grid-template-columns:1fr}
+  .home-landing.home-hero{--cards-h:72px}
+  .home-hero .landing-course-grid{grid-template-columns:1fr;gap:8px}
+  .home-hero .landing-course-image{width:88px}
+  .home-hero .landing-course-body{padding-block:4px}
+  .home-hero .landing-course-body h3,.home-hero .landing-course-body p{margin-top:2px}
 }

@@ -21,7 +21,7 @@ export default function RecommendationEditor({ trip, plan, tripSelection, formKe
       <section className="panel">{itinerary}</section>
     </div>
     <section className="panel recommendation-review">
-      <h2>{formProps.mode === 'edit' ? '후기 수정' : '후기 작성'}</h2>
+      <h2>{formProps.mode === 'edit' && !formProps.republishing ? '후기 수정' : '후기 작성'}</h2>
       <CourseForm key={formKey} {...formProps} previewContext={<>
         {map && <div className="preview-itinerary-map">{map}</div>}
         {itinerary}

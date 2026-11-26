@@ -163,12 +163,14 @@ public class HumanCourseService {
             FROM human_course_post p JOIN course c ON c.id=p.course_id
             JOIN members m ON m.member_id=p.author_id JOIN room_reservation r ON r.reservation_id=p.reservation_id
             JOIN room ro ON ro.room_id=r.room_id JOIN lodging l ON l.lodging_id=ro.lodging_id
-            WHERE p.post_id=? AND p.deleted_at IS NULL AND p.status IN ('VISIBLE','BLINDED')
+            WHERE p.post_id=? AND p.deleted_at IS NULL AND p.status IN ('VISIBLE','BLINDED','DRAFT')
             """, viewer, viewer, id);
         if (rows.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "여행을 찾을 수 없습니다.");
         Map<String, Object> row = rows.getFirst();
         boolean mine = number(row, "author_id") == viewer;
         boolean blinded = "BLINDED".equals(row.get("status"));
+        boolean draft = "DRAFT".equals(row.get("status"));
+        if (draft && (!mine || !allowBlinded)) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         if (blinded && !allowBlinded) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         Snapshot snapshot = snapshot(row);
         // 이 서버에서 실제로 열리는 사진만 보여 줌 (옛 사진은 올린 PC 폴더에만 있어 다른 PC에선 깨짐)
@@ -204,7 +206,7 @@ public class HumanCourseService {
             body, photoAssets.stream().map(Photo::name).toList(), photoAssets,
             blinded ? List.of() : snapshot.plan(), number(row, "likes"), truthy(row.get("liked")),
             truthy(row.get("reported")), comments, row.get("created_at").toString().substring(0, 10),
-            blinded ? "BLINDED" : "PUBLIC", snapshot.version(),
+            blinded ? "BLINDED" : draft ? "DRAFT" : "PUBLIC", snapshot.version(),
             row.get("checkin_date") + " ~ " + row.get("checkout_date"), mine, String.valueOf(row.get("reservation_id")),
             blinded ? null : new MapPlace("stay-" + row.get("lodging_id"), null, string(row, "stay_name"),
                 string(row, "stay_address"), decimal(row.get("stay_latitude")),
@@ -332,15 +334,22 @@ public class HumanCourseService {
     }
 
     @Transactional
-    public IdResult edit(Authentication auth, long id, PostInput input) {
+    public IdResult edit(Authentication auth, long id, PostInput input, boolean republish) {
         long owner = member(auth);
         validate(input);
         var rows = jdbc.queryForList("SELECT author_id,status FROM human_course_post WHERE post_id=? AND deleted_at IS NULL FOR UPDATE", id);
         if (rows.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         if (number(rows.getFirst(), "author_id") != owner) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-        jdbc.update("UPDATE human_course_post SET title=?,category=?,summary=COALESCE(?,summary),companion_type=?,content=?,updated_at=NOW() WHERE post_id=?",
+        String status = string(rows.getFirst(), "status");
+        if (("DRAFT".equals(status) && !republish) || ("BLINDED".equals(status) && republish)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "게시 상태가 변경됐습니다. 화면을 새로고침해 주세요.");
+        }
+        jdbc.update("""
+            UPDATE human_course_post SET title=?,category=?,summary=COALESCE(?,summary),companion_type=?,content=?,
+                status=?,updated_at=NOW() WHERE post_id=?
+            """,
             input.title().trim(), input.category(), input.summary() == null ? null : input.summary().trim(),
-            input.companion(), input.body().trim(), id);
+            input.companion(), input.body().trim(), "DRAFT".equals(status) ? "VISIBLE" : status, id);
         if (input.replacePhotos()) {
             jdbc.update("DELETE FROM human_course_photo WHERE post_id=?", id);
             savePhotos(id, input.photoAssets());
@@ -353,6 +362,23 @@ public class HumanCourseService {
             String url = photos.save(assets.get(i));
             jdbc.update("INSERT INTO human_course_photo(post_id,image_url,sort_order,created_at) VALUES (?,?,?,NOW())", id, url, i + 1);
         }
+    }
+
+    @Transactional
+    public IdResult unpublish(Authentication auth, long id) {
+        long owner = member(auth);
+        var rows = jdbc.queryForList("""
+            SELECT status FROM human_course_post
+            WHERE post_id=? AND author_id=? AND deleted_at IS NULL FOR UPDATE
+            """, id, owner);
+        if (rows.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "내릴 게시글을 찾을 수 없습니다.");
+        String status = string(rows.getFirst(), "status");
+        if ("DRAFT".equals(status)) return new IdResult(id);
+        if (!"VISIBLE".equals(status)) throw new ResponseStatusException(HttpStatus.CONFLICT, "공개된 게시글만 내릴 수 있습니다.");
+        jdbc.update("UPDATE human_course_post SET status='DRAFT',updated_at=NOW() WHERE post_id=?", id);
+        management.clearSelections(id);
+        jdbc.update("UPDATE admin_human_featured SET featured=FALSE WHERE post_id=?", id);
+        return new IdResult(id);
     }
 
     @Transactional
@@ -472,7 +498,7 @@ public class HumanCourseService {
         String url = "/api/human-courses/photos/" + name;
         if (jdbc.queryForList("""
             SELECT ph.photo_id FROM human_course_photo ph JOIN human_course_post p ON p.post_id=ph.post_id
-            WHERE ph.image_url=? AND p.deleted_at IS NULL AND (p.status='VISIBLE' OR (p.status='BLINDED' AND p.author_id=?))
+            WHERE ph.image_url=? AND p.deleted_at IS NULL AND (p.status='VISIBLE' OR (p.status IN ('BLINDED','DRAFT') AND p.author_id=?))
             """, url, viewer).isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 }

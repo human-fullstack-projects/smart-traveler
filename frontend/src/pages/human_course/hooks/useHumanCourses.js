@@ -42,7 +42,12 @@ export default function useHumanCourses(member) {
     try {
       let result;
       if (action.type === 'create') { result = await api.createCourse(action.reservationId, action.fields); await refresh(); return result; }
-      if (action.type === 'edit') { result = await api.editCourse(action.id, action.fields); await refresh(); return result; }
+      if (action.type === 'edit') { result = await api.editCourse(action.id, action.fields, action.republish); await refresh(); return result; }
+      if (action.type === 'unpublish') {
+        result = await api.unpublishCourse(action.id);
+        await refresh();
+        return result;
+      }
       if (action.type === 'delete') { await api.deleteCourse(action.id); await refresh(); return { id: action.id }; }
       if (action.type === 'like') result = await api.likeCourse(action.id);
       else if (action.type === 'comment') result = await api.commentCourse(action.id, action.text);

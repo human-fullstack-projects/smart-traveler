@@ -72,7 +72,6 @@ export default function MyCourses({ courses = [], isGuest, member, courseId, gue
       <div><span className="trip-status">{stateLabel(detail)}</span><h1>{detail.title}</h1></div>
     </header>
     <div className="trip-detail-summary"><strong>{detail.region || '여행 지역 미정'}</strong><span>{period(detail)}</span><span>총 {(detail.days || []).length}일 일정</span><span>방문 장소 {(detail.days || []).reduce((sum, day) => sum + (day.places || []).length, 0)}곳</span></div>
-    {!isGuest && detail.state !== 'BOOKED' && <a className="trips-back trips-back-pill saved-trip-stay-link" href={`#/stays?courseId=${encodeURIComponent(detail.id)}`}>숙소 선택 →</a>}
     {detail.stay && <section className="saved-trip-stay-link" aria-labelledby="saved-trip-stay-title">
       <h2 id="saved-trip-stay-title">선택한 숙소</h2>
       <a className="trips-back trips-back-pill" href={`#/stays/booking?${new URLSearchParams({
@@ -85,7 +84,10 @@ export default function MyCourses({ courses = [], isGuest, member, courseId, gue
       {detail.stay.address && <p>{detail.stay.address}</p>}
     </section>}
     <MyCourseMap key={detail.id} course={detail} expanded title="여행 일정" hideMapControls showPlaceDetails />
-    <div className="trip-detail-footer"><a className="trips-back trips-back-pill" href="#/my-courses">← 저장된 여행 목록</a></div>
+    <div className="trip-detail-footer saved-trip-actions">
+      <a className="trips-back trips-back-pill" href={`#/stays?${new URLSearchParams({ courseId: detail.id })}`}>이 일정으로 숙소검색</a>
+      <a className="trips-back trips-back-pill" href="#/my-courses">← 저장된 여행 목록</a>
+    </div>
   </div>;
 
   const visibleCourses = latestCourses ?? courses;

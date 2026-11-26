@@ -238,7 +238,7 @@ export default function App() {
           isAuthenticated={Boolean(member)}
           reservationId={new URLSearchParams(route.split('?')[1] || '').get('reservationId') || ''}
           from={new URLSearchParams(route.split('?')[1] || '').get('from') || ''}
-          execute={async action => { const result = await humanCourses.execute(action); if (!result?.error && ['create', 'edit', 'delete'].includes(action.type)) await myPageStore.retry(); return result; }} /> : <div className="human-courses"><section className="panel"><h1>페이지를 찾을 수 없습니다.</h1><a className="button" href="#/human-courses">여행 목록으로</a></section></div>}
+          execute={async action => { const result = await humanCourses.execute(action); if (!result?.error && ['create', 'edit', 'delete', 'unpublish'].includes(action.type)) await myPageStore.retry(); return result; }} /> : <div className="human-courses"><section className="panel"><h1>페이지를 찾을 수 없습니다.</h1><a className="button" href="#/human-courses">여행 목록으로</a></section></div>}
     </>;
   } else if (isChat) {
     content = <AiChatPage {...chat} />;
@@ -250,6 +250,7 @@ export default function App() {
         onLogin={loggedIn}
         onStart={chat.startChat}
         busy={chat.busy}
+        guestCourses={myPageStore.isGuest ? myPageStore.courses : undefined}
         reviewKey={`${member?.memberId ?? 'guest'}-${authRevision}`}
       />
     );

@@ -3,7 +3,7 @@ import { useAuth } from '../../../contexts/AuthContext.jsx';
 import OwnerActionNotice from '../../../components/OwnerActionNotice.jsx';
 import ItineraryPlaceList from '../../../components/map/ItineraryPlaceList.jsx';
 import { myPageApi } from '../../mypage/api/myPageApi.js';
-import { getRooms, getStay, getStayTourPhotos } from '../shared/stayApi.js';
+import { getRooms, getStay, getStayItineraryPlace, getStayTourPhotos } from '../shared/stayApi.js';
 import useStayCourse, { readStayCourseId } from '../shared/useStayCourse.js';
 import '../../../css/stay-shared.css';
 import { formatWon, getDefaultStayDates, getNightCount, getStayCourseMessage, stayTypeLabels } from '../shared/stayData.js';
@@ -13,12 +13,13 @@ import StayReservationDialog from './StayReservationDialog.jsx';
 import { buildStayGallery } from './stayPhotos.js';
 import '../../../css/stay-booking.css';
 
-export default function StayBookingPage({ onStart, busy = false }) {
+export default function StayBookingPage({ onStart, busy = false, guestCourses }) {
   const query = new URLSearchParams(window.location.hash.split('?')[1]);
   const lodgingId = query.get('stay');
   const courseId = readStayCourseId(query);
+  const rebookReservationId = query.get('rebookReservationId');
   const { course, route: courseRoute, loading: stayCourseLoading, error: stayCourseError, sourceLabel, retry: retryStayCourse } =
-    useStayCourse(courseId, { includePlaceAddresses: true });
+    useStayCourse(courseId, { rebookReservationId, guestCourses, includePlaceAddresses: true });
   const backToSearch = courseId ? `#/stays?courseId=${encodeURIComponent(courseId)}` : '#/stays';
   const defaults = getDefaultStayDates();
   const { member, authChecked, authCheckFailed } = useAuth();
@@ -182,15 +183,17 @@ export default function StayBookingPage({ onStart, busy = false }) {
             </section>
             <StayOverview stay={stay} />
           </div>
-          <StayLocation stay={stay} courseRoute={courseId ? courseRoute : null} selectedPlaceId={selectedPlaceId}
+          <StayLocation stay={stay} courseRoute={course ? courseRoute : null} selectedPlaceId={selectedPlaceId}
             onCoursePlaceSelect={course ? selectCoursePlace : undefined} />
-          {course && courseRoute.days.some(day => day.places.length) && <section className="booking-section booking-course-itinerary itinerary-map" aria-labelledby="booking-itinerary-title">
+          {course && <section className="booking-section booking-course-itinerary itinerary-map" aria-labelledby="booking-itinerary-title">
             <h2 id="booking-itinerary-title">여행 일정</h2>
-            <ItineraryPlaceList days={courseRoute.days} selectedId={selectedPlaceId} onSelect={selectCoursePlace}
-              loadDetails={myPageApi.placeDetails} loadPhotos={myPageApi.placeTourPhotos} searchRegion={course.region} />
+            {courseRoute.days.length ? <ItineraryPlaceList days={courseRoute.days} selectedId={selectedPlaceId} onSelect={selectCoursePlace}
+              loadDetails={getStayItineraryPlace} loadPhotos={member ? myPageApi.placeTourPhotos : undefined} searchRegion={course.region} />
+              : <p>저장된 일정이 없습니다.</p>}
           </section>}
           {room && !isOwner && <StayReservationDialog key={`${room.roomId}-${member?.memberId ?? 'guest'}`} open={reservationOpen} room={room}
-            member={member} checkIn={checkIn} checkOut={checkOut} guests={guests} courseId={course?.id} waitingForCourse={Boolean(courseId && !course)}
+            member={member} checkIn={checkIn} checkOut={checkOut} guests={guests} courseId={course?.id}
+            waitingForCourse={Boolean((courseId && !course) || (rebookReservationId && (stayCourseLoading || stayCourseError)))}
             onClose={() => setReservationOpen(false)} onAvailabilityChanged={reloadRoomsAfterConflict} />}
         </>}
       </main>

@@ -19,7 +19,7 @@ export function validState(state) {
     && (c.summary === undefined || text(c.summary))
     && (c.travelDates === undefined || text(c.travelDates))
     && Number.isFinite(Date.parse(c.createdAt)) && typeof c.mine === 'boolean'
-    && (c.reservationId === null || text(c.reservationId)) && ['PUBLIC', 'BLINDED'].includes(c.visibility)
+    && (c.reservationId === null || text(c.reservationId)) && ['PUBLIC', 'BLINDED', 'DRAFT'].includes(c.visibility)
     && positive(c.courseVersion) && validPlan(c.plan) && Array.isArray(c.photos) && c.photos.every(text) && c.photos.length <= 5
     && (c.photoAssets === undefined || (Array.isArray(c.photoAssets) && c.photoAssets.length === c.photos.length && c.photoAssets.every((photo, index) => photo && text(photo.name) && photo.name === c.photos[index] && text(photo.dataUrl) && /^data:image\/(?:png|jpeg|webp|gif);base64,/.test(photo.dataUrl))))
     && Number.isSafeInteger(c.likes) && c.likes >= 0 && typeof c.likedByMe === 'boolean' && typeof c.reportedByMe === 'boolean'
