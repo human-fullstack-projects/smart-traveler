@@ -255,7 +255,8 @@ export default function App() {
     <MainLayout member={member} loggingOut={loggingOut} onLogout={handleLogout} notice={notice} onDismissNotice={() => setNotice('')}
       pastelBackground={Boolean(MyPageScreen) || routePath === '/stays' || routePath === '/stays/booking'
         || routePath === '/human-courses' || HumanCourseScreen === HumanCourseDetail}
-      isHome={(routePath === '/' || routePath === '/main') && !(authChecked && member?.roleCode === 'USER' && routePath !== '/my-travel-style' && survey.memberId === member.memberId && survey.status === 'needed')}>
+      isHome={(routePath === '/' || routePath === '/main') && !(authChecked && member?.roleCode === 'USER' && routePath !== '/my-travel-style' && survey.memberId === member.memberId && survey.status === 'needed')}
+      isChat={isChat}>
       {authChecked && member?.roleCode === 'USER' && routePath !== '/my-travel-style' && survey.memberId === member.memberId && survey.status === 'needed'
         ? <TravelStylePage key={`survey-${member.memberId}`} member={member} surveyMode initialData={survey.data}
             onSaved={() => setSurvey({ memberId: member.memberId, status: 'done', data: null })} />
