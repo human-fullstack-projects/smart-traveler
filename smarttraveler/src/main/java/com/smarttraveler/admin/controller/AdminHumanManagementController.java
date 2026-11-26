@@ -28,6 +28,12 @@ public class AdminHumanManagementController {
         @RequestParam(required=false) String query, @RequestParam(required=false) Long postId) {
         return service.comments(region,from,to,query,postId);
     }
+    @PostMapping("/human-comments/{commentId}/delete")
+    public Map<String,Object> deleteComment(@PathVariable long commentId,
+        @RequestBody(required=false) CommentDelete body, Principal principal) {
+        service.deleteComment(commentId, body == null ? null : body.reason(), principal.getName());
+        return Map.of("commentId",commentId,"deleted",true);
+    }
     @GetMapping("/human-exposures")
     public List<HumanManagementService.Exposure> exposures(@RequestParam String scope,
         @RequestParam(required=false) String region) { return service.exposures(scope,region); }
@@ -55,4 +61,5 @@ public class AdminHumanManagementController {
     }
     public record ExposureChange(Long postId,String scope,String region,boolean selected) {}
     public record PickChange(String month,Long postId,boolean selected) {}
+    public record CommentDelete(String reason) {}
 }
