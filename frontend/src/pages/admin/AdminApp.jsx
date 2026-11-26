@@ -29,7 +29,7 @@ const LABEL = {
   READY: '결제 준비', DONE: '결제 완료', ABORTED: '결제 실패', SKIPPED: '건너뜀',
   queued: '대기', running: '생성 중', pending: '대기',
   FRAUD: '부정 이용', POLICY: '운영 정책 위반', POLICY_VIOLATION: '운영 정책 위반', OTHER: '기타',
-  FEATURE: '메인 노출', UNFEATURE: '노출 해제',
+  FEATURE: '메인 노출', UNFEATURE: '노출 해제', COMMENT_DELETE: '댓글 삭제',
   KTO_TOURAPI: '관광공사 관광정보', KTO_HUB: '중심 관광지', KTO_RELATED: '연관 관광지',
   ATTRACTION: '관광지', CULTURE: '문화시설', LEISURE: '레포츠', RESTAURANT: '음식점', SHOPPING: '쇼핑', HUB_RANK: '중심 순위', RELATED: '연관 순위',
   done: '완료', failed: '생성실패', generating: '생성중', preview: '미리보기', selected: '선택됨', confirmed: '확정',
@@ -287,10 +287,14 @@ function Lodgings() {
           ['체크인/아웃', `${show(l.checkinTime).slice(0, 5)} / ${show(l.checkoutTime).slice(0, 5)}`], ['업주', show(l.ownerName)], ['등록', date(l.createdAt)], ['반려 사유', show(l.rejectReason)], ['예약', `${(detail.data.reservations || []).length}건`]]} />
         <MiniList title="객실" rows={detail.data.rooms} empty="객실 없음" columns={[['객실', (r) => r.name], ['인원', (r) => `${r.baseCapacity}~${r.maxCapacity}명`], ['주중', (r) => won(r.priceOffWeekday)], ['주말', (r) => won(r.priceOffWeekend)]]} />
         <div className="adm-actions">
-          <input className="st-input" placeholder="반려·운영중지 사유" value={reason} onChange={(e) => setReason(e.target.value)} />
-          <button className="st-btn" onClick={() => act('ACTIVE')}>승인 · 운영</button>
-          <button className="st-btn st-btn-line" onClick={() => act('REJECTED')}>반려</button>
-          <button className="st-btn st-btn-line" onClick={() => act('SUSPENDED')}>운영 중지</button>
+          {/* 지금 상태에서 바꿀 수 있는 버튼만 (11-26 · 서버 규칙: 승인대기→운영/반려 · 운영→운영 중지 · 운영중지→운영) */}
+          {(l.status === 'PENDING' || l.status === 'ACTIVE') && <input className="st-input" placeholder={l.status === 'PENDING' ? '반려 사유 (반려 시 필수)' : '운영 중지 사유'} value={reason} onChange={(e) => setReason(e.target.value)} />}
+          {l.status === 'PENDING' && <>
+            <button className="st-btn" onClick={() => act('ACTIVE')}>승인</button>
+            <button className="st-btn st-btn-line" onClick={() => act('REJECTED')}>반려</button>
+          </>}
+          {l.status === 'ACTIVE' && <button className="st-btn st-btn-line" onClick={() => act('SUSPENDED')}>운영 중지</button>}
+          {l.status === 'SUSPENDED' && <button className="st-btn" onClick={() => act('ACTIVE')}>다시 운영</button>}
           {l.status !== 'DELETED' && <button className="st-btn st-btn-line" onClick={remove}>숙소 삭제</button>}
         </div>
       </>}</Detail>
@@ -433,7 +437,7 @@ function HumanCourses({ onChanged }) {
       {c && <AdminCourseView course={view.data} error={view.error} />}
     </div>}
     {tab === 'comments' && <Table title="댓글 목록" rows={comments.data} rowKey="commentId" empty="조건에 맞는 댓글이 없어요."
-      columns={[['코스', (r) => r.postTitle], ['작성자', (r) => show(r.authorNickname || r.authorId)], ['지역', (r) => show(r.region)], ['내용', (r) => r.content], ['작성일', (r) => date(r.createdAt)], ['삭제', (r) => r.deleted ? '삭제됨' : '—']]} />}
+      columns={[['코스', (r) => r.postTitle], ['작성자', (r) => show(r.authorNickname || r.authorId)], ['지역', (r) => show(r.region)], ['내용', (r) => r.content], ['작성일', (r) => date(r.createdAt)], ['삭제', (r) => r.deleted ? '삭제됨' : <button className="adm-link" onClick={(e) => { e.stopPropagation(); run(() => adminPost(`/human-comments/${r.commentId}/delete`, {}), '댓글을 삭제했어요.'); }}>삭제</button>]]} />}
     {tab === 'exposure' && <>
       <div className="adm-filters">
         <label className="st-field">노출 위치<select className="st-input" value={scope} onChange={(e) => setScope(e.target.value)}><option value="MAIN">메인</option><option value="REGION">지역</option></select></label>
