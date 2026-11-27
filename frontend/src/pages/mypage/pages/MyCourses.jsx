@@ -97,14 +97,14 @@ export default function MyCourses({ courses = [], isGuest, member, courseId, gue
   const filtered = visibleCourses.filter(course => {
     return isDraft(course) && `${course.title} ${course.region}`.toLowerCase().includes(query.trim().toLowerCase());
   });
-  filtered.sort((first, second) => {
-    const firstGroup = startDateGroup(first.startDate, today);
-    const secondGroup = startDateGroup(second.startDate, today);
-    if (firstGroup !== secondGroup) return firstGroup - secondGroup;
-    if (firstGroup === 2) return 0;
-    const dateOrder = first.startDate.localeCompare(second.startDate);
-    return firstGroup === 0 ? dateOrder : -dateOrder;
-  });
+  // filtered.sort((first, second) => {
+  //   const firstGroup = startDateGroup(first.startDate, today);
+  //   const secondGroup = startDateGroup(second.startDate, today);
+  //   if (firstGroup !== secondGroup) return firstGroup - secondGroup;
+  //   if (firstGroup === 2) return 0;
+  //   const dateOrder = first.startDate.localeCompare(second.startDate);
+  //   return firstGroup === 0 ? dateOrder : -dateOrder;
+  // });
   const shownGuestCourse = isGuest && guestRecommendedCourse
     && `${guestRecommendedCourse.title} ${guestRecommendedCourse.destination}`.toLowerCase().includes(query.trim().toLowerCase());
   const guestCount = Number(Boolean(shownGuestCourse));
